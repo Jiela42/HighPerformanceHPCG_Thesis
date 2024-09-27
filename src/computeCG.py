@@ -4,7 +4,7 @@ from typing import Tuple
 
 # my personal implementation of generations for the matrices, vectors etc.
 import generations
-import gpu_timing.py
+from gpu_timing import gpu_timer
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -127,7 +127,7 @@ def computeMG(nx: int, nz: int, ny: int,
 
         print("Starting to generate coarse problem, nx: ", nx, " ny: ", ny, " nz: ", nz)
         # f2c_op, Ac, _ = generations.generate_coarse_problem(nx, ny, nz)
-        f2c_op, Ac = generations.generate_coarse_problem(nx, ny, nz)
+        f2c_op, Ac, _ = generations.generate_coarse_problem(nx, ny, nz)
         print("End of generating coarse problem")
 
         nxc = nx // 2
@@ -176,21 +176,39 @@ def computeMG(nx: int, nz: int, ny: int,
     return 0
 
 
-
-
 # Each time we run a timer, we need to initialize and destroy it depending on
 # the inputs and specific versions we tested
 # the problem: do I need timer-free versions of the functions? Or can I work around that with an if?
+time_CG = True
 
-gpu_timing.init_timers(version_name = "BaseTorch",
-                       ault_node = "41-44",
-                       matrix_type= "3D_27P_Stencil")
+# print("DEVICE: ", device)
+num = 16
 
-num = 32
+if device.type == "cuda":
+    # print("Initializing timers")
 
-A,y = generations.generate_torch_coo_problem(num,num,num)
+    timers = gpu_timer(version_name = "BaseTorch",
+                        ault_node = "41-44",
+                        matrix_type= "3D_27P_Stencil",
+                        nx = num,
+                        ny = num,
+                        nz = num
+                        )
 
-x = torch.zeros(num*num*num, device=device)
 
-computeMG(num, num, num, A,y,x,0)
 
+for i in range(3):
+    if time_CG and device.type == "cuda":
+        timers.start_CG_timer()
+
+    A,y = generations.generate_torch_coo_problem(num,num,num)
+
+    x = torch.zeros(num*num*num, device=device)
+
+    computeMG(num, num, num, A,y,x,0)
+
+    if time_CG and device.type == "cuda":
+        timers.stop_CG_timer()
+
+if device.type == "cuda":
+    timers.destroy_timers()
