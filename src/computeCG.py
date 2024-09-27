@@ -1,10 +1,16 @@
 import torch
+import numpy as np
+from typing import Tuple
 
 # my personal implementation of generations for the matrices, vectors etc.
 import generations
+import gpu_timing.py
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 num_pre_smoother_steps = 1
 num_post_smoother_steps = 1
+
 
 def computeSPMV_stencil(nx: int, ny: int, nz: int, y: torch.tensor, x: torch.tensor) -> int:
 
@@ -120,7 +126,8 @@ def computeMG(nx: int, nz: int, ny: int,
         # since that might throw an error and we don't want to do computation in that case
 
         print("Starting to generate coarse problem, nx: ", nx, " ny: ", ny, " nz: ", nz)
-        f2c_op, Ac, _ = generations.generate_coarse_problem(nx, ny, nz)
+        # f2c_op, Ac, _ = generations.generate_coarse_problem(nx, ny, nz)
+        f2c_op, Ac = generations.generate_coarse_problem(nx, ny, nz)
         print("End of generating coarse problem")
 
         nxc = nx // 2
@@ -128,9 +135,9 @@ def computeMG(nx: int, nz: int, ny: int,
         nzc = nz // 2
 
         nc = nxc * nyc * nzc
-        Axf = torch.zeros(nx * ny * nz)
-        rc = torch.zeros(nc)
-        xc = torch.zeros(nc)
+        Axf = torch.zeros(nx * ny * nz, device=device)
+        rc = torch.zeros(nc, device=device)
+        xc = torch.zeros(nc, device=device)
 
         for i in range(num_pre_smoother_steps):
             ierr += computeSYMGS(nx, ny, nz, A, r, x)
@@ -170,11 +177,20 @@ def computeMG(nx: int, nz: int, ny: int,
 
 
 
+
+# Each time we run a timer, we need to initialize and destroy it depending on
+# the inputs and specific versions we tested
+# the problem: do I need timer-free versions of the functions? Or can I work around that with an if?
+
+gpu_timing.init_timers(version_name = "BaseTorch",
+                       ault_node = "41-44",
+                       matrix_type= "3D_27P_Stencil")
+
 num = 32
 
 A,y = generations.generate_torch_coo_problem(num,num,num)
 
-x = torch.zeros(num*num*num)
+x = torch.zeros(num*num*num, device=device)
 
 computeMG(num, num, num, A,y,x,0)
 

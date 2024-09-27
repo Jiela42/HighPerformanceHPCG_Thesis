@@ -6,6 +6,7 @@ from typing import Tuple
 
 store = False
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def generate_torch_csr_problem(nx: int, ny: int, nz: int) -> Tuple[torch.sparse.Tensor, torch.Tensor]:
 
@@ -59,7 +60,7 @@ def generate_torch_coo_problem(nx: int, ny: int, nz: int) -> Tuple[torch.sparse.
     col_indices = []
     values = []
 
-    y = torch.zeros(nx * ny * nz)
+    y = torch.zeros(nx * ny * nz, device=device)
 
     for ix in range(nx):
         for iy in range(ny):
@@ -82,11 +83,11 @@ def generate_torch_coo_problem(nx: int, ny: int, nz: int) -> Tuple[torch.sparse.
                                         nnz_i += 1
                 y[i] = 26.0 - nnz_i
 
-    row_indices = torch.tensor(row_indices)
-    col_indices = torch.tensor(col_indices)
-    values = torch.tensor(values)
+    row_indices = torch.tensor(row_indices, device=device)
+    col_indices = torch.tensor(col_indices, device=device)
+    values = torch.tensor(values, device=device)
 
-    A = torch.sparse_coo_tensor(torch.stack([row_indices, col_indices]), values, (nx * ny * nz, nx * ny * nz))
+    A = torch.sparse_coo_tensor(torch.stack([row_indices, col_indices]), values, (nx * ny * nz, nx * ny * nz), device=device)
     A = A.coalesce()
 
     return A, y
@@ -124,7 +125,7 @@ def generate_coarse_problem(nxf: int, nyf: int, nzf: int) -> Tuple[np.ndarray, t
     nyc = nyf // 2
     nzc = nzf // 2
 
-    f2c_op = torch.zeros(nxc*nyc*nzc, dtype=torch.int64)
+    f2c_op = torch.zeros(nxc*nyc*nzc, dtype=torch.int64, device=device)
 
     coarse_num_rows = nxc * nyc * nzc
 
@@ -135,6 +136,7 @@ def generate_coarse_problem(nxf: int, nyf: int, nzf: int) -> Tuple[np.ndarray, t
             for ixc in range(nxc):
                 ixf = 2*ixc
                 current_coarse_row = ixc + nxc*iyc + nxc*nyc*izc
+
                 current_fine_row = ixf + nxf*iyf + nxf*nyf*izf
                 f2c_op[current_coarse_row] = current_fine_row
 
