@@ -142,7 +142,8 @@ def generate_coarse_problem(nxf: int, nyf: int, nzf: int) -> Tuple[np.ndarray, t
 
     # print(f2c_op)
 
-    print("We generate the new problem using the COO format")
+    # print("We generate the new problem using the COO format")
+    
     Ac, yc = generate_torch_coo_problem(nxc, nyc, nzc)
 
     return f2c_op, Ac, yc

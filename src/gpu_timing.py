@@ -86,31 +86,31 @@ class gpu_timer:
 
         # write the results to a file
         if self.CG_time:
-            filename = f"{new_folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_CG.txt"
+            filename = f"{new_folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_CG.csv"
             with open(filename, "w") as f:
                 f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.ny},CG\n")
                 for time in self.elapsed_CG_time_ms:
                     f.write(f"{time}\n")
         if self.MG_time:
-            filename = f"{new_folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_MG.txt"
+            filename = f"{new_folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_MG.csv"
             with open(filename, "w") as f:
                 f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.ny},MG\n")
                 for time in self.elapsed_MG_time_ms:
                     f.write(f"{time}\n")
         if self.SYMGS_time:
-            filename = f"{new_folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_SYMGS.txt"
+            filename = f"{new_folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_SYMGS.csv"
             with open(filename, "w") as f:
                 f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.ny},SYMGS\n")
                 for time in self.elapsed_SYMGS_time_ms:
                     f.write(f"{time}\n")
         if self.SPMV_time:
-            filename = f"{new_folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_SPMV.txt"
+            filename = f"{new_folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_SPMV.csv"
             with open(filename, "w") as f:
                 f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.ny},SPMV\n")
                 for time in self.elapsed_SPMV_time_ms:
                     f.write(f"{time}\n")
         if self.waxpby_time:
-            filename = f"{new_folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_WAXPBY.txt"
+            filename = f"{new_folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_WAXPBY.csv"
             with open(filename, "w") as f:
                     f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.ny},WAXPBY\n")
                     for time in self.elapsed_waxpby_time_ms:

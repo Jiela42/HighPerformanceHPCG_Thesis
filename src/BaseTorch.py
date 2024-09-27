@@ -121,15 +121,15 @@ def computeMG(nx: int, nz: int, ny: int,
     ierr = 0
 
     if depth < 3:
-        print("In the if clause, depth: ", depth)
+        # print("In the if clause, depth: ", depth)
 
         # first generate new matrix
         # since that might throw an error and we don't want to do computation in that case
 
-        print("Starting to generate coarse problem, nx: ", nx, " ny: ", ny, " nz: ", nz)
+        # print("Starting to generate coarse problem, nx: ", nx, " ny: ", ny, " nz: ", nz)
         # f2c_op, Ac, _ = generations.generate_coarse_problem(nx, ny, nz)
         f2c_op, Ac, _ = generations.generate_coarse_problem(nx, ny, nz)
-        print("End of generating coarse problem")
+        # print("End of generating coarse problem")
 
         nxc = nx // 2
         nyc = ny // 2

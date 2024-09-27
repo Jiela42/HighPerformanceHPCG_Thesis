@@ -85,7 +85,7 @@ if "BaseTorch" in versions:
                         BaseTorch.computeSPMV(size[0], size[1], size[2], A, y, x)
                         timer.stop_timer("computeSPMV")
 
-            timer.destroy_timers()
+            timer.destroy_timer()
 
 
 #################################################################################################################
