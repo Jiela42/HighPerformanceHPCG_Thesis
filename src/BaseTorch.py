@@ -4,12 +4,13 @@ from typing import Tuple
 
 # my personal implementation of generations for the matrices, vectors etc.
 import generations
-from gpu_timing import gpu_timer
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 num_pre_smoother_steps = 1
 num_post_smoother_steps = 1
+tolerance = 0.0
+n_iter = 50
 
 
 def computeSPMV_stencil(nx: int, ny: int, nz: int, y: torch.tensor, x: torch.tensor) -> int:
@@ -175,40 +176,38 @@ def computeMG(nx: int, nz: int, ny: int,
     
     return 0
 
+def computeCG(nx: int, ny: int, nz: int) -> int:
 
-# Each time we run a timer, we need to initialize and destroy it depending on
-# the inputs and specific versions we tested
-# the problem: do I need timer-free versions of the functions? Or can I work around that with an if?
-time_CG = True
+    norm_err = 0.0
 
-# print("DEVICE: ", device)
+    A,y = generations.generate_torch_coo_problem(nx,ny,nz)
+    x = torch.zeros(nx*ny*nz, device=device)
+
+    for i in range(n_iter) and norm_err > tolerance:
+        computeMG(nx, ny, nz, A, y, x, 0)
+
+
+
+
+
+
+
+
+    
+
+    return 0
+
+
+#################################################################################################################
+# this is only a test thingy
+
 num = 16
 
-if device.type == "cuda":
-    # print("Initializing timers")
 
-    timers = gpu_timer(version_name = "BaseTorch",
-                        ault_node = "41-44",
-                        matrix_type= "3D_27P_Stencil",
-                        nx = num,
-                        ny = num,
-                        nz = num
-                        )
+# A,y = generations.generate_torch_coo_problem(num,num,num)
+# x = torch.zeros(num*num*num, device=device)
 
+# computeMG(num, num, num, A,y,x,0)
+# computeCG(num, num, num)
+#################################################################################################################
 
-
-for i in range(3):
-    if time_CG and device.type == "cuda":
-        timers.start_CG_timer()
-
-    A,y = generations.generate_torch_coo_problem(num,num,num)
-
-    x = torch.zeros(num*num*num, device=device)
-
-    computeMG(num, num, num, A,y,x,0)
-
-    if time_CG and device.type == "cuda":
-        timers.stop_CG_timer()
-
-if device.type == "cuda":
-    timers.destroy_timers()
