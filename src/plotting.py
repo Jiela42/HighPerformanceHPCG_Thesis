@@ -17,6 +17,7 @@ methods_to_plot = [
 ]
 
 sizes_to_plot =[
+    ("8x8x8"),
     ("16x16x16"),
     ("32x32x32"),
     # ("64x64x64"),
@@ -44,6 +45,7 @@ y_axis_config_to_plot = [
 
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 import seaborn as sns
 import os
 from io import StringIO
@@ -115,7 +117,12 @@ all_methods = full_data['Method'].unique()
 all_ault_nodes = full_data['Ault Node'].unique()
 all_matrix_dimensions = full_data['Matrix Dimensions'].unique()
 
-print(full_data)
+# print(full_data)
+print(all_matrix_types)
+print(all_versions)
+print(all_methods)
+print(all_ault_nodes)
+print(all_matrix_dimensions)
 
 #################################################################################################################
 # generate the plots
@@ -135,7 +142,7 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
     plt.figure(figsize=(10, 6))
 
 
-    ax = sns.barplot(x=x, order=x_order, y=y, hue=hue, hue_order=hue_order, data=data,  estimator= 'median', errorbar=('ci', 98))
+    ax = sns.barplot(x=x, order=x_order, y=y, hue=hue, hue_order=hue_order, data=data,  estimator= np.median, ci=98)
     fig = ax.get_figure()
 
     ax.set_title(title)
