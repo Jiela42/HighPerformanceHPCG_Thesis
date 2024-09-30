@@ -1,6 +1,7 @@
 from gpu_timing import gpu_timer
 import generations
 import torch
+import time
 import BaseTorch
 
 num_iterations = 5
@@ -30,14 +31,27 @@ matrix_types = [
 ]
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#################################################################################################################
+# run the tests for all of the versions
+#################################################################################################################
+
 
 #################################################################################################################
 # for each version we need the following
 # because each version has it's own name and needs to be called!
 #################################################################################################################
+print("Starting timing")
+overall_start = time.time()
+
 if "BaseTorch" in versions:
     for size in sizes:
         for matrix_type in matrix_types:
+
+            # initialize the matrix and vectors (not included in measurments)
+            A,y = generations.generate_torch_coo_problem(size[0], size[1], size[2])
+            x = torch.zeros(size[0]*size[1]*size[2], device=device)
+
+            nnz = A._nnz()
 
             timer = gpu_timer(
                 version_name = "BaseTorch",
@@ -45,15 +59,13 @@ if "BaseTorch" in versions:
                 matrix_type = matrix_type,
                 nx = size[0],
                 ny = size[1],
-                nz = size[2]
+                nz = size[2],
+                nnz = nnz
             )
 
             # note: CG and MG include generations of matrices!
             # Also note: in the original HPCG the generations are all done in the main function, non of them in the MG routine.
             
-            # initialize the matrix and vectors (not included in measurments)
-            A,y = generations.generate_torch_coo_problem(size[0], size[1], size[2])
-            x = torch.zeros(size[0]*size[1]*size[2], device=device)
 
             if "computeCG" in methods:
                 for i in range(num_iterations):
@@ -87,5 +99,12 @@ if "BaseTorch" in versions:
 
             timer.destroy_timer()
 
+torch.cuda.synchronize()
+overall_end = time.time()
 
+time_elapsed = overall_end - overall_start
+minutes, seconds = divmod(time_elapsed, 60)
+
+print("Timing finished")
+print(f"Timing took: {int(minutes)} minutes and {seconds:.2f} seconds")
 #################################################################################################################

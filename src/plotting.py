@@ -27,10 +27,11 @@ for file in files:
     version_name = meta_data[0]
     ault_node = meta_data[1]
     matrix_type = meta_data[2]
-    nx = meta_data[3]
-    ny = meta_data[4]
-    nz = meta_data[5]
-    method = meta_data[6]
+    nx = int(meta_data[3])
+    ny = int(meta_data[4])
+    nz = int(meta_data[5])
+    nnz = int(meta_data[6])
+    method = meta_data[7]
 
     # read in the rest of the data i.e. the timings
 
@@ -43,18 +44,23 @@ for file in files:
     data['nx'] = nx
     data['ny'] = ny
     data['nz'] = nz
+    data['NNZ'] = nnz
     data['Method'] = method
 
     # Append the data to the full_data DataFrame
-    full_data = full_data.append(data, ignore_index=True)
+    full_data = pd.concat([full_data, data], ignore_index=True)
 
+#################################################################################################################
+# preprocess the data
+#################################################################################################################
 
-print(full_data)
+# time per nnz
+full_data['Time per NNZ (ms)'] = full_data['Time (ms)'] / full_data['NNZ']
 
 # Here we could do preprocessing, such as time per nnz or sorting of the possible values of the columns
 
 # add a column matrix dimensions: nx x ny x nz (a string)
-full_data['Matrix Dimensions'] = full_data['nx'].astype(str) + " x " + full_data['ny'].astype(str) + " x " + full_data['nz'].astype(str)
+full_data['Matrix Dimensions'] = full_data['nx'].astype(str) + "x" + full_data['ny'].astype(str) + "x" + full_data['nz'].astype(str)
 
 
 all_matrix_types = full_data['Matrix Type'].unique()
@@ -63,6 +69,7 @@ all_methods = full_data['Method'].unique()
 all_ault_nodes = full_data['Ault Node'].unique()
 all_matrix_dimensions = full_data['Matrix Dimensions'].unique()
 
+print(full_data)
 
 #################################################################################################################
 # generate the plots
