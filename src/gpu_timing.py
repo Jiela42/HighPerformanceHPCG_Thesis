@@ -4,8 +4,6 @@ import datetime
 
 class gpu_timer:
 
-    
-
     def __init__(self, version_name, ault_node, matrix_type, nx, ny, nz, nnz):
         self.version_name = version_name
         self.ault_node = ault_node
@@ -24,14 +22,17 @@ class gpu_timer:
         self.elapsed_MG_time_ms = []
         self.MG_time = False
 
-        self.elapsed_SYMGS_time_ms = []
-        self.SYMGS_time = False
+        self.elapsed_SymGS_time_ms = []
+        self.SymGS_time = False
 
         self.elapsed_SPMV_time_ms = []
         self.SPMV_time = False
 
         self.elapsed_waxpby_time_ms = []
         self.waxpby_time = False
+
+        self.elapsed_dot_time_ms = []
+        self.dot_time = False
 
     def start_timer(self):
 
@@ -58,15 +59,18 @@ class gpu_timer:
         elif method_name == "computeMG":
             self.MG_time = True
             self.elapsed_MG_time_ms.append(elapsed_time)
-        elif method_name == "computeSYMGS":
-            self.SYMGS_time = True
-            self.elapsed_SYMGS_time_ms.append(elapsed_time)
+        elif method_name == "computeSymGS":
+            self.SymGS_time = True
+            self.elapsed_SymGS_time_ms.append(elapsed_time)
         elif method_name == "computeSPMV":
             self.SPMV_time = True
             self.elapsed_SPMV_time_ms.append(elapsed_time)
         elif method_name == "computeWAXPBY":
             self.waxpby_time = True
             self.elapsed_waxpby_time_ms.append(elapsed_time)
+        elif method_name == "computeDot":
+            self.dot_time = True
+            self.elapsed_dot_time_ms.append(elapsed_time)
         else:
             raise ValueError("Method name not recognized")
 
@@ -98,11 +102,11 @@ class gpu_timer:
                 f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.ny},{self.nnz},MG\n")
                 for time in self.elapsed_MG_time_ms:
                     f.write(f"{time}\n")
-        if self.SYMGS_time:
-            filename = f"{new_folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_SYMGS.csv"
+        if self.SymGS_time:
+            filename = f"{new_folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_SymGS.csv"
             with open(filename, "w") as f:
-                f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.ny},{self.nnz},SYMGS\n")
-                for time in self.elapsed_SYMGS_time_ms:
+                f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.ny},{self.nnz},SymGS\n")
+                for time in self.elapsed_SymGS_time_ms:
                     f.write(f"{time}\n")
         if self.SPMV_time:
             filename = f"{new_folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_SPMV.csv"
@@ -116,7 +120,13 @@ class gpu_timer:
                     f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.ny},{self.nnz},WAXPBY\n")
                     for time in self.elapsed_waxpby_time_ms:
                         f.write(f"{time}\n")
+        if self.dot_time:
+            filename = f"{new_folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_DOT.csv"
+            with open(filename, "w") as f:
+                    f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.ny},{self.nnz},DOT\n")
+                    for time in self.elapsed_dot_time_ms:
+                        f.write(f"{time}\n")
         
-        print("Timer destroyed")
+        # print("Timer destroyed")
         
             

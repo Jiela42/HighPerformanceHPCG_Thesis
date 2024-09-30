@@ -8,7 +8,7 @@ plot_path = "../plots/"
 
 
 methods_to_plot = [
-    "SYMGS",
+    "SymGS",
     "SPMV",
     # "Restriction",
     "MG",

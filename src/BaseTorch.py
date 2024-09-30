@@ -36,7 +36,10 @@ def computeSPMV_stencil(nx: int, ny: int, nz: int, y: torch.tensor, x: torch.ten
                                             y[i] -= 1.0 * x[j]
     return 0
 
-def computeSYMGS(nx: int, nz: int, ny: int,
+def computeDot(x: torch.tensor, y: torch.tensor) -> float:
+    return torch.dot(x, y)
+
+def computeSymGS(nx: int, nz: int, ny: int,
                  A: torch.sparse.Tensor, r: torch.Tensor, x: torch.Tensor)-> int:
     
     n_rows = nx * ny * nz
@@ -141,7 +144,7 @@ def computeMG(nx: int, nz: int, ny: int,
         xc = torch.zeros(nc, device=device)
 
         for i in range(num_pre_smoother_steps):
-            ierr += computeSYMGS(nx, ny, nz, A, r, x)
+            ierr += computeSymGS(nx, ny, nz, A, r, x)
         if ierr != 0:
             return ierr
         
@@ -165,12 +168,12 @@ def computeMG(nx: int, nz: int, ny: int,
             return ierr
         
         for i in range(num_post_smoother_steps):
-            ierr += computeSYMGS(nx, ny, nz, A, r, x)
+            ierr += computeSymGS(nx, ny, nz, A, r, x)
         if ierr != 0:
             return ierr
         
     else:
-        ierr = computeSYMGS(nx, ny, nz, A, r, x)
+        ierr = computeSymGS(nx, ny, nz, A, r, x)
         if (ierr!=0):
             return ierr;  
     

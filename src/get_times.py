@@ -18,12 +18,14 @@ versions = [
 ]
 
 methods = [
-    "computeSYMGS",
+    "computeSymGS",
     "computeSPMV",
     # "computeRestriction",
     "computeMG",
     # "computeProlongation",
     # "computeCG",
+    # "computeWAXPBY",
+    "computeDot",
 ]
 
 matrix_types = [
@@ -51,9 +53,11 @@ if "BaseTorch" in versions:
             A,y = generations.generate_torch_coo_problem(size[0], size[1], size[2])
             x = torch.zeros(size[0]*size[1]*size[2], device=device)
 
+            a,b = torch.rand(size[0]*size[1]*size[2], device=device), torch.rand(size[0]*size[1]*size[2], device=device)
+
             nnz = A._nnz()
 
-            timer = gpu_timer(
+            matrix_timer = gpu_timer(
                 version_name = "BaseTorch",
                 ault_node = "41-44",
                 matrix_type = matrix_type,
@@ -63,6 +67,16 @@ if "BaseTorch" in versions:
                 nnz = nnz
             )
 
+            vector_timer = gpu_timer(
+                version_name = "BaseTorch",
+                ault_node = "41-44",
+                matrix_type = matrix_type,
+                nx = size[0],
+                ny = size[1],
+                nz = size[2],
+                nnz = size[0]*size[1]*size[2]
+            )
+
             # note: CG and MG include generations of matrices!
             # Also note: in the original HPCG the generations are all done in the main function, non of them in the MG routine.
             
@@ -70,34 +84,49 @@ if "BaseTorch" in versions:
             if "computeCG" in methods:
                 for i in range(num_iterations):
 
-                    timer.start_timer()
+                    matrix_timer.start_timer()
                     BaseTorch.computeCG(size[0], size[1], size[2])
-                    timer.stop_timer("computeCG")
+                    matrix_timer.stop_timer("computeCG")
             
             if "computeMG" in methods:
                 for i in range(num_iterations):
 
-                    timer.start_timer()
+                    matrix_timer.start_timer()
                     BaseTorch.computeMG(size[0], size[1], size[2], A, y, x, 0)
-                    timer.stop_timer("computeMG")
+                    matrix_timer.stop_timer("computeMG")
             
-            if "computeSYMGS" in methods:
+            if "computeSymGS" in methods:
                 for i in range(num_iterations):
 
-                    timer.start_timer()
-                    BaseTorch.computeSYMGS(size[0], size[1], size[2], A, y, x)
-                    timer.stop_timer("computeSYMGS")
+                    matrix_timer.start_timer()
+                    BaseTorch.computeSymGS(size[0], size[1], size[2], A, y, x)
+                    matrix_timer.stop_timer("computeSymGS")
             
             if "computeSPMV" in methods:
                     for i in range(num_iterations):
         
-                        timer.start_timer()
+                        matrix_timer.start_timer()
                         # careful! This way we only get "nice" numbers for the vectors, which does not reflect how spmv is used in the routines
                         # We might possibly want to read a bunch of y options from a file and use them here
                         BaseTorch.computeSPMV(size[0], size[1], size[2], A, y, x)
-                        timer.stop_timer("computeSPMV")
+                        matrix_timer.stop_timer("computeSPMV")
 
-            timer.destroy_timer()
+            if "computeWAXPBY" in methods:
+                for i in range(num_iterations):
+
+                    vector_timer.start_timer()
+                    # BaseTorch.computeWAXPBY(a, x ,b, y, w)
+                    vector_timer.stop_timer("computeWAXPBY")
+            
+            if "computeDot" in methods:
+                for i in range(num_iterations):
+
+                    vector_timer.start_timer()
+                    BaseTorch.computeDot(a, b)
+                    vector_timer.stop_timer("computeDot")
+
+            matrix_timer.destroy_timer()
+            vector_timer.destroy_timer()
 
 torch.cuda.synchronize()
 overall_end = time.time()
