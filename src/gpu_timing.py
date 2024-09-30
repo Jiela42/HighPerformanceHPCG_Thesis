@@ -121,9 +121,9 @@ class gpu_timer:
                     for time in self.elapsed_waxpby_time_ms:
                         f.write(f"{time}\n")
         if self.dot_time:
-            filename = f"{new_folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_DOT.csv"
+            filename = f"{new_folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_Dot.csv"
             with open(filename, "w") as f:
-                    f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.ny},{self.nnz},DOT\n")
+                    f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.ny},{self.nnz},Dot\n")
                     for time in self.elapsed_dot_time_ms:
                         f.write(f"{time}\n")
         

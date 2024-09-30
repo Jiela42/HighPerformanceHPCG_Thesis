@@ -14,6 +14,7 @@ methods_to_plot = [
     "MG",
     # "Prolongation",
     # "CG",
+    "Dot",
 ]
 
 sizes_to_plot =[

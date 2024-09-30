@@ -8,8 +8,8 @@ num_iterations = 5
 
 sizes =[
     (8, 8, 8),
-    # (16, 16, 16),
-    # (32, 32, 32),
+    (16, 16, 16),
+    (32, 32, 32),
     # (64, 64, 64),
     # (128, 128, 128),
 ]
@@ -43,8 +43,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # for each version we need the following
 # because each version has it's own name and needs to be called!
 #################################################################################################################
-print("Starting timing")
+print("Starting timing", flush=True)
 overall_start = time.time()
+
+torch.cuda.synchronize()
 
 if "BaseTorch" in versions:
     for size in sizes:
