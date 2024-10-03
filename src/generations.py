@@ -60,7 +60,7 @@ def generate_torch_coo_problem(nx: int, ny: int, nz: int) -> Tuple[torch.sparse.
     col_indices = []
     values = []
 
-    y = torch.zeros(nx * ny * nz, device=device)
+    y = torch.zeros(nx * ny * nz, device=device, dtype=torch.float64)
 
     for ix in range(nx):
         for iy in range(ny):
@@ -81,13 +81,13 @@ def generate_torch_coo_problem(nx: int, ny: int, nz: int) -> Tuple[torch.sparse.
                                         else:
                                             values.append(-1.0)
                                         nnz_i += 1
-                y[i] = 26.0 - nnz_i
+                y[i] = 26.0 - (float(nnz_i -1))
 
-    row_indices = torch.tensor(row_indices, device=device)
-    col_indices = torch.tensor(col_indices, device=device)
-    values = torch.tensor(values, device=device)
+    row_indices = torch.tensor(row_indices, device=device, dtype=torch.int64)
+    col_indices = torch.tensor(col_indices, device=device, dtype=torch.int64)
+    values = torch.tensor(values, device=device, dtype=torch.float64)
 
-    A = torch.sparse_coo_tensor(torch.stack([row_indices, col_indices]), values, (nx * ny * nz, nx * ny * nz), device=device)
+    A = torch.sparse_coo_tensor(torch.stack([row_indices, col_indices]), values, (nx * ny * nz, nx * ny * nz), device=device, dtype=torch.float64)
     A = A.coalesce()
 
     return A, y
