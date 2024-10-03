@@ -1,10 +1,10 @@
 #################################################################################################################
 # Set which data to plot (this is very similar to the settings in get_times.py)
 #################################################################################################################
-data_path = "/media/jiela/DK 128GB/Uni/HS24/Masters Thesis/Research - Coding/HighPerformanceHPCG_Thesis/data"
-plot_path = "/media/jiela/DK 128GB/Uni/HS24/Masters Thesis/Research - Coding/HighPerformanceHPCG_Thesis/plots"
-# data_path = "../data/"
-# plot_path = "../plots/"
+# data_path = "/media/jiela/DK 128GB/Uni/HS24/Masters Thesis/Research - Coding/HighPerformanceHPCG_Thesis/data"
+# plot_path = "/media/jiela/DK 128GB/Uni/HS24/Masters Thesis/Research - Coding/HighPerformanceHPCG_Thesis/plots"
+data_path = "../data/"
+plot_path = "../plots/"
 
 
 methods_to_plot = [
@@ -27,6 +27,7 @@ sizes_to_plot =[
 
 versions_to_plot = [
     "BaseTorch",
+    "MatlabReference",
 ]
 
 y_axis_to_plot = [
