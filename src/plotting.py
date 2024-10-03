@@ -1,10 +1,10 @@
 #################################################################################################################
 # Set which data to plot (this is very similar to the settings in get_times.py)
 #################################################################################################################
-# data_path = "/media/jiela/DK 128GB/Uni/HS24/Masters Thesis/Research - Coding/HighPerformanceHPCG_Thesis/data"
-# plot_path = "/media/jiela/DK 128GB/Uni/HS24/Masters Thesis/Research - Coding/HighPerformanceHPCG_Thesis/plots"
-data_path = "../data/"
-plot_path = "../plots/"
+data_path = "/media/jiela/DK 128GB/Uni/HS24/Masters Thesis/Research - Coding/HighPerformanceHPCG_Thesis/data"
+plot_path = "/media/jiela/DK 128GB/Uni/HS24/Masters Thesis/Research - Coding/HighPerformanceHPCG_Thesis/plots"
+# data_path = "../data/"
+# plot_path = "../plots/"
 
 
 methods_to_plot = [
@@ -51,7 +51,11 @@ import seaborn as sns
 import os
 from io import StringIO
 import datetime
+import warnings
 
+#################################################################################################################
+# Suppress all FutureWarnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 #################################################################################################################
 # read the data
 #################################################################################################################
@@ -136,6 +140,19 @@ current_plot_path = os.path.join(plot_path, timestamp)
 if not os.path.exists(current_plot_path):
         os.makedirs(current_plot_path)
 
+def get_num_columns(hue_order):
+    
+    longest_name = max([len(h) for h in hue_order])
+    num_hues = len(hue_order)
+
+    max_cols = 4 if longest_name <= 10 else 3
+    return max(max_cols, num_hues)
+
+def get_legend_horizontal_offset(num_cols, hue_order):
+    num_hues = len(hue_order)
+    num_rows = num_hues/num_cols
+
+    return -(num_rows + 1) * 0.06 - 0.18
 
 def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale):
 
@@ -155,10 +172,11 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
     if y_ax_scale == "linear":
         ax.set_yscale('linear')
 
-    legend = ax.legend(loc = 'lower center', bbox_to_anchor = (0.5, -0.3), ncol = 1)
-    legend.set_title(hue)
+    nc = get_num_columns(hue_order=hue_order)
+    box_offset = get_legend_horizontal_offset(num_cols=nc, hue_order=hue_order)
 
-    # fig.canvas.draw()
+    legend = ax.legend(loc = 'lower center', bbox_to_anchor = (0.5, box_offset), ncol = nc)
+    legend.set_title(hue)
 
     fig.savefig(save_path, bbox_inches='tight')
 
@@ -174,8 +192,8 @@ def plot_x_options(y_axis, y_axis_scale, save_path):
         data = full_data[full_data['Version'] == version]
         
         # we might want to sort these in accordance with the sorting instructions!
-        current_methods = data['Method'].unique()
-        current_sizes = data['Matrix Dimensions'].unique()
+        current_methods = [m for m in methods_to_plot if m in data['Method'].unique()]
+        current_sizes = [s for s in sizes_to_plot if s in data['Matrix Dimensions'].unique()]
         current_title = version
         current_save_path = os.path.join(save_path, version + "_grouped_by_sizes.png")
 
@@ -190,8 +208,8 @@ def plot_x_options(y_axis, y_axis_scale, save_path):
         data = full_data[full_data['Method'] == method]
         
         # we might want to sort these in accordance with the sorting instructions!
-        current_versions = data['Version'].unique()
-        current_sizes = data['Matrix Dimensions'].unique()
+        current_versions = [v for v in versions_to_plot if v in data['Version'].unique()]
+        current_sizes = [s for s in sizes_to_plot if s in data['Matrix Dimensions'].unique()]
         current_title = method
         current_save_path = os.path.join(save_path, method + "_grouped_by_versions.png")
 
@@ -206,8 +224,8 @@ def plot_x_options(y_axis, y_axis_scale, save_path):
         data = full_data[full_data['Matrix Dimensions'] == size]
 
         # we might want to sort these in accordance with the sorting instructions!
-        current_versions = data['Version'].unique()
-        current_methods = data['Method'].unique()
+        current_versions = [v for v in versions_to_plot if v in data['Version'].unique()]
+        current_methods = [m for m in methods_to_plot if m in data['Method'].unique()]
         current_title = "3D Matrix size: " + size
         current_save_path = os.path.join(save_path, size + "_grouped_by_versions.png")
 
