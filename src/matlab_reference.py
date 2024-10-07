@@ -8,12 +8,8 @@ def computeDot(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
     return torch.dot(a, b)
 
 def computeSPMV(A: torch.sparse.Tensor, x: torch.Tensor) -> torch.Tensor:
-    x_copy = x.clone()
-    x_copy = x_copy.unsqueeze(1) if x_copy.dim() == 1 else x_copy
 
-    res = torch.zeros_like(x_copy)
-    res = torch.sparse.mm(A, x_copy)
-    return res
+    return torch.sparse.mm(A, x)
 
 def greg_symGS(A: torch.sparse.Tensor, y: torch.Tensor) -> torch.Tensor:
     
@@ -82,16 +78,25 @@ def computeSymGS(A: torch.sparse.Tensor, r: torch.Tensor) -> torch.Tensor:
 def computeCG(A: torch.sparse.Tensor, b: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
 
     p = x.clone()
+
+    # print("entered computeCG", flush=True)
+
+
+    p = p.unsqueeze(1) if p.dim() == 1 else p
+    b = b.unsqueeze(1) if b.dim() == 1 else b
+
     Ap = torch.sparse.mm(A, p)
     r = b - Ap
-    normr = torch.sqrt(torch.dot(r,r)).item()
+    r = r.squeeze(1) if r.dim() > 1 else r
+    normr = torch.sqrt(torch.dot(r,r))
 
     iter = 0
     maxiters = 100
 
     while normr > 1e-16 and iter < maxiters:
         iter += 1
-        z = ComputeSymGS(A, r)
+        z = computeSymGS(A, r)
+        # z = z.unsqueeze(1) if z.dim() == 1 else z
         if iter == 1:
             p = z
             rtz = torch.dot(r,z)
@@ -100,11 +105,16 @@ def computeCG(A: torch.sparse.Tensor, b: torch.Tensor, x: torch.Tensor) -> torch
             rtz = torch.dot(r,z)
             beta = rtz/oldrtz
             p = beta*p + z
+
+        p = p.unsqueeze(1) if p.dim() == 1 else p
         Ap = torch.sparse.mm(A, p)
+        p = p.squeeze(1) if p.dim() > 1 else p
+        Ap = Ap.squeeze(1) if Ap.dim() > 1 else Ap
         pAp = torch.dot(p, Ap)
         alpha = rtz/pAp
         x = x + alpha*p
         r = r - alpha*Ap
+
         normr = torch.sqrt(torch.dot(r,r)).item()
 
 

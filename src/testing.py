@@ -7,7 +7,7 @@ import numpy as np
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 error_tolerance = 1e-9
-debug = True
+debug = False
 
 
 def gen_stencil(n):
@@ -41,30 +41,43 @@ def print_differeing_vectors(tested: torch.Tensor, control: torch.Tensor) -> Non
 
 def test(sizes: List[Tuple[int, int, int]], matrix_types: List[str], methods: List[str], Versions: List[str]) -> None:
 
-    if "BaseTorch" in Versions:
-        for size in sizes:
-
-            A,y = generations.generate_torch_coo_problem(size[0], size[1], size[2])
-            # print(y)
-            y_original = y.clone()
-            x = torch.zeros(size[0]*size[1]*size[2], device=device, dtype=torch.float64)
-            a,b = torch.rand(size[0]*size[1]*size[2], device=device, dtype=torch.float64), torch.rand(size[0]*size[1]*size[2], device=device, dtype=torch.float64)
+    for size in sizes:
+        
+        A,y = generations.generate_torch_coo_problem(size[0], size[1], size[2])
+        # print(y)
+        y_original = y.clone()
+        A_original = A.clone()
+        x = torch.zeros(size[0]*size[1]*size[2], device=device, dtype=torch.float64)
+        a,b = torch.rand(size[0]*size[1]*size[2], device=device, dtype=torch.float64), torch.rand(size[0]*size[1]*size[2], device=device, dtype=torch.float64)
+        
+        if "BaseTorch" in Versions:
 
             if "computeCG" in methods:
-                tested_x = BaseTorch.computeCG(A, b, x)
-                control_x = matlab_reference.computeCG(A, b, x)
+                BaseTorch.computeCG_no_preconditioning(size[0], size[1], size[2], A, b, x)
+                tested_x = x.clone()
+                matlab_reference.computeCG(A, b, x)
+                control_x = x.clone()
+                
+                if not torch.allclose(y, y_original, atol=error_tolerance):
+                    raise AssertionError(f"BaseTorch ComputeCG changed y")
+                
+                if debug:
+                    if not torch.allclose(A.to_dense(), A_original.to_dense(), atol=error_tolerance):
+                        raise AssertionError(f"BaseTorch ComputeCG changed A")
+
                 if not torch.allclose(tested_x, control_x, atol=error_tolerance):
                     print_differeing_vectors(tested_x, control_x)
-                    raise AssertionError(f"Error in computeCG for size {size}, version BaseTorch")
+                    raise AssertionError(f"Error in BaseTorch computeCG for size {size}, version BaseTorch")
+
             
             if "computeMG" in methods:
                 BaseTorch.computeMG(size[0], size[1], size[2], A, y, x, 0)
-                tested_y = x
+                tested_y = x.clone()
                 control_y = matlab_reference.computeMG(A, y)
 
                 if not torch.allclose(tested_y, control_y, atol=error_tolerance):
                     print_differeing_vectors(tested_y, control_y)
-                    raise AssertionError(f"Error in computeMG for size {size}, version BaseTorch")
+                    raise AssertionError(f"Error in BaseTorch computeMG for size {size}, version BaseTorch")
 
             if "computeDot" in methods:
                 tested_dot = BaseTorch.computeDot(a, b)
@@ -72,191 +85,118 @@ def test(sizes: List[Tuple[int, int, int]], matrix_types: List[str], methods: Li
 
                 if not torch.allclose(tested_dot, control_dot, atol=error_tolerance):
                     print_differeing_vectors(tested_dot, control_dot)
-                    raise AssertionError(f"Error in computeDot for size {size}, version BaseTorch")
+                    raise AssertionError(f"Error in BaseTorch computeDot for size {size}, version BaseTorch")
             
             if "computeSymGS" in methods:
 
-                # control_x_greg = matlab_reference.greg_symGS(A, y)
-                # control_x_greg = control_x_greg.squeeze() if control_x_greg.dim() > 1 else control_x_greg
-
                 control_x = matlab_reference.computeSymGS(A, y)
                 BaseTorch.computeSymGS(size[0], size[1], size[2], A, y, x)
-                tested_x = x
-
-                # y_test_matlab = torch.sparse.mm(A, control_x.unsqueeze(1)).squeeze()
-                # y_test = torch.sparse.mm(A, tested_x.unsqueeze(1)).squeeze()
-                # y_test_greg = torch.sparse.mm(A, control_x_greg.unsqueeze(1)).squeeze()
-
-                # if not torch.allclose(y_test_matlab, y, atol=error_tolerance):
-                #     print("SymGS: y_test_matlab also failes the test")
-                    # print_differeing_vectors(y_test_matlab, y_original)
-
-                # if not torch.allclose(control_x, control_x_greg, atol=error_tolerance):
-                #     print_differeing_vectors(control_x, control_x_greg)
-                #     print(f"SymGS: matlab and greg do not agree")
-                # else:
-                #     print("SymGS: matlab and greg agree")
+                tested_x = x.clone()
 
                 if not torch.allclose(y, y_original, atol=error_tolerance):
-                    raise AssertionError(f"ComputeSymGS changed y")
-
-
-                # print(f"y_test size: {y_test.size()}")
-                # print(f"y size: {y.size()}")
-                # print(f"y_test_matlab size: {y_test_matlab.size()}")
-                # print(f"y_test_greg size: {y_test_greg.size()}")
-                # print(f"y_original size: {y_original.size()}")
-                # print(f"tested_x size: {tested_x.size()}")
-                # print(f"control_x size: {control_x.size()}")
-                # print(f"control_x_greg size: {control_x_greg.size()}")
-
-
-                # distance_BaseTorch = torch.norm(y_test-y)
-                # distance_Matlab = torch.norm(y_test_matlab-y)
-                # distance_greg = torch.norm(y_test_greg-y)
-
-                # print(f"distance_BaseTorch: {distance_BaseTorch}")
-                # print(f"distance_Matlab: {distance_Matlab}")
-                # print(f"distance_greg: {distance_greg}")
-
-                # # check the percision of the matrices and results and print them
-                # print(f"Percision of A: {A.dtype}")
-                # print(f"Percision of y: {y.dtype}")
-                # print(f"Percision of x: {x.dtype}")
-                # print(f"Percision of control_x: {control_x.dtype}")
-                # print(f"Percision of control_x_greg: {control_x_greg.dtype}")
-                # print(f"Percision of y_test: {y_test.dtype}")
-                # print(f"Percision of y_test_matlab: {y_test_matlab.dtype}")
-                # print(f"Percision of y_test_greg: {y_test_greg.dtype}")
+                    raise AssertionError(f"BaseTorch ComputeSymGS changed y")
                 
-                # print(y)
-                # print(y_test_greg)
-
-                # if not torch.allclose(y, y_test_greg, atol=error_tolerance):
-                #     print_differeing_vectors(y_test_greg, y)
-                #     raise AssertionError(f"Error in computeSymGS for size {size}, version BaseTorch")
-
-                # if distance_BaseTorch > distance_Matlab:
-                #     raise AssertionError(f"Error in computeSymGS for size {size}, version BaseTorch, distance_BaseTorch: {distance_BaseTorch}, distance_Matlab: {distance_Matlab}")
-
-                # if not torch.allclose(y_test, y, atol=error_tolerance):
-                #     # print_differeing_vectors(y_test, y)
-                #     raise AssertionError(f"Error in computeSymGS for size {size}, version BaseTorch")
+                if debug:
+                    if not torch.allclose(A.to_dense(), A_original.to_dense(), atol=error_tolerance):
+                        raise AssertionError(f"BaseTorch ComputeSymGS changed A")
 
                 if not torch.allclose(tested_x, control_x, atol=error_tolerance):
                     print_differeing_vectors(tested_x, control_x)
-                    raise AssertionError(f"(x comparison) Error in computeSymGS for size {size}, version BaseTorch")
+                    raise AssertionError(f"(x comparison) Error in BaseTorch computeSymGS for size {size}, version BaseTorch")
                 elif debug:
-                    print("SymGS: BaseTorch and Matlab agree")
-
-                # if not torch.allclose(tested_x, control_x_greg, atol=error_tolerance):
-                #     print_differeing_vectors(tested_x, control_x_greg)
-                #     raise AssertionError(f"(x comparison) Error in computeSymGS for size {size}, version BaseTorch")
-                # else:
-                #     print("BaseTorch and greg agree")
+                    print("BaseTorch SymGS: BaseTorch and Matlab agree")
                     
 
             if "computeSPMV" in methods:
                 BaseTorch.computeSPMV(size[0], size[1], size[2], A, y, x)
-                tested_solution = x
+                tested_solution = x.clone()
+
+                y = y.unsqueeze(1) if y.dim() == 1 else y                
                 control_solution = matlab_reference.computeSPMV(A, y)
 
+                y = y.squeeze() if y.dim() > 1 else y
                 if not torch.allclose(y, y_original, atol=error_tolerance):
                     raise AssertionError(f"ComputeSPMV changed y")
-                
-                # differences = (tested_solution - control_solution).abs()
-                # max_diff = differences.max()
-                # print(differences)
 
-                tested_solution = tested_solution.squeeze() if tested_solution.dim() > 1 else tested_solution
                 control_solution = control_solution.squeeze() if control_solution.dim() > 1 else control_solution
+                tested_solution = tested_solution.squeeze() if tested_solution.dim() > 1 else tested_solution
 
                 if not torch.allclose(tested_solution, control_solution, atol=error_tolerance):
-                    print("MMMMMIIIIAUUUUU")
-                    print(f"tested solution dims: {tested_solution.size()}")
-                    print(f"control solution dims: {control_solution.size()}")
-                    # print("Difference:", max_diff)
-                    # print("Index of max difference:", torch.argmax(differences))
-                    # print_differeing_vectors(tested_solution, control_solution)
-                    raise AssertionError(f"Error in computeSPMV for size {size}, version BaseTorch")
+                    raise AssertionError(f"Error in BaseTorch computeSPMV for size {size}, version BaseTorch")
                 elif debug:
-                    print("SPMV: BaseTorch and Matlab agree")
+                    print("BaseTorch SPMV: BaseTorch and Matlab agree", flush=True)
 
     print("----ALL TESTS PASSED----")
 
 
-def symGS_mini_test():
+def symGS_mini_test(versions):
     
     A = gen_stencil(16)
     x = torch.ones(16, device=device, dtype=torch.float64)
     y = A @ x
     empty_x = torch.zeros(16, device=device, dtype=torch.float64)
-    # print(y)
 
     # make A sparse
     A_sparse_coo = A.to_sparse().to(dtype=torch.float64, device=device)
 
     x_greg = matlab_reference.greg_symGS(A_sparse_coo, y)
-    x_matlab = matlab_reference.computeSymGS(A_sparse_coo, y)
-    BaseTorch.computeSymGS(2, 2, 4, A_sparse_coo, y, empty_x)
-    x_BaseTorch = empty_x
-
-    # print(x_greg)
-    # print(x_matlab)
-    # print(x_BaseTorch)
-
-    # for i in range(16):
-    #     print(f"greg: {x_greg[i].item()}, matlab: {x_matlab[i].item()}, BaseTorch: {x_BaseTorch[i].item()}")
-
     x_greg = x_greg.squeeze() if x_greg.dim() > 1 else x_greg
 
-    if torch.allclose(x_greg, x_matlab, atol=error_tolerance):
-        print("SymGS_Mini_testgreg and matlab are the same")
-    if torch.allclose(x_greg, x_BaseTorch, atol=error_tolerance):
-        print("SymGS_Mini_test: greg and BaseTorch are the same")
-    # else:
-        # print("appearently non of them are the same")
-        # print(x_greg.dtype)
-        # print(x_BaseTorch.dtype)
-        # print(x_matlab.dtype)
-        # print(x_greg.size())
-        # print(x_BaseTorch.size())
-        # print(x_matlab.size())
+    x_matlab = matlab_reference.computeSymGS(A_sparse_coo, y)
 
-# sizes =[
-#     (8, 8, 8),
-#     (16, 16, 16),
-#     # (32, 32, 32),
-#     # (64, 64, 64),
-#     # (128, 128, 128),
-# ]
+    if not torch.allclose(x_greg, x_matlab, atol=error_tolerance):
+        raise AssertionError(f"SymGS_Mini_test: greg and matlab are different")
+    elif debug:
+        print("SymGS_Mini_testgreg and matlab are the same", flush=True)
+    
+    if "BaseTorch" in versions:
+        BaseTorch.computeSymGS(2, 2, 4, A_sparse_coo, y, empty_x)
+        x_BaseTorch = empty_x.clone()
 
-# versions = [
-#     "BaseTorch",
-#     # "MatlabReference",
-# ]
+        if not torch.allclose(x_greg, x_BaseTorch, atol=error_tolerance):
+            # print_differeing_vectors(x_greg, x_BaseTorch)
+            print("x_greg shape: ", x_greg.shape)
+            print("x_BaseTorch shape: ", x_BaseTorch.shape)
+            raise AssertionError(f"SymGS_Mini_test: greg and BaseTorch are different")
+        elif debug:
+            print("SymGS_Mini_test: greg and BaseTorch are the same", flush=True)
 
-# methods = [
-#     "computeSymGS",
-#     "computeSPMV",
-#     # "computeRestriction",
-#     # "computeMG",
-#     # "computeProlongation",
-#     # "computeCG",
-#     # "computeWAXPBY",
-#     "computeDot",
-# ]
+sizes =[
+    (8, 8, 8),
+    (16, 16, 16),
+    # (32, 32, 32),
+    # (64, 64, 64),
+    # (128, 128, 128),
+]
 
-# matrix_types = [
-#     "3d_27pt"
-# ]
+versions = [
+    "BaseTorch",
+    # "MatlabReference",
+]
 
-# symGS_mini_test()
-# test(sizes, matrix_types, methods, versions)
+methods = [
+    "computeSymGS",
+    "computeSPMV",
+    # "computeRestriction",
+    # "computeMG",
+    # "computeProlongation",
+    "computeCG",
+    "computeWAXPBY",
+    "computeDot",
+]
 
-# def run_tests(sizes, matrix_types, methods, versions):
-#     symGS_mini_test()
-#     test(sizes, matrix_types, methods, versions)
+matrix_types = [
+    "3d_27pt"
+]
+
+if "computeSymGS" in methods:
+    symGS_mini_test(versions)
+test(sizes, matrix_types, methods, versions)
+
+def run_tests(sizes, matrix_types, methods, versions):
+    if "computeSymGS" in methods:
+        symGS_mini_test(versions)
+    test(sizes, matrix_types, methods, versions)
 
 
 # print(A)

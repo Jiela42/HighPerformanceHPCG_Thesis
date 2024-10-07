@@ -10,7 +10,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 num_pre_smoother_steps = 1
 num_post_smoother_steps = 1
 tolerance = 0.0
-n_iter = 50
+max_iter = 50
+debug = True # this will also skip the preconditioning in the CG function
 
 
 def computeSPMV_stencil(nx: int, ny: int, nz: int, y: torch.tensor, x: torch.tensor) -> int:
@@ -205,12 +206,14 @@ def computeMG(nx: int, nz: int, ny: int,
     return 0
 
 def computeWAXPBY(a: torch.float64, x: torch.Tensor, b: torch.float64, y: torch.Tensor, w: torch.Tensor)-> int:
+    # note that double can also be x or y!
     w = a * x + b * y
     return 0
 
-def computeCG(nx: int, ny: int, nz: int) -> int:
-
-    norm_err = 0.0
+def computeCG_no_preconditioning(nx: int, ny: int, nz: int,
+                                 A: torch.sparse.Tensor, y: torch.Tensor, x: torch.Tensor) -> int:
+    
+    norm_r = 0.0
 
     A,y = generations.generate_torch_coo_problem(nx,ny,nz)
     x = torch.zeros(nx*ny*nz, device=device, dtype=torch.float64)
@@ -232,69 +235,126 @@ def computeCG(nx: int, ny: int, nz: int) -> int:
     computeWAXPBY(1.0, y, -1.0, Ap, r)
 
     norm_r = torch.sqrt(computeDot(r, r))
+    norm_0 = norm_r
+
+    # print(f"norm_r type: {norm_r.dtype}")
+    # print(f"norm_0 type: {norm_0.dtype}")
 
 
-    for i in range(n_iter) and norm_err > tolerance:
-        computeMG(nx, ny, nz, A, y, z, 0)
+    for i in range(1, max_iter+1):
+        if norm_r / norm_0 <= tolerance:
+            break
+
+        # in this version of the function we skip the preconditioning
+        z = r.clone()
+        
+        if (i == 1):
+            # copy Mr to p
+            p = z.clone()
+            # rtz = r'*z
+            rtz = computeDot(r, z)
+        else:
+            oldrtz = rtz
+            # rtz = r'*z
+            rtz = computeDot(r, z)
+            beta = rtz / oldrtz
+            # p = beta*p + z
+            computeWAXPBY(1.0, z, beta, p, p)
+
+        # 
+        computeSPMV(nx, ny, nz, A, p, Ap)
+        # alpha = p'*Ap
+        pAp = computeDot(p, Ap)
+        alpha = rtz / pAp
+        # x = x + alpha*p
+        computeWAXPBY(1.0, x, alpha, p, x)
+        # r = r - alpha*Ap
+        computeWAXPBY(1.0, r, -alpha, Ap, r)
+        norm_r = computeDot(r, r)
+        norm_r = torch.sqrt(norm_r)
     
-    return 0
+    return 0    
 
-"""
-// p is of length ncols, copy x to p for sparse MV operation
-  CopyVector(x, p);
-  TICK(); ComputeSPMV_ref(A, p, Ap);  TOCK(t3); // Ap = A*p
-  TICK(); ComputeWAXPBY_ref(nrow, 1.0, b, -1.0, Ap, r); TOCK(t2); // r = b - Ax (x stored in p)
-  TICK(); ComputeDotProduct_ref(nrow, r, r, normr, t4);  TOCK(t1);
-  normr = sqrt(normr);
-#ifdef HPCG_DEBUG
-  if (A.geom->rank==0) HPCG_fout << "Initial Residual = "<< normr << std::endl;
-#endif
 
-  // Record initial residual for convergence testing
-  normr0 = normr;
 
-  // Start iterations
+def computeCG(nx: int, ny: int, nz: int,
+              A: torch.sparse.Tensor, y: torch.Tensor, x: torch.Tensor) -> int:
 
-  for (int k=1; k<=max_iter && normr/normr0 > tolerance; k++ ) {
-    TICK();
-    if (doPreconditioning)
-      ComputeMG_ref(A, r, z); // Apply preconditioner
-    else
-      ComputeWAXPBY_ref(nrow, 1.0, r, 0.0, r, z); // copy r to z (no preconditioning)
-    TOCK(t5); // Preconditioner apply time
+    norm_r = 0.0
 
-    if (k == 1) {
-      CopyVector(z, p); TOCK(t2); // Copy Mr to p
-      TICK(); ComputeDotProduct_ref(nrow, r, z, rtz, t4); TOCK(t1); // rtz = r'*z
-    } else {
-      oldrtz = rtz;
-      TICK(); ComputeDotProduct_ref(nrow, r, z, rtz, t4); TOCK(t1); // rtz = r'*z
-      beta = rtz/oldrtz;
-      TICK(); ComputeWAXPBY_ref(nrow, 1.0, z, beta, p, p);  TOCK(t2); // p = beta*p + z
-    }
+    # r: residual vector
+    r = torch.zeros_like(y)
 
-    TICK(); ComputeSPMV_ref(A, p, Ap); TOCK(t3); // Ap = A*p
-    TICK(); ComputeDotProduct_ref(nrow, p, Ap, pAp, t4); TOCK(t1); // alpha = p'*Ap
-    alpha = rtz/pAp;
-    TICK(); ComputeWAXPBY_ref(nrow, 1.0, x, alpha, p, x);// x = x + alpha*p
-            ComputeWAXPBY_ref(nrow, 1.0, r, -alpha, Ap, r);  TOCK(t2);// r = r - alpha*Ap
-    TICK(); ComputeDotProduct_ref(nrow, r, r, normr, t4); TOCK(t1);
-    normr = sqrt(normr);
-"""
+    # z: preconditioned residual vector
+    z = torch.zeros_like(y)
+
+    # p is of length ncols, copy x to p for sparse MV operation
+    p = x.clone()
+    Ap = torch.zeros(nx*ny*nz, device=device, dtype=torch.float64)
+
+    computeSPMV(nx, ny, nz, A, p, Ap)
+
+    # r = b - Ap
+    computeWAXPBY(1.0, y, -1.0, Ap, r)
+
+    norm_r = torch.sqrt(computeDot(r, r))
+    norm_0 = norm_r
+
+    # print(f"norm_r type: {norm_r.dtype}")
+    # print(f"norm_0 type: {norm_0.dtype}")
+
+
+    for i in range(1, max_iter+1):
+        if norm_r / norm_0 <= tolerance:
+            break
+        # print("iteration: ", i)
+        # we always want to do the preconditioning
+        # we have a seperate function for no preconditioning
+        if not debug:
+            computeMG(nx, ny, nz, A, y, z, 0)
+        else:
+            z = r.clone()
+        
+        if (i == 1):
+            # copy Mr to p
+            p = z.clone()
+            # rtz = r'*z
+            rtz = computeDot(r, z)
+        else:
+            oldrtz = rtz
+            # rtz = r'*z
+            rtz = computeDot(r, z)
+            beta = rtz / oldrtz
+            # p = beta*p + z
+            computeWAXPBY(1.0, z, beta, p, p)
+
+        # 
+        computeSPMV(nx, ny, nz, A, p, Ap)
+        # alpha = p'*Ap
+        pAp = computeDot(p, Ap)
+        alpha = rtz / pAp
+        # x = x + alpha*p
+        computeWAXPBY(1.0, x, alpha, p, x)
+        # r = r - alpha*Ap
+        computeWAXPBY(1.0, r, -alpha, Ap, r)
+        norm_r = computeDot(r, r)
+        norm_r = torch.sqrt(norm_r)
     
+    return 0    
 
 
 
 #################################################################################################################
 # this is only a test thingy
 
-num = 16
+num = 8
 
 
-# A,y = generations.generate_torch_coo_problem(num,num,num)
-# x = torch.zeros(num*num*num, device=device, dtype=torch.float64)
+A,y = generations.generate_torch_coo_problem(num,num,num)
+x = torch.zeros(num*num*num, device=device, dtype=torch.float64)
 
 # computeMG(num, num, num, A,y,x,0)
-# computeCG(num, num, num)
+computeCG(num, num, num, A, y, x)
+# print("computed CG")
 #################################################################################################################
 
