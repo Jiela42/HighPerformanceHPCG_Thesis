@@ -3,6 +3,8 @@ import torch.linalg
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+def computeWAXPBY(alpha: float, x: torch.Tensor, beta: float, y: torch.Tensor) -> torch.Tensor:
+    return alpha * x + beta * y
 
 def computeDot(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
     return torch.dot(a, b)
@@ -116,7 +118,6 @@ def computeCG(A: torch.sparse.Tensor, b: torch.Tensor, x: torch.Tensor) -> torch
         r = r - alpha*Ap
 
         normr = torch.sqrt(torch.dot(r,r)).item()
-
 
 def main (A: torch.sparse.Tensor, b: torch.Tensor, x: torch.Tensor, x_exact: torch.Tensor) -> torch.Tensor:
 

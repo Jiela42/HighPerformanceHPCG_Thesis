@@ -205,9 +205,9 @@ def computeMG(nx: int, nz: int, ny: int,
     
     return 0
 
-def computeWAXPBY(a: torch.float64, x: torch.Tensor, b: torch.float64, y: torch.Tensor, w: torch.Tensor)-> int:
+def computeWAXPBY(a: float, x: torch.Tensor, b: float, y: torch.Tensor, w: torch.Tensor)-> int:
     # note that double can also be x or y!
-    w = a * x + b * y
+    w.copy_(a * x + b * y)
     return 0
 
 def computeCG_no_preconditioning(nx: int, ny: int, nz: int,
@@ -274,8 +274,6 @@ def computeCG_no_preconditioning(nx: int, ny: int, nz: int,
         norm_r = torch.sqrt(norm_r)
     
     return 0    
-
-
 
 def computeCG(nx: int, ny: int, nz: int,
               A: torch.sparse.Tensor, y: torch.Tensor, x: torch.Tensor) -> int:

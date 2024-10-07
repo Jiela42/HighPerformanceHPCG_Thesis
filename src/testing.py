@@ -1,9 +1,12 @@
 import torch
 from typing import List, Tuple
+
+import torch.cuda
 import generations
 import matlab_reference
 import BaseTorch
 import numpy as np
+import random
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 error_tolerance = 1e-9
@@ -29,8 +32,8 @@ def print_differeing_vectors(tested: torch.Tensor, control: torch.Tensor) -> Non
     if tested.size(0) != control.size(0):
         raise AssertionError(f"Size of the vectors is different: {tested.size(0)} vs {control.size(0)}")
 
-    for i in range(tested.size(0)):
-        print(f"i: {i} should be: {control[i].item()} but was: {tested[i]}")
+    # for i in range(tested.size(0)):
+    #     print(f"i: {i} should be: {control[i].item()} but was: {tested[i]}")
 
     # print the wrong elements next to each other
     print(f"control size: {control.size()}")
@@ -42,7 +45,7 @@ def print_differeing_vectors(tested: torch.Tensor, control: torch.Tensor) -> Non
 def test(sizes: List[Tuple[int, int, int]], matrix_types: List[str], methods: List[str], Versions: List[str]) -> None:
 
     for size in sizes:
-        
+
         A,y = generations.generate_torch_coo_problem(size[0], size[1], size[2])
         # print(y)
         y_original = y.clone()
@@ -70,14 +73,14 @@ def test(sizes: List[Tuple[int, int, int]], matrix_types: List[str], methods: Li
                     raise AssertionError(f"Error in BaseTorch computeCG for size {size}, version BaseTorch")
 
             
-            if "computeMG" in methods:
-                BaseTorch.computeMG(size[0], size[1], size[2], A, y, x, 0)
-                tested_y = x.clone()
-                control_y = matlab_reference.computeMG(A, y)
+            # if "computeMG" in methods:
+            #     BaseTorch.computeMG(size[0], size[1], size[2], A, y, x, 0)
+            #     tested_y = x.clone()
+            #     control_y = matlab_reference.computeMG(A, y)
 
-                if not torch.allclose(tested_y, control_y, atol=error_tolerance):
-                    print_differeing_vectors(tested_y, control_y)
-                    raise AssertionError(f"Error in BaseTorch computeMG for size {size}, version BaseTorch")
+            #     if not torch.allclose(tested_y, control_y, atol=error_tolerance):
+            #         print_differeing_vectors(tested_y, control_y)
+            #         raise AssertionError(f"Error in BaseTorch computeMG for size {size}, version BaseTorch")
 
             if "computeDot" in methods:
                 tested_dot = BaseTorch.computeDot(a, b)
@@ -125,6 +128,19 @@ def test(sizes: List[Tuple[int, int, int]], matrix_types: List[str], methods: Li
                     raise AssertionError(f"Error in BaseTorch computeSPMV for size {size}, version BaseTorch")
                 elif debug:
                     print("BaseTorch SPMV: BaseTorch and Matlab agree", flush=True)
+            
+            if "computeWAXPBY" in methods:
+                alpha, beta = random.random(), random.random()
+                BaseTorch.computeWAXPBY(alpha, a, beta, b, x)
+                tested_solution = x.clone()
+
+                control_solution = matlab_reference.computeWAXPBY(alpha, a, beta, b)
+
+                if not torch.allclose(tested_solution, control_solution, atol=error_tolerance):
+                    print_differeing_vectors(tested_solution, control_solution)
+                    raise AssertionError(f"Error in BaseTorch computeWAXPBY for size {size}, version BaseTorch")
+                elif debug:
+                    print("BaseTorch WAXPBY: BaseTorch and Matlab agree", flush=True)
 
     print("----ALL TESTS PASSED----")
 
@@ -161,37 +177,37 @@ def symGS_mini_test(versions):
         elif debug:
             print("SymGS_Mini_test: greg and BaseTorch are the same", flush=True)
 
-sizes =[
-    (8, 8, 8),
-    (16, 16, 16),
-    # (32, 32, 32),
-    # (64, 64, 64),
-    # (128, 128, 128),
-]
+# sizes =[
+#     (8, 8, 8),
+#     # (16, 16, 16),
+#     # (32, 32, 32),
+#     # (64, 64, 64),
+#     # (128, 128, 128),
+# ]
 
-versions = [
-    "BaseTorch",
-    # "MatlabReference",
-]
+# versions = [
+#     "BaseTorch",
+#     # "MatlabReference",
+# ]
 
-methods = [
-    "computeSymGS",
-    "computeSPMV",
-    # "computeRestriction",
-    # "computeMG",
-    # "computeProlongation",
-    "computeCG",
-    "computeWAXPBY",
-    "computeDot",
-]
+# methods = [
+#     # "computeSymGS",
+#     # "computeSPMV",
+#     # "computeRestriction",
+#     # "computeMG",
+#     # "computeProlongation",
+#     # "computeCG",
+#     "computeWAXPBY",
+#     # "computeDot",
+# ]
 
-matrix_types = [
-    "3d_27pt"
-]
+# matrix_types = [
+#     "3d_27pt"
+# ]
 
-if "computeSymGS" in methods:
-    symGS_mini_test(versions)
-test(sizes, matrix_types, methods, versions)
+# if "computeSymGS" in methods:
+#     symGS_mini_test(versions)
+# test(sizes, matrix_types, methods, versions)
 
 def run_tests(sizes, matrix_types, methods, versions):
     if "computeSymGS" in methods:

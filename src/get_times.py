@@ -7,13 +7,13 @@ import matlab_reference
 import BaseTorch
 
 num_iterations = 5
-do_tests = False
+do_tests = True
 debug = True
 
 sizes =[
     (8, 8, 8),
     (16, 16, 16),
-    (32, 32, 32),
+    # (32, 32, 32),
     # (64, 64, 64),
     # (128, 128, 128),
 ]
@@ -29,8 +29,8 @@ methods = [
     # "computeRestriction",
     "computeMG",
     # "computeProlongation",
-    # "computeCG",
-    # "computeWAXPBY",
+    "computeCG",
+    "computeWAXPBY",
     "computeDot",
 ]
 
@@ -44,7 +44,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #################################################################################################################
 if do_tests:
     print("Starting tests", flush=True)
-    testing.test(sizes, matrix_types, methods, versions)
+    testing.run_tests(sizes, matrix_types, methods, versions)
+    print("Tests finished", flush=True)
 
 #################################################################################################################
 # for each version we need the following
