@@ -1,0 +1,5 @@
+Number of Rows: 4096
+Number of Columns: 4096
+nx: 16
+ny: 16
+nz: 16
