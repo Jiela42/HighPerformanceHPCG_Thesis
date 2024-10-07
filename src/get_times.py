@@ -5,15 +5,16 @@ import time
 import testing
 import matlab_reference
 import BaseTorch
+import random
 
 num_iterations = 5
-do_tests = True
+do_tests = False
 debug = True
 
 sizes =[
     (8, 8, 8),
     (16, 16, 16),
-    # (32, 32, 32),
+    (32, 32, 32),
     # (64, 64, 64),
     # (128, 128, 128),
 ]
@@ -63,8 +64,9 @@ if "BaseTorch" in versions:
             # initialize the matrix and vectors (not included in measurments)
             A,y = generations.generate_torch_coo_problem(size[0], size[1], size[2])
             x = torch.zeros(size[0]*size[1]*size[2], device=device, dtype=torch.float64)
-
+            
             a,b = torch.rand(size[0]*size[1]*size[2], device=device, dtype=torch.float64), torch.rand(size[0]*size[1]*size[2], device=device, dtype=torch.float64)
+            alpha, beta = random.random(), random.random()
 
             nnz = A._nnz()
 
@@ -96,7 +98,7 @@ if "BaseTorch" in versions:
                 for i in range(num_iterations):
 
                     matrix_timer.start_timer()
-                    BaseTorch.computeCG(size[0], size[1], size[2])
+                    BaseTorch.computeCG(size[0], size[1], size[2], A, y, x)
                     matrix_timer.stop_timer("computeCG")
             
             if "computeMG" in methods:
@@ -126,7 +128,7 @@ if "BaseTorch" in versions:
                 for i in range(num_iterations):
 
                     vector_timer.start_timer()
-                    # BaseTorch.computeWAXPBY(a, x ,b, y, w)
+                    BaseTorch.computeWAXPBY(alpha, a ,beta, b, x)
                     vector_timer.stop_timer("computeWAXPBY")
             
             if "computeDot" in methods:
@@ -148,7 +150,8 @@ if "MatlabReference" in versions:
             x = torch.zeros(size[0]*size[1]*size[2], device=device, dtype=torch.float64)
 
             a,b = torch.rand(size[0]*size[1]*size[2], device=device, dtype=torch.float64), torch.rand(size[0]*size[1]*size[2], device=device, dtype=torch.float64)
-        
+            alpha, beta = random.random(), random.random()
+
             nnz = A._nnz()
 
             matrix_timer = gpu_timer(
@@ -209,7 +212,7 @@ if "MatlabReference" in versions:
                 for i in range(num_iterations):
 
                     vector_timer.start_timer()
-                    # matlab_reference.computeWAXPBY(a, x ,b, y, w)
+                    matlab_reference.computeWAXPBY(a, x, beta, y)
                     vector_timer.stop_timer("computeWAXPBY")
             
             if "computeDot" in methods:
