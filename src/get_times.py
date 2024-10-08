@@ -20,19 +20,19 @@ sizes =[
 ]
 
 versions = [
-    # "BaseTorch",
-    "MatlabReference",
+    "BaseTorch",
+    # "MatlabReference",
 ]
 
 methods = [
-    "computeSymGS",
-    "computeSPMV",
+    # "computeSymGS",
+    # "computeSPMV",
     # "computeRestriction",
-    "computeMG",
+    # "computeMG",
     # "computeProlongation",
     "computeCG",
-    "computeWAXPBY",
-    "computeDot",
+    # "computeWAXPBY",
+    # "computeDot",
 ]
 
 matrix_types = [

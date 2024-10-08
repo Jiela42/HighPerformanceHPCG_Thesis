@@ -11,7 +11,7 @@ import os
 import glob
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-error_tolerance = 1e-5
+error_tolerance = 1e-9
 debug = True
 
 # this function is needed for the symGS mini test
@@ -228,12 +228,6 @@ def MG_mini_test(versions):
 
         
 
-
-
-
-
-
-
     # read the testcases from the hpcg_output folder
 
 
@@ -244,9 +238,9 @@ def MG_mini_test(versions):
 # This part allows us to run the tests from the command line
 #################################################################################################################
 sizes =[
-    # (8, 8, 8),
-    # (16, 16, 16),
-    # (32, 32, 32),
+    (8, 8, 8),
+    (16, 16, 16),
+    (32, 32, 32),
     # (64, 64, 64),
     # (128, 128, 128),
 ]
@@ -260,9 +254,9 @@ methods = [
     # "computeSymGS",
     # "computeSPMV",
     # "computeRestriction",
-    "computeMG",
+    # "computeMG",
     # "computeProlongation",
-    # "computeCG",
+    "computeCG",
     # "computeWAXPBY",
     # "computeDot",
 ]

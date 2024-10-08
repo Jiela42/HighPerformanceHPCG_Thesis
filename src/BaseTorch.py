@@ -11,8 +11,6 @@ num_pre_smoother_steps = 1
 num_post_smoother_steps = 1
 tolerance = 0.0
 max_iter = 50
-debug = True # this will also skip the preconditioning in the CG function
-
 
 def computeSPMV_stencil(nx: int, ny: int, nz: int, y: torch.tensor, x: torch.tensor) -> int:
 
@@ -201,11 +199,7 @@ def computeCG_no_preconditioning(nx: int, ny: int, nz: int,
                                  A: torch.sparse.Tensor, y: torch.Tensor, x: torch.Tensor) -> int:
     
     norm_r = 0.0
-
-    A,y = generations.generate_torch_coo_problem(nx,ny,nz)
-    x = torch.zeros(nx*ny*nz, device=device, dtype=torch.float64)
-
-
+    
     # r: residual vector
     r = torch.zeros_like(y)
 
@@ -287,10 +281,7 @@ def computeCG(nx: int, ny: int, nz: int,
             break
         # we always want to do the preconditioning
         # we have a seperate function for no preconditioning
-        if not debug:
-            computeMG(nx, ny, nz, A, y, z, 0)
-        else:
-            z = r.clone()
+        computeMG(nx, ny, nz, A, y, z, 0)
         
         if (i == 1):
             # copy Mr to p
@@ -318,8 +309,6 @@ def computeCG(nx: int, ny: int, nz: int,
         norm_r = torch.sqrt(norm_r)
     
     return 0    
-
-
 
 #################################################################################################################
 # this is only a test thingy
