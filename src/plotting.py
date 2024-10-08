@@ -40,7 +40,6 @@ y_axis_config_to_plot = [
     "log"
 ]
 
-print(print_flag)
 
 #################################################################################################################
 # import necessary libraries
@@ -127,14 +126,14 @@ all_methods = full_data['Method'].unique()
 all_ault_nodes = full_data['Ault Node'].unique()
 all_matrix_dimensions = full_data['Matrix Dimensions, Matrix Density'].unique()
 
-all_dense_ops = [
+all_sparse_ops = [
     "SymGS",
     "SPMV",
     "MG",
     "CG",
     ]
 
-all_sparse_ops = [
+all_dense_ops = [
     "Dot",
     "WAXPBY",
     ]
@@ -226,8 +225,6 @@ def generate_order(current_dim_perc):
 
 def plot_x_options(y_axis, y_axis_scale, save_path):
 
-    print_flag = True
-
     for version in versions_to_plot:
 
         # filter data
@@ -261,27 +258,17 @@ def plot_x_options(y_axis, y_axis_scale, save_path):
         # filter data
         data = full_data[full_data['Method'] == method]
         
-        sparse_data = data[data['Method'].isin(sparse_ops_to_plot)]
-        dense_data = data[data['Method'].isin(dense_ops_to_plot)]
-        
         # we might want to sort these in accordance with the sorting instructions!
         current_versions = [v for v in versions_to_plot if v in data['Version'].unique()]
         current_dense_sizes = [s for s in sizes_to_plot if s in dense_data['Matrix Size'].unique()]
         current_sparse_sizes = generate_order(sparse_data['Matrix Dimensions, Matrix Density'].unique())
         current_title = method
         current_save_path = os.path.join(save_path, method + "_grouped_by_versions.png")
-        
-        if print_flag:
-            print("Sparse data:")
-            print(sparse_data[0])
-            print("Dense data:")
-            print(dense_data[0])
-            print_flag = False
 
         if method in sparse_ops_to_plot:
-            plot_data(sparse_data, x = 'Matrix Dimensions, Matrix Density', x_order = current_sparse_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
+            plot_data(data, x = 'Matrix Dimensions, Matrix Density', x_order = current_sparse_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale)
         if method in dense_ops_to_plot:
-            plot_data(dense_data, x = 'Matrix Size', x_order = current_dense_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale)
+            plot_data(data, x = 'Matrix Size', x_order = current_dense_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale)
 
         # careful, this was not updated to distinguish between sparse and dense operations
         # current_save_path = os.path.join(save_path, method + "_grouped_by_sizes.png")
