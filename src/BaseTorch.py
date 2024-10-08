@@ -47,13 +47,6 @@ def computeSymGS(nx: int, nz: int, ny: int,
     indices = A.indices()
     values = A.values()
 
-    # print("n_rows: ", n_rows)
-
-    # # make x all zeros
-    # x[:] = 0.0
-
-    # CHECK x vs r 
-
     # forward pass
     for i in range(n_rows):
 
@@ -69,7 +62,6 @@ def computeSymGS(nx: int, nz: int, ny: int,
         sum += diag * x[i].item()
         x[i] = sum / diag
     
-    # print(f"BaseTorch x between passes: {x}")
 
     # backward pass
     for i in range(n_rows-1, -1, -1):
@@ -146,19 +138,14 @@ def computeMG(nx: int, nz: int, ny: int,
 
     x.zero_()
 
-    # print(f"In the computeMG function, depth: {depth} - x dtype: {x.dtype}")
     ierr = 0
 
     if depth < 3:
-        # print("In the if clause, depth: ", depth)
 
         # first generate new matrix
         # since that might throw an error and we don't want to do computation in that case
 
-        # print("Starting to generate coarse problem, nx: ", nx, " ny: ", ny, " nz: ", nz)
-        # f2c_op, Ac, _ = generations.generate_coarse_problem(nx, ny, nz)
         f2c_op, Ac, _ = generations.generate_coarse_problem(nx, ny, nz)
-        # print("End of generating coarse problem")
 
         nxc = nx // 2
         nyc = ny // 2
@@ -237,10 +224,6 @@ def computeCG_no_preconditioning(nx: int, ny: int, nz: int,
     norm_r = torch.sqrt(computeDot(r, r))
     norm_0 = norm_r
 
-    # print(f"norm_r type: {norm_r.dtype}")
-    # print(f"norm_0 type: {norm_0.dtype}")
-
-
     for i in range(1, max_iter+1):
         if norm_r / norm_0 <= tolerance:
             break
@@ -298,14 +281,10 @@ def computeCG(nx: int, ny: int, nz: int,
     norm_r = torch.sqrt(computeDot(r, r))
     norm_0 = norm_r
 
-    # print(f"norm_r type: {norm_r.dtype}")
-    # print(f"norm_0 type: {norm_0.dtype}")
-
 
     for i in range(1, max_iter+1):
         if norm_r / norm_0 <= tolerance:
             break
-        # print("iteration: ", i)
         # we always want to do the preconditioning
         # we have a seperate function for no preconditioning
         if not debug:
@@ -345,14 +324,14 @@ def computeCG(nx: int, ny: int, nz: int,
 #################################################################################################################
 # this is only a test thingy
 
-num = 8
+# num = 8
 
 
-A,y = generations.generate_torch_coo_problem(num,num,num)
-x = torch.zeros(num*num*num, device=device, dtype=torch.float64)
+# A,y = generations.generate_torch_coo_problem(num,num,num)
+# x = torch.zeros(num*num*num, device=device, dtype=torch.float64)
 
 # computeMG(num, num, num, A,y,x,0)
-computeCG(num, num, num, A, y, x)
+# computeCG(num, num, num, A, y, x)
 # print("computed CG")
 #################################################################################################################
 
