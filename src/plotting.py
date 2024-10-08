@@ -6,15 +6,15 @@
 data_path = "../data/"
 plot_path = "../plots/"
 
-
 methods_to_plot = [
     "SymGS",
     "SPMV",
     # "Restriction",
     "MG",
     # "Prolongation",
-    # "CG",
+    "CG",
     "Dot",
+    "WAXPBY",
 ]
 
 sizes_to_plot =[
@@ -40,6 +40,7 @@ y_axis_config_to_plot = [
     "log"
 ]
 
+print(print_flag)
 
 #################################################################################################################
 # import necessary libraries
@@ -82,6 +83,7 @@ for file in files:
     nz = int(meta_data[5])
     nnz = int(meta_data[6])
     method = str(meta_data[7])
+    sparsity_of_A = nnz / (nx * ny * nz) ** 2 if method not in ["Dot", "WAXPBY"] else 1
 
     # read in the rest of the data i.e. the timings
 
@@ -96,6 +98,7 @@ for file in files:
     data['nz'] = nz
     data['NNZ'] = nnz
     data['Method'] = method
+    data['Density of A'] = sparsity_of_A
 
     # Append the data to the full_data DataFrame
     full_data = pd.concat([full_data, data], ignore_index=True)
@@ -110,18 +113,35 @@ full_data['Time per NNZ (ms)'] = full_data['Time (ms)'] / full_data['NNZ']
 # Here we could do preprocessing, such as time per nnz or sorting of the possible values of the columns
 
 # add a column matrix dimensions: nx x ny x nz (a string)
-full_data['Matrix Dimensions'] = full_data['nx'].astype(str) + "x" + full_data['ny'].astype(str) + "x" + full_data['nz'].astype(str)
+full_data['Matrix Dimensions, Matrix Density'] = full_data['nx'].astype(str) + "x" + full_data['ny'].astype(str) + "x" + full_data['nz'].astype(str) + ", " + (full_data['Density of A']* 100).round(2).astype(str) + "%" 
+full_data['Matrix Size'] = full_data['nx'].astype(str) + "x" + full_data['ny'].astype(str) + "x" + full_data['nz'].astype(str)
 
 # remove any data, that is not to be plotted
 full_data = full_data[full_data['Method'].isin(methods_to_plot)]
 full_data = full_data[full_data['Version'].isin(versions_to_plot)]
-full_data = full_data[full_data['Matrix Dimensions'].isin(sizes_to_plot)]
+full_data = full_data[full_data['Matrix Size'].isin(sizes_to_plot)]
 
 all_matrix_types = full_data['Matrix Type'].unique()
 all_versions = full_data['Version'].unique()
 all_methods = full_data['Method'].unique()
 all_ault_nodes = full_data['Ault Node'].unique()
-all_matrix_dimensions = full_data['Matrix Dimensions'].unique()
+all_matrix_dimensions = full_data['Matrix Dimensions, Matrix Density'].unique()
+
+all_dense_ops = [
+    "SymGS",
+    "SPMV",
+    "MG",
+    "CG",
+    ]
+
+all_sparse_ops = [
+    "Dot",
+    "WAXPBY",
+    ]
+
+dense_ops_to_plot = [m for m in methods_to_plot if m in all_dense_ops]
+sparse_ops_to_plot = [m for m in methods_to_plot if m in all_sparse_ops]
+
 
 # print(full_data)
 print(all_matrix_types)
@@ -160,7 +180,6 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
     sns.set(style="whitegrid")
     plt.figure(figsize=(10, 6))
 
-
     ax = sns.barplot(x=x, order=x_order, y=y, hue=hue, hue_order=hue_order, data=data,  estimator= np.median, ci=98)
     fig = ax.get_figure()
 
@@ -184,54 +203,111 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
     fig.clf()
     plt.close(fig)
 
+def generate_order(current_dim_perc):
+    sorted_sizes = {}
+
+    for string in current_dim_perc:
+        size = string.split(",")[0]
+        if size in sizes_to_plot:
+            if size not in sorted_sizes:
+                sorted_sizes[size] = []
+            sorted_sizes[size].append(string)
+    
+    # sort the order from smallest size to largest and sort the percentages within the same size
+    
+    order = []
+
+    for size in sizes_to_plot:
+        if size in sorted_sizes:
+            sorted_sizes[size] = sorted(sorted_sizes[size], key=lambda x: float(x.split(",")[1].strip("%")))
+            order += sorted_sizes[size]
+    return order
+    
 
 def plot_x_options(y_axis, y_axis_scale, save_path):
+
+    print_flag = True
 
     for version in versions_to_plot:
 
         # filter data
         data = full_data[full_data['Version'] == version]
         
+        # we group by sparse and dense operations 
+        sparse_data = data[data['Method'].isin(sparse_ops_to_plot)]
+        dense_data = data[data['Method'].isin(dense_ops_to_plot)]
+        
         # we might want to sort these in accordance with the sorting instructions!
-        current_methods = [m for m in methods_to_plot if m in data['Method'].unique()]
-        current_sizes = [s for s in sizes_to_plot if s in data['Matrix Dimensions'].unique()]
+        current_sparse_methods = [m for m in sparse_ops_to_plot if m in data['Method'].unique()]
+        current_dense_methods = [m for m in dense_ops_to_plot if m in data['Method'].unique()]
+        current_dense_sizes = [s for s in sizes_to_plot if s in dense_data['Matrix Size'].unique()]
+        current_sparse_sizes = generate_order(sparse_data['Matrix Dimensions, Matrix Density'].unique())
         current_title = version
-        current_save_path = os.path.join(save_path, version + "_grouped_by_sizes.png")
+        current_dense_save_path = os.path.join(save_path, version + "_denseOps_grouped_by_sizes.png")
+        current_sparse_save_path = os.path.join(save_path, version + "_sparseOps_grouped_by_sizes.png")
 
-        plot_data(data, x = 'Matrix Dimensions', x_order = current_sizes, y = y_axis, hue = 'Method', hue_order = current_methods, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale)
+        plot_data(sparse_data, x = 'Matrix Dimensions, Matrix Density', x_order = current_sparse_sizes, y = y_axis, hue = 'Method', hue_order = current_sparse_methods, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
+        plot_data(dense_data, x = 'Matrix Size', x_order = current_dense_sizes, y = y_axis, hue = 'Method', hue_order = current_dense_methods, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale)
 
-        current_save_path = os.path.join(save_path, version + "_grouped_by_methods.png")
-        plot_data(data, x = 'Method', x_order = current_methods, y = y_axis, hue = 'Matrix Dimensions', hue_order = current_sizes, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale)
+        current_dense_save_path = os.path.join(save_path, version + "_denseOps_grouped_by_methods.png")
+        current_sparse_save_path = os.path.join(save_path, version + "_sparseOps_grouped_by_methods.png")
+
+        plot_data(sparse_data, x = 'Method', x_order = current_sparse_methods, y = y_axis, hue = 'Matrix Dimensions, Matrix Density', hue_order = current_sparse_sizes, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
+        plot_data(dense_data, x = 'Method', x_order = current_dense_methods, y = y_axis, hue = 'Matrix Size', hue_order = current_dense_sizes, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale)
+
 
     for method in methods_to_plot:
 
         # filter data
         data = full_data[full_data['Method'] == method]
         
+        sparse_data = data[data['Method'].isin(sparse_ops_to_plot)]
+        dense_data = data[data['Method'].isin(dense_ops_to_plot)]
+        
         # we might want to sort these in accordance with the sorting instructions!
         current_versions = [v for v in versions_to_plot if v in data['Version'].unique()]
-        current_sizes = [s for s in sizes_to_plot if s in data['Matrix Dimensions'].unique()]
+        current_dense_sizes = [s for s in sizes_to_plot if s in dense_data['Matrix Size'].unique()]
+        current_sparse_sizes = generate_order(sparse_data['Matrix Dimensions, Matrix Density'].unique())
         current_title = method
         current_save_path = os.path.join(save_path, method + "_grouped_by_versions.png")
+        
+        if print_flag:
+            print("Sparse data:")
+            print(sparse_data[0])
+            print("Dense data:")
+            print(dense_data[0])
+            print_flag = False
 
-        plot_data(data, x = 'Matrix Dimensions', x_order = current_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale)
+        if method in sparse_ops_to_plot:
+            plot_data(sparse_data, x = 'Matrix Dimensions, Matrix Density', x_order = current_sparse_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
+        if method in dense_ops_to_plot:
+            plot_data(dense_data, x = 'Matrix Size', x_order = current_dense_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale)
 
+        # careful, this was not updated to distinguish between sparse and dense operations
         # current_save_path = os.path.join(save_path, method + "_grouped_by_sizes.png")
         # plot_data(data, x = 'Matrix Dimensions', x_order = current_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale)
     
     for size in sizes_to_plot:
 
         # filter data
-        data = full_data[full_data['Matrix Dimensions'] == size]
+        data = full_data[full_data["Matrix Size"] == size]
+        
+        sparse_data = data[data['Method'].isin(sparse_ops_to_plot)]
+        dense_data = data[data['Method'].isin(dense_ops_to_plot)]
+
+        current_dense_sizes = [s for s in sizes_to_plot if s in dense_data['Matrix Size'].unique()]
+        current_sparse_sizes = generate_order(sparse_data['Matrix Dimensions, Matrix Density'].unique())
 
         # we might want to sort these in accordance with the sorting instructions!
         current_versions = [v for v in versions_to_plot if v in data['Version'].unique()]
-        current_methods = [m for m in methods_to_plot if m in data['Method'].unique()]
-        current_title = "3D Matrix size: " + size
-        current_save_path = os.path.join(save_path, size + "_grouped_by_versions.png")
+        current_dense_methods = [m for m in methods_to_plot if m in dense_data['Method'].unique()]
+        current_sparse_methods = [m for m in methods_to_plot if m in sparse_data['Method'].unique()]
+        current_title = "3D Matrix Size, Density: " + size
+        current_dense_save_path = os.path.join(save_path, size + "_denseOps_grouped_by_versions.png")
+        current_sparse_save_path = os.path.join(save_path, size + "_sparseOps_grouped_by_versions.png")
 
-        plot_data(data, x = 'Method', x_order = current_methods, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale)
-
+        plot_data(dense_data, x = 'Method', x_order = current_dense_methods, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale)
+        plot_data(sparse_data, x = 'Method', x_order = current_sparse_methods, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
 
 for y_ax in y_axis_to_plot:
     if "linear" in y_axis_config_to_plot:

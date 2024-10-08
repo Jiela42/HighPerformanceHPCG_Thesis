@@ -30,7 +30,7 @@ def greg_symGS(A: torch.sparse.Tensor, y: torch.Tensor) -> torch.Tensor:
     x, _ = torch.triangular_solve(input = y_copy, A = LA, upper=False)    
     # Compute x1 = y - LA*x + DA*x
     x1 = y_copy - torch.matmul(LA, x) + torch.matmul(DA, x)
-    # print("greg x1: ", x1)    
+
     # Solve UA * x = x1
     x, _ = torch.triangular_solve(A= UA, input = x1, upper=True)    
     return x
@@ -80,9 +80,6 @@ def computeSymGS(A: torch.sparse.Tensor, r: torch.Tensor) -> torch.Tensor:
 def computeCG(A: torch.sparse.Tensor, b: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
 
     p = x.clone()
-
-    # print("entered computeCG", flush=True)
-
 
     p = p.unsqueeze(1) if p.dim() == 1 else p
     b = b.unsqueeze(1) if b.dim() == 1 else b

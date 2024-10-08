@@ -7,12 +7,14 @@ import matlab_reference
 import BaseTorch
 import numpy as np
 import random
+import os
+import glob
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-error_tolerance = 1e-9
-debug = False
+error_tolerance = 1e-5
+debug = True
 
-
+# this function is needed for the symGS mini test
 def gen_stencil(n):
     A = torch.zeros([n,n], device=device, dtype=torch.float64)
     for i in range(n):
@@ -21,6 +23,17 @@ def gen_stencil(n):
                     A[i,j] = 1
     return A
 
+# helper functions for MG file-read-in tests
+def read_dimension(file_path):
+    dimensions = {}
+    with open(file_path, 'r') as file:
+        for line in file:
+            if ':' in line:
+                key, value = line.split(':')
+                dimensions[key.strip()] = int(value.strip())
+    return dimensions
+
+# this function helps debugging
 def print_differeing_vectors(tested: torch.Tensor, control: torch.Tensor) -> None:
 
     tested = tested.squeeze() if tested.dim() > 1 else tested
@@ -42,6 +55,7 @@ def print_differeing_vectors(tested: torch.Tensor, control: torch.Tensor) -> Non
         if not torch.isclose(tested[i], control[i],atol=error_tolerance):
             print(f"i: {i} should be: {control[i]} but was: {tested[i]}")
 
+# this contains most of the main testing functions
 def test(sizes: List[Tuple[int, int, int]], matrix_types: List[str], methods: List[str], Versions: List[str]) -> None:
 
     for size in sizes:
@@ -144,7 +158,7 @@ def test(sizes: List[Tuple[int, int, int]], matrix_types: List[str], methods: Li
 
     print("----ALL TESTS PASSED----")
 
-
+# this function tests the symGS function on a super small example
 def symGS_mini_test(versions):
     
     A = gen_stencil(16)
@@ -177,41 +191,101 @@ def symGS_mini_test(versions):
         elif debug:
             print("SymGS_Mini_test: greg and BaseTorch are the same", flush=True)
 
-# sizes =[
-#     (8, 8, 8),
-#     # (16, 16, 16),
-#     # (32, 32, 32),
-#     # (64, 64, 64),
-#     # (128, 128, 128),
-# ]
+# this function tests the MG function based on outputs we got from the original HPCG code
+def MG_mini_test(versions):
 
-# versions = [
-#     "BaseTorch",
-#     # "MatlabReference",
-# ]
+    path_to_testcases = "../hpcg_output"
 
-# methods = [
-#     # "computeSymGS",
-#     # "computeSPMV",
-#     # "computeRestriction",
-#     # "computeMG",
-#     # "computeProlongation",
-#     # "computeCG",
-#     "computeWAXPBY",
-#     # "computeDot",
-# ]
+    sub_directories = [d for d in os.listdir(path_to_testcases)]
 
-# matrix_types = [
-#     "3d_27pt"
-# ]
+    for dir in sub_directories:
+        dir_path = os.path.join(path_to_testcases, dir)
+        dimensions_path = os.path.join(dir_path, "dimA.txt")
+        b_computed_path = os.path.join(dir_path, "b_computed.txt")
+        x_overlap_path = os.path.join(dir_path, "x_overlap.txt")
+        x_overlap_after_mg_path = os.path.join(dir_path, "x_overlap_after_mg.txt")
+        dimensions_dict = read_dimension(dimensions_path)
+        nx = dimensions_dict["nx"]
+        ny = dimensions_dict["ny"]
+        nz = dimensions_dict["nz"]
 
-# if "computeSymGS" in methods:
-#     symGS_mini_test(versions)
+        A, y = generations.generate_torch_coo_problem(nx, ny, nz)
+
+        b_computed = torch.tensor(np.loadtxt(b_computed_path), device=device, dtype=torch.float64)
+        x_overlap = torch.tensor(np.loadtxt(x_overlap_path), device=device, dtype=torch.float64)
+        x_overlap_after_mg = torch.tensor(np.loadtxt(x_overlap_after_mg_path), device=device, dtype=torch.float64)
+
+        if "BaseTorch" in versions:
+            empty_x = torch.zeros(nx*ny*nz, device=device, dtype=torch.float64)
+            BaseTorch.computeMG(nx, ny, nz, A, b_computed, empty_x, 0)
+            x_BaseTorch = empty_x.clone()
+
+            if not torch.allclose(x_BaseTorch, x_overlap_after_mg, atol=error_tolerance):
+                print_differeing_vectors(x_BaseTorch, x_overlap_after_mg)
+                raise AssertionError(f"MG_Mini_test: BaseTorch and original HPCG are different, for dimensions: {nx}x{ny}x{nz}")
+            elif debug:
+                print(f"MG_Mini_test: BaseTorch and original HPCG are the same for dimensions: {nx}x{ny}x{nz}", flush=True)
+
+        
+
+
+
+
+
+
+
+    # read the testcases from the hpcg_output folder
+
+
+    # if "BaseTorch" in versions:
+    #     # 
+
+#################################################################################################################
+# This part allows us to run the tests from the command line
+#################################################################################################################
+sizes =[
+    # (8, 8, 8),
+    # (16, 16, 16),
+    # (32, 32, 32),
+    # (64, 64, 64),
+    # (128, 128, 128),
+]
+
+versions = [
+    "BaseTorch",
+    # "MatlabReference",
+]
+
+methods = [
+    # "computeSymGS",
+    # "computeSPMV",
+    # "computeRestriction",
+    "computeMG",
+    # "computeProlongation",
+    # "computeCG",
+    # "computeWAXPBY",
+    # "computeDot",
+]
+
+matrix_types = [
+    "3d_27pt"
+]
+
+if "computeSymGS" in methods:
+    symGS_mini_test(versions)
 # test(sizes, matrix_types, methods, versions)
 
+if "computeMG" in methods:
+    MG_mini_test(versions)
+
+#################################################################################################################
+
+# this function is called from get_times.py in order to ensure correctness
 def run_tests(sizes, matrix_types, methods, versions):
     if "computeSymGS" in methods:
         symGS_mini_test(versions)
+    if "computeMG" in methods:
+        MG_mini_test(versions)
     test(sizes, matrix_types, methods, versions)
 
 

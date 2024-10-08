@@ -20,7 +20,7 @@ sizes =[
 ]
 
 versions = [
-    "BaseTorch",
+    # "BaseTorch",
     "MatlabReference",
 ]
 
@@ -182,7 +182,7 @@ if "MatlabReference" in versions:
                 for i in range(num_iterations):
 
                     matrix_timer.start_timer()
-                    matlab_reference.computeCG(size[0], size[1], size[2])
+                    matlab_reference.computeCG(A, y, x)
                     matrix_timer.stop_timer("computeCG")
             
             # if "computeMG" in methods:
@@ -201,12 +201,14 @@ if "MatlabReference" in versions:
             
             if "computeSPMV" in methods:
                     for i in range(num_iterations):
-        
+
+                        y = y.unsqueeze(1) if y.dim() == 1 else y
                         matrix_timer.start_timer()
                         # careful! This way we only get "nice" numbers for the vectors, which does not reflect how spmv is used in the routines
                         # We might possibly want to read a bunch of y options from a file and use them here
                         matlab_reference.computeSPMV(A, y)
                         matrix_timer.stop_timer("computeSPMV")
+                        y = y.squeeze(1) if y.dim() > 1 else y
 
             if "computeWAXPBY" in methods:
                 for i in range(num_iterations):
