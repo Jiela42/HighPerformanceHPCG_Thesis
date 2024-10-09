@@ -171,19 +171,25 @@ def test(sizes: List[Tuple[int, int, int]], matrix_types: List[str], methods: Li
 
                         y = y.unsqueeze(1) if y.dim() == 1 else y
                         control_solution = matlab_reference.computeSPMV(A, y)
+                        control_solution = control_solution.squeeze() if control_solution.dim() > 1 else control_solution
 
                         y = y.squeeze() if y.dim() > 1 else y
 
                         if not torch.allclose(y, y_original, atol=error_tolerance):
                             raise AssertionError(f"ComputeSPMV changed y")
                         
+
                         if not torch.allclose(tested_solution, control_solution, atol=error_tolerance):
-                            print(A.to_dense())
-                            print(y)
+                            # print(A.to_dense())
+                            # print(y)
+                            
+                            print(f"tested solution size: {tested_solution.size()}")
+                            print(f"control solution size: {control_solution.size()}")
+
                             print_differeing_vectors(tested_solution, control_solution)
                             raise AssertionError(f"Error in BasicStencil computeSPMV for size {size}, version BasicStencil")
                         elif debug:
-                            print(f"BasicStencil SPMV: BaseTorch and Matlab agree for size {size}", flush=True)
+                            print(f"BasicStencil SPMV: BasicStencil and Matlab agree for size {size}", flush=True)
                         
                    
                     else:
@@ -265,39 +271,39 @@ def MG_mini_test():
 #################################################################################################################
 # This part allows us to run the tests from the command line
 #################################################################################################################
-sizes =[
-    (2, 2, 2),
-    (8, 8, 8),
-    (16, 16, 16),
-    (32, 32, 32),
-    (64, 64, 64),
-    (128, 128, 128),
-]
+# sizes =[
+#     # (2, 2, 2),
+#     (8, 8, 8),
+#     (16, 16, 16),
+#     (32, 32, 32),
+#     (64, 64, 64),
+#     (128, 128, 128),
+# ]
 
-versions = [
-    "BaseTorch",
-    # "MatlabReference",
-    "BasicStencil",
-]
+# versions = [
+#     "BaseTorch",
+#     # "MatlabReference",
+#     "BasicStencil",
+# ]
 
-methods = [
-    # "computeSymGS",
-    "computeSPMV",
-    # "computeRestriction",
-    # "computeMG",
-    # "computeProlongation",
-    # "computeCG",
-    # "computeWAXPBY",
-    # "computeDot",
-]
+# methods = [
+#     # "computeSymGS",
+#     "computeSPMV",
+#     # "computeRestriction",
+#     # "computeMG",
+#     # "computeProlongation",
+#     # "computeCG",
+#     # "computeWAXPBY",
+#     # "computeDot",
+# ]
 
-matrix_types = [
-    "3d_27pt"
-]
+# matrix_types = [
+#     "3d_27pt"
+# ]
 
 # if "computeSymGS" in methods:
 #     symGS_mini_test(versions)
-test(sizes, matrix_types, methods, versions)
+# test(sizes, matrix_types, methods, versions)
 
 #################################################################################################################
 

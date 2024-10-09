@@ -28,6 +28,7 @@ sizes_to_plot =[
 versions_to_plot = [
     "BaseTorch",
     "MatlabReference",
+    "BasicStencil",
 ]
 
 y_axis_to_plot = [
@@ -243,14 +244,18 @@ def plot_x_options(y_axis, y_axis_scale, save_path):
         current_dense_save_path = os.path.join(save_path, version + "_denseOps_grouped_by_sizes.png")
         current_sparse_save_path = os.path.join(save_path, version + "_sparseOps_grouped_by_sizes.png")
 
-        plot_data(sparse_data, x = 'Matrix Dimensions, Matrix Density', x_order = current_sparse_sizes, y = y_axis, hue = 'Method', hue_order = current_sparse_methods, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
-        plot_data(dense_data, x = 'Matrix Size', x_order = current_dense_sizes, y = y_axis, hue = 'Method', hue_order = current_dense_methods, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale)
+        if not sparse_data.empty:
+            plot_data(sparse_data, x = 'Matrix Dimensions, Matrix Density', x_order = current_sparse_sizes, y = y_axis, hue = 'Method', hue_order = current_sparse_methods, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
+        if not dense_data.empty:
+            plot_data(dense_data, x = 'Matrix Size', x_order = current_dense_sizes, y = y_axis, hue = 'Method', hue_order = current_dense_methods, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale)
 
         current_dense_save_path = os.path.join(save_path, version + "_denseOps_grouped_by_methods.png")
         current_sparse_save_path = os.path.join(save_path, version + "_sparseOps_grouped_by_methods.png")
 
-        plot_data(sparse_data, x = 'Method', x_order = current_sparse_methods, y = y_axis, hue = 'Matrix Dimensions, Matrix Density', hue_order = current_sparse_sizes, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
-        plot_data(dense_data, x = 'Method', x_order = current_dense_methods, y = y_axis, hue = 'Matrix Size', hue_order = current_dense_sizes, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale)
+        if not sparse_data.empty:
+            plot_data(sparse_data, x = 'Method', x_order = current_sparse_methods, y = y_axis, hue = 'Matrix Dimensions, Matrix Density', hue_order = current_sparse_sizes, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
+        if not dense_data.empty:
+            plot_data(dense_data, x = 'Method', x_order = current_dense_methods, y = y_axis, hue = 'Matrix Size', hue_order = current_dense_sizes, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale)
 
 
     for method in methods_to_plot:
@@ -260,17 +265,17 @@ def plot_x_options(y_axis, y_axis_scale, save_path):
         
         # we might want to sort these in accordance with the sorting instructions!
         current_versions = [v for v in versions_to_plot if v in data['Version'].unique()]
-        current_dense_sizes = [s for s in sizes_to_plot if s in dense_data['Matrix Size'].unique()]
-        current_sparse_sizes = generate_order(sparse_data['Matrix Dimensions, Matrix Density'].unique())
+        current_dense_sizes = [s for s in sizes_to_plot if s in data['Matrix Size'].unique()]
+        current_sparse_sizes = generate_order(data['Matrix Dimensions, Matrix Density'].unique())
         current_title = method
         current_save_path = os.path.join(save_path, method + "_grouped_by_versions.png")
 
-        if method in sparse_ops_to_plot:
+        if method in sparse_ops_to_plot and not data.empty:
             plot_data(data, x = 'Matrix Dimensions, Matrix Density', x_order = current_sparse_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale)
-        if method in dense_ops_to_plot:
+        if method in dense_ops_to_plot and not data.empty:
             plot_data(data, x = 'Matrix Size', x_order = current_dense_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale)
 
-        # careful, this was not updated to distinguish between sparse and dense operations
+        # careful, the following was not updated to distinguish between sparse and dense operations
         # current_save_path = os.path.join(save_path, method + "_grouped_by_sizes.png")
         # plot_data(data, x = 'Matrix Dimensions', x_order = current_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale)
     
@@ -293,8 +298,10 @@ def plot_x_options(y_axis, y_axis_scale, save_path):
         current_dense_save_path = os.path.join(save_path, size + "_denseOps_grouped_by_versions.png")
         current_sparse_save_path = os.path.join(save_path, size + "_sparseOps_grouped_by_versions.png")
 
-        plot_data(dense_data, x = 'Method', x_order = current_dense_methods, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale)
-        plot_data(sparse_data, x = 'Method', x_order = current_sparse_methods, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
+        if not sparse_data.empty:
+            plot_data(dense_data, x = 'Method', x_order = current_dense_methods, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale)
+        if not dense_data.empty:
+            plot_data(sparse_data, x = 'Method', x_order = current_sparse_methods, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
 
 for y_ax in y_axis_to_plot:
     if "linear" in y_axis_config_to_plot:

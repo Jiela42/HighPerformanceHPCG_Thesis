@@ -161,35 +161,35 @@ def computeCG(nx: int, ny: int, nz: int,
 #################################################################################################################
 # this is only a test thingy
 
-num = 2
+# num = 2
 
-A,y = generations.generate_torch_coo_problem(num,num,num)
-x = torch.zeros(num*num*num, device=device, dtype=torch.float64)
+# A,y = generations.generate_torch_coo_problem(num,num,num)
+# x = torch.zeros(num*num*num, device=device, dtype=torch.float64)
 
-vals = A.values()
-nnz = vals.size(0)
+# vals = A.values()
+# nnz = vals.size(0)
 
-sequential_values = torch.arange(1, nnz + 1, dtype=vals.dtype)
-new_A = torch.sparse_coo_tensor(A.indices(), sequential_values, A.size(), device=device)
-new_A = new_A.coalesce()
+# sequential_values = torch.arange(1, nnz + 1, dtype=vals.dtype)
+# new_A = torch.sparse_coo_tensor(A.indices(), sequential_values, A.size(), device=device)
+# new_A = new_A.coalesce()
 
-ones = torch.ones(num*num*num, device=device, dtype=torch.float64)
+# ones = torch.ones(num*num*num, device=device, dtype=torch.float64)
 
-print("generated problem, starting conversion")
-dense_A = convert_A_to_Band_matrix(num,num,num,new_A)
-print("conversion ended starting computation")
-computeSPMV(num,num,num,dense_A,ones,x)
-basicStencil_spmv = x.clone()
-BaseTorch.computeSPMV(num,num,num,new_A,ones,x)
-torch_spmv = x.clone()
+# print("generated problem, starting conversion")
+# dense_A = convert_A_to_Band_matrix(num,num,num,new_A)
+# print("conversion ended starting computation")
+# computeSPMV(num,num,num,dense_A,ones,x)
+# basicStencil_spmv = x.clone()
+# BaseTorch.computeSPMV(num,num,num,new_A,ones,x)
+# torch_spmv = x.clone()
 
-print(basicStencil_spmv)
-print(torch_spmv)
+# print(basicStencil_spmv)
+# print(torch_spmv)
 
-print("computed SPMV")
+# print("computed SPMV")
 
 # computeMG(num, num, num, A,y,x,0)
 # computeCG(num, num, num, A, y, x)
-print("computed CG")
+# print("computed CG")
 #################################################################################################################
 
