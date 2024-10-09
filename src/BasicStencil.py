@@ -16,7 +16,7 @@ num_pre_smoother_steps = 1
 num_post_smoother_steps = 1
 tolerance = 0.0
 max_iter = 50
-debug = False # this will also skip the preconditioning in the CG function
+debug = True # this will also skip the preconditioning in the CG function
 
 
 #################################################################################################################
@@ -104,8 +104,10 @@ def computeSPMV(nx: int, nz: int, ny: int,
                 i = ix + nx*iy + nx*ny*iz
                 for j_min_i, sx, sy, sz in offsets_in_matrix_sx_sy_sz:
                     j = i + j_min_i
+                    # if sx == 0 and sy == 0 and sz == 0:
+                    #     # print("meow")
                     # this is to make sure we don't go out of bounds on the vectors x & y
-                    if j > 0 and j < nx*ny*nz:
+                    if j >= 0 and j < nx*ny*nz:
                         y[i] += A[i, offsets_to_band_index[(sx, sy, sz)]] * x[j]
 
     return 0
@@ -159,20 +161,35 @@ def computeCG(nx: int, ny: int, nz: int,
 #################################################################################################################
 # this is only a test thingy
 
-# num = 2
+num = 2
 
+A,y = generations.generate_torch_coo_problem(num,num,num)
+x = torch.zeros(num*num*num, device=device, dtype=torch.float64)
 
+vals = A.values()
+nnz = vals.size(0)
 
-# A,y = generations.generate_torch_coo_problem(num,num,num)
-# x = torch.zeros(num*num*num, device=device, dtype=torch.float64)
-# print("generated problem, starting conversion")
-# dense_A = convert_A_to_Band_matrix(num,num,num,A)
-# print("conversion ended starting computation")
-# computeSPMV(num,num,num,dense_A,y,x)
-# print("computed SPMV")
+sequential_values = torch.arange(1, nnz + 1, dtype=vals.dtype)
+new_A = torch.sparse_coo_tensor(A.indices(), sequential_values, A.size(), device=device)
+new_A = new_A.coalesce()
+
+ones = torch.ones(num*num*num, device=device, dtype=torch.float64)
+
+print("generated problem, starting conversion")
+dense_A = convert_A_to_Band_matrix(num,num,num,new_A)
+print("conversion ended starting computation")
+computeSPMV(num,num,num,dense_A,ones,x)
+basicStencil_spmv = x.clone()
+BaseTorch.computeSPMV(num,num,num,new_A,ones,x)
+torch_spmv = x.clone()
+
+print(basicStencil_spmv)
+print(torch_spmv)
+
+print("computed SPMV")
 
 # computeMG(num, num, num, A,y,x,0)
 # computeCG(num, num, num, A, y, x)
-# print("computed CG")
+print("computed CG")
 #################################################################################################################
 
