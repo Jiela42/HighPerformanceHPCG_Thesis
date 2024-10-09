@@ -85,19 +85,23 @@ def computeSymGS(nx: int, nz: int, ny: int,
     return BaseTorch.computeSymGS(nx, nz, ny, A, r, x)
 
 def computeSPMV(nx: int, nz: int, ny: int,
-                A: torch.sparse.Tensor, x: torch.Tensor, y: torch.Tensor)-> int:
+                A: torch.Tensor, x: torch.Tensor, y: torch.Tensor)-> int:
     
     offsets_in_matrix_sx_sy_sz = [(sx + nx*sy + nx * ny* sz, sx, sy, sz) for sx, sy, sz in sx_sy_sz_offsets]
     
     # note: we added zero-padding to the matrix, therefore we don't have to check for the boundaries
+    # while that is true for the matrix, we still have to check for the boundaries of the vector
+
     for ix in range(nx):
         for iy in range(ny):
             for iz in range(nz):
                 i = ix + nx*iy + nx*ny*iz
                 for j_min_i, sx, sy, sz in offsets_in_matrix_sx_sy_sz:
                     j = i + j_min_i
-                    y[i] += A[i, offsets_to_band_index[(sx, sy, sz)]] * x[j]
- 
+                    # this is to make sure we don't go out of bounds on the vectors x & y
+                    if j > 0 and j < nx*ny*nz:
+                        y[i] += A[i, offsets_to_band_index[(sx, sy, sz)]] * x[j]
+
     return 0
 
 def computeRestriction(Afx: torch.Tensor, rf: torch.Tensor,
@@ -149,16 +153,17 @@ def computeCG(nx: int, ny: int, nz: int,
 #################################################################################################################
 # this is only a test thingy
 
-num = 8
+# num = 2
 
 
-A,y = generations.generate_torch_coo_problem(num,num,num)
-x = torch.zeros(num*num*num, device=device, dtype=torch.float64)
-print("generated problem, starting conversion")
-A = convert_A_to_Band_matrix(num,num,num,A)
-print("conversion ended starting computation")
-computeSPMV(num,num,num,A,y,x)
-print("computed SPMV")
+
+# A,y = generations.generate_torch_coo_problem(num,num,num)
+# x = torch.zeros(num*num*num, device=device, dtype=torch.float64)
+# print("generated problem, starting conversion")
+# dense_A = convert_A_to_Band_matrix(num,num,num,A)
+# print("conversion ended starting computation")
+# computeSPMV(num,num,num,dense_A,y,x)
+# print("computed SPMV")
 
 # computeMG(num, num, num, A,y,x,0)
 # computeCG(num, num, num, A, y, x)
