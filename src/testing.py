@@ -2,13 +2,15 @@ import torch
 from typing import List, Tuple
 
 import torch.cuda
-import generations
-import matlab_reference
-import BaseTorch
 import numpy as np
 import random
 import os
 import glob
+
+import generations
+import matlab_reference
+import BaseTorch
+import BasicStencil
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 error_tolerance = 1e-9
@@ -67,94 +69,128 @@ def test(sizes: List[Tuple[int, int, int]], matrix_types: List[str], methods: Li
         x = torch.zeros(size[0]*size[1]*size[2], device=device, dtype=torch.float64)
         a,b = torch.rand(size[0]*size[1]*size[2], device=device, dtype=torch.float64), torch.rand(size[0]*size[1]*size[2], device=device, dtype=torch.float64)
         
-        if "BaseTorch" in Versions:
+        for v in Versions:
 
-            if "computeCG" in methods:
-                BaseTorch.computeCG_no_preconditioning(size[0], size[1], size[2], A, b, x)
-                tested_x = x.clone()
-                matlab_reference.computeCG(A, b, x)
-                control_x = x.clone()
-                
-                if not torch.allclose(y, y_original, atol=error_tolerance):
-                    raise AssertionError(f"BaseTorch ComputeCG changed y")
-                
-                if debug:
-                    if not torch.allclose(A.to_dense(), A_original.to_dense(), atol=error_tolerance):
-                        raise AssertionError(f"BaseTorch ComputeCG changed A")
+            if v == "BaseTorch":
+                for m in methods:
+                    if m == "computeCG":
 
-                if not torch.allclose(tested_x, control_x, atol=error_tolerance):
-                    print_differeing_vectors(tested_x, control_x)
-                    raise AssertionError(f"Error in BaseTorch computeCG for size {size}, version BaseTorch")
+                        BaseTorch.computeCG_no_preconditioning(size[0], size[1], size[2], A, b, x)
+                        tested_x = x.clone()
+                        matlab_reference.computeCG(A, b, x)
+                        control_x = x.clone()
+                        
+                        if not torch.allclose(y, y_original, atol=error_tolerance):
+                            raise AssertionError(f"BaseTorch ComputeCG changed y")
+                        
+                        if debug:
+                            if not torch.allclose(A.to_dense(), A_original.to_dense(), atol=error_tolerance):
+                                raise AssertionError(f"BaseTorch ComputeCG changed A")
 
-            
-            # if "computeMG" in methods:
-            #     BaseTorch.computeMG(size[0], size[1], size[2], A, y, x, 0)
-            #     tested_y = x.clone()
-            #     control_y = matlab_reference.computeMG(A, y)
+                        if not torch.allclose(tested_x, control_x, atol=error_tolerance):
+                            print_differeing_vectors(tested_x, control_x)
+                            raise AssertionError(f"Error in BaseTorch computeCG for size {size}, version BaseTorch")
 
-            #     if not torch.allclose(tested_y, control_y, atol=error_tolerance):
-            #         print_differeing_vectors(tested_y, control_y)
-            #         raise AssertionError(f"Error in BaseTorch computeMG for size {size}, version BaseTorch")
-
-            if "computeDot" in methods:
-                tested_dot = BaseTorch.computeDot(a, b)
-                control_dot = matlab_reference.computeDot(a, b)
-
-                if not torch.allclose(tested_dot, control_dot, atol=error_tolerance):
-                    print_differeing_vectors(tested_dot, control_dot)
-                    raise AssertionError(f"Error in BaseTorch computeDot for size {size}, version BaseTorch")
-            
-            if "computeSymGS" in methods:
-
-                control_x = matlab_reference.computeSymGS(A, y)
-                BaseTorch.computeSymGS(size[0], size[1], size[2], A, y, x)
-                tested_x = x.clone()
-
-                if not torch.allclose(y, y_original, atol=error_tolerance):
-                    raise AssertionError(f"BaseTorch ComputeSymGS changed y")
-                
-                if debug:
-                    if not torch.allclose(A.to_dense(), A_original.to_dense(), atol=error_tolerance):
-                        raise AssertionError(f"BaseTorch ComputeSymGS changed A")
-
-                if not torch.allclose(tested_x, control_x, atol=error_tolerance):
-                    print_differeing_vectors(tested_x, control_x)
-                    raise AssertionError(f"(x comparison) Error in BaseTorch computeSymGS for size {size}, version BaseTorch")
-                elif debug:
-                    print("BaseTorch SymGS: BaseTorch and Matlab agree")
                     
+                    elif m == "computeDot":
+                        tested_dot = BaseTorch.computeDot(a, b)
+                        control_dot = matlab_reference.computeDot(a, b)
 
-            if "computeSPMV" in methods:
-                BaseTorch.computeSPMV(size[0], size[1], size[2], A, y, x)
-                tested_solution = x.clone()
+                        if not torch.allclose(tested_dot, control_dot, atol=error_tolerance):
+                            print_differeing_vectors(tested_dot, control_dot)
+                            raise AssertionError(f"Error in BaseTorch computeDot for size {size}, version BaseTorch")
+                    
+                    elif m == "computeSymGS":
 
-                y = y.unsqueeze(1) if y.dim() == 1 else y                
-                control_solution = matlab_reference.computeSPMV(A, y)
+                        control_x = matlab_reference.computeSymGS(A, y)
+                        BaseTorch.computeSymGS(size[0], size[1], size[2], A, y, x)
+                        tested_x = x.clone()
 
-                y = y.squeeze() if y.dim() > 1 else y
-                if not torch.allclose(y, y_original, atol=error_tolerance):
-                    raise AssertionError(f"ComputeSPMV changed y")
+                        if not torch.allclose(y, y_original, atol=error_tolerance):
+                            raise AssertionError(f"BaseTorch ComputeSymGS changed y")
+                        
+                        if debug:
+                            if not torch.allclose(A.to_dense(), A_original.to_dense(), atol=error_tolerance):
+                                raise AssertionError(f"BaseTorch ComputeSymGS changed A")
 
-                control_solution = control_solution.squeeze() if control_solution.dim() > 1 else control_solution
-                tested_solution = tested_solution.squeeze() if tested_solution.dim() > 1 else tested_solution
+                        if not torch.allclose(tested_x, control_x, atol=error_tolerance):
+                            print_differeing_vectors(tested_x, control_x)
+                            raise AssertionError(f"(x comparison) Error in BaseTorch computeSymGS for size {size}, version BaseTorch")
+                        elif debug:
+                            print("BaseTorch SymGS: BaseTorch and Matlab agree")
 
-                if not torch.allclose(tested_solution, control_solution, atol=error_tolerance):
-                    raise AssertionError(f"Error in BaseTorch computeSPMV for size {size}, version BaseTorch")
-                elif debug:
-                    print("BaseTorch SPMV: BaseTorch and Matlab agree", flush=True)
-            
-            if "computeWAXPBY" in methods:
-                alpha, beta = random.random(), random.random()
-                BaseTorch.computeWAXPBY(alpha, a, beta, b, x)
-                tested_solution = x.clone()
+                    elif m == "computeSPMV":
+                        BaseTorch.computeSPMV(size[0], size[1], size[2], A, y, x)
+                        tested_solution = x.clone()
 
-                control_solution = matlab_reference.computeWAXPBY(alpha, a, beta, b)
+                        y = y.unsqueeze(1) if y.dim() == 1 else y                
+                        control_solution = matlab_reference.computeSPMV(A, y)
 
-                if not torch.allclose(tested_solution, control_solution, atol=error_tolerance):
-                    print_differeing_vectors(tested_solution, control_solution)
-                    raise AssertionError(f"Error in BaseTorch computeWAXPBY for size {size}, version BaseTorch")
-                elif debug:
-                    print("BaseTorch WAXPBY: BaseTorch and Matlab agree", flush=True)
+                        y = y.squeeze() if y.dim() > 1 else y
+                        if not torch.allclose(y, y_original, atol=error_tolerance):
+                            raise AssertionError(f"ComputeSPMV changed y")
+
+                        control_solution = control_solution.squeeze() if control_solution.dim() > 1 else control_solution
+                        tested_solution = tested_solution.squeeze() if tested_solution.dim() > 1 else tested_solution
+
+                        if not torch.allclose(tested_solution, control_solution, atol=error_tolerance):
+                            raise AssertionError(f"Error in BaseTorch computeSPMV for size {size}, version BaseTorch")
+                        elif debug:
+                            print("BaseTorch SPMV: BaseTorch and Matlab agree", flush=True)
+                    
+                    elif m == "computeWAXPBY":
+                        alpha, beta = random.random(), random.random()
+                        BaseTorch.computeWAXPBY(alpha, a, beta, b, x)
+                        tested_solution = x.clone()
+
+                        control_solution = matlab_reference.computeWAXPBY(alpha, a, beta, b)
+
+                        if not torch.allclose(tested_solution, control_solution, atol=error_tolerance):
+                            print_differeing_vectors(tested_solution, control_solution)
+                            raise AssertionError(f"Error in BaseTorch computeWAXPBY for size {size}, version BaseTorch")
+                        elif debug:
+                            print("BaseTorch WAXPBY: BaseTorch and Matlab agree", flush=True)
+                    
+                    elif m == "computeMG":
+                        MG_mini_test()
+                    
+                    else:
+                        print(f"WARNING: Method {m} not implemented in BaseTorch")
+
+            elif v == "BasicStencil":
+                for m in methods:
+
+                    A, y = generations.generate_torch_coo_problem(size[0], size[1], size[2])
+                    x = torch.zeros(size[0]*size[1]*size[2], device=device, dtype=torch.float64)
+                    A_banded = BasicStencil.convert_A_to_Band_matrix(size[0], size[1], size[2], A)
+
+                    if m == "computeSPMV":
+
+                        BasicStencil.computeSPMV(size[0], size[1], size[2], A_banded, y, x)
+                        tested_solution = x.clone()
+
+                        y = y.unsqueeze(1) if y.dim() == 1 else y
+                        control_solution = matlab_reference.computeSPMV(A, y)
+
+                        y = y.squeeze() if y.dim() > 1 else y
+
+                        if not torch.allclose(y, y_original, atol=error_tolerance):
+                            raise AssertionError(f"ComputeSPMV changed y")
+                        
+                        if not torch.allclose(tested_solution, control_solution, atol=error_tolerance):
+                            print(A.to_dense())
+                            print(y)
+                            print_differeing_vectors(tested_solution, control_solution)
+                            raise AssertionError(f"Error in BasicStencil computeSPMV for size {size}, version BasicStencil")
+                        elif debug:
+                            print(f"BasicStencil SPMV: BaseTorch and Matlab agree for size {size}", flush=True)
+                        
+                   
+                    else:
+                        print(f"WARNING: Method {m} not implemented in BasicStencil")
+            else:
+                print(f"WARNING: Version {v} not implemented for testing")
+                    
 
     print("----ALL TESTS PASSED----")
 
@@ -192,7 +228,7 @@ def symGS_mini_test(versions):
             print("SymGS_Mini_test: greg and BaseTorch are the same", flush=True)
 
 # this function tests the MG function based on outputs we got from the original HPCG code
-def MG_mini_test(versions):
+def MG_mini_test():
 
     path_to_testcases = "../hpcg_output"
 
@@ -215,48 +251,42 @@ def MG_mini_test(versions):
         x_overlap = torch.tensor(np.loadtxt(x_overlap_path), device=device, dtype=torch.float64)
         x_overlap_after_mg = torch.tensor(np.loadtxt(x_overlap_after_mg_path), device=device, dtype=torch.float64)
 
-        if "BaseTorch" in versions:
-            empty_x = torch.zeros(nx*ny*nz, device=device, dtype=torch.float64)
-            BaseTorch.computeMG(nx, ny, nz, A, b_computed, empty_x, 0)
-            x_BaseTorch = empty_x.clone()
+        # we only test baseTorch with this minitest, every other version of MG is compared to BaseTorch
+        empty_x = torch.zeros(nx*ny*nz, device=device, dtype=torch.float64)
+        BaseTorch.computeMG(nx, ny, nz, A, b_computed, empty_x, 0)
+        x_BaseTorch = empty_x.clone()
 
-            if not torch.allclose(x_BaseTorch, x_overlap_after_mg, atol=error_tolerance):
-                print_differeing_vectors(x_BaseTorch, x_overlap_after_mg)
-                raise AssertionError(f"MG_Mini_test: BaseTorch and original HPCG are different, for dimensions: {nx}x{ny}x{nz}")
-            elif debug:
-                print(f"MG_Mini_test: BaseTorch and original HPCG are the same for dimensions: {nx}x{ny}x{nz}", flush=True)
-
-        
-
-    # read the testcases from the hpcg_output folder
-
-
-    # if "BaseTorch" in versions:
-    #     # 
+        if not torch.allclose(x_BaseTorch, x_overlap_after_mg, atol=error_tolerance):
+            print_differeing_vectors(x_BaseTorch, x_overlap_after_mg)
+            raise AssertionError(f"MG_Mini_test: BaseTorch and original HPCG are different, for dimensions: {nx}x{ny}x{nz}")
+        elif debug:
+            print(f"MG_Mini_test: BaseTorch and original HPCG are the same for dimensions: {nx}x{ny}x{nz}", flush=True)
 
 #################################################################################################################
 # This part allows us to run the tests from the command line
 #################################################################################################################
 sizes =[
+    (2, 2, 2),
     (8, 8, 8),
     (16, 16, 16),
     (32, 32, 32),
-    # (64, 64, 64),
-    # (128, 128, 128),
+    (64, 64, 64),
+    (128, 128, 128),
 ]
 
 versions = [
     "BaseTorch",
     # "MatlabReference",
+    "BasicStencil",
 ]
 
 methods = [
     # "computeSymGS",
-    # "computeSPMV",
+    "computeSPMV",
     # "computeRestriction",
     # "computeMG",
     # "computeProlongation",
-    "computeCG",
+    # "computeCG",
     # "computeWAXPBY",
     # "computeDot",
 ]
@@ -265,12 +295,9 @@ matrix_types = [
     "3d_27pt"
 ]
 
-if "computeSymGS" in methods:
-    symGS_mini_test(versions)
-# test(sizes, matrix_types, methods, versions)
-
-if "computeMG" in methods:
-    MG_mini_test(versions)
+# if "computeSymGS" in methods:
+#     symGS_mini_test(versions)
+test(sizes, matrix_types, methods, versions)
 
 #################################################################################################################
 
@@ -278,8 +305,6 @@ if "computeMG" in methods:
 def run_tests(sizes, matrix_types, methods, versions):
     if "computeSymGS" in methods:
         symGS_mini_test(versions)
-    if "computeMG" in methods:
-        MG_mini_test(versions)
     test(sizes, matrix_types, methods, versions)
 
 

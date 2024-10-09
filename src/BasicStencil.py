@@ -74,7 +74,6 @@ def convert_A_to_Band_matrix(nx: int, ny: int, nz: int, A: torch.sparse.Tensor) 
     
     return band_matrix
 
-
 def computeDot(x: torch.tensor, y: torch.tensor) -> float:
     print(f"WARNING: computeDot not implemented for {version_name}, using BaseTorch implementation")
     return BaseTorch.computeDot(x, y)
@@ -87,10 +86,17 @@ def computeSymGS(nx: int, nz: int, ny: int,
 def computeSPMV(nx: int, nz: int, ny: int,
                 A: torch.Tensor, x: torch.Tensor, y: torch.Tensor)-> int:
     
+    """
+    computes Ax = y
+    """
+    
     offsets_in_matrix_sx_sy_sz = [(sx + nx*sy + nx * ny* sz, sx, sy, sz) for sx, sy, sz in sx_sy_sz_offsets]
     
     # note: we added zero-padding to the matrix, therefore we don't have to check for the boundaries
     # while that is true for the matrix, we still have to check for the boundaries of the vector
+
+    # set y to zero
+    y.zero_()
 
     for ix in range(nx):
         for iy in range(ny):
