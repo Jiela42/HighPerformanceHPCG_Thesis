@@ -16,7 +16,27 @@ num_pre_smoother_steps = 1
 num_post_smoother_steps = 1
 tolerance = 0.0
 max_iter = 50
-debug = True # this will also skip the preconditioning in the CG function
+debug = False # this will also skip the preconditioning in the CG function
+
+
+#################################################################################################################
+# Static util datastructure for the banded matrix
+#################################################################################################################
+# define the offsets for the bands
+offsets_to_band_index = {
+        (-1, -1, -1): 0, (0, -1, -1): 1, (1, -1, -1): 2,
+        (-1, 0, -1): 3, (0, 0, -1): 4, (1, 0, -1): 5,
+        (-1, 1, -1): 6, (0, 1, -1): 7, (1, 1, -1): 8,
+        (-1, -1, 0): 9, (0, -1, 0): 10, (1, -1, 0): 11,
+        (-1, 0, 0): 12, (0, 0, 0): 13, (1, 0, 0): 14,
+        (-1, 1, 0): 15, (0, 1, 0): 16, (1, 1, 0): 17,
+        (-1, -1, 1): 18, (0, -1, 1): 19, (1, -1, 1): 20,
+        (-1, 0, 1): 21, (0, 0, 1): 22, (1, 0, 1): 23,
+        (-1, 1, 1): 24, (0, 1, 1): 25, (1, 1, 1): 26
+    }
+
+sx_sy_sz_offsets = list(offsets_to_band_index.keys())
+#################################################################################################################
 
 def convert_A_to_Band_matrix(nx: int, ny: int, nz: int, A: torch.sparse.Tensor) -> torch.Tensor:
     """
@@ -34,26 +54,10 @@ def convert_A_to_Band_matrix(nx: int, ny: int, nz: int, A: torch.sparse.Tensor) 
     """
     band_matrix = torch.zeros(nx*ny*nz, 27, device=device, dtype=torch.float64)
 
-    # define the offsets for the bands
-    offsets_to_band_index = {
-        (-1, -1, -1): 0, (0, -1, -1): 1, (1, -1, -1): 2,
-        (-1, 0, -1): 3, (0, 0, -1): 4, (1, 0, -1): 5,
-        (-1, 1, -1): 6, (0, 1, -1): 7, (1, 1, -1): 8,
-        (-1, -1, 0): 9, (0, -1, 0): 10, (1, -1, 0): 11,
-        (-1, 0, 0): 12, (0, 0, 0): 13, (1, 0, 0): 14,
-        (-1, 1, 0): 15, (0, 1, 0): 16, (1, 1, 0): 17,
-        (-1, -1, 1): 18, (0, -1, 1): 19, (1, -1, 1): 20,
-        (-1, 0, 1): 21, (0, 0, 1): 22, (1, 0, 1): 23,
-        (-1, 1, 1): 24, (0, 1, 1): 25, (1, 1, 1): 26
-    }
-
-    sx_sy_sz_offsets = list(offsets_to_band_index.keys())
-
-    offsets_in_matrix_sx_sy_sz = [(sx + nx*sy + nx * ny* sz, sx, sy, sz) for sx, sy, sz in sx_sy_sz_offsets]
-
     indices = A.indices()
     values = A.values()
 
+    offsets_in_matrix_sx_sy_sz = [(sx + nx*sy + nx * ny* sz, sx, sy, sz) for sx, sy, sz in sx_sy_sz_offsets]
 
     # we iterate over the matrix
     for elem in range(indices.size(1)):
@@ -83,20 +87,18 @@ def computeSymGS(nx: int, nz: int, ny: int,
 def computeSPMV(nx: int, nz: int, ny: int,
                 A: torch.sparse.Tensor, x: torch.Tensor, y: torch.Tensor)-> int:
     
-    # inner nodes
-    for ix in range(1, nx-1):
-        for iy in range(1, ny-1):
-            for iz in range(1, nz-1):
-                i = ix + nx*iy + nx*ny*iz
-                for sz in range(-1, 2):
-                    for sy in range(-1, 2):
-                        for sx in range(-1, 2):
-                            j = ix+sx + nx*(iy+sy) + nx*ny*(iz+sz)
-                            y[i] += A[i,j] * x[j]
-                
+    offsets_in_matrix_sx_sy_sz = [(sx + nx*sy + nx * ny* sz, sx, sy, sz) for sx, sy, sz in sx_sy_sz_offsets]
     
-    print(f"WARNING: computeSPMV not implemented for {version_name}, using BaseTorch implementation")
-    return BaseTorch.computeSPMV(nx, nz, ny, A, x, y)
+    # note: we added zero-padding to the matrix, therefore we don't have to check for the boundaries
+    for ix in range(nx):
+        for iy in range(ny):
+            for iz in range(nz):
+                i = ix + nx*iy + nx*ny*iz
+                for j_min_i, sx, sy, sz in offsets_in_matrix_sx_sy_sz:
+                    j = i + j_min_i
+                    y[i] += A[i, offsets_to_band_index[(sx, sy, sz)]] * x[j]
+ 
+    return 0
 
 def computeRestriction(Afx: torch.Tensor, rf: torch.Tensor,
                        nc: int, f2c: torch.Tensor, rc: torch.Tensor)-> int:
@@ -147,11 +149,16 @@ def computeCG(nx: int, ny: int, nz: int,
 #################################################################################################################
 # this is only a test thingy
 
-# num = 8
+num = 8
 
 
-# A,y = generations.generate_torch_coo_problem(num,num,num)
-# x = torch.zeros(num*num*num, device=device, dtype=torch.float64)
+A,y = generations.generate_torch_coo_problem(num,num,num)
+x = torch.zeros(num*num*num, device=device, dtype=torch.float64)
+print("generated problem, starting conversion")
+A = convert_A_to_Band_matrix(num,num,num,A)
+print("conversion ended starting computation")
+computeSPMV(num,num,num,A,y,x)
+print("computed SPMV")
 
 # computeMG(num, num, num, A,y,x,0)
 # computeCG(num, num, num, A, y, x)
