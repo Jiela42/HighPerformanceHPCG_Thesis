@@ -32,14 +32,42 @@ def convert_A_to_Band_matrix(nx: int, ny: int, nz: int, A: torch.sparse.Tensor) 
     torch.Tensor: The band matrix containing 9 bands.
                 band_matrix[0] is the first row
     """
-    band_matrix = torch.zeros(nx*ny*nz, 9, device=device, dtype=torch.float64)
+    band_matrix = torch.zeros(nx*ny*nz, 27, device=device, dtype=torch.float64)
+
+    # define the offsets for the bands
+    offsets_to_band_index = {
+        (-1, -1, -1): 0, (0, -1, -1): 1, (1, -1, -1): 2,
+        (-1, 0, -1): 3, (0, 0, -1): 4, (1, 0, -1): 5,
+        (-1, 1, -1): 6, (0, 1, -1): 7, (1, 1, -1): 8,
+        (-1, -1, 0): 9, (0, -1, 0): 10, (1, -1, 0): 11,
+        (-1, 0, 0): 12, (0, 0, 0): 13, (1, 0, 0): 14,
+        (-1, 1, 0): 15, (0, 1, 0): 16, (1, 1, 0): 17,
+        (-1, -1, 1): 18, (0, -1, 1): 19, (1, -1, 1): 20,
+        (-1, 0, 1): 21, (0, 0, 1): 22, (1, 0, 1): 23,
+        (-1, 1, 1): 24, (0, 1, 1): 25, (1, 1, 1): 26
+    }
+
+    sx_sy_sz_offsets = list(offsets_to_band_index.keys())
+
+    offsets_in_matrix_sx_sy_sz = [(sx + nx*sy + nx * ny* sz, sx, sy, sz) for sx, sy, sz in sx_sy_sz_offsets]
 
     indices = A.indices()
     values = A.values()
 
-    # we need to figure out how to map from A to the band matrix based on nx, ny, nz
 
+    # we iterate over the matrix
+    for elem in range(indices.size(1)):
+        i = indices[0, elem].item()
+        j = indices[1, elem].item()
+        value = values[elem].item()
 
+        # find the right band and update the banded matrix
+        for band_offset, sx, sy, sz in offsets_in_matrix_sx_sy_sz:
+            if j == i + band_offset:
+                band_index = offsets_to_band_index[(sx, sy, sz)]
+                band_matrix[i, band_index] = value
+                break
+    
     return band_matrix
 
 
