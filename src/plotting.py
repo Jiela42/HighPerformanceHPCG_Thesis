@@ -7,7 +7,7 @@ data_path = "../data/"
 plot_path = "../plots/"
 
 methods_to_plot = [
-    "CG",
+    # "CG",
     "MG",
     "SymGS",
     "SPMV",

@@ -12,29 +12,6 @@ num_post_smoother_steps = 1
 tolerance = 0.0
 max_iter = 50
 
-def computeSPMV_stencil(nx: int, ny: int, nz: int, y: torch.tensor, x: torch.tensor) -> int:
-
-    # iterate over the rows of the matrix
-    for ix in range(nx):
-        for iy in range(ny):
-            for iz in range(nz):
-                i = ix + nx*iy + nx*ny*iz
-                col_idx_i = []
-                # iterate over the neighbours
-                for sz in range(-1, 2):
-                    if iz+sz > -1 and iz+sz < nz:
-                        for sy in range(-1, 2):
-                            if iy+sy > -1 and iy+sy < ny:
-                                for sx in range(-1, 2):
-                                    if ix+sx > -1 and ix+sx < nx:
-                                        j = ix+sx + nx*(iy+sy) + nx*ny*(iz+sz)
-                                        if i == j:
-                                            # Ax = y
-                                            y[i] += 26.0 * x[j]
-                                        else:
-                                            y[i] -= 1.0 * x[j]
-    return 0
-
 def computeDot(x: torch.tensor, y: torch.tensor) -> float:
     return torch.dot(x, y)
 
@@ -313,11 +290,13 @@ def computeCG(nx: int, ny: int, nz: int,
 #################################################################################################################
 # this is only a test thingy
 
-# num = 8
+num = 8
 
 
-# A,y = generations.generate_torch_coo_problem(num,num,num)
-# x = torch.zeros(num*num*num, device=device, dtype=torch.float64)
+A,y = generations.generate_torch_coo_problem(num,num,num)
+x = torch.zeros(num*num*num, device=device, dtype=torch.float64)
+
+computeSPMV(num, num, num, A, y, x)
 
 # computeMG(num, num, num, A,y,x,0)
 # computeCG(num, num, num, A, y, x)

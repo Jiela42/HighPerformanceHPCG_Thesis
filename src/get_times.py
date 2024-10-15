@@ -14,17 +14,17 @@ do_tests = False
 debug = True
 
 sizes =[
-    # (8, 8, 8),
-    # (16, 16, 16),
-    # (32, 32, 32),
-    (64, 64, 64),
-    (128, 128, 128),
+    (8, 8, 8),
+    (16, 16, 16),
+    (32, 32, 32),
+    # (64, 64, 64),
+    # (128, 128, 128),
 ]
 
 versions = [
     "BaseTorch",
-    "MatlabReference",
-    "BasicStencil",
+    # "MatlabReference",
+    # "BasicStencil",
 ]
 
 methods = [

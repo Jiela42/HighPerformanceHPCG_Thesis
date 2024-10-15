@@ -1,6 +1,6 @@
 import numpy as np
-import scipy.sparse as sp
-from scipy.sparse import lil_matrix
+# import scipy.sparse as sp
+# from scipy.sparse import lil_matrix
 import torch
 from typing import Tuple
 
@@ -8,7 +8,7 @@ store = False
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def generate_torch_csr_problem(nx: int, ny: int, nz: int) -> Tuple[torch.sparse.Tensor, torch.Tensor]:
+def generate_torch_csr_problem(nx: int, ny: int, nz: int) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
 
     col_indices = []
     values = []
@@ -17,7 +17,7 @@ def generate_torch_csr_problem(nx: int, ny: int, nz: int) -> Tuple[torch.sparse.
     # (we get this by doing a prefix sum later ;))
     nnz_per_row = [0]
 
-    y = torch.zeros(nx*ny*nz)
+    y = torch.zeros(nx*ny*nz, device=device, dtype=torch.float64)
 
     for ix in range(nx):
         for iy in range(ny):
@@ -41,18 +41,15 @@ def generate_torch_csr_problem(nx: int, ny: int, nz: int) -> Tuple[torch.sparse.
                 nnz_per_row.append(nnz_i)
                 y[i] = 26.0 - nnz_i
 
-    col_indices = torch.tensor(col_indices)
-    values = torch.tensor(values)
+    col_indices = torch.tensor(col_indices, device=device, dtype=torch.int32)
+    values = torch.tensor(values, device=device, dtype=torch.float64)
 
 
     # turn nnz_per_row into a tensor and make it the row indices
-    nnz_per_row = torch.tensor(nnz_per_row)
-    crow_indices = torch.cumsum(nnz_per_row, dim=0)
+    nnz_per_row = torch.tensor(nnz_per_row, device=device, dtype=torch.int32)
+    crow_indices = torch.cumsum(nnz_per_row, dim=0, dtype=torch.int32)
 
-
-    A = torch.sparse_csr_tensor(crow_indices, col_indices, values, (nx*ny*nz, nx*ny*nz))
-
-    return A, y
+    return crow_indices, col_indices, values, y
 
 def generate_torch_coo_problem(nx: int, ny: int, nz: int) -> Tuple[torch.sparse.Tensor, torch.Tensor]:
 
@@ -92,6 +89,7 @@ def generate_torch_coo_problem(nx: int, ny: int, nz: int) -> Tuple[torch.sparse.
 
     return A, y
 
+"""
 def generate_lil_problem(nx: int, ny: int, nz: int) -> Tuple[lil_matrix, np.ndarray]:
 
     A = sp.lil_matrix((nx*ny*nz, nx*ny*nz))
@@ -115,6 +113,7 @@ def generate_lil_problem(nx: int, ny: int, nz: int) -> Tuple[lil_matrix, np.ndar
                 y[i] = 26.0 - A[i].sum()
     
     return A, y
+"""
 
 def generate_coarse_problem(nxf: int, nyf: int, nzf: int) -> Tuple[np.ndarray, torch.tensor, torch.tensor]:
 
@@ -147,6 +146,38 @@ def generate_coarse_problem(nxf: int, nyf: int, nzf: int) -> Tuple[np.ndarray, t
     Ac, yc = generate_torch_coo_problem(nxc, nyc, nzc)
 
     return f2c_op, Ac, yc
+
+def generate_coarse_csr_problem(nxf: int, nyf: int, nzf: int)-> Tuple[np.ndarray, torch.tensor, torch.tensor, torch.tensor, torch.tensor]:
+
+    if (nxf % 2 == 1 or nyf % 2 == 1 or nzf % 2 == 1):
+        raise ValueError("nx, ny, and nz must be even")
+
+    nxc = nxf // 2
+    nyc = nyf // 2
+    nzc = nzf // 2
+
+    f2c_op = torch.zeros(nxc*nyc*nzc, dtype=torch.int64, device=device)
+
+    coarse_num_rows = nxc * nyc * nzc
+
+    for izc in range(nzc):
+        izf = 2*izc
+        for iyc in range(nyc):
+            iyf = 2*iyc
+            for ixc in range(nxc):
+                ixf = 2*ixc
+                current_coarse_row = ixc + nxc*iyc + nxc*nyc*izc
+
+                current_fine_row = ixf + nxf*iyf + nxf*nyf*izf
+                f2c_op[current_coarse_row] = current_fine_row
+
+    # print(f2c_op)
+
+    # print("We generate the new problem using the COO format")
+    
+    Ac_row_ptr, Ac_col_ptr, Ac_vals, yc = generate_torch_csr_problem(nxc, nyc, nzc)
+
+    return f2c_op, Ac_row_ptr, Ac_col_ptr, Ac_vals, yc
 
 def generate_Dense_Problem(nx: int, ny: int, nz: int) -> Tuple[np.ndarray, np.ndarray]:
 
@@ -278,9 +309,9 @@ def One_D_example(n):
 
     print(A_inverse @ x)
 
-num = 4
+# num = 4
 
 # One_D_example(num)
 
-A, y = generate_Dense_Problem(num, num, num)
-generate_coarse_problem(num, num, num)
+# A, y = generate_Dense_Problem(num, num, num)
+# generate_coarse_problem(num, num, num)
