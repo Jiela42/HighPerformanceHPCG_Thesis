@@ -1,3 +1,4 @@
 # Ignore example matrices
 example_matrices/
 src/__pycache__/
+HPCGLib/build/
