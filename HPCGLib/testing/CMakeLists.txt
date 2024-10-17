@@ -8,4 +8,5 @@ add_executable(TestHPCGLib
 
 target_link_libraries(TestHPCGLib
     HPCGLib
+    MatrixLib
 )

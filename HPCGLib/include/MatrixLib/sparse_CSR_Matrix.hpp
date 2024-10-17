@@ -2,12 +2,14 @@
 #define SPARSE_CSR_MATRIX_HPP
 
 #include <vector>
+#include <string>
 
 template <typename T>
 class sparse_CSR_Matrix {
 public:
     sparse_CSR_Matrix();
     sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, T* vals, int* row_ptr, int* col_idx);
+    sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, std::vector<T> vals, std::vector<int> row_ptr, std::vector<int> col_idx);
 
     const std::vector<int>& get_row_ptr() const;
     const std::vector<int>& get_col_idx() const;
@@ -19,6 +21,8 @@ public:
     int get_nz() const;
     int get_nnz() const;
     T get_element(int i, int j) const;
+    void print() const;
+    void compare_to(const sparse_CSR_Matrix<T>& other) const;
 
 
 private:
@@ -28,9 +32,9 @@ private:
     int nnz;
     int num_rows;
     int num_cols;
-    std::vector<T> row_ptr;
-    std::vector<T> col_idx;
+    std::vector<int> row_ptr;
+    std::vector<int> col_idx;
     std::vector<T> values;
 };
 
-endif // SPARSE_CSR_MATRIX_HPP
+#endif // SPARSE_CSR_MATRIX_HPP
