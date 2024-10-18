@@ -17,4 +17,5 @@ target_link_libraries(
     HPCGLib
     TimingLib
     CUDA::cusparse
+    CUDA::cudart
 )

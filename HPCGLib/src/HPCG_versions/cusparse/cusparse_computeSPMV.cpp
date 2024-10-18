@@ -19,15 +19,19 @@ void cuSparse_Implementation<T>::cusparse_computeSPMV(const sparse_CSR_Matrix<T>
     int num_cols = A.get_num_cols();
     int nnz = A.get_nnz();
 
+    const int * A_row_ptr_data = A.get_row_ptr().data();
+    const int * A_col_idx_data = A.get_col_idx().data();
+    const double * A_values_data = A.get_values().data();
+
     CHECK_CUDA(cudaMalloc(&A_row_ptr_d, (num_rows + 1) * sizeof(int)));
     CHECK_CUDA(cudaMalloc(&A_col_idx_d, nnz * sizeof(int)));
     CHECK_CUDA(cudaMalloc(&A_values_d, nnz * sizeof(T)));
     CHECK_CUDA(cudaMalloc(&x_d, num_cols * sizeof(T)));
     CHECK_CUDA(cudaMalloc(&y_d, num_rows * sizeof(T)));
 
-    CHECK_CUDA(cudaMemcpy(A_row_ptr_d, A.row_ptr.data(), (num_rows + 1) * sizeof(int), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(A_col_idx_d, A.col_idx.data(), nnz * sizeof(int), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(A_values_d, A.values.data(), nnz * sizeof(T), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(A_row_ptr_d, A_row_ptr_data, (num_rows + 1) * sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(A_col_idx_d, A_col_idx_data, nnz * sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(A_values_d, A_values_data, nnz * sizeof(T), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(T), cudaMemcpyHostToDevice));
 
     cusparseHandle_t handle;
@@ -36,20 +40,27 @@ void cuSparse_Implementation<T>::cusparse_computeSPMV(const sparse_CSR_Matrix<T>
     T alpha = 1.0;
     T beta = 0.0;
 
-    cusparseMatDescr_t descr;
-    cusparseCreateMatDescr(&descr);
-    cusparseSetMatType(descr, CUSPARSE_MATRIX_TYPE_GENERAL);
-    cusparseSetMatIndexBase(descr, CUSPARSE_INDEX_BASE_ZERO);
 
-    if constexpr (std::is_same<T, double>::value) {
-        cusparseDcsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, num_rows, num_cols, nnz, &alpha, descr, A_values_d, A_row_ptr_d, A_col_idx_d, x_d, &beta, y_d);
-    } else if constexpr (std::is_same<T, float>::value) {
-        cusparseScsrmv(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, num_rows, num_cols, nnz, &alpha, descr, A_values_d, A_row_ptr_d, A_col_idx_d, x_d, &beta, y_d);
-    }
+    // Create the matrix and vector descriptors
+    cusparseSpMatDescr_t matA;
+    cusparseDnVecDescr_t vecX, vecY;
+    CHECK_CUSPARSE(cusparseCreateCsr(&matA, num_rows, num_cols, nnz, A_row_ptr_d, A_col_idx_d, A_values_d,
+                      CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I, CUSPARSE_INDEX_BASE_ZERO, CUDA_R_64F));
+    CHECK_CUSPARSE(cusparseCreateDnVec(&vecX, num_cols, x_d, CUDA_R_64F));
+    CHECK_CUSPARSE(cusparseCreateDnVec(&vecY, num_rows, y_d, CUDA_R_64F));
+
+    // Allocate buffer
+    size_t bufferSize = 0;
+    void* dBuffer = nullptr;
+    CHECK_CUSPARSE(cusparseSpMV_bufferSize(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, matA, vecX, &beta, vecY, CUDA_R_64F, CUSPARSE_SPMV_ALG_DEFAULT, &bufferSize));
+    CHECK_CUDA(cudaMalloc(&dBuffer, bufferSize));
+
+    // Perform SpMV
+    CHECK_CUSPARSE(cusparseSpMV(handle, CUSPARSE_OPERATION_NON_TRANSPOSE, &alpha, matA, vecX, &beta, vecY, CUDA_R_64F, CUSPARSE_SPMV_ALG_DEFAULT, dBuffer));
+
 
     CHECK_CUDA(cudaMemcpy(y.data(), y_d, num_rows * sizeof(T), cudaMemcpyDeviceToHost));
 
-    cusparseDestroyMatDescr(descr);
     cusparseDestroy(handle);
 
     CHECK_CUDA(cudaFree(A_row_ptr_d));
@@ -57,6 +68,11 @@ void cuSparse_Implementation<T>::cusparse_computeSPMV(const sparse_CSR_Matrix<T>
     CHECK_CUDA(cudaFree(A_values_d));
     CHECK_CUDA(cudaFree(x_d));
     CHECK_CUDA(cudaFree(y_d));
+    CHECK_CUDA(cudaFree(dBuffer));
+
+    CHECK_CUSPARSE(cusparseDestroySpMat(matA));
+    CHECK_CUSPARSE(cusparseDestroyDnVec(vecX));
+    CHECK_CUSPARSE(cusparseDestroyDnVec(vecY));
 }
 
 // Explicit template instantiation
