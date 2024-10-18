@@ -5,6 +5,9 @@
 #include <cusparse_v2.h>
 #include <iostream>
 
+#define MAX_THREADS_PER_BLOCK 1024
+#define MAX_NUM_BLOCKS 65535
+
 // Macro to check CUDA function calls
 #define CHECK_CUDA(call) \
     { \

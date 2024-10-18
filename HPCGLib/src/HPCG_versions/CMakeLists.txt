@@ -8,14 +8,17 @@ find_package(CUDAToolkit REQUIRED)
 include_directories(${CUDAToolkit_INCLUDE_DIRS})
 
 target_sources(HPCGLib PRIVATE
-    HPCG_original/HPCG_original_test.cpp
+    # HPCG_original/HPCG_original_test.cpp
 
     cusparse/cusparse_computeSPMV.cpp
+
+    naiveBanded/naiveBanded_compute_SPMV.cpp
 )
 
 target_link_libraries(
     HPCGLib
     TimingLib
     CUDA::cusparse
+    CUDA::cublas
     CUDA::cudart
 )
