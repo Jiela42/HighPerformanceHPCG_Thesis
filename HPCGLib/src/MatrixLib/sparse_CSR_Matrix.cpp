@@ -48,17 +48,17 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, std::ve
 }
 
 template <typename T>
-const std::vector<int>& sparse_CSR_Matrix<T>::get_row_ptr() const{
+const std::vector<int>& sparse_CSR_Matrix<T>::get_row_ptr(){
     return this->row_ptr;
 }
 
 template <typename T>
-const std::vector<int>& sparse_CSR_Matrix<T>::get_col_idx() const{
+const std::vector<int>& sparse_CSR_Matrix<T>::get_col_idx(){
     return this->col_idx;
 }
 
 template <typename T>
-const std::vector<T>& sparse_CSR_Matrix<T>::get_values() const{
+const std::vector<T>& sparse_CSR_Matrix<T>::get_values(){
     return this->values;
 }
 
@@ -102,7 +102,7 @@ T sparse_CSR_Matrix<T>::get_element(int row, int col) const{
             return this->values[i];
         }
     }
-    printf("WARNING Element row %d, col %d not found\n", row, col);
+    printf("WARNING Element row %d, col %d not found in sparse CSR Matrix\n", row, col);
     return T();
 }
 
@@ -128,7 +128,7 @@ void sparse_CSR_Matrix<T>::print() const{
 }
 
 template <typename T>
-void sparse_CSR_Matrix<T>::compare_to(const sparse_CSR_Matrix<T>& other) const{
+void sparse_CSR_Matrix<T>::compare_to(sparse_CSR_Matrix<T>& other) const{
 
     bool same = true;
 

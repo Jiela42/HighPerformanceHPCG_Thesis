@@ -5,6 +5,7 @@ add_library(MatrixLib)
 
 target_sources(MatrixLib PRIVATE
     sparse_CSR_Matrix.cpp
+    banded_Matrix.cpp
     generations.cpp
 )
 

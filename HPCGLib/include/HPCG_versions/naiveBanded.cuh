@@ -1,10 +1,14 @@
-#ifndef NAIVEBANDED_HPP
-#define NAIVEBANDED_HPP
+#ifndef NAIVEBANDED_CUH
+#define NAIVEBANDED_CUH
+
 #include "HPCGLib.hpp"
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
+
 #include <vector>
 #include <iostream>
 #include <string>
+
+#include <cuda_runtime.h>
 
 template <typename T>
 class naiveBanded_Implementation : public HPCG_functions<T> {
@@ -59,21 +63,30 @@ public:
         const sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
         T * banded_A_d, // the matrix A is already on the device
         int num_rows, int num_cols, // these refer to the shape of the banded matrix
+        int num_bands, // the number of bands in the banded matrix
         int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the banded matrix
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) {
-        naiveBanded_compute_SPMV(A, banded_A_d, num_rows, num_cols, j_min_i, x_d, y_d);
+        naiveBanded_compute_SPMV(A, banded_A_d, num_rows, num_cols, num_bands, j_min_i, x_d, y_d);
     }
 
 private:
-    void naiveBanded_compute_SPMV(
-        const sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
-        T * banded_A_d, // the matrix A is already on the device
-        int num_rows, int num_cols, // these refer to the shape of the banded matrix
-        int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the banded matrix
-        T * x_d, T * y_d // the vectors x and y are already on the device
+    // void naiveBanded_compute_SPMV(
+    //     const sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
+    //     T * banded_A_d, // the matrix A is already on the device
+    //     int num_rows, int num_cols, // these refer to the shape of the banded matrix
+    //     int num_bands, // the number of bands in the banded matrix
+    //     int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the banded matrix
+    //     T * x_d, T * y_d // the vectors x and y are already on the device
+    // );
+
+    __global__ void naiveBanded_SPMV_kernel(
+    double* banded_A,
+    int num_rows, int num_bands, int * j_min_i,
+    double* x, double* y
     );
+
    
 };
 
-#endif // NAIVEBANDED_HPP
+#endif // NAIVEBANDED_CUH

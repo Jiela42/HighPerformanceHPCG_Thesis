@@ -21,7 +21,7 @@ std::pair<sparse_CSR_Matrix<double>, std::vector<double>> generate_HPCG_Problem(
         for(int iy = 0; iy < ny; iy++){
             for(int iz = 0; iz < nz; iz++){
 
-                int i = ix + nx * iy; + nx * ny * iz;
+                int i = ix + nx * iy + nx * ny * iz;
                 int nnz_i = 0;
 
                 for (int sz = -1; sz < 2; sz++){
