@@ -48,7 +48,7 @@ public:
         int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) override {
-        std::cerr << "Warning: compute_SPMV is not implemented in Naive Banded." << std::endl;
+        std::cerr << "Warning: compute_SPMV is not implemented with these parameters in Naive Banded." << std::endl;
     }
 
     void compute_WAXPBY(
@@ -78,11 +78,6 @@ public:
         naiveBanded_computeSPMV(A, banded_A_d, num_rows, num_cols, num_bands, j_min_i, x_d, y_d);
     }
 
-    void compute_SPMV(){
-        dumbFunction();
-    }
-
-    void dumbFunction();
 private:
 
     void naiveBanded_computeSPMV(
@@ -93,18 +88,13 @@ private:
         int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the banded matrix
         T * x_d, T * y_d // the vectors x and y are already on the device
     );
-
-
-   
 };
 
-    __global__ void naiveBanded_SPMV_kernel(
-    double* banded_A,
-    int num_rows, int num_bands, int * j_min_i,
-    double* x, double* y
-    );
-// // Explicit template instantiation
-// extern template class naiveBanded_Implementation<double>;
-
+// kernel functions, because they cannot be member functions
+__global__ void naiveBanded_SPMV_kernel(
+double* banded_A,
+int num_rows, int num_bands, int * j_min_i,
+double* x, double* y
+);
 
 #endif // NAIVEBANDED_CUH

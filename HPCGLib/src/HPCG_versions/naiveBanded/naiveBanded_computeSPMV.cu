@@ -2,12 +2,11 @@
 
 // #include "MatrixLib/sparse_CSR_Matrix.hpp"
 #include <cmath>
-#include "utils.cuh"
+// #include "utils.cuh"
 #include "cuda_utils.hpp"
 
 #include <cuda_runtime.h>
 // #include <cuda.h>
-
 
 
 int ceiling_division(int numerator, int denominator) {
@@ -37,15 +36,7 @@ void naiveBanded_Implementation<T>::naiveBanded_computeSPMV(
 
         // synchronize the device
         cudaDeviceSynchronize();
-
-
     }
-
-template <typename T>
-void naiveBanded_Implementation<T>::dumbFunction(){
-    std::cerr << "nothing." << std::endl;
-}
-
 
 // explicit template instantiation
 template class naiveBanded_Implementation<double>;
