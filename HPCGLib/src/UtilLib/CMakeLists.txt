@@ -1,9 +1,7 @@
 # Minimum CMake version required
 cmake_minimum_required(VERSION 3.10)
 
-project(HPCGLib LANGUAGES CXX CUDA)
-
-add_library(HPCGLib)
+add_library(UtilLib)
 
 find_package(CUDAToolkit REQUIRED)
 # Include CUDA directories
@@ -17,6 +15,7 @@ include_directories(${CUDAToolkit_INCLUDE_DIRS})
 # Set CUDA architectures
 set(CMAKE_CUDA_ARCHITECTURES 86)
 
+enable_language(CUDA)
 
 # Set compile options for CUDA
 target_compile_options(HPCGLib PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:
@@ -24,26 +23,13 @@ target_compile_options(HPCGLib PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:
     -arch=sm_86
 >)
 
-# Set properties for CUDA compilation
-# set_target_properties(HPCGLib PROPERTIES
-#     CUDA_SEPARABLE_COMPILATION ON
-#     POSITION_INDEPENDENT_CODE ON
-# )
-
-
-target_sources(HPCGLib PRIVATE
-
-    cusparse/cusparse_computeSPMV.cpp
-
-    naiveBanded/naiveBanded_computeSPMV.cu
-    naiveBanded/naiveBanded_kernel_SPMV.cu
-    # naiveBanded/naiveBanded_Implementation.cpp
+target_sources(UtilLib PRIVATE
+    utils.cu
 )
 
-target_link_libraries(
+target_link_libraries(UtilLib
     HPCGLib
-    TimingLib
-    CUDA::cusparse
-    CUDA::cublas
+    # CUDA::cusparse
+    # CUDA::cublas
     CUDA::cudart
 )

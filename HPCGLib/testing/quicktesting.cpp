@@ -79,6 +79,7 @@ int main() {
 
     // get a banded version of A
     banded_Matrix<double> banded_A;
+    std::cout << "Creating banded matrix" << std::endl;
     banded_A.banded_3D27P_Matrix_from_CSR(A);
 
     // allocate memory on the device
@@ -87,7 +88,7 @@ int main() {
 
 
     double * banded_A_d;
-    double * y_min_i_d;
+    int * y_min_i_d;
 
     CHECK_CUDA(cudaMalloc(&banded_A_d, num_bands * num_rows * sizeof(double)));
     CHECK_CUDA(cudaMalloc(&y_min_i_d, num_rows * sizeof(double)));
@@ -98,23 +99,27 @@ int main() {
     // call the SPMV
     naiveBanded_Implementation<double> naiveBanded;
 
-    naiveBanded.compute_SPMV(
-        A,
-                          A_row_ptr_d, A_col_idx_d, A_values_d,
-                          x_d, y_d
-    );
+    // MOVVE TH WARNING BACK IN SPARSE CSR MATRIX!!
 
     // naiveBanded.compute_SPMV(
-    //     A,
-    //     banded_A_d,
-    //     num_rows, num_cols,
-    //     num_bands,
-    //     banded_A.get_j_min_i().data(),
-    //     x_d, y_d);
+    //     );
+    // banded_A.print();
 
+    std::cout << "Naive Banded SPMV starting" << std::endl;
+    naiveBanded.compute_SPMV(
+        A,
+        banded_A_d,
+        num_rows, num_cols,
+        num_bands,
+        y_min_i_d,
+        x_d, y_d);
+
+    std::cout << "Naive Banded SPMV done" << std::endl;
     // copy the result back into a new vector
     std::vector<double> y_banded(num_rows, 0.0);
+    std::cout << "copying result back" << std::endl;
     CHECK_CUDA(cudaMemcpy(y_banded.data(), y_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+    std::cout << "copying done" << std::endl;
 
     CHECK_CUDA(cudaFree(x_d));
     CHECK_CUDA(cudaFree(y_d));
@@ -125,17 +130,17 @@ int main() {
     CHECK_CUDA(cudaFree(A_values_d));
 
     std::cout << "Naive Banded SPMV done" << std::endl;
-    // banded_A.print();
 
 
 
-    // // compare the results
-    // for (int i = 0; i < num_rows; i++) {
-    //     if (y[i] != y_banded[i]) {
-    //         std::cerr << "Error: cuSparse and Naive Banded SPMV results do not match." << std::endl;
-    //         return 1;
-    //     }
-    // }
+    // compare the results
+    for (int i = 0; i < num_rows; i++) {
+        if (y[i] != y_banded[i]) {
+            std::cerr << "Error: cuSparse and Naive Banded SPMV results do not match." << std::endl;
+            return 1;
+        }
+    }
+    printf("cuSparse and Naive Banded SPMV results match\n");
 
     return 0;
 }

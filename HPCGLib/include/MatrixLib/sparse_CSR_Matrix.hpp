@@ -7,6 +7,9 @@
 template <typename T>
 class sparse_CSR_Matrix {
 public:
+
+    bool development = false;
+
     sparse_CSR_Matrix();
     sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, T* vals, int* row_ptr, int* col_idx);
     sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, std::vector<T> vals, std::vector<int> row_ptr, std::vector<int> col_idx);

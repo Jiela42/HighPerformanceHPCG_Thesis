@@ -105,9 +105,13 @@ T sparse_CSR_Matrix<T>::get_element(int row, int col) const{
             return this->values[i];
         }
     }
-    // printf("WARNING Element row %d, col %d not found in sparse CSR Matrix\n", row, col);
+    // uncomment the following during development
+    if (this->development) {
+        printf("WARNING Element row %d, col %d not found in sparse CSR Matrix\n", row, col);
+    }
     return T();
 }
+
 
 template <typename T>
 void sparse_CSR_Matrix<T>::print() const{

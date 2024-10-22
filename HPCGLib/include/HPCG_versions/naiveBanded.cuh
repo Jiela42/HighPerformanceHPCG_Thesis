@@ -16,6 +16,13 @@ public:
 
     std::string version_name = "Naive Banded";
 
+    // naiveBanded_Implementation() {
+    //     std::cerr << "Warning: Naive Banded is created." << std::endl;
+    // }
+    // ~naiveBanded_Implementation() {
+    //     std::cerr << "Warning: Naive Banded is being destroyed." << std::endl;
+    // }
+
     void compute_CG(const sparse_CSR_Matrix<T>& A, const std::vector<T>& b, std::vector<T>& x) override {
         std::cerr << "Warning: compute_CG is not implemented in Naive Banded." << std::endl;
     }
@@ -57,6 +64,7 @@ public:
         std::cerr << "Warning: compute_Dot is not implemented in Naive Banded." << std::endl;
     }
 
+
     // Banded matrices need a special SPMV implementations because they have special arguments
     // we have some aliasing going on depending on the input parameters.
     void compute_SPMV(
@@ -67,26 +75,36 @@ public:
         int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the banded matrix
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) {
-        naiveBanded_compute_SPMV(A, banded_A_d, num_rows, num_cols, num_bands, j_min_i, x_d, y_d);
+        naiveBanded_computeSPMV(A, banded_A_d, num_rows, num_cols, num_bands, j_min_i, x_d, y_d);
     }
 
+    void compute_SPMV(){
+        dumbFunction();
+    }
+
+    void dumbFunction();
 private:
-    // void naiveBanded_compute_SPMV(
-    //     const sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
-    //     T * banded_A_d, // the matrix A is already on the device
-    //     int num_rows, int num_cols, // these refer to the shape of the banded matrix
-    //     int num_bands, // the number of bands in the banded matrix
-    //     int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the banded matrix
-    //     T * x_d, T * y_d // the vectors x and y are already on the device
-    // );
+
+    void naiveBanded_computeSPMV(
+        const sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
+        T * banded_A_d, // the matrix A is already on the device
+        int num_rows, int num_cols, // these refer to the shape of the banded matrix
+        int num_bands, // the number of bands in the banded matrix
+        int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the banded matrix
+        T * x_d, T * y_d // the vectors x and y are already on the device
+    );
+
+
+   
+};
 
     __global__ void naiveBanded_SPMV_kernel(
     double* banded_A,
     int num_rows, int num_bands, int * j_min_i,
     double* x, double* y
     );
+// // Explicit template instantiation
+// extern template class naiveBanded_Implementation<double>;
 
-   
-};
 
 #endif // NAIVEBANDED_CUH
