@@ -13,9 +13,13 @@ std::pair<sparse_CSR_Matrix<double>, std::vector<double>> generate_HPCG_Problem(
     int nnz = 0;
 
     std::vector<int> row_ptr(num_rows + 1, 0);
+    std::vector<int> nnz_per_row(num_rows);
     std::vector<int> col_idx;
     std::vector<double> values;
     std::vector<double> y(num_rows, 0.0);
+
+    std::vector<std::vector<int>> col_idx_per_row(num_rows);
+    std::vector<std::vector<double>> values_per_row(num_rows);
 
     for(int ix = 0; ix < nx; ix++){
         for(int iy = 0; iy < ny; iy++){
@@ -32,23 +36,32 @@ std::pair<sparse_CSR_Matrix<double>, std::vector<double>> generate_HPCG_Problem(
                                     if(ix + sx > -1 && ix + sx < nx){
                                         int j = ix + sx + nx * (iy + sy) + nx * ny * (iz + sz);
                                         if(i == j){
-                                            col_idx.push_back(j);
-                                            values.push_back(26.0);
+                                            col_idx_per_row[i].push_back(j);
+                                            values_per_row[i].push_back(26.0);
                                         } else {
-                                            col_idx.push_back(j);
-                                            values.push_back(-1.0);
+                                            col_idx_per_row[i].push_back(j);
+                                            values_per_row[i].push_back(-1.0);
                                         }
-                                        nnz_i++;
-                                        nnz++;
+                                            nnz_i++;
+                                            nnz++;
                                     }
                                 }
                             }
                         }
                     }
                 }
-                row_ptr[i + 1] = row_ptr[i] + nnz_i; 
+                nnz_per_row[i] = nnz_i;
                 y[i] = 26.0 - nnz_i;
             }
+        }
+    }
+
+    for (int i = 0; i < num_rows; i++){
+        row_ptr[i + 1] = row_ptr[i] + nnz_per_row[i];
+
+        for (int j = 0; j < nnz_per_row[i]; j++){
+            col_idx.push_back(col_idx_per_row[i][j]);
+            values.push_back(values_per_row[i][j]);
         }
     }
 

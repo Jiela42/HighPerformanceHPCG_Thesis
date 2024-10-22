@@ -24,6 +24,9 @@ class banded_Matrix {
         std::vector <int>& get_j_min_i();
         std::vector <T>& get_values();
         void print() const;
+        // void compare_to(banded_Matrix<T>& other) const;
+        // void write_to_file() const;
+
 
     private:
         int nx;

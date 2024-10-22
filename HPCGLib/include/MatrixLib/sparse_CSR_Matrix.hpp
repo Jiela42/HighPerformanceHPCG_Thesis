@@ -23,7 +23,8 @@ public:
     T get_element(int i, int j) const;
     void print() const;
     void compare_to(sparse_CSR_Matrix<T>& other) const;
-
+    void write_to_file() const;
+    void read_from_file(std::string nx, std::string ny, std::string nz, std::string matrix_type);
 
 private:
     int nx;
