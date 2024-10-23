@@ -2,3 +2,4 @@
 example_matrices/
 src/__pycache__/
 HPCGLib/build/
+HPCGLib/example_matrices/
