@@ -3,12 +3,14 @@
 
 #include "HPCGLib.hpp"
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
+#include "MatrixLib/banded_Matrix.hpp"
 
 #include <vector>
 #include <iostream>
 #include <string>
 
 #include <cuda_runtime.h>
+#include "cuda_utils.hpp"
 
 template <typename T>
 class naiveBanded_Implementation : public HPCG_functions<T> {
@@ -48,7 +50,31 @@ public:
         int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) override {
-        std::cerr << "Warning: compute_SPMV is not implemented with these parameters in Naive Banded." << std::endl;
+        // This is relevant for the tests, but will not be used
+        // In this function we just rewrite A to match the banded format
+        banded_Matrix<double> banded_A;
+        banded_A.banded_3D27P_Matrix_from_CSR(A);
+        int num_bands = banded_A.get_num_bands();
+
+        double * banded_A_d;
+        int * y_min_i_d;
+
+        int num_rows = A.get_num_rows();
+        int num_cols = A.get_num_cols();
+
+        CHECK_CUDA(cudaMalloc(&banded_A_d, num_bands * num_rows * sizeof(double)));
+        CHECK_CUDA(cudaMalloc(&y_min_i_d, num_rows * sizeof(double)));
+        
+        CHECK_CUDA(cudaMemcpy(banded_A_d, banded_A.get_values().data(), num_bands * num_rows * sizeof(double), cudaMemcpyHostToDevice));
+        CHECK_CUDA(cudaMemcpy(y_min_i_d, banded_A.get_j_min_i().data(), num_rows * sizeof(int), cudaMemcpyHostToDevice));
+        
+        // now just call the implementation
+        compute_SPMV(A, banded_A_d, num_rows, num_cols, num_bands, y_min_i_d, x_d, y_d);
+    
+        // anything I initialized on the device, I need to free again
+        CHECK_CUDA(cudaFree(banded_A_d));
+        CHECK_CUDA(cudaFree(y_min_i_d));
+
     }
 
     void compute_WAXPBY(

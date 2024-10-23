@@ -1,4 +1,3 @@
-// just hello world to check if cmake setup works
 #include <iostream>
 #include "MatrixLib/generations.hpp"
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
@@ -28,21 +27,6 @@ int main() {
     double * y_d;
 
     sparse_CSR_Matrix<double> A = problem.first;
-
-
-    std::cout << "sanity_check read and write of matrix" << std::endl;
-
-    std::string str_nx = std::to_string(A.get_nx());
-    std::string str_ny = std::to_string(A.get_ny());
-    std::string str_nz = std::to_string(A.get_nz());
-
-    A.write_to_file();
-    sparse_CSR_Matrix<double> A_from_file;
-    A_from_file.read_from_file(str_nx, str_ny, str_nz, "cpp");
-
-    A.compare_to(A_from_file);
-
-    std::cout << "sanity check complete" << std::endl;
 
     int num_rows = A.get_num_rows();
     int num_cols = A.get_num_cols();

@@ -135,16 +135,18 @@ void sparse_CSR_Matrix<T>::print() const{
 }
 
 template <typename T>
-void sparse_CSR_Matrix<T>::compare_to(sparse_CSR_Matrix<T>& other) const{
-
+bool sparse_CSR_Matrix<T>::compare_to(sparse_CSR_Matrix<T>& other, std::string info) const{
+    // caller_info is a string that is printed to help identify where the comparison is called from
+    // this is helpful since compare to is called from a whole bunch of tests
+    
     bool same = true;
 
     if (this->num_rows != other.get_num_rows()){
-        printf("Matrices have different number of rows: this has %d the other %d\n", this->num_rows, other.get_num_rows());
+        printf("Matrices have different number of rows: this has %d the other %d for %s\n", this->num_rows, other.get_num_rows(), info.c_str());
         same = false;
     }
     if (this->num_cols != other.get_num_cols()){
-        printf("Matrices have different number of cols: this has %d the other %d\n", this->num_cols, other.get_num_cols());
+        printf("Matrices have different number of cols: this has %d the other %d for %s\n", this->num_cols, other.get_num_cols(), info.c_str());
         same = false;
     }
 
@@ -154,19 +156,20 @@ void sparse_CSR_Matrix<T>::compare_to(sparse_CSR_Matrix<T>& other) const{
         int other_start = other.get_row_ptr()[i];
         int other_end = other.get_row_ptr()[i + 1];
         if (end - start != other_end - other_start) {
-            printf("Row %d has different number of non-zero elements\n", i);
+            printf("Row %d has different number of non-zero elements for %s\n", i, info.c_str());
             same = false;
         }
         for (int j = start; j < end; j++) {
             if (this->col_idx[j] != other.get_col_idx()[j] || this->values[j] != other.get_values()[j]) {
-                printf("Element at row %d, col %d is different\n", i, this->col_idx[j]);
+                printf("Element at row %d, col %d is different for %s\n", i, this->col_idx[j], info.c_str());
                 same = false;
             }
         }
     }
-    if (same){
-        printf("Matrices are the same\n");
+    if (same && this->development) {
+        printf("Matrices are the same for %s\n", info.c_str());
     }
+    return same;
 }
 
 template <typename T>
@@ -177,10 +180,10 @@ void sparse_CSR_Matrix<T>::write_to_file()const{
     std::string str_nz = std::to_string(this->nz);
 
     std::string dim_str = str_nx + "x" + str_ny + "x" + str_nz;
-
-    std::string folder_path = "/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/example_matrices/";
-       
+    
+    std::string folder_path = "../../example_matrices/";
     std::string filename = folder_path + "cpp_sparse_CSR_Matrix_" + dim_str + ".txt";
+
     FILE * file = fopen(filename.c_str(), "w");
     if (!file) {
         throw std::runtime_error("Could not open file: " + filename);
@@ -242,8 +245,7 @@ void sparse_CSR_Matrix<T>::read_from_file(std::string nx, std::string ny, std::s
 
     std::string dim_str = nx + "x" + ny + "x" + nz;
     
-    std::string folder_path = "/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/example_matrices/";
-
+    std::string folder_path = "../../example_matrices/";
     std::string filename =  folder_path + matrix_type +"_sparse_CSR_Matrix_" + dim_str + ".txt";
     std::ifstream file(filename);
     if (!file.is_open()) {

@@ -25,7 +25,7 @@ public:
     int get_nnz() const;
     T get_element(int i, int j) const;
     void print() const;
-    void compare_to(sparse_CSR_Matrix<T>& other) const;
+    bool compare_to(sparse_CSR_Matrix<T>& other, std::string info) const;
     void write_to_file() const;
     void read_from_file(std::string nx, std::string ny, std::string nz, std::string matrix_type);
 
