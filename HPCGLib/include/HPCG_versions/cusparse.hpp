@@ -46,6 +46,17 @@ public:
             x_d, y_d);
     }
 
+    void compute_SPMV(
+        const sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
+        T * banded_A_d, // the matrix A is already on the device
+        int num_rows, int num_cols, // these refer to the shape of the banded matrix
+        int num_bands, // the number of bands in the banded matrix
+        int * j_min_i_d, // this is a mapping for calculating the j of some entry i,j in the banded matrix
+        T * x_d, T * y_d // the vectors x and y are already on the device
+        ) override {
+        std::cerr << "Error: compute_SPMV needs different parameters for the cuSparse_Implementation." << std::endl;
+    }
+
     void compute_WAXPBY(
         T * x_d, T * y_d, T * w_d, // the vectors x, y and w are already on the device
         T alpha, T beta

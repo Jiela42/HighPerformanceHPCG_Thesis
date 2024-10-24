@@ -8,6 +8,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include <stdexcept>
 
 #include <cuda_runtime.h>
 #include "cuda_utils.hpp"
@@ -50,31 +51,7 @@ public:
         int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) override {
-        // This is relevant for the tests, but will not be used
-        // In this function we just rewrite A to match the banded format
-        banded_Matrix<double> banded_A;
-        banded_A.banded_3D27P_Matrix_from_CSR(A);
-        int num_bands = banded_A.get_num_bands();
-
-        double * banded_A_d;
-        int * y_min_i_d;
-
-        int num_rows = A.get_num_rows();
-        int num_cols = A.get_num_cols();
-
-        CHECK_CUDA(cudaMalloc(&banded_A_d, num_bands * num_rows * sizeof(double)));
-        CHECK_CUDA(cudaMalloc(&y_min_i_d, num_rows * sizeof(double)));
-        
-        CHECK_CUDA(cudaMemcpy(banded_A_d, banded_A.get_values().data(), num_bands * num_rows * sizeof(double), cudaMemcpyHostToDevice));
-        CHECK_CUDA(cudaMemcpy(y_min_i_d, banded_A.get_j_min_i().data(), num_rows * sizeof(int), cudaMemcpyHostToDevice));
-        
-        // now just call the implementation
-        compute_SPMV(A, banded_A_d, num_rows, num_cols, num_bands, y_min_i_d, x_d, y_d);
-    
-        // anything I initialized on the device, I need to free again
-        CHECK_CUDA(cudaFree(banded_A_d));
-        CHECK_CUDA(cudaFree(y_min_i_d));
-
+        throw std::runtime_error("ERROR: compute_SPMV requires a banded Matrix as input in the Naive Banded Implementation.");
     }
 
     void compute_WAXPBY(
@@ -98,10 +75,10 @@ public:
         T * banded_A_d, // the matrix A is already on the device
         int num_rows, int num_cols, // these refer to the shape of the banded matrix
         int num_bands, // the number of bands in the banded matrix
-        int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the banded matrix
+        int * j_min_i_d, // this is a mapping for calculating the j of some entry i,j in the banded matrix
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) {
-        naiveBanded_computeSPMV(A, banded_A_d, num_rows, num_cols, num_bands, j_min_i, x_d, y_d);
+        naiveBanded_computeSPMV(A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);
     }
 
 private:
