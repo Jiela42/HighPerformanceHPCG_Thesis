@@ -77,7 +77,7 @@ public:
         int num_bands, // the number of bands in the banded matrix
         int * j_min_i_d, // this is a mapping for calculating the j of some entry i,j in the banded matrix
         T * x_d, T * y_d // the vectors x and y are already on the device
-        ) {
+        ) override {
         naiveBanded_computeSPMV(A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);
     }
 

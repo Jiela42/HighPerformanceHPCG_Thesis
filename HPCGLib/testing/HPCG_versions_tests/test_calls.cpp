@@ -49,7 +49,8 @@ void test_SPMV(
     // compare the results
     for (int i = 0; i < num_rows; i++) {
         if (y_baseline[i] != y_uut[i]) {
-            std::cerr << "Error: cuSparse and Naive Banded SPMV results do not match." << std::endl;
+            std::cerr << "ERROR: cuSparse and Naive Banded SPMV results do not match." << std::endl;
+            
             return;
         }
     }

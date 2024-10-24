@@ -47,7 +47,7 @@ void read_save_test(banded_Matrix<double> A, std::string info){
 //////////////////////////////////////////////////////////////////////////////////////////////
 // for each size we recieve we generate the matrices and run all the tests
 
-void run_all_tests(int nx, int ny, int nz){
+void run_all_matrixLib_tests(int nx, int ny, int nz){
     
     std::string dim_info = std::to_string(nx) + "x" + std::to_string(ny) + "x" + std::to_string(nz);
 

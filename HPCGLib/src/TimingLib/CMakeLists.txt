@@ -5,6 +5,7 @@ add_library(TimingLib)
 
 target_sources(TimingLib PRIVATE
     timing_lib_test.cpp
+    timer.cpp
 )
 
 target_link_libraries(TimingLib

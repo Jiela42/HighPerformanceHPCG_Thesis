@@ -53,9 +53,11 @@ class HPCG_functions {
         virtual void compute_Dot(
             T * x_d, T & y_d, T & result_d // again: the vectors x, y and result are already on the device
         ) = 0;
-private:
-    int getNumber() const {
-        return num_bench_iter;
+
+        bool test_before_bench = true;
+
+        int getNumberOfIterations() const {
+            return num_bench_iter;
     }
 };
 
