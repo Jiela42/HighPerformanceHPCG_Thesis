@@ -13,14 +13,14 @@ template <typename T>
 class cuSparse_Implementation : public HPCG_functions<T> {
 public:
 
-    std::string version_name = "cuSparse/cuBLAS";
+    std::string version_name = "cuSparse&cuBLAS";
 
-    void compute_CG(const sparse_CSR_Matrix<T>& A, const std::vector<T>& b, std::vector<T>& x) override {
+    void compute_CG(sparse_CSR_Matrix<T>& A, std::vector<T>& b, std::vector<T>& x) override {
         std::cerr << "Warning: compute_CG is not implemented in cuSparse_Implementation." << std::endl;
     }
     
     void compute_MG(
-        const sparse_CSR_Matrix<T> & A, // we pass A for the metadata
+        sparse_CSR_Matrix<T> & A, // we pass A for the metadata
         int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) override {
@@ -28,7 +28,7 @@ public:
     }
 
     void compute_SymGS(
-        const sparse_CSR_Matrix<T> & A, // we pass A for the metadata
+        sparse_CSR_Matrix<T> & A, // we pass A for the metadata
         int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) override {
@@ -36,7 +36,7 @@ public:
     }
 
     void compute_SPMV(
-        const sparse_CSR_Matrix<T> & A, // we pass A for the metadata
+        sparse_CSR_Matrix<T> & A, // we pass A for the metadata
         int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) override {
@@ -47,7 +47,7 @@ public:
     }
 
     void compute_SPMV(
-        const sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
+        sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
         T * banded_A_d, // the matrix A is already on the device
         int num_rows, int num_cols, // these refer to the shape of the banded matrix
         int num_bands, // the number of bands in the banded matrix
@@ -73,7 +73,7 @@ public:
 private:
     // here come the cuSparse functions
     void cusparse_computeSPMV(
-    const sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
+    sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
     int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
     T * x_d, T * y_d // the vectors x and y are already on the device
     );

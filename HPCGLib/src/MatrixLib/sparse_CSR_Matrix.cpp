@@ -51,17 +51,17 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, std::ve
 }
 
 template <typename T>
-const std::vector<int>& sparse_CSR_Matrix<T>::get_row_ptr(){
+std::vector<int>& sparse_CSR_Matrix<T>::get_row_ptr(){
     return this->row_ptr;
 }
 
 template <typename T>
-const std::vector<int>& sparse_CSR_Matrix<T>::get_col_idx(){
+std::vector<int>& sparse_CSR_Matrix<T>::get_col_idx(){
     return this->col_idx;
 }
 
 template <typename T>
-const std::vector<T>& sparse_CSR_Matrix<T>::get_values(){
+std::vector<T>& sparse_CSR_Matrix<T>::get_values(){
     return this->values;
 }
 

@@ -10,5 +10,4 @@ target_sources(TimingLib PRIVATE
 
 target_link_libraries(TimingLib
     HPCGLib
-    # CUDA::cusparse
 )

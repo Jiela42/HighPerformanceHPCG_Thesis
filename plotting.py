@@ -3,7 +3,7 @@
 #################################################################################################################
 # data_path = "/media/jiela/DK 128GB/Uni/HS24/Masters Thesis/Research - Coding/HighPerformanceHPCG_Thesis/data"
 # plot_path = "/media/jiela/DK 128GB/Uni/HS24/Masters Thesis/Research - Coding/HighPerformanceHPCG_Thesis/plots"
-data_path = "../data/"
+data_path = "../timing_results/"
 plot_path = "../plots/"
 
 methods_to_plot = [

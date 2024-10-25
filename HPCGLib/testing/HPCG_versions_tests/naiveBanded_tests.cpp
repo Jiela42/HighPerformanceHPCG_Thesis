@@ -2,7 +2,9 @@
 
 #include "cuda_utils.hpp"
 
-void run_naiveBanded_tests(int nx, int ny, int nz){
+bool run_naiveBanded_tests(int nx, int ny, int nz){
+
+    bool all_pass = true;
 
     // the output will be allocated by the test function
     // but any inputs need to be allocated and copied over to the device here
@@ -19,7 +21,7 @@ void run_naiveBanded_tests(int nx, int ny, int nz){
     // create the matrix and vectors both CSR and banded
     std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
     sparse_CSR_Matrix<double> A = problem.first;
-    std::vector<double> x(nx*ny*nz, 1.0);
+    std::vector<double> x(nx*ny*nz, 0.7);
 
     banded_Matrix<double> A_banded;
     A_banded.banded_3D27P_Matrix_from_CSR(A);
@@ -67,7 +69,7 @@ void run_naiveBanded_tests(int nx, int ny, int nz){
 
 
     // test the SPMV function
-    test_SPMV(
+    all_pass = all_pass && test_SPMV(
         cuSparse, naiveBanded,
         A,
         A_row_ptr_d, A_col_idx_d, A_values_d,
@@ -89,5 +91,7 @@ void run_naiveBanded_tests(int nx, int ny, int nz){
     CHECK_CUDA(cudaFree(j_min_i_d));
 
     CHECK_CUDA(cudaFree(x_d));
+
+    return all_pass;
    
 }

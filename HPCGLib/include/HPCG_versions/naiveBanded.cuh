@@ -26,12 +26,12 @@ public:
     //     std::cerr << "Warning: Naive Banded is being destroyed." << std::endl;
     // }
 
-    void compute_CG(const sparse_CSR_Matrix<T>& A, const std::vector<T>& b, std::vector<T>& x) override {
+    void compute_CG(sparse_CSR_Matrix<T>& A, std::vector<T>& b, std::vector<T>& x) override {
         std::cerr << "Warning: compute_CG is not implemented in Naive Banded." << std::endl;
     }
     
     void compute_MG(
-        const sparse_CSR_Matrix<T> & A, // we pass A for the metadata
+        sparse_CSR_Matrix<T> & A, // we pass A for the metadata
         int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) override {
@@ -39,7 +39,7 @@ public:
     }
 
     void compute_SymGS(
-        const sparse_CSR_Matrix<T> & A, // we pass A for the metadata
+        sparse_CSR_Matrix<T> & A, // we pass A for the metadata
         int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) override {
@@ -47,7 +47,7 @@ public:
     }
 
     void compute_SPMV(
-        const sparse_CSR_Matrix<T> & A, // we pass A for the metadata
+        sparse_CSR_Matrix<T> & A, // we pass A for the metadata
         int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) override {
@@ -71,7 +71,7 @@ public:
     // Banded matrices need a special SPMV implementations because they have special arguments
     // we have some aliasing going on depending on the input parameters.
     void compute_SPMV(
-        const sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
+        sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
         T * banded_A_d, // the matrix A is already on the device
         int num_rows, int num_cols, // these refer to the shape of the banded matrix
         int num_bands, // the number of bands in the banded matrix
@@ -84,7 +84,7 @@ public:
 private:
 
     void naiveBanded_computeSPMV(
-        const sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
+        sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
         T * banded_A_d, // the matrix A is already on the device
         int num_rows, int num_cols, // these refer to the shape of the banded matrix
         int num_bands, // the number of bands in the banded matrix

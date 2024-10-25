@@ -14,9 +14,9 @@ public:
     sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, T* vals, int* row_ptr, int* col_idx);
     sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, std::vector<T> vals, std::vector<int> row_ptr, std::vector<int> col_idx);
 
-    const std::vector<int>& get_row_ptr();
-    const std::vector<int>& get_col_idx();
-    const std::vector<T>& get_values();
+    std::vector<int>& get_row_ptr();
+    std::vector<int>& get_col_idx();
+    std::vector<T>& get_values();
     int get_num_rows() const;
     int get_num_cols() const;
     int get_nx() const;

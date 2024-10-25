@@ -14,6 +14,7 @@ add_executable(full_bench
     full_bench.cpp
     abstract_benchmark_functions.cpp
     benchmark_cuSparse.cpp
+    benchmark_naiveBanded.cpp
 )
 
 target_link_libraries(bench_test
@@ -24,4 +25,5 @@ target_link_libraries(bench_test
 target_link_libraries(full_bench
     HPCGLib
     TimingLib
+    TestHPCGLib
 )

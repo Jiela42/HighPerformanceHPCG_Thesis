@@ -28,26 +28,29 @@ public:
     // Function to stop the timer and record the elapsed time
     void stopTimer(std::string method_name);
 
-    // Function to write the timing results to a CSV file
-    void writeResultsToCsv(const std::string& csv_file, const std::string& method_name, int n, int m, int num_iterations, const std::vector<float>& results);
 
 private:
-    // CUDA events for timing
-    cudaEvent_t start;
-    cudaEvent_t stop;
+    // Function to write the timing results to a CSV file
+    void writeResultsToCsv();
+    void writeCSV(std::string filepath, std::string file_header, std::vector<float> times);
+    float getElapsedTime() const;
 
-    // Member variables for storing metadata
-    int nx;
-    int ny;
-    int nz;
-    int nnz;
+    cudaEvent_t start, stop;
+    float milliseconds;
+    // the filename also includes the method name ;)
+    std::string base_filename;
+    std::string base_fileheader;
+    std::string folder_path;
+    int nx, ny, nz, nnz;
     std::string ault_node;
     std::string matrix_type;
     std::string version_name;
-    std::string folder_path;
 
-    // Vector to store timing results
-    std::vector<float> times;
+    std::vector<float> CG_times;
+    std::vector<float> MG_times;
+    std::vector<float> SymGS_times;
+    std::vector<float> SPMV_times;
+    std::vector<float> Dot_times;
 };
 
 #endif // TIMER_HPP

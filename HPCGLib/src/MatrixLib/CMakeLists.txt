@@ -11,5 +11,4 @@ target_sources(MatrixLib PRIVATE
 
 target_link_libraries(MatrixLib
     HPCGLib
-    # CUDA::cusparse
 )

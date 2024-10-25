@@ -13,9 +13,9 @@
 // depending on the versions they may require different inputs, hence the method overloading
 
 // in this case both versions require the same inputs 
-void test_SPMV(
+bool test_SPMV(
     HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
-    const sparse_CSR_Matrix<double> & A, // we pass A for the metadata
+    sparse_CSR_Matrix<double> & A, // we pass A for the metadata
     int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d, // the matrix A is already on the device
     double * x_d // the vectors x is already on the device
         
@@ -51,15 +51,16 @@ void test_SPMV(
         if (y_baseline[i] != y_uut[i]) {
             std::cerr << "ERROR: cuSparse and Naive Banded SPMV results do not match." << std::endl;
             
-            return;
+            return false;
         }
     }
+    return true;
 }
 
 // in this case the baseline requires CSR and the UUT requires both CSR and banded
-void test_SPMV(
+bool test_SPMV(
     HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
-    const sparse_CSR_Matrix<double> & A, // we pass A for the metadata
+    sparse_CSR_Matrix<double> & A, // we pass A for the metadata
     int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d, // the matrix A is already on the device
     
     double * banded_A_d, // the matrix A is already on the device
@@ -69,7 +70,7 @@ void test_SPMV(
         
     double * x_d // the vectors x is already on the device
         
-){  
+){
 
     int num_rows_baseline = A.get_num_rows();
     std::vector<double> y_baseline(num_rows, 0.0);
@@ -104,7 +105,8 @@ void test_SPMV(
         if (y_baseline[i] != y_uut[i]) {
             std::cerr << "Error: cuSparse and Naive Banded SPMV results do not match." << std::endl;
             
-            return;
+            return false;
         }
     }
+    return true;
 }

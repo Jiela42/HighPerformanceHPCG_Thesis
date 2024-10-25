@@ -1,5 +1,6 @@
 #include "benchmark.hpp"
-#include "HPCGLib.hpp"
+// #include "TimingLib/timer.hpp"
+
 // these function calls the abstract function the required number of times and records the time
 
 // again we have method overloading for different matrix types
@@ -8,21 +9,24 @@
 void bench_SPMV(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
-    const sparse_CSR_Matrix<double> & A,
+    sparse_CSR_Matrix<double> & A,
     int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d,
     double * x_d, double * y_d
     ){
 
+    int num_iterations = implementation.getNumberOfIterations();
+
     if (implementation.test_before_bench){
     // we always test against cusparse$
         cuSparse_Implementation<double> baseline;
-        test_SPMV(
+        bool test_failed = !test_SPMV(
             baseline, implementation,
             A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d);
-    
+        if (test_failed){
+            num_iterations = 0;
+        }
     }
 
-    int num_iterations = implementation.getNumberOfIterations();
 
     for(int i = 0; i < num_iterations; i++){
         timer.startTimer();
@@ -39,13 +43,15 @@ void bench_SPMV(
 void bench_SPMV(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
-    const sparse_CSR_Matrix<double> & A,
+    sparse_CSR_Matrix<double> & A,
     double * banded_A_d,
     int num_rows, int num_cols,
     int num_bands,
     int * j_min_i_d,
     double * x_d, double * y_d
     ){
+
+    int num_iterations = implementation.getNumberOfIterations();
 
     if (implementation.test_before_bench){
     // we always test against cusparse
@@ -55,9 +61,9 @@ void bench_SPMV(
         int num_cols = A.get_num_cols();
         int nnz = A.get_nnz();
 
-        const int * A_row_ptr_data = A.get_row_ptr().data();
-        const int * A_col_idx_data = A.get_col_idx().data();
-        const double * A_values_data = A.get_values().data();
+        int * A_row_ptr_data = A.get_row_ptr().data();
+        int * A_col_idx_data = A.get_col_idx().data();
+        double * A_values_data = A.get_values().data();
 
         int * A_row_ptr_d;
         int * A_col_idx_d;
@@ -72,7 +78,7 @@ void bench_SPMV(
         CHECK_CUDA(cudaMemcpy(A_values_d, A_values_data, nnz * sizeof(double), cudaMemcpyHostToDevice));
     
         // test the SPMV function
-        test_SPMV(
+        bool test_failed = !test_SPMV(
             baseline, implementation,
             A,
             A_row_ptr_d, A_col_idx_d, A_values_d,
@@ -83,10 +89,14 @@ void bench_SPMV(
             j_min_i_d,
 
             x_d
-            );    
+            );
+
+        if (test_failed)
+        {
+            num_iterations = 0;
+        }
     }
 
-    int num_iterations = implementation.getNumberOfIterations();
 
     for(int i = 0; i < num_iterations; i++){
         timer.startTimer();
@@ -110,17 +120,20 @@ void bench_SPMV(
 void bench_Implementation(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
-    const sparse_CSR_Matrix<double> & A,
+    sparse_CSR_Matrix<double> & A,
     int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d,
-    double * x_d){
+    double * x_d, double * y_d
+    ){
 
-    bench_SPMV(implementation, timer, A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d);
+    bench_SPMV(implementation, timer, A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d, y_d);
     // other functions to be benchmarked
 }
 
+// this version supports banded matrixes
 void bench_Implementation(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
+    sparse_CSR_Matrix<double> & A, // we need to pass the CSR matrix for metadata and potential testing
     double * banded_A_d,
     int num_rows, int num_cols,
     int num_bands,
@@ -128,7 +141,7 @@ void bench_Implementation(
     double * x_d, double * y_d
     ){
 
-    bench_SPMV(implementation, timer, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);
+    bench_SPMV(implementation, timer, A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);
     // other functions to be benchmarked
 }
 

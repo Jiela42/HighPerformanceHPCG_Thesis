@@ -16,7 +16,7 @@ int ceiling_division(int numerator, int denominator) {
 
 template <typename T>
 void naiveBanded_Implementation<T>::naiveBanded_computeSPMV(
-        const sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
+        sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
         T * banded_A_d, // the data of matrix A is already on the device
         int num_rows, int num_cols, // these refer to the shape of the banded matrix
         int num_bands, // the number of bands in the banded matrix

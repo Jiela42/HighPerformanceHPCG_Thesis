@@ -1,7 +1,6 @@
 #include "benchmark.hpp"
 
-void run_cuSparse_3d27p__benchmarks(int nx, int ny, int nz, std::string folder_path){
-    // create the timer
+void run_cuSparse_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path){
 
     std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
     sparse_CSR_Matrix<double> A = problem.first;
@@ -15,8 +14,9 @@ void run_cuSparse_3d27p__benchmarks(int nx, int ny, int nz, std::string folder_p
     const int * A_col_idx_data = A.get_col_idx().data();
     const double * A_values_data = A.get_values().data();
     
-    CudaTimer timer(nx, ny, nz, nnz, "41-44", "3d_27pt", "cuSparse", folder_path);
     cuSparse_Implementation<double> implementation;
+    std::string implementation_name = implementation.version_name;
+    CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, "41-44", "3d_27pt", implementation_name, folder_path);
 
     // Allocate the memory on the device
     int * A_row_ptr_d;
@@ -37,7 +37,7 @@ void run_cuSparse_3d27p__benchmarks(int nx, int ny, int nz, std::string folder_p
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
 
     // run the benchmarks (without the copying back and forth)
-    bench_Implementation(cuSparse_implementation, timer, A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d);
+    bench_Implementation(implementation, *timer, A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d, y_d);
 
     // free the memory
     cudaFree(A_row_ptr_d);
@@ -45,4 +45,7 @@ void run_cuSparse_3d27p__benchmarks(int nx, int ny, int nz, std::string folder_p
     cudaFree(A_values_d);
     cudaFree(x_d);
     cudaFree(y_d);
+
+    delete timer;
+
 }

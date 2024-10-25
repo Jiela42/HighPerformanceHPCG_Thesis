@@ -1,4 +1,5 @@
 #include <iostream>
+#include "HPCGLib.hpp"
 #include "MatrixLib/generations.hpp"
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
 #include "MatrixLib/banded_Matrix.hpp"
