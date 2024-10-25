@@ -21,14 +21,13 @@ sizes_to_plot =[
     ("8x8x8"),
     ("16x16x16"),
     ("32x32x32"),
-    # ("64x64x64"),
-    # ("128x128x128"),
+    ("64x64x64"),
+    ("128x128x128"),
 ]
 
 versions_to_plot = [
-    "BaseTorch",
-    "MatlabReference",
-    "BasicStencil",
+    "cuSparse&cuBLAS",
+    "naiveBanded"
 ]
 
 y_axis_to_plot = [

@@ -109,13 +109,12 @@ void CudaTimer::writeResultsToCsv() {
     base_fileheader = version_name + ","
                 + ault_node + ","
                 + matrix_type + ","
-                + ault_node + ","
                 + std::to_string(nx) + "," + std::to_string(ny) + "," + std::to_string(nz) + "," + std::to_string(nnz) + ",";
 
-    writeCSV(base_filename + "CG.csv", base_fileheader + "CG,", CG_times);
-    writeCSV(base_filename + "MG.csv", base_fileheader + "MG,", MG_times);
-    writeCSV(base_filename + "SymGS.csv", base_fileheader + "SymGS,", SymGS_times);
-    writeCSV(base_filename + "SPMV.csv", base_fileheader + "SPMV,", SPMV_times);
-    writeCSV(base_filename + "Dot.csv", base_fileheader + "Dot,", Dot_times);
+    writeCSV(base_filename + "CG.csv", base_fileheader + "CG", CG_times);
+    writeCSV(base_filename + "MG.csv", base_fileheader + "MG", MG_times);
+    writeCSV(base_filename + "SymGS.csv", base_fileheader + "SymGS", SymGS_times);
+    writeCSV(base_filename + "SPMV.csv", base_fileheader + "SPMV", SPMV_times);
+    writeCSV(base_filename + "Dot.csv", base_fileheader + "Dot", Dot_times);
     
 }
