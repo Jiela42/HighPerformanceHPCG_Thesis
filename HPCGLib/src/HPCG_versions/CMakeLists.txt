@@ -43,6 +43,7 @@ target_sources(HPCGLib PRIVATE
 target_link_libraries(
     HPCGLib
     TimingLib
+    UtilLib
     CUDA::cusparse
     CUDA::cublas
     CUDA::cudart

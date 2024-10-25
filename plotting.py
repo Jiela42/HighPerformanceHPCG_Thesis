@@ -1,7 +1,7 @@
 #################################################################################################################
 # Set which data to plot (this is very similar to the settings in get_times.py)
 #################################################################################################################
-# data_path = "/media/jiela/DK 128GB/Uni/HS24/Masters Thesis/Research - Coding/HighPerformanceHPCG_Thesis/data"
+# data_path = "/media/jiela/DK 128GB/Uni/HS24/Masters Thesis/Research - Coding/HighPerformanceHPCG_Thesis/timing_results"
 # plot_path = "/media/jiela/DK 128GB/Uni/HS24/Masters Thesis/Research - Coding/HighPerformanceHPCG_Thesis/plots"
 data_path = "../timing_results/"
 plot_path = "../plots/"
@@ -106,6 +106,8 @@ for file in files:
 #################################################################################################################
 # preprocess the data
 #################################################################################################################
+
+print(full_data)
 
 # time per nnz
 full_data['Time per NNZ (ms)'] = full_data['Time (ms)'] / full_data['NNZ']

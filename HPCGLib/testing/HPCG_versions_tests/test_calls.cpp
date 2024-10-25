@@ -4,7 +4,8 @@
 #include "HPCG_versions/cusparse.hpp"
 #include "HPCG_versions/naiveBanded.cuh"
 
-#include "cuda_utils.hpp"
+#include "UtilLib/cuda_utils.hpp"
+#include "UtilLib/utils.hpp"
 
 #include <iostream>
 
@@ -46,15 +47,8 @@ bool test_SPMV(
     CHECK_CUDA(cudaFree(y_baseline_d));
     CHECK_CUDA(cudaFree(y_uut_d));
 
-    // compare the results
-    for (int i = 0; i < num_rows; i++) {
-        if (y_baseline[i] != y_uut[i]) {
-            std::cerr << "ERROR: cuSparse and Naive Banded SPMV results do not match." << std::endl;
-            
-            return false;
-        }
-    }
-    return true;
+    bool test_pass = vector_compare(y_baseline, y_uut);
+    return test_pass;
 }
 
 // in this case the baseline requires CSR and the UUT requires both CSR and banded
@@ -101,12 +95,7 @@ bool test_SPMV(
     CHECK_CUDA(cudaFree(y_uut_d));
 
     // compare the results
-    for (int i = 0; i < num_rows; i++) {
-        if (y_baseline[i] != y_uut[i]) {
-            std::cerr << "Error: cuSparse and Naive Banded SPMV results do not match." << std::endl;
-            
-            return false;
-        }
-    }
-    return true;
+    bool test_pass = vector_compare(y_baseline, y_uut);
+
+    return test_pass;
 }

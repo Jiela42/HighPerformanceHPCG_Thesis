@@ -4,6 +4,7 @@
 #include "HPCGLib.hpp"
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
 #include "MatrixLib/banded_Matrix.hpp"
+#include "UtilLib/cuda_utils.hpp"
 
 #include <vector>
 #include <iostream>
@@ -11,7 +12,6 @@
 #include <stdexcept>
 
 #include <cuda_runtime.h>
-#include "cuda_utils.hpp"
 
 template <typename T>
 class naiveBanded_Implementation : public HPCG_functions<T> {

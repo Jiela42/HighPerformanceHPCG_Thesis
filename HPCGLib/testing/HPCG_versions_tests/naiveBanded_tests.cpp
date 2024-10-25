@@ -1,6 +1,6 @@
 #include "testing.hpp"
 
-#include "cuda_utils.hpp"
+#include "UtilLib/cuda_utils.hpp"
 
 bool run_naiveBanded_tests(int nx, int ny, int nz){
 
@@ -81,6 +81,10 @@ bool run_naiveBanded_tests(int nx, int ny, int nz){
 
         x_d
         );
+    
+    if (not all_pass){
+        std::cout << "naiveBanded SPMV test failed for size " << nx << "x" << ny << "x" << nz << std::endl;
+    }
 
     // anything that got allocated also needs to be de-allocted
     CHECK_CUDA(cudaFree(A_row_ptr_d));

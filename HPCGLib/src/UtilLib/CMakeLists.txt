@@ -25,11 +25,12 @@ target_compile_options(HPCGLib PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:
 
 target_sources(UtilLib PRIVATE
     utils.cu
+    utils.cpp
 )
 
 target_link_libraries(UtilLib
     HPCGLib
     # CUDA::cusparse
     # CUDA::cublas
-    CUDA::cudart
+    # CUDA::cudart
 )

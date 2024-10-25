@@ -1,17 +1,17 @@
 #include "HPCG_versions/naiveBanded.cuh"
 
 // #include "MatrixLib/sparse_CSR_Matrix.hpp"
-#include <cmath>
-// #include "utils.cuh"
-#include "cuda_utils.hpp"
+// #include <cmath>
+#include "UtilLib/utils.cuh"
+// #include "cuda_utils.hpp"
 
 #include <cuda_runtime.h>
 // #include <cuda.h>
 
 
-int ceiling_division(int numerator, int denominator) {
-    return static_cast<int>(std::ceil(static_cast<double>(numerator) / denominator));
-}
+// int ceiling_division(int numerator, int denominator) {
+//     return static_cast<int>(std::ceil(static_cast<double>(numerator) / denominator));
+// }
 
 
 template <typename T>

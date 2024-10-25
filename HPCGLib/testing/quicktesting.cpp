@@ -5,7 +5,7 @@
 #include "MatrixLib/banded_Matrix.hpp"
 #include "HPCG_versions/cusparse.hpp"
 #include "HPCG_versions/naiveBanded.cuh"
-#include "cuda_utils.hpp"
+#include "UtilLib/cuda_utils.hpp"
 
 int main() {
 

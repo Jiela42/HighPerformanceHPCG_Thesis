@@ -23,12 +23,14 @@ add_executable(AllTests
 target_link_libraries(TestHPCGLib
     HPCGLib
     MatrixLib
+    UtilLib
 )
 
 target_link_libraries(AllTests
     HPCGLib
     MatrixLib
     TestHPCGLib
+    UtilLib
 )
 
 target_link_libraries(quicktesting

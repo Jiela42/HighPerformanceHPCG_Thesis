@@ -1,4 +1,4 @@
-#include "utils.cuh"
+#include "UtilLib/utils.cuh"
 
 #include <cmath>
 

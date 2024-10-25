@@ -13,7 +13,7 @@
             // every thread computes one or more rows of the matrix
             for (int i = tid; i < num_rows; i += blockDim.x * gridDim.x) {
                 // compute the matrix-vector product for the ith row
-                int sum_i = 0;
+                double sum_i = 0;
                 for (int band = 0; band < num_bands; band++) {
                     int j = i + j_min_i[band];
                     int current_row = i * num_bands;
