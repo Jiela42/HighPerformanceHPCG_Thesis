@@ -3,8 +3,8 @@
 #################################################################################################################
 # data_path = "/media/jiela/DK 128GB/Uni/HS24/Masters Thesis/Research - Coding/HighPerformanceHPCG_Thesis/timing_results"
 # plot_path = "/media/jiela/DK 128GB/Uni/HS24/Masters Thesis/Research - Coding/HighPerformanceHPCG_Thesis/plots"
-data_path = "../timing_results/"
-plot_path = "../plots/"
+data_path = "timing_results/"
+plot_path = "plots/"
 
 methods_to_plot = [
     # "CG",
@@ -22,12 +22,17 @@ sizes_to_plot =[
     ("16x16x16"),
     ("32x32x32"),
     ("64x64x64"),
+    ("128x64x64"),
+    ("128x128x64"),
     ("128x128x128"),
+    ("256x128x128"),
 ]
 
 versions_to_plot = [
     "cuSparse&cuBLAS",
-    "naiveBanded"
+    "Naive Banded",
+    "Naive Banded (1 thread per physical core)",
+    "Naive Banded (4 thread per physical core)",
 ]
 
 y_axis_to_plot = [
@@ -65,6 +70,8 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 files = [os.path.join(dp, f) for dp, _, filenames in os.walk(data_path) for f in filenames]
 
 full_data = pd.DataFrame()
+
+print(len(files))
 
 for file in files:
     # the first line contains the metadata, read it in
@@ -177,6 +184,10 @@ def get_legend_horizontal_offset(num_cols, hue_order):
     return -(num_rows + 1) * 0.06 - 0.18
 
 def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale):
+
+    # if we have no data we do not want to plot anything
+    if data.empty:
+        return
 
     sns.set(style="whitegrid")
     plt.figure(figsize=(10, 6))

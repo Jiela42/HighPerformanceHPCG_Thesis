@@ -5,8 +5,12 @@
 #include <cusparse_v2.h>
 #include <iostream>
 
+// here we define some machiene dependent constants
 #define MAX_THREADS_PER_BLOCK 1024
 #define MAX_NUM_BLOCKS 65535
+#define NUM_PHYSICAL_CORES 10496
+#define NUM_SM 84
+#define NUM_CORES_PER_SM 128
 
 // Macro to check CUDA function calls
 #define CHECK_CUDA(call) \

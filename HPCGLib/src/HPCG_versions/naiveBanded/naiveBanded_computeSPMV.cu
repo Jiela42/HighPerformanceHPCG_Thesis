@@ -1,18 +1,6 @@
 #include "HPCG_versions/naiveBanded.cuh"
-
-// #include "MatrixLib/sparse_CSR_Matrix.hpp"
-// #include <cmath>
 #include "UtilLib/utils.cuh"
-// #include "cuda_utils.hpp"
-
 #include <cuda_runtime.h>
-// #include <cuda.h>
-
-
-// int ceiling_division(int numerator, int denominator) {
-//     return static_cast<int>(std::ceil(static_cast<double>(numerator) / denominator));
-// }
-
 
 template <typename T>
 void naiveBanded_Implementation<T>::naiveBanded_computeSPMV(
@@ -25,8 +13,8 @@ void naiveBanded_Implementation<T>::naiveBanded_computeSPMV(
     ) {
         // call the kernel for the naive banded SPMV
         // since every thread is working on one or more rows we need to base the number of threads on that
-        int num_threads = MAX_THREADS_PER_BLOCK;
-        int num_blocks = std::min(MAX_NUM_BLOCKS, ceiling_division(num_rows, num_threads));
+        int num_threads = NUM_CORES_PER_SM * 4;
+        int num_blocks = std::min(NUM_PHYSICAL_CORES, ceiling_division(num_rows, num_threads));
 
 
         // call the kernel

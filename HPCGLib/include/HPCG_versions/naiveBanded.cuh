@@ -17,7 +17,7 @@ template <typename T>
 class naiveBanded_Implementation : public HPCG_functions<T> {
 public:
 
-    std::string version_name = "Naive Banded";
+    std::string version_name = "Naive Banded (4 thread per physical core)";
 
     // naiveBanded_Implementation() {
     //     std::cerr << "Warning: Naive Banded is created." << std::endl;
