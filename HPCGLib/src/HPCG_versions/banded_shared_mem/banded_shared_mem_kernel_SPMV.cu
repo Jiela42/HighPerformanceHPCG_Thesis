@@ -20,7 +20,7 @@
                 // row_start refers to the first row of this SM
                 int row_start = iter * total_size + bid;
 
-
+                // between each row of the matrix, we need to allocate the new entries of x
                 // now we actually load x
 
                 for (int i = threadIdx.x; i < num_x_elem; I += blockDim){
