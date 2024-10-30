@@ -37,7 +37,9 @@ target_sources(HPCGLib PRIVATE
 
     naiveBanded/naiveBanded_computeSPMV.cu
     naiveBanded/naiveBanded_kernel_SPMV.cu
-    # naiveBanded/naiveBanded_Implementation.cpp
+
+    banded_shared_mem/banded_shared_mem_computeSPMV.cu
+    banded_shared_mem/banded_shared_mem_kernel_SPMV.cu
 )
 
 target_link_libraries(
