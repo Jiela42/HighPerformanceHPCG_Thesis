@@ -1,21 +1,26 @@
-#include "HPCG_versions/naiveBanded.cuh"
+#include "HPCG_versions/banded_shared_mem.cuh"
 #include "UtilLib/utils.cuh"
 #include <cuda_runtime.h>
 
-void eliminate_overlap(int* min_j, int* max_j, int num_thick_bands){
+void eliminate_overlap(int* min_j, int* max_j, int num_thick_bands, int* num_x_elem, int* num_consecutive_memory_regions){
 
-    int num_consecutive_memory_regions = 1;
+    int ctr_consecutive_memory_regions = 1;
 
     for (int i = 1; i < num_thick_bands; i++){
-        if (max_j[num_consecutive_memory_regions] <= min_j[i]){
-            max_j[num_consecutive_memory_regions] = max_j[i];
+        if (max_j[ctr_consecutive_memory_regions] <= min_j[i]){
+            max_j[ctr_consecutive_memory_regions] = max_j[i];
         }
         else{
-            min_j[num_consecutive_memory_regions] = min_j[i];
-            max_j[num_consecutive_memory_regions] = max_j[i];
+            min_j[ctr_consecutive_memory_regions] = min_j[i];
+            max_j[ctr_consecutive_memory_regions] = max_j[i];
             num_consecutive_memory_regions ++;
         }
     }
+
+    for (int i = 0; i < ctr_consecutive_memory_regions; i++){
+        num_x_elem += max_j[i] - min_j[i];
+    }
+    *num_consecutive_memory_regions = ctr_consecutive_memory_regions;
 }
 
 template <typename T>
@@ -35,12 +40,12 @@ void Banded_Shared_Memory_Implementation<T>::banded_shared_memory_computeSPMV(
         // dynamically calculate how many rows can be handled at the same time
         // i.e. how many doubles are required per row
 
-        std::vector * j_min_i_host = A.get_j_min_i();
+        std::vector<int> j_min_i_host = A.get_j_min_i();
 
         int new_elem_per_row = 1;
 
         for (int i = 1; i < num_bands; i++){
-            if (not j_min_i_host[i-1] + 1 == j_min_i_host[i]){
+            if (j_min_i_host[i-1] + 1 != j_min_i_host[i]){
                 new_elem_per_row ++;
             }
         }    
@@ -48,56 +53,58 @@ void Banded_Shared_Memory_Implementation<T>::banded_shared_memory_computeSPMV(
         int shared_mem_bytes = 1024 * SHARED_MEM_SIZE;
         int shared_mem_doubles = shared_mem_bytes / sizeof(double);
 
-        int rows_per_sm = (shared_Mem_doubles -  2 * num_bands) / new_elem_per_row
+        int rows_per_sm = (shared_mem_doubles -  2 * num_bands) / new_elem_per_row;
 
         // based on the guess of the number of rows per sm we calculate the exact numbers
         
-        int [num_bands] min_j;
-        int [num_bands] max_j;
-        int [num_bands] consecutive_j;
+        int min_j [num_bands];
+        int max_j [num_bands];
         
         // in the kernel we will need to adjust this, by adding the row start
         min_j[0] = j_min_i[0];
         max_j[0] = j_min_i[0] + rows_per_sm;
-        consecutive_j[0] = rows_per_sm;
 
         // this refers to how many independent bands we end up having
         int num_thick_bands = 1;
-
         for (int band = 1; band < num_bands; band++){
             
             if (j_min_i[band-1] + 1 == j_min_i[band]){
                 max_j[num_thick_bands-1] += 1;
-                consecutive_j[num_thick_bands-1] += 1
             }
             else{
                 // again in the kernel this will need to be adjusted
                 min_j[num_thick_bands] = j_min_i[band];
-                max_j[num_thick_bands] = j_min_i[band] + num_rows_per_sm;
-                consecutive_j[num_thick_bands] = num_rows_per_sm;
-                num_thick_bands ++;
+                max_j[num_thick_bands] = j_min_i[band] + rows_per_sm;
             }
         }
-        
-        // you need to re-work this!
-        // in the eliminate overlap!!!
-        //just hand in a pointer to an int.
+
+        int num_conseq_mem_reg = 0;
         int num_x_elem = 0;
-        for(int i = 0; i < num_thick_bands; i++){
-            num_x_elem += consecutive_j[i];
-        }
+        eliminate_overlap(min_j, max_j, num_thick_bands, &num_x_elem, &num_conseq_mem_reg);
 
-        eliminate_overlap(min_j, max_j, num_thick_bands);
+        int size_shared_j_min_i = num_bands * sizeof(int);
+        int size_x_offsets = 3*num_conseq_mem_reg * sizeof(int);
+        int size_shared_x = num_x_elem * sizeof(double);
+        int size_shared_memory = size_shared_j_min_i  + size_x_offsets + size_shared_x;
+        
+        // move the offsets to the device
+        // I am not sure if this is actually faster,
+        // or if it would make sense to have the first thread in a block do this computation
+        int * min_j_d;
+        int * max_j_d;
 
-        int size_shared_j_min_i = num_bands * size_of(int);
-        int size_shared_x = num_x_elem * size_of(double);
-        int size_x_offsets = 
-        int size_shared_memory = size_shared_j_min_i + size_shared_x;
-        // shared_x = (rows_per_sm -1) * new_elem_per_row + num_bands;
+        cudaMalloc(&min_j_d, num_bands * sizeof(int));
+        cudaMalloc(&max_j_d, num_bands * sizeof(int));
+
+        cudaMemcpy(min_j_d, min_j, num_bands * sizeof(int), cudaMemcpyHostToDevice);
+        cudaMemcpy(max_j_d, max_j, num_bands * sizeof(int), cudaMemcpyHostToDevice); 
 
         // call the kernel
-        banded_shared_memory_SPMV_kernel<<<num_blocks, num_threads>>>(
-            num_rows_per_sm, banded_A_d, num_rows, num_bands, j_min_i, x_d, y_d
+        banded_shared_memory_SPMV_kernel<<<num_blocks, num_threads, size_shared_memory>>>(
+            rows_per_sm, size_shared_x, num_conseq_mem_reg,
+            min_j_d, max_j_d,
+            banded_A_d, num_rows, num_bands, j_min_i,
+            x_d, y_d
         );
 
         // synchronize the device
@@ -105,4 +112,4 @@ void Banded_Shared_Memory_Implementation<T>::banded_shared_memory_computeSPMV(
     }
 
 // explicit template instantiation
-template class naiveBanded_Implementation<double>;
+template class Banded_Shared_Memory_Implementation<double>;

@@ -19,19 +19,12 @@ public:
 
     std::string version_name = "Banded, explicit Shared Memory";
 
-    // naiveBanded_Implementation() {
-    //     std::cerr << "Warning: Banded Shared Memory is created." << std::endl;
-    // }
-    // ~naiveBanded_Implementation() {
-    //     std::cerr << "Warning: Banded Shared Memory is being destroyed." << std::endl;
-    // }
-
     void compute_CG(sparse_CSR_Matrix<T>& A, std::vector<T>& b, std::vector<T>& x) override {
-        std::cerr << "Warning: compute_CG is not implemented in Banded." << std::endl;
+        std::cerr << "Warning: compute_CG is not implemented in Banded Shared Memory." << std::endl;
     }
     
     void compute_MG(
-        banded_Matrix<T> & A, // we pass A for the metadata
+        sparse_CSR_Matrix<T> & A, // we pass A for the metadata
         int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) override {
@@ -39,7 +32,7 @@ public:
     }
 
     void compute_SymGS(
-        banded_Matrix<T> & A, // we pass A for the metadata
+        sparse_CSR_Matrix<T> & A, // we pass A for the metadata
         int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) override {
@@ -47,7 +40,7 @@ public:
     }
 
     void compute_SPMV(
-        banded_Matrix<T> & A, // we pass A for the metadata
+        sparse_CSR_Matrix<T> & A, // we pass A for the metadata
         int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) override {
@@ -77,7 +70,7 @@ public:
         int num_bands, // the number of bands in the banded matrix
         int * j_min_i_d, // this is a mapping for calculating the j of some entry i,j in the banded matrix
         T * x_d, T * y_d // the vectors x and y are already on the device
-        ) override {
+        )  {
         banded_shared_memory_computeSPMV(A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);
     }
 
@@ -95,7 +88,8 @@ private:
 
 // kernel functions, because they cannot be member functions
 __global__ void banded_shared_memory_SPMV_kernel(
-    int num_rows
+    int rows_per_sm, int num_x_elem, int num_consecutive_memory_regions,
+    int* min_j, int* max_j,
     double* banded_A,
     int num_rows, int num_bands, int * j_min_i,
     double* x, double* y
