@@ -10,6 +10,9 @@
 
 template <typename T>
 sparse_CSR_Matrix<T>::sparse_CSR_Matrix() {
+    
+    this->matrix_type = MatrixType::UNKNOWN;
+
     this->nx = 0;
     this->ny = 0;
     this->nz = 0;
@@ -22,7 +25,10 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix() {
 }
 
 template <typename T>
-sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, T* vals, int* row_ptr, int* col_idx) {
+sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, MatrixType mt, T* vals, int* row_ptr, int* col_idx) {
+    
+    this->matrix_type = mt;
+    
     this->nx = nx;
     this->ny = ny;
     this->nz = nz;
@@ -37,7 +43,10 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, T* vals
 }
 
 template <typename T>
-sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, std::vector<T> vals, std::vector<int> row_ptr, std::vector<int> col_idx) {
+sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, MatrixType mt, std::vector<T> vals, std::vector<int> row_ptr, std::vector<int> col_idx) {
+    
+    this->matrix_type = mt;
+
     this->nx = nx;
     this->ny = ny;
     this->nz = nz;
@@ -51,6 +60,68 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, std::ve
 }
 
 template <typename T>
+void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_banded(banded_Matrix<T> A){
+
+    if(A.get_matrix_type() == MatrixType::Stencil_3D27P){
+        assert(A.get_num_bands() == 27);
+        assert(A.get_num_rows() == A.get_num_cols());
+        assert(A.get_num_rows() == A.get_nx() * A.get_ny() * A.get_nz());
+    }
+    this->sparse_CSR_Matrix_from_banded_transformation(A);
+}
+
+template <typename T>
+void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_banded_transformation(banded_Matrix<T> A){
+
+    this->matrix_type = A.get_matrix_type();
+    this->nx = A.get_nx();
+    this->ny = A.get_ny();
+    this->nz = A.get_nz();
+    this->nnz = A.get_nnz();
+    this->num_rows = A.get_num_rows();
+    this->num_cols = A.get_num_cols();
+
+    assert(A.get_num_bands() == A.get_j_min_i().size());
+
+
+    this->row_ptr = std::vector<int>(this->num_rows + 1, 0);
+    this->col_idx = std::vector<int>(this->nnz, 0);
+    this->values = std::vector<T>(this->nnz, 0);
+
+    std::vector<T> banded_vals = A.get_values();
+    int elem_count = 0;
+    
+    for(int i = 0; i < this->num_rows; i++){
+        int nnz_i = 0;
+        for(int band_j = 0; band_j < A.get_num_bands(); band_j++){
+            int j = A.get_j_min_i()[band_j] + i;
+            int val = banded_vals[i*A.get_num_bands() + band_j];
+
+            if(val != 0){
+                this->col_idx[elem_count] = j;
+                this->values[elem_count] = val;
+                elem_count++;
+            }
+
+            this->row_ptr[i + 1] = elem_count;
+        }
+    }
+
+    assert(elem_count == this->nnz);
+
+}
+
+template <typename T>
+void sparse_CSR_Matrix<T>::sanity_check_3D27P(){
+    assert(this->matrix_type == MatrixType::Stencil_3D27P);
+    assert(this->num_rows == this->num_cols);
+    assert(this->num_rows == this->nx * this->ny * this->nz);
+    assert(this->row_ptr.size() == this->num_rows + 1);
+    assert(this->col_idx.size() == this->nnz);
+    assert(this->nnz == this->row_ptr[this->num_rows]);
+}
+
+template <typename T>
 std::vector<int>& sparse_CSR_Matrix<T>::get_row_ptr(){
     return this->row_ptr;
 }
@@ -58,6 +129,11 @@ std::vector<int>& sparse_CSR_Matrix<T>::get_row_ptr(){
 template <typename T>
 std::vector<int>& sparse_CSR_Matrix<T>::get_col_idx(){
     return this->col_idx;
+}
+
+template <typename T>
+MatrixType sparse_CSR_Matrix<T>::get_matrix_type() const{
+    return this->matrix_type;
 }
 
 template <typename T>

@@ -29,7 +29,7 @@ void bench_Implementation(
 void bench_Implementation(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
-    sparse_CSR_Matrix<double> & A, // we need to pass the CSR matrix for potential testing
+    banded_Matrix<double> & A, // we need to pass the CSR matrix for potential testing
     double * banded_A_d,
     int num_rows, int num_cols,
     int num_bands,

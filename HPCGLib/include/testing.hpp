@@ -31,7 +31,7 @@ bool test_SPMV(
 // this one supports testing a banded matrix i.e. the naiveBanded implementation
 bool test_SPMV(
     HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
-    sparse_CSR_Matrix<double> & A, // we pass A for the metadata
+    banded_Matrix<double> & A, // we pass A for the metadata
     int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d, // the matrix A is already on the device
     
     double * banded_A_d, // the matrix A is already on the device

@@ -24,7 +24,7 @@ bool run_naiveBanded_tests(int nx, int ny, int nz){
     std::vector<double> x(nx*ny*nz, 0.7);
 
     banded_Matrix<double> A_banded;
-    A_banded.banded_3D27P_Matrix_from_CSR(A);
+    A_banded.banded_Matrix_from_sparse_CSR(A);
 
     int num_rows = A.get_num_rows();
     int num_cols = A.get_num_cols();
@@ -71,7 +71,7 @@ bool run_naiveBanded_tests(int nx, int ny, int nz){
     // test the SPMV function
     all_pass = all_pass && test_SPMV(
         cuSparse, naiveBanded,
-        A,
+        A_banded,
         A_row_ptr_d, A_col_idx_d, A_values_d,
         
         banded_A_d,

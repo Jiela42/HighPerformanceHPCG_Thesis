@@ -66,7 +66,7 @@ std::pair<sparse_CSR_Matrix<double>, std::vector<double>> generate_HPCG_Problem(
     }
 
     // Create the sparse matrix
-    sparse_CSR_Matrix<double> A(nx, ny, nz, nnz, values, row_ptr, col_idx);
+    sparse_CSR_Matrix<double> A(nx, ny, nz, nnz, MatrixType::Stencil_3D27P, values, row_ptr, col_idx);
 
     return std::make_pair(A, y);
 }

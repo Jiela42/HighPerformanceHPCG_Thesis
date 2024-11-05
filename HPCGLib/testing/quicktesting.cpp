@@ -65,7 +65,7 @@ int main() {
     // get a banded version of A
     banded_Matrix<double> banded_A;
     std::cout << "Creating banded matrix" << std::endl;
-    banded_A.banded_3D27P_Matrix_from_CSR(A);
+    banded_A.banded_Matrix_from_sparse_CSR(A);
 
     // allocate memory on the device
 
@@ -92,7 +92,7 @@ int main() {
 
     std::cout << "Naive Banded SPMV starting" << std::endl;
     naiveBanded.compute_SPMV(
-        A,
+        banded_A,
         banded_A_d,
         num_rows, num_cols,
         num_bands,

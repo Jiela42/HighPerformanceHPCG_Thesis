@@ -7,7 +7,7 @@ void run_naiveBanded_3d27p_benchmarks(int nx, int ny, int nz, std::string folder
     std::vector<double> x(nx*ny*nz, 0.7);
 
     banded_Matrix<double> banded_A;
-    banded_A.banded_3D27P_Matrix_from_CSR(A);
+    banded_A.banded_Matrix_from_sparse_CSR(A);
 
     int num_rows = banded_A.get_num_rows();
     int num_cols = banded_A.get_num_cols();
@@ -37,7 +37,7 @@ void run_naiveBanded_3d27p_benchmarks(int nx, int ny, int nz, std::string folder
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
 
     // run the benchmarks (without the copying back and forth)
-    bench_Implementation(implementation, *timer, A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);
+    bench_Implementation(implementation, *timer, banded_A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);
 
     // free the memory
     cudaFree(banded_A_d);

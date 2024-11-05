@@ -10,7 +10,7 @@ int main(){
 
     bool all_pass = true;
 
-    all_pass = all_pass && (4, 4, 4);
+    all_pass = all_pass && run_all_matrixLib_tests(4, 4, 4);
     all_pass = all_pass && run_all_matrixLib_tests(8, 8, 8);
     all_pass = all_pass && run_all_matrixLib_tests(16, 16, 16);
     all_pass = all_pass && run_all_matrixLib_tests(32, 32, 32);
@@ -22,6 +22,11 @@ int main(){
     all_pass = all_pass && run_naiveBanded_tests(16, 16, 16);
     all_pass = all_pass && run_naiveBanded_tests(32, 32, 32);
     std::cout << "Finished naiveBanded tests" << std::endl;
+
+    std::cout << "Starting banded shared memory tests" << std::endl;
+    // all_pass = all_pass && run_banded_shared_memory_tests(4, 4, 4);
+    std::cout << "Finished banded shared memory tests" << std::endl;
+
 
     if (all_pass){
         std::cout << "*******************************************************************************************" << std::endl;

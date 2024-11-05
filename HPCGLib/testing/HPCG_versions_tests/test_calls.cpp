@@ -54,7 +54,7 @@ bool test_SPMV(
 // in this case the baseline requires CSR and the UUT requires both CSR and banded
 bool test_SPMV(
     HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
-    sparse_CSR_Matrix<double> & A, // we pass A for the metadata
+    banded_Matrix<double> & banded_A, // we pass A for the metadata
     int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d, // the matrix A is already on the device
     
     double * banded_A_d, // the matrix A is already on the device
@@ -65,6 +65,9 @@ bool test_SPMV(
     double * x_d // the vectors x is already on the device
         
 ){
+
+    sparse_CSR_Matrix<double> A;
+    A.sparse_CSR_Matrix_from_banded(banded_A);
 
     int num_rows_baseline = A.get_num_rows();
     std::vector<double> y_baseline(num_rows, 0.0);
@@ -80,7 +83,7 @@ bool test_SPMV(
                           A_row_ptr_d, A_col_idx_d, A_values_d,
                           x_d, y_baseline_d);
 
-    uut.compute_SPMV(A,
+    uut.compute_SPMV(banded_A,
                     banded_A_d,
                     num_rows, num_cols,
                     num_bands,

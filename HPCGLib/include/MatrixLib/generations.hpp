@@ -4,6 +4,7 @@
 #include <vector>
 #include <utility>
 #include "sparse_CSR_Matrix.hpp"
+#include "matrix_basics.hpp"
 
 
 std::pair<sparse_CSR_Matrix<double>, std::vector<double>> generate_HPCG_Problem(int nx, int ny, int nz);

@@ -4,7 +4,7 @@
 
 template <typename T>
 void naiveBanded_Implementation<T>::naiveBanded_computeSPMV(
-        sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
+        banded_Matrix<T>& A, //we only pass A for the metadata
         T * banded_A_d, // the data of matrix A is already on the device
         int num_rows, int num_cols, // these refer to the shape of the banded matrix
         int num_bands, // the number of bands in the banded matrix
@@ -16,6 +16,9 @@ void naiveBanded_Implementation<T>::naiveBanded_computeSPMV(
         int num_threads = NUM_CORES_PER_SM * 4;
         int num_blocks = std::min(NUM_PHYSICAL_CORES, ceiling_division(num_rows, num_threads));
 
+        assert(num_bands == A.get_num_bands());
+        assert(num_rows == A.get_num_rows());
+        assert(num_cols == A.get_num_cols());
 
         // call the kernel
         naiveBanded_SPMV_kernel<<<num_blocks, num_threads>>>(

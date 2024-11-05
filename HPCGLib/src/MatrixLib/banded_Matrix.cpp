@@ -13,6 +13,7 @@ banded_Matrix<T>::banded_Matrix() {
     this->ny = 0;
     this->nz = 0;
     this->nnz = 0;
+    this->matrix_type = MatrixType::UNKNOWN;
     this->num_rows = 0;
     this->num_cols = 0;
     this->num_bands = 0;
@@ -21,7 +22,20 @@ banded_Matrix<T>::banded_Matrix() {
 }
 
 template <typename T>
+void banded_Matrix<T>::banded_Matrix_from_sparse_CSR(sparse_CSR_Matrix<T> A){
+    if (A.get_matrix_type() == MatrixType::Stencil_3D27P) {
+        this->banded_3D27P_Matrix_from_CSR(A);
+    } else {
+        printf("ERROR: Unsupported matrix type for conversion to banded matrix\n");
+        exit(1);
+    }
+}
+
+template <typename T>
 void banded_Matrix<T>::banded_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T> A){
+    
+    assert(A.get_matrix_type() == MatrixType::Stencil_3D27P);
+    this->matrix_type = MatrixType::Stencil_3D27P;
     this->nx = A.get_nx();
     this->ny = A.get_ny();
     this->nz = A.get_nz();
@@ -102,6 +116,11 @@ int banded_Matrix<T>::get_nz() const{
 template <typename T>
 int banded_Matrix<T>::get_nnz() const{
     return this->nnz;
+}
+
+template <typename T>
+MatrixType banded_Matrix<T>::get_matrix_type() const{
+    return this->matrix_type;
 }
 
 template <typename T>

@@ -71,7 +71,7 @@ public:
     // Banded matrices need a special SPMV implementations because they have special arguments
     // we have some aliasing going on depending on the input parameters.
     void compute_SPMV(
-        sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
+        banded_Matrix<T>& A, //we only pass A for the metadata
         T * banded_A_d, // the matrix A is already on the device
         int num_rows, int num_cols, // these refer to the shape of the banded matrix
         int num_bands, // the number of bands in the banded matrix
@@ -84,7 +84,7 @@ public:
 private:
 
     void naiveBanded_computeSPMV(
-        sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
+        banded_Matrix<T>& A, //we only pass A for the metadata
         T * banded_A_d, // the matrix A is already on the device
         int num_rows, int num_cols, // these refer to the shape of the banded matrix
         int num_bands, // the number of bands in the banded matrix

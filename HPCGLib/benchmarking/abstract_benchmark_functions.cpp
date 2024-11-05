@@ -43,7 +43,7 @@ void bench_SPMV(
 void bench_SPMV(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
-    sparse_CSR_Matrix<double> & A,
+    banded_Matrix<double> & A,
     double * banded_A_d,
     int num_rows, int num_cols,
     int num_bands,
@@ -56,14 +56,16 @@ void bench_SPMV(
     if (implementation.test_before_bench){
     // we always test against cusparse
         cuSparse_Implementation<double> baseline;
+        sparse_CSR_Matrix<double> sparse_CSR_A;
+        sparse_CSR_A.sparse_CSR_Matrix_from_banded(A); 
 
-        int num_rows = A.get_num_rows();
-        int num_cols = A.get_num_cols();
-        int nnz = A.get_nnz();
+        int num_rows = sparse_CSR_A.get_num_rows();
+        int num_cols = sparse_CSR_A.get_num_cols();
+        int nnz = sparse_CSR_A.get_nnz();
 
-        int * A_row_ptr_data = A.get_row_ptr().data();
-        int * A_col_idx_data = A.get_col_idx().data();
-        double * A_values_data = A.get_values().data();
+        int * A_row_ptr_data = sparse_CSR_A.get_row_ptr().data();
+        int * A_col_idx_data = sparse_CSR_A.get_col_idx().data();
+        double * A_values_data = sparse_CSR_A.get_values().data();
 
         int * A_row_ptr_d;
         int * A_col_idx_d;
@@ -133,7 +135,7 @@ void bench_Implementation(
 void bench_Implementation(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
-    sparse_CSR_Matrix<double> & A, // we need to pass the CSR matrix for metadata and potential testing
+    banded_Matrix<double> & A, // we need to pass the CSR matrix for metadata and potential testing
     double * banded_A_d,
     int num_rows, int num_cols,
     int num_bands,
