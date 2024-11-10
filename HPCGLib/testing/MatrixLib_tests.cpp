@@ -1,6 +1,7 @@
 #include "MatrixLib/generations.hpp"
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
 #include "MatrixLib/banded_Matrix.hpp"
+#include "testing.hpp"
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -44,22 +45,57 @@ bool read_save_test(banded_Matrix<double> A, std::string info){
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // banded vs csr tests
+bool banded_csr_conversion_test_on_matrix(sparse_CSR_Matrix<double> A){
+    banded_Matrix<double> banded_A;
+    banded_A.banded_Matrix_from_sparse_CSR(A);
+    // for(int i = 0; i < banded_A.get_num_rows(); i++){
+    //     for(int j = 0; j < banded_A.get_num_cols(); j++){
+    //         double elem = A.get_element(i, j);
+    //         double banded_elem = banded_A.get_element(i, j);
+    //         if (elem != banded_elem){
+    //             std::cerr << "element mismatch at i: " << i << " j: " << j << " elem: " << elem << " banded_elem: " << banded_elem << std::endl;
+    //             return false;
+    //         }
+    //     }
+    // }
+
+    // for(int i=0; i< banded_A.get_num_bands(); i++){
+    //     double val = banded_A.get_values()[i];
+    //     std::cout << "in test val: " << val << std::endl;
+    // }
+    sparse_CSR_Matrix<double> back_to_CSR;
+    // std::cout << "in test banded A nnz: " << banded_A.get_nnz() << std::endl;
+    back_to_CSR.sparse_CSR_Matrix_from_banded(banded_A);
+
+    bool test_passed = A.compare_to(back_to_CSR, "banded vs csr conversion test");
+
+    return test_passed;
+}
+
 bool run_banded_csr_conversion_test(int nx, int ny, int nz){
     std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
     sparse_CSR_Matrix<double> A = problem.first;
 
-    banded_Matrix<double> banded_A;
-    banded_A.banded_Matrix_from_sparse_CSR(A);
-    sparse_CSR_Matrix<double> back_to_CSR;
-    back_to_CSR.sparse_CSR_Matrix_from_banded(banded_A);
+    bool all_pass = true;
 
-    bool test_passed = A.compare_to(back_to_CSR, "banded vs csr conversion test for " + std::to_string(nx) + "x" + std::to_string(ny) + "x" + std::to_string(nz));
-    
-    if (not test_passed){
-        std::cerr << "Test failed for banded vs csr conversion test for " << nx << "x" << ny << "x" << nz << std::endl;
+    all_pass = all_pass && banded_csr_conversion_test_on_matrix(A);
+    if (not all_pass){
+        std::cerr << "banded vs csr conversion test failed for normal HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
     }
 
-    return test_passed;
+    // std::cout << "random values" << std::endl;
+    A.random_values(RANDOM_SEED);
+    all_pass = all_pass && banded_csr_conversion_test_on_matrix(A);
+    if (not all_pass){
+        std::cerr << "banded vs csr conversion test failed for random values HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
+    }   
+    // std::cout << "iterative values" << std::endl;
+    A.iterative_values();
+    all_pass = all_pass && banded_csr_conversion_test_on_matrix(A);
+    if (not all_pass){
+        std::cerr << "banded vs csr conversion test failed for iterative values HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
+    }
+    return all_pass;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

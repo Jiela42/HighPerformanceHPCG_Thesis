@@ -5,7 +5,7 @@
 #include <iostream>
 
 // Define a constant for error tolerance
-const double error_tolerance = 1e-9;
+const double error_tolerance = 1e-12;
 
 // Function to compare two doubles with a tolerance
 bool double_compare(double a, double b);

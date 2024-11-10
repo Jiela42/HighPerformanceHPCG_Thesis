@@ -3,6 +3,7 @@
 
 #include "MatrixLib/banded_Matrix.hpp"
 #include "MatrixLib/matrix_basics.hpp"
+#include "UtilLib/utils.hpp"
 
 #include <vector>
 #include <string>
@@ -26,6 +27,9 @@ public:
     void sparse_CSR_Matrix_from_banded(banded_Matrix<T> A);
 
     void sanity_check_3D27P();
+
+    void iterative_values();
+    void random_values(int seed);
 
     std::vector<int>& get_row_ptr();
     std::vector<int>& get_col_idx();

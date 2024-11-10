@@ -89,7 +89,7 @@ bool test_SPMV(
                     num_bands,
                     j_min_i_d,
                     x_d, y_uut_d);
-
+    
     // and now we need to copy the result back and de-allocate the memory
     CHECK_CUDA(cudaMemcpy(y_baseline.data(), y_baseline_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
     CHECK_CUDA(cudaMemcpy(y_uut.data(), y_uut_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));

@@ -70,16 +70,24 @@ void banded_Matrix<T>::banded_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T> A){
         this->j_min_i[i] = off_x + off_y * this->nx + off_z * this->nx * this->ny;
     }
 
+    int elem_ctr = 0;
+
     // now that we have the static offsets which define i & j, we can make the actual matrix
     for (int i = 0; i < this->num_rows; i++) {
         for (int band_j = 0; band_j < this->num_bands; band_j++) {
             int j = this->j_min_i[band_j] + i;
             // check if j is in bounds (since not every point has all 27 neighbours)
             if (j >= 0 && j < this->num_cols) {
-                this->values[i * this->num_bands + band_j] = A.get_element(i, j);
+                double elem = A.get_element(i, j);
+                // also make sure we don't add zero elements
+                if(elem != 0){
+                    this->values[i * this->num_bands + band_j] = elem;
+                    elem_ctr++;
+                }
             }
         }
     }
+    assert(elem_ctr == this->nnz);
 }
 
 template <typename T>
@@ -144,7 +152,7 @@ T banded_Matrix<T>::get_element(int i, int j) const{
             }
         }
     }
-    printf("WARNING Element row %d, col %d not found\n", i, j);
+    // printf("WARNING Element row %d, col %d not found\n", i, j);
     return T();
 }
 

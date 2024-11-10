@@ -10,5 +10,6 @@
 std::pair<sparse_CSR_Matrix<double>, std::vector<double>> generate_HPCG_Problem(int nx, int ny, int nz);
 std::pair<sparse_CSR_Matrix<double>, std::vector<int>> generate_coarse_HPCG_Problem(int nxf, int nyf, int nzf);
 
+std::vector<double> generate_random_vector(int size, int seed);
 
 #endif // GENERATIONS_HPP

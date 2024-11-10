@@ -108,3 +108,13 @@ std::pair<sparse_CSR_Matrix<double>, std::vector<int>> generate_coarse_HPCG_Prob
 }
 
 // Also make a generation for the banded matrix in here (at some point)
+
+std::vector<double> generate_random_vector(int size, int seed){
+    std::vector<double> vec(size, 0.0);
+    srand(seed);
+    for (int i = 0; i < size; i++){
+        vec[i] = (double)rand() / RAND_MAX;
+    }
+    return vec;
+
+}

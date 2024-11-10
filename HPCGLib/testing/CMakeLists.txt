@@ -7,17 +7,18 @@ project(Testing LANGUAGES CXX CUDA)
 
 add_library(TestHPCGLib
     HPCG_versions_tests/naiveBanded_tests.cpp
+    HPCG_versions_tests/bandedSharedMem_tests.cpp
         
     MatrixLib_tests.cpp
     HPCG_versions_tests/test_calls.cpp
 )
 
-add_executable(quicktesting
-    quicktesting.cpp
+add_executable(run_quicktesting
+    run_quicktesting.cpp
 )
 
-add_executable(AllTests
-    all_tests.cpp
+add_executable(run_AllTests
+    run_all_tests.cpp
 )
 
 target_link_libraries(TestHPCGLib
@@ -26,15 +27,14 @@ target_link_libraries(TestHPCGLib
     UtilLib
 )
 
-target_link_libraries(AllTests
+target_link_libraries(run_AllTests
     HPCGLib
     MatrixLib
     TestHPCGLib
     UtilLib
 )
 
-target_link_libraries(quicktesting
+target_link_libraries(run_quicktesting
     HPCGLib
     MatrixLib
-    # TestHPCGLib
 )

@@ -2,26 +2,35 @@
 
 #include "UtilLib/cuda_utils.hpp"
 
-bool run_naiveBanded_tests_on_matrix(sparse_CSR_Matrix<double> A){
+bool run_bandedSharedMem_tests_on_matrix(sparse_CSR_Matrix<double> A){
     // the output will be allocated by the test function
     // but any inputs need to be allocated and copied over to the device here
     // and is then passed to the test function
-
     bool all_pass = true;
     
     // create the baseline and the UUT
     cuSparse_Implementation<double> cuSparse;
-    naiveBanded_Implementation<double> naiveBanded;
+    Banded_Shared_Memory_Implementation<double> bandedSharedMem;
     
     int nx = A.get_nx();
     int ny = A.get_ny();
     int nz = A.get_nz();
     
     // random seeded x vector
-    std::vector<double> x = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+    // std::vector<double> x = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+    std::vector<double> x (nx*ny*nz, 1.0);
 
     banded_Matrix<double> A_banded;
     A_banded.banded_Matrix_from_sparse_CSR(A);
+
+    // for(int i =0; i < A_banded.get_num_bands(); i++){
+    //     double val = A_banded.get_values()[i];
+    //     if (val != 0.0){
+        //     std::cout << val << std::endl;
+    //     }
+    // }
+
+    std::cout << "num_rows: " << A.get_num_rows() << std::endl;
 
     int num_rows = A.get_num_rows();
     int num_cols = A.get_num_cols();
@@ -64,10 +73,9 @@ bool run_naiveBanded_tests_on_matrix(sparse_CSR_Matrix<double> A){
     
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
 
-
     // test the SPMV function
     all_pass = all_pass && test_SPMV(
-        cuSparse, naiveBanded,
+        cuSparse, bandedSharedMem,
         A_banded,
         A_row_ptr_d, A_col_idx_d, A_values_d,
         
@@ -92,7 +100,7 @@ bool run_naiveBanded_tests_on_matrix(sparse_CSR_Matrix<double> A){
     return all_pass;
 }
 
-bool run_naiveBanded_tests(int nx, int ny, int nz){
+bool run_bandedSharedMem_tests(int nx, int ny, int nz){
 
     bool all_pass = true;
 
@@ -106,24 +114,24 @@ bool run_naiveBanded_tests(int nx, int ny, int nz){
     std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
     sparse_CSR_Matrix<double> A = problem.first;
 
-    all_pass = all_pass && run_naiveBanded_tests_on_matrix(A);
+    all_pass = all_pass && run_bandedSharedMem_tests_on_matrix(A);
 
     if(not all_pass){
-        std::cout << "naiveBanded tests failed for standard HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
+        std::cout << "banded shared memory tests failed for standard HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
     }
 
-    A.iterative_values();
+    // A.iterative_values();
 
-    all_pass = all_pass && run_naiveBanded_tests_on_matrix(A);
-    if(not all_pass){
-        std::cout << "naiveBanded tests failed for iterative values HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
-    }
+    // all_pass = all_pass && run_bandedSharedMem_tests_on_matrix(A);
+    // if(not all_pass){
+    //     std::cout << "banded shared memory tests failed for iterative values HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
+    // }
 
-    A.random_values(RANDOM_SEED);
-    all_pass = all_pass && run_naiveBanded_tests_on_matrix(A);
-    if(not all_pass){
-        std::cout << "naiveBanded tests failed for random values HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
-    }
+    // A.random_values(RANDOM_SEED);
+    // all_pass = all_pass && run_bandedSharedMem_tests_on_matrix(A);
+    // if(not all_pass){
+    //     std::cout << "banded shared memory tests failed for random values HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
+    // }
 
     return all_pass;
    

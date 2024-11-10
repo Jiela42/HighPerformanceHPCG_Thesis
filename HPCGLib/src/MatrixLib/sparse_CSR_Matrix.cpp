@@ -83,30 +83,46 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_banded_transformation(banded_M
 
     assert(A.get_num_bands() == A.get_j_min_i().size());
 
-
     this->row_ptr = std::vector<int>(this->num_rows + 1, 0);
     this->col_idx = std::vector<int>(this->nnz, 0);
     this->values = std::vector<T>(this->nnz, 0);
 
+    // for(int i =0; i< A.get_num_bands(); i++){
+    //     std::cout << A.get_values()[i] << std::endl;
+    // }
+
     std::vector<T> banded_vals = A.get_values();
+
+    // for(int i=0; i< A.get_num_bands(); i++){
+    //     std::cout << "banded_vals: " << banded_vals[i] << std::endl;
+    // }
     int elem_count = 0;
-    
+
     for(int i = 0; i < this->num_rows; i++){
         int nnz_i = 0;
         for(int band_j = 0; band_j < A.get_num_bands(); band_j++){
             int j = A.get_j_min_i()[band_j] + i;
-            int val = banded_vals[i*A.get_num_bands() + band_j];
-
-            if(val != 0){
+            double val = banded_vals[i*A.get_num_bands() + band_j];
+            // int val = A.get_element(i, j);
+            // if(elem_count == 0 && i == 0){
+            //     std::cout << "val: " << val << std::endl;
+            // }
+            if((val!= 0.0)){
                 this->col_idx[elem_count] = j;
                 this->values[elem_count] = val;
                 elem_count++;
+            }
+            else{
+                // if (i == 0){
+                // std::cout << "val is zero: val: " << val << std::endl;
+                // }
             }
 
             this->row_ptr[i + 1] = elem_count;
         }
     }
-
+    // std::cout << "elem_count: " << elem_count << std::endl;
+    // std::cout << "nnz: " << this->nnz << std::endl;
     assert(elem_count == this->nnz);
 
 }
@@ -119,6 +135,36 @@ void sparse_CSR_Matrix<T>::sanity_check_3D27P(){
     assert(this->row_ptr.size() == this->num_rows + 1);
     assert(this->col_idx.size() == this->nnz);
     assert(this->nnz == this->row_ptr[this->num_rows]);
+}
+
+template <typename T>
+void sparse_CSR_Matrix<T>::iterative_values(){
+
+    double val = 0.1;
+
+    for (int i = 0; i < this->nnz; i++) {
+        this->values[i] = val;
+        val += 0.1;
+        if (val > 10.0) {
+            val = 0.1;
+        }
+        // if(val < 0.1){
+        //     std::cout << "val is zero" << std::endl;
+        // }
+    }
+}
+
+template <typename T>
+void sparse_CSR_Matrix<T>::random_values(int seed){
+    srand(seed);
+    for (int i = 0; i < this->nnz; i++) {
+        T val = (T)rand() / RAND_MAX;
+        // if(i==0){
+        //     std::cout << "val: " << val << std::endl;
+        // }
+        this->values[i] = val;
+    }
+    // std::cout << "values[0]: " << this->values[0] << std::endl;
 }
 
 template <typename T>
