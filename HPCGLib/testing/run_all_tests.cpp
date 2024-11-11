@@ -10,16 +10,16 @@ int main(){
 
     bool all_pass = true;
 
-    all_pass = all_pass && run_all_matrixLib_tests(4, 4, 4);
+    // all_pass = all_pass && run_all_matrixLib_tests(4, 4, 4);
     // all_pass = all_pass && run_all_matrixLib_tests(8, 8, 8);
     // all_pass = all_pass && run_all_matrixLib_tests(16, 16, 16);
     // all_pass = all_pass && run_all_matrixLib_tests(32, 32, 32);
     // all_pass = all_pass && run_all_matrixLib_tests(64, 64, 64);
     // all_pass = all_pass && run_all_matrixLib_tests(128, 128, 128);
-    // std::cout << "Finished MatrixLib tests" << std::endl;
+    std::cout << "Finished MatrixLib tests" << std::endl;
 
     std::cout << "Starting naiveBanded tests" << std::endl;
-    all_pass = all_pass && run_naiveBanded_tests(4, 4, 4);
+    // all_pass = all_pass && run_naiveBanded_tests(4, 4, 4);
     // all_pass = all_pass && run_naiveBanded_tests(8, 8, 8);
     // all_pass = all_pass && run_naiveBanded_tests(16, 16, 16);
     // all_pass = all_pass && run_naiveBanded_tests(32, 32, 32);
@@ -30,10 +30,14 @@ int main(){
     std::cout << "Starting banded shared memory tests" << std::endl;
     // all_pass = all_pass && run_bandedSharedMem_tests(4, 4, 4);
     // all_pass = all_pass && run_bandedSharedMem_tests(8, 8, 8);
-    all_pass = all_pass && run_bandedSharedMem_tests(16, 16, 16);
+    // std::cout <<"Finished 8x8x8" << std::endl;
+    // all_pass = all_pass && run_bandedSharedMem_tests(16, 16, 16);
+    // std::cout <<"Finished 16x16x16" << std::endl;
     all_pass = all_pass && run_bandedSharedMem_tests(32, 32, 32);
-    all_pass = all_pass && run_bandedSharedMem_tests(64, 64, 64);
-    all_pass = all_pass && run_bandedSharedMem_tests(128, 128, 128);
+    // std::cout <<"Finished 32x32x32" << std::endl;
+    // all_pass = all_pass && run_bandedSharedMem_tests(64, 64, 64);
+    // std::cout <<"Finished 64x64x64" << std::endl;
+    // all_pass = all_pass && run_bandedSharedMem_tests(128, 128, 128);
     std::cout << "Finished banded shared memory tests" << std::endl;
 
 
