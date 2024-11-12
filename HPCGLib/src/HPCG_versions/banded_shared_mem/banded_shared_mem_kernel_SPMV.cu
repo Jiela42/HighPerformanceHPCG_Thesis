@@ -41,6 +41,9 @@ __device__ void test_val_cooperatively(double * array, int num_elements, double 
             double* x, double* y
         ){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    int bid = blockIdx.x * blockDim.x;
+    int total_size_of_worked_on_rows = rows_per_sm * gridDim.x;
+
     int necessary_pad = 0;
     if((num_bands + 3*num_consecutive_memory_regions + 1) %2 != 0){
         necessary_pad = 1;
@@ -54,27 +57,12 @@ __device__ void test_val_cooperatively(double * array, int num_elements, double 
     double* shared_x = (double*)& sum_x_elem_per_conseq_mem[num_consecutive_memory_regions + 1 + necessary_pad];  
 
     // int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    int bid = blockIdx.x * blockDim.x;
-    int total_size = blockDim.x * gridDim.x;
 
     int sum_x_elem = 0;
 
     // first the first thread of each block loads any offsets
-
     if (threadIdx.x == 0){
-    // printf("shard_x before\n");
-    // print_values_thread(shared_x, 8);
 
-    // print the pointer addresses
-    // printf("shared_j_min_i: %p\n", shared_j_min_i);
-    // printf("shared_j_min: %p\n", shared_j_min);
-    // printf("shared_j_max: %p\n", shared_j_max);
-    // printf("sum_x_elem_per_conseq_mem: %p\n", sum_x_elem_per_conseq_mem);
-    // printf("shared_x: %p\n", shared_x);
-    // printf("banded_A: %p\n", banded_A);
-    // printf("x: %p\n", x);
-
-    // print_offsets_thread(shared_j_min, 8);
         for (int i = 0; i < num_bands; i++){
             shared_j_min_i[i] = j_min_i[i];
         }
@@ -86,32 +74,25 @@ __device__ void test_val_cooperatively(double * array, int num_elements, double 
         }
         // we need to also have the last element of sum_x_elem_per_conseq_mem (where all of them are summed up i.e. num_x_elem)
         sum_x_elem_per_conseq_mem[num_consecutive_memory_regions] = sum_x_elem;
-
-        // print_offsets_thread(shared_j_min_i, 8);
-        if (tid == 0){
-
-        printf("num_x_elem: %d\n", num_x_elem);
-        printf("num_consecutive_memory_regions: %d\n", num_consecutive_memory_regions);
-        printf("j_min\n");
-        print_offsets_thread(shared_j_min, 1);
-        printf("j_max\n");
-        print_offsets_thread(shared_j_max, 1);
-        printf("sum_x_elem_per_conseq_mem\n");
-        print_offsets_thread(sum_x_elem_per_conseq_mem, 2);
-        printf("sum_x_elem: %d\n", sum_x_elem);
-        printf("num_threads_in block: %d\n", blockDim.x);
-        }
     }
 
-    // synchronize the threads after preliminary loading
-    __syncthreads();
 
     // every thread computes one or more rows of the matrix
-    for (int iter = 0; iter*total_size < num_rows; iter++) {
-        // does this not do anything? or does it just copy the wrong values?
+    for (int iter = 0; iter*total_size_of_worked_on_rows < num_rows; iter++) {
+        // synchronize the threads after loading the offsets and after each iteration
+        __syncthreads();
 
         // row_start refers to the first row of this SM
-        int row_start = iter * total_size + bid;
+        // which depends on the number of rows per sm, the iteration and the block_id
+        int row_start = iter * total_size_of_worked_on_rows + blockIdx.x * rows_per_sm;
+
+        // if(blockIdx.x == 181 && threadIdx.x == 0){
+        //     printf("blockIdx: %d\n", blockIdx.x);
+        //     printf("row_start: %d\n", row_start);
+        //     for(int meow = 0; meow < num_consecutive_memory_regions; meow++){
+        //         printf("min_j[%d]: %d max_j[%d]: %d\n", meow, min_j[meow] + row_start, meow, max_j[meow]+ row_start);
+        //     }
+        // }
 
         // between each block of rows of the matrix, we need to allocate the new entries of x
         // these entries of x depend on the row start
@@ -119,17 +100,11 @@ __device__ void test_val_cooperatively(double * array, int num_elements, double 
 
         for (int i = threadIdx.x; i < num_x_elem; i += blockDim.x){
 
-
             // first we find which offset we need to take
             for (int j = 0; j < num_consecutive_memory_regions; j++){
-            // if(tid ==0){
-            //     printf("block_idx: %d\n", blockIdx.x);
-            //     printf("i: %d\n", i);
-            //     printf("j: %d\n", j);
-            //     printf("sum_x_elem_per_conseq_mem ptr: %p\n", sum_x_elem_per_conseq_mem);
-            //     // printf("sum_x_elem_per_conseq_mem[1] ptr: %p\n", &sum_x_elem_per_conseq_mem[1]);
-            //     printf("sum_x_elem_per_conseq_mem[j]: %d\n", sum_x_elem_per_conseq_mem[j]);
-            //     printf("sum_x_elem_per_conseq_mem[j+1]: %d\n", sum_x_elem_per_conseq_mem[j+1]);
+
+            // if(i==3144 && blockIdx.x == 181 && row_start == 255210){
+            //     printf("i: %d, j: %d, sum_x_elem_per_conseq_mem[j]: %d, sum_x_elem_per_conseq_mem[j+1]: %d\n", i, j, sum_x_elem_per_conseq_mem[j], sum_x_elem_per_conseq_mem[j+1]);
             // }
                 if (i >= sum_x_elem_per_conseq_mem[j] && i < sum_x_elem_per_conseq_mem[j+1]){
 
@@ -137,82 +112,74 @@ __device__ void test_val_cooperatively(double * array, int num_elements, double 
                     // then we get first_elem + 1, ..., j_max[0] + row_start
                     // so what is the i-th elem?
                     // it is j_min_i[j] + i + row_start
-                    int target_j = shared_j_min[j] + i + row_start;
-                    // if(threadIdx.x==0){
-                    //     printf("target_j: %d\n", target_j);
+                    int target_j = shared_j_min[j] + i + row_start - sum_x_elem_per_conseq_mem[j];
+
+                    // if(i==3144 && blockIdx.x == 181 && row_start == 255210){
+                    //     printf("bid: %d, target_j: %d\n",blockIdx.x, target_j);
                     // }
+
                     // check that it is within the bounds of x
                     if(target_j >= 0 && target_j < num_rows){
+                        // printf("target_j: %d, blockid %d, threadid: %d\n", target_j, blockIdx.x, threadIdx.x);
                         shared_x[i] = x[target_j];
-                        // if(tid == 0){
-                        //     printf("shared_x[%d] ptr: %p\n", i, &shared_x[i]);
+                        // if(target_j == 259306){
+                        //     printf("target_j: %d, i: %d, blockid %d, threadid: %d\n", target_j,i, blockIdx.x, threadIdx.x);
                         // }
-                        // if(i < 8){
-                        //     printf("shared_x[%d]: %f\n", i, shared_x[i]);
-                        // }
-                        // printf("printing from written x\n");
-                        // printf("shared_x[%d]: %f\n", i, shared_x[i]);
-                        // printf("x[%d]: %f\n", target_j, x[target_j]);
                     }
-
                     // once we found it, we break
                     break;
                 }
             }
-            // if (tid == 0){
-
-            //     printf("i: %d\n", i);
-            //     printf("sum_x_elem_per_conseq_mem[0]: %d\n", sum_x_elem_per_conseq_mem[0]);
-            //     printf("sum_x_elem_per_conseq_mem[1]: %d\n", sum_x_elem_per_conseq_mem[1]);
-            // }
-
         }
-
-    
 
         // synchronize the threads after loading x
         __syncthreads();
-
-        // test_val_cooperatively(shared_x, 513, 1.0);
-
-        // if(threadIdx.x == 0)
-        //     {printf("shared_x after\n");
-        //     printf("shared_x[0]: %f\n", shared_x[0]);
-        //     // printf()
-        // }
-        // print_values_cooperatively(shared_x, 8);
-        // if(threadIdx.x ==0){
-
-        // for(int meow = 0; meow < num_bands; meow++){
-        //     double val = banded_A[meow];
-        //     if (val != 0.0){
-        //         printf("banded_A[%d]: %f\n", meow, val);
-        //     }
-        // }
-        // }
         
         // now we compute the matrix-vector product
         for(int row = row_start + threadIdx.x; row < row_start + rows_per_sm && row < num_rows; row += blockDim.x){
             // compute the matrix-vector product for the ith row
-            // if(row == 0){
-            //     printf("yi before: %f\n", y[row]);
-            // }
             double sum_i = 0;
+            // if(row == 255210){
+            //     printf("row: %d, bid: %d, tid: %d, min_j %d, max_j %d\n", row, blockIdx.x, threadIdx.x, min_j[2] + row_start, max_j[2]+ row_start);
+            // }
             for (int band = 0; band < num_bands; band++) {
                 int j = row + shared_j_min_i[band];
                 int current_row = row * num_bands;
+                
+                // if(row == 255210){
+                //     printf("band: %d, j: %d\n", band, j);
+                // }
+
+
+                // printf("reading row: %d from bid %d and thread number %d \n", row, blockIdx.x, threadIdx.x);
+                // debug notes: it looks like we tried to read all the rows
+                // we iterate over the consecutive memory regions to find the correct j
+                for(int mem_reg = 0; mem_reg < num_consecutive_memory_regions; mem_reg++){
+                    // we test if it is in a specific memory segment, which is also dependent on the row_start
+                    if(j >= shared_j_min[mem_reg] + row_start && j < shared_j_max[mem_reg] + row_start){
+                        j = j - (shared_j_min[mem_reg] + row_start) + sum_x_elem_per_conseq_mem[mem_reg];
+                        break;
+                    }
+                }
+
+                // if (row == 255210)
+                // {
+                //     printf("new j: %d\n", j);
+                // }
+                
                 if (j >= 0 && j < num_rows) {
+                    // we have to calculate what j would be. since we only have 1410 rows per block but j can be up to num_rows
+                    
                     sum_i += banded_A[current_row + band] * shared_x[j];
-                    // if (row == 0){
+                    // if (row == 255210){
                     //     printf("banded_A: %f\n", banded_A[current_row + band]);
                     //     printf("shared_x: %f\n", shared_x[j]);
                     // }
                 }
             }
+            // printf("writing row: %d from bid %d and thread number %d \n", row, blockIdx.x, threadIdx.x);
             y[row] = sum_i;
-            // if(row == 0){
-            // printf("yi after: %f\n", y[row]);
-            // }
+
         }
     }
 }

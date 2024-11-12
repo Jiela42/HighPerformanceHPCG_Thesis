@@ -17,8 +17,11 @@ bool run_bandedSharedMem_tests_on_matrix(sparse_CSR_Matrix<double> A){
     int nz = A.get_nz();
     
     // random seeded x vector
-    // std::vector<double> x = generate_random_vector(nx*ny*nz, RANDOM_SEED);
-    std::vector<double> x (nx*ny*nz, 1.0);
+    std::vector<double> x = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+    // std::vector<double> x (nx*ny*nz, 1.0);
+    // for(int i = 0; i < x.size(); i++){
+    //     x[i] = i%10;
+    // }
 
     banded_Matrix<double> A_banded;
     A_banded.banded_Matrix_from_sparse_CSR(A);
@@ -103,6 +106,7 @@ bool run_bandedSharedMem_tests_on_matrix(sparse_CSR_Matrix<double> A){
 bool run_bandedSharedMem_tests(int nx, int ny, int nz){
 
     bool all_pass = true;
+    bool current_pass = true;
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -114,24 +118,28 @@ bool run_bandedSharedMem_tests(int nx, int ny, int nz){
     std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
     sparse_CSR_Matrix<double> A = problem.first;
 
-    all_pass = all_pass && run_bandedSharedMem_tests_on_matrix(A);
+    current_pass = run_bandedSharedMem_tests_on_matrix(A);
 
-    if(not all_pass){
+    if(not current_pass){
         std::cout << "banded shared memory tests failed for standard HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
     }
+    all_pass = all_pass && current_pass;
 
-    // A.iterative_values();
+    A.iterative_values();
 
-    // all_pass = all_pass && run_bandedSharedMem_tests_on_matrix(A);
-    // if(not all_pass){
-    //     std::cout << "banded shared memory tests failed for iterative values HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
-    // }
+    current_pass = run_bandedSharedMem_tests_on_matrix(A);
+    if(not current_pass){
+        std::cout << "banded shared memory tests failed for iterative values HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
+    }
 
-    // A.random_values(RANDOM_SEED);
-    // all_pass = all_pass && run_bandedSharedMem_tests_on_matrix(A);
-    // if(not all_pass){
-    //     std::cout << "banded shared memory tests failed for random values HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
-    // }
+    all_pass = all_pass && current_pass;
+
+    A.random_values(RANDOM_SEED);
+    current_pass = run_bandedSharedMem_tests_on_matrix(A);
+    if(not current_pass){
+        std::cout << "banded shared memory tests failed for random values HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
+    }
+    all_pass = all_pass && current_pass;
 
     return all_pass;
    

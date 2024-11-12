@@ -9,7 +9,7 @@ void eliminate_overlap(int* min_j, int* max_j, int num_thick_bands, int* num_x_e
     *num_x_elem = 0;
 
     for (int i = 1; i < num_thick_bands; i++){
-        if (max_j[ctr_consecutive_memory_regions-1] <= min_j[i]){
+        if (max_j[ctr_consecutive_memory_regions-1] >= min_j[i]){
             max_j[ctr_consecutive_memory_regions-1] = max_j[i];
         }
         else{
@@ -20,13 +20,8 @@ void eliminate_overlap(int* min_j, int* max_j, int num_thick_bands, int* num_x_e
     }
 
     for (int i = 0; i < ctr_consecutive_memory_regions; i++){
-        // nx += max_j[i] - min_j[i];
         *num_x_elem += max_j[i] - min_j[i];
     }
-
-    // printf("from eliminate overlap ctr_consecutive_memory_regions: %d\n", ctr_consecutive_memory_regions);
-    // printf("from eliminate overlap nx: %d\n", nx);
-    printf("from eliminate overlap num_x_elem: %d\n", *num_x_elem);
 
     *num_consecutive_memory_regions = ctr_consecutive_memory_regions;
 }
@@ -56,33 +51,25 @@ void Banded_Shared_Memory_Implementation<T>::banded_shared_memory_computeSPMV(
             if (j_min_i_host[i-1] + 1 != j_min_i_host[i]){
                 new_elem_per_row ++;
             }
-        }    
+        }
 
         int shared_mem_bytes = 1024 * SHARED_MEM_SIZE;
         int shared_mem_doubles = shared_mem_bytes / sizeof(double);
+        int shared_mem_doubles_for_x = shared_mem_doubles - 2*num_bands;
 
-        int rows_per_sm = (shared_mem_doubles -  2 * num_bands) / new_elem_per_row;
+        int rows_per_sm = (shared_mem_doubles_for_x -  2 * num_bands) / new_elem_per_row;
         int min_j [num_bands];
         int max_j [num_bands];
         int num_thick_bands = 1;
         int num_conseq_mem_reg = 0;
         int num_x_elem = 0;
-        
-        printf("shared_mem_doubles - num_bands - 2: %d\n", shared_mem_doubles - num_bands - 2);
-        
+                
         if(shared_mem_doubles - num_bands - 2 > num_rows){
             rows_per_sm = num_rows;
             min_j[0] = 0;
             max_j[0] = num_rows;
             num_conseq_mem_reg = 1;
             num_x_elem = num_rows;
-
-            printf("rows_per_sm: %d\n", rows_per_sm);
-            printf("num_x_elem: %d\n", num_x_elem);
-            printf("num_conseq_mem_reg: %d\n", num_conseq_mem_reg);
-            printf("for num_rows: %d, it all fits\n", num_rows);
-
-
         }
         else{
 
@@ -94,7 +81,6 @@ void Banded_Shared_Memory_Implementation<T>::banded_shared_memory_computeSPMV(
 
             // this refers to how many independent bands we end up having
             for (int band = 1; band < num_bands; band++){
-                printf("j_min_i_host[%d]: %d\n", band-1, j_min_i_host[band-1]);
                 
                 if (j_min_i_host[band-1] + 1 == j_min_i_host[band]){
                     max_j[num_thick_bands-1] += 1;
@@ -103,12 +89,9 @@ void Banded_Shared_Memory_Implementation<T>::banded_shared_memory_computeSPMV(
                     // again in the kernel this will need to be adjusted
                     min_j[num_thick_bands] = j_min_i_host[band];
                     max_j[num_thick_bands] = j_min_i_host[band] + rows_per_sm;
-                    printf("min_j[%d]: %d\n", num_thick_bands, min_j[num_thick_bands]);
-                    printf("max_j[%d]: %d\n", num_thick_bands, max_j[num_thick_bands]);
                     num_thick_bands ++;
                 }
             }
-
             eliminate_overlap(min_j, max_j, num_thick_bands, &num_x_elem, &num_conseq_mem_reg);
         }
 
@@ -125,16 +108,12 @@ void Banded_Shared_Memory_Implementation<T>::banded_shared_memory_computeSPMV(
         int * min_j_d;
         int * max_j_d;
 
-        CHECK_CUDA(cudaMalloc(&min_j_d, num_bands * sizeof(int)));
-        CHECK_CUDA(cudaMalloc(&max_j_d, num_bands * sizeof(int)));
+        CHECK_CUDA(cudaMalloc(&min_j_d, num_conseq_mem_reg * sizeof(int)));
+        CHECK_CUDA(cudaMalloc(&max_j_d, num_conseq_mem_reg * sizeof(int)));
 
-        CHECK_CUDA(cudaMemcpy(min_j_d, min_j, num_bands * sizeof(int), cudaMemcpyHostToDevice));
-        CHECK_CUDA(cudaMemcpy(max_j_d, max_j, num_bands * sizeof(int), cudaMemcpyHostToDevice)); 
+        CHECK_CUDA(cudaMemcpy(min_j_d, min_j, num_conseq_mem_reg * sizeof(int), cudaMemcpyHostToDevice));
+        CHECK_CUDA(cudaMemcpy(max_j_d, max_j, num_conseq_mem_reg * sizeof(int), cudaMemcpyHostToDevice)); 
 
-        std::cout << "size_shared_memory: " << size_shared_memory << std::endl;
-        std::cout << "num_conseq_mem_reg: " << num_conseq_mem_reg << std::endl;
-        std::cout << "num_x_elem: " << num_x_elem << std::endl;
-        std::cout << "rows_per_sm: " << rows_per_sm << std::endl;
 
         // call the kernel
         banded_shared_memory_SPMV_kernel<<<num_blocks, num_threads, size_shared_memory>>>(
@@ -145,6 +124,7 @@ void Banded_Shared_Memory_Implementation<T>::banded_shared_memory_computeSPMV(
         );
 
         // synchronize the device
+        CHECK_CUDA(cudaGetLastError());
         CHECK_CUDA(cudaDeviceSynchronize());
     }
 
