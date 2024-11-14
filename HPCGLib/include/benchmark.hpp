@@ -13,6 +13,7 @@
 // these functions run the benchmark for specific Impelmentations and matrix sizes
 void run_cuSparse_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
 void run_naiveBanded_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
+void run_bandedSharedMem_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
 
 // this function allows us to run the whole abstract benchmark
 // we have method overloading to support different matrix types

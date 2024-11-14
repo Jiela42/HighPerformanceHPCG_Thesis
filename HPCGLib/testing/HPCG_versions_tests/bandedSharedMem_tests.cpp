@@ -33,7 +33,7 @@ bool run_bandedSharedMem_tests_on_matrix(sparse_CSR_Matrix<double> A){
     //     }
     // }
 
-    std::cout << "num_rows: " << A.get_num_rows() << std::endl;
+    // std::cout << "num_rows: " << A.get_num_rows() << std::endl;
 
     int num_rows = A.get_num_rows();
     int num_cols = A.get_num_cols();

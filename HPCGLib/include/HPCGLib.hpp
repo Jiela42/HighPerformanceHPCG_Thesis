@@ -11,7 +11,10 @@
 template <typename T>
 class HPCG_functions {
     public:
+        bool test_before_bench = true;
         const std::string version_name;
+        // this string is used when small changes are benchmarked to see their effect
+        std::string additional_parameters = "vanilla_version";
     // CG starts with having the data on the CPU
         virtual void compute_CG(sparse_CSR_Matrix<T> & A, std::vector<T> & b, std::vector<T> & x) = 0;
         
@@ -54,7 +57,6 @@ class HPCG_functions {
             T * x_d, T & y_d, T & result_d // again: the vectors x, y and result are already on the device
         ) = 0;
 
-        bool test_before_bench = true;
 
         int getNumberOfIterations() const {
             return num_bench_iter;

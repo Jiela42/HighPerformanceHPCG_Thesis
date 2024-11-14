@@ -16,7 +16,8 @@ void run_cuSparse_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_pa
     
     cuSparse_Implementation<double> implementation;
     std::string implementation_name = implementation.version_name;
-    CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, "41-44", "3d_27pt", implementation_name, folder_path);
+    std::string additional_params = implementation.additional_parameters;
+    CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, "41-44", "3d_27pt", implementation_name, additional_params, folder_path);
 
     // Allocate the memory on the device
     int * A_row_ptr_d;

@@ -18,6 +18,7 @@ CudaTimer::CudaTimer(
         std::string ault_node,
         std::string matrix_type,
         std::string version_name,
+        std::string additional_parameters,
         // this folderpath leads to a timestamped folder, this way we only get a single folder per benchrun
         std::string folder_path
     ) {
@@ -30,6 +31,7 @@ CudaTimer::CudaTimer(
         this->ault_node = ault_node;
         this->matrix_type = matrix_type;
         this->version_name = version_name;
+        this->additional_parameters = additional_parameters;
         this->folder_path = folder_path;
  }
 
@@ -111,10 +113,10 @@ void CudaTimer::writeResultsToCsv() {
                 + matrix_type + ","
                 + std::to_string(nx) + "," + std::to_string(ny) + "," + std::to_string(nz) + "," + std::to_string(nnz) + ",";
 
-    writeCSV(base_filename + "CG.csv", base_fileheader + "CG", CG_times);
-    writeCSV(base_filename + "MG.csv", base_fileheader + "MG", MG_times);
-    writeCSV(base_filename + "SymGS.csv", base_fileheader + "SymGS", SymGS_times);
-    writeCSV(base_filename + "SPMV.csv", base_fileheader + "SPMV", SPMV_times);
-    writeCSV(base_filename + "Dot.csv", base_fileheader + "Dot", Dot_times);
+    writeCSV(base_filename + "CG.csv", base_fileheader + "CG," + additional_parameters, CG_times);
+    writeCSV(base_filename + "MG.csv", base_fileheader + "MG," + additional_parameters, MG_times);
+    writeCSV(base_filename + "SymGS.csv", base_fileheader + "SymGS," + additional_parameters, SymGS_times);
+    writeCSV(base_filename + "SPMV.csv", base_fileheader + "SPMV," + additional_parameters, SPMV_times);
+    writeCSV(base_filename + "Dot.csv", base_fileheader + "Dot," + additional_parameters, Dot_times);
     
 }

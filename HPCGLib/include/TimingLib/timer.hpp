@@ -16,6 +16,7 @@ public:
         std::string ault_node,
         std::string matrix_type,
         std::string version_name,
+        std::string additional_parameters,
         std::string folder_path
     );
 
@@ -45,6 +46,7 @@ private:
     std::string ault_node;
     std::string matrix_type;
     std::string version_name;
+    std::string additional_parameters;
 
     std::vector<float> CG_times;
     std::vector<float> MG_times;

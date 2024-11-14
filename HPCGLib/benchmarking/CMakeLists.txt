@@ -15,6 +15,7 @@ add_executable(run_full_bench
     abstract_benchmark_functions.cpp
     benchmark_cuSparse.cpp
     benchmark_naiveBanded.cpp
+    benchmark_bandedSharedMem.cpp
 )
 
 target_link_libraries(run_bench_test

@@ -1,0 +1,11 @@
+Banded explicit Shared Memory (rows_per_SM pow2),41-44,3d_27pt,256,128,128,111777784,SPMV,align number of rows per SM with the number of threads per block
+7.41475
+6.10918
+6.22275
+6.61299
+6.37133
+6.09894
+6.36416
+6.10304
+6.4727
+6.25766

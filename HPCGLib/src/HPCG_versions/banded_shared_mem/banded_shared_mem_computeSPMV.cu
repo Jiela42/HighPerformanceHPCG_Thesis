@@ -37,8 +37,6 @@ void Banded_Shared_Memory_Implementation<T>::banded_shared_memory_computeSPMV(
     ) {
 
         // since every thread is working on one or more rows we need to base the number of threads on that
-        int num_threads = NUM_CORES_PER_SM * 4;
-        int num_blocks = std::min(NUM_PHYSICAL_CORES, ceiling_division(num_rows, num_threads));
 
         // dynamically calculate how many rows can be handled at the same time
         // i.e. how many doubles are required per row
@@ -58,6 +56,9 @@ void Banded_Shared_Memory_Implementation<T>::banded_shared_memory_computeSPMV(
         int shared_mem_doubles_for_x = shared_mem_doubles - 2*num_bands;
 
         int rows_per_sm = (shared_mem_doubles_for_x -  2 * num_bands) / new_elem_per_row;
+        rows_per_sm = next_smaller_power_of_two(rows_per_sm);
+        int num_threads = 1024;
+        int num_blocks = std::min(NUM_PHYSICAL_CORES *2, ceiling_division(num_rows, rows_per_sm));
         int min_j [num_bands];
         int max_j [num_bands];
         int num_thick_bands = 1;

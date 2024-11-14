@@ -29,10 +29,16 @@ sizes_to_plot =[
 ]
 
 versions_to_plot = [
+    "BaseTorch",
+    "matlab_reference",
     "cuSparse&cuBLAS",
     "Naive Banded",
-    "Naive Banded (1 thread per physical core)",
-    "Naive Banded (4 thread per physical core)",
+    # "Naive Banded (1 thread per physical core)",
+    # "Naive Banded (4 thread per physical core)",
+    "Banded explicit Shared Memory",
+    "Banded explicit Shared Memory (rows_per_SM pow2)",
+    "Banded explicit Shared Memory (rows_per_SM pow2 1024 threads)",
+    # "Banded explicit Shared Memory (rows_per_SM pow2 1024 threads 2x physical cores)",
 ]
 
 y_axis_to_plot = [
@@ -190,7 +196,7 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
         return
 
     sns.set(style="whitegrid")
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(25, 6))
 
     ax = sns.barplot(x=x, order=x_order, y=y, hue=hue, hue_order=hue_order, data=data,  estimator= np.median, ci=98)
     fig = ax.get_figure()
