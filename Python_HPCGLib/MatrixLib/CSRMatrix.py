@@ -4,17 +4,17 @@ import torch
 from typing import List, Tuple
 import itertools
 
-from MatrixUtils import MatrixType
-from COOMatrix import COOMatrix
-from BandedMatrix import BandedMatrix
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.MatrixUtils import MatrixType
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.MatrixUtils import developer_mode
 
 
 class CSRMatrix:
 
-    def __init__(self):
+    def __init__(self: 'CSRMatrix'):
         self.matrixType = MatrixType.UNKNOWN
         self.num_cols = None
         self.num_rows = None
+        self.nnz = None
         self.row_ptr = None
         self.col_idx =  None
         self.values = None
@@ -26,13 +26,13 @@ class CSRMatrix:
         self.ny = None
         self.nz = None
 
-
-    def __init__(self, num_cols:int, num_rows:int, row_ptr: List[int], col_idx: List[int], values: List[float]):
+    def set_CSRMatrix(self: 'CSRMatrix', num_cols:int, num_rows:int, row_ptr: List[int], col_idx: List[int], values: List[float]):
         
         self.matrixType = MatrixType.UNKNOWN
 
         self.num_cols = num_cols
         self.num_rows = num_rows
+        self.nnz = len(values)
 
         assert len(row_ptr) == num_rows + 1, "Error in Matrix Initialization: row_ptr must have length num_rows + 1"
         assert len(col_idx) == values, "Error in Matrix Initialization: col_idx must have length values"
@@ -49,7 +49,7 @@ class CSRMatrix:
         self.ny = None
         self.nz = None
 
-    def create_3d27pt_CSRMatrix(self, nx: int, ny: int, nz: int):
+    def create_3d27pt_CSRMatrix(self: 'CSRMatrix', nx: int, ny: int, nz: int):
         self.matrixType = MatrixType.Stencil_3D27P
         self.num_rows = nx * ny * nz
         self.num_cols = nx * ny * nz
@@ -59,7 +59,7 @@ class CSRMatrix:
 
         num_rows = self.num_rows
 
-
+        nnz = 0
         col_indices = [[] for _ in range(num_rows)]
         values = [[] for _ in range(num_rows)]
 
@@ -87,6 +87,7 @@ class CSRMatrix:
                                                 values[i].append(-1.0)
                                             nnz_i += 1
                     nnz_per_row[i] = nnz_i
+                    nnz += nnz_i
 
         # Concatenate all lists in col_indices and values
         col_indices = list(itertools.chain(*col_indices))
@@ -94,14 +95,25 @@ class CSRMatrix:
 
         row_idx = [0]
 
-        for i in range(1,num_rows+1):
-            row_idx.append(row_idx[i-1] + nnz_per_row[i])
+        for i in range(num_rows):
+            # this works because we are appending and because we prepended a zero
+            # this means for row i, the row_idx[i] contains the sum of nnz for all previous rows, not including row i
+            row_idx.append(row_idx[i] + nnz_per_row[i])
 
+        self.nnz = nnz
         self.row_ptr = row_idx
         self.col_idx = col_indices
         self.values = values
 
-    def to_np(self) -> Tuple[np.array, np.array, np.array]:
+    def iterative_values(self: 'CSRMatrix'):
+        next_val = 0.1
+        for i in range(self.nnz):
+            self.values[i] = next_val
+            next_val += 0.1
+            if next_val > 11.1:
+                next_val = 0.1
+
+    def to_np(self: 'CSRMatrix') -> Tuple[np.array, np.array, np.array]:
 
         # note that np does not support CSR Matrices, so we return np arrays
         if self.np_matrix is not None:
@@ -115,7 +127,7 @@ class CSRMatrix:
 
             return self.np_matrix
 
-    def to_torch(self) -> Tuple[torch.tensor, torch.tensor, torch.tensor]:
+    def to_torch(self: 'CSRMatrix') -> Tuple[torch.tensor, torch.tensor, torch.tensor]:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         # note that this version of torch (which we have to use for the GPU we work on),
@@ -132,45 +144,74 @@ class CSRMatrix:
 
             return self.torch_matrix
 
+    def get_element(self: 'CSRMatrix', i: int, j: int) -> float:
+        for k in range(self.row_ptr[i], self.row_ptr[i+1]):
+            if self.col_idx[k] == j:
+                return self.values[k]
+        if developer_mode:
+            print(f"WARNING: Element ({i}, {j}) not found in CSR matrix")
+        return 0.0
 
-    def to_coo(self, cooMatrix: COOMatrix):
-        cooMatrix.num_cols = self.num_cols
-        cooMatrix.num_rows = self.num_rows
-
-        coo_row_idx = []
-        coo_col_idx = []
-        coo_values = self.values.copy()
-
+    def compare_to(self: 'CSRMatrix', other: 'CSRMatrix') -> bool:
+        if self.num_cols != other.num_cols:
+            if developer_mode:
+                print(f"Error: num_cols does not match: {self.num_cols} != {other.num_cols}")
+            return False
+        
+        if self.num_rows != other.num_rows:
+            if developer_mode:
+                print(f"Error: num_rows does not match: {self.num_rows} != {other.num_rows}")
+            return False
+        
+        if self.nnz != other.nnz:
+            if developer_mode:
+                print(f"Error: nnz does not match: {self.nnz} != {other.nnz}")
+            return False
+        
+        if self.row_ptr != other.row_ptr:
+            if developer_mode:
+                print(f"Error: row_ptr does not match: {self.row_ptr} != {other.row_ptr}")
+            return False
+        
+        if self.col_idx != other.col_idx:
+            if developer_mode:
+                print(f"Error: col_idx does not match: {self.col_idx} != {other.col_idx}")
+            return False
+        
+        if self.values != other.values:
+            if developer_mode:
+                for i in range(self.num_rows):
+                    for j in range(self.row_ptr[i], self.row_ptr[i+1]):
+                        if self.values[j] != other.values[j]:
+                            print(f"Error: values at row {i}, col {self.col_idx[j]} do not match: {self.values[j]} != {other.values[j]}")
+                            break
+            return False
+        
+        if self.nx != other.nx:
+            if developer_mode:
+                print(f"Error: nx does not match: {self.nx} != {other.nx}")
+            return False
+        
+        if self.ny != other.ny:
+            if developer_mode:
+                print(f"Error: ny does not match: {self.ny} != {other.ny}")
+            return False
+        
+        if self.nz != other.nz:
+            if developer_mode:
+                print(f"Error: nz does not match: {self.nz} != {other.nz}")
+            return False
+        
+        if self.matrixType != other.matrixType:
+            if developer_mode:
+                print(f"Error: matrixType does not match: {self.matrixType} != {other.matrixType}")
+            return False
+        return True
+    
+    def to_dense(self: 'CSRMatrix') -> np.array:
+        dense_matrix = np.zeros((self.num_rows, self.num_cols))
         for i in range(self.num_rows):
             for j in range(self.row_ptr[i], self.row_ptr[i+1]):
-                coo_row_idx.append(i)
-                coo_col_idx.append(self.col_idx[j])
-
-        cooMatrix.row_idx = coo_row_idx
-        cooMatrix.col_idx = coo_col_idx
-        cooMatrix.values = coo_values
-
-
-    def to_banded(self, bandedMatrix: BandedMatrix):
-        if self.matrixType == Stencil_3D27P:
-            bandedMatrix.num_cols = self.num_cols
-            bandedMatrix.num_rows = self.num_rows
-            bandedMatrix.num_bands = 27
-
-            banded_values = [[]]
-            j_min_i =[      [(-1, -1, -1): 0, (0, -1, -1): 1, (1, -1, -1): 2,
-        (-1, 0, -1): 3, (0, 0, -1): 4, (1, 0, -1): 5,
-        (-1, 1, -1): 6, (0, 1, -1): 7, (1, 1, -1): 8,
-        (-1, -1, 0): 9, (0, -1, 0): 10, (1, -1, 0): 11,
-        (-1, 0, 0): 12, (0, 0, 0): 13, (1, 0, 0): 14,
-        (-1, 1, 0): 15, (0, 1, 0): 16, (1, 1, 0): 17,
-        (-1, -1, 1): 18, (0, -1, 1): 19, (1, -1, 1): 20,
-        (-1, 0, 1): 21, (0, 0, 1): 22, (1, 0, 1): 23,
-        (-1, 1, 1): 24, (0, 1, 1): 25, (1, 1, 1): 26
-    ]
-
-        else:
-            assert False, "Error: to_banded only implemented for Stencil_3D27P matrices"
-
-
+                dense_matrix[i, self.col_idx[j]] = self.values[j]
+        return dense_matrix
     

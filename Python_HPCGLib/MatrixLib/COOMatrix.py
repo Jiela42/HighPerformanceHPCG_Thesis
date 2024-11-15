@@ -4,16 +4,19 @@ import torch
 from typing import List, Tuple
 import itertools
 
-from MatrixUtils import MatrixType
-from CSRMatrix import CSRMatrix
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.MatrixUtils import MatrixType
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.MatrixUtils import developer_mode
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.CSRMatrix import CSRMatrix
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.BandedMatrix import BandedMatrix
 
 
-class CSRMatrix:
+class COOMatrix:
 
-    def __init__(self):
+    def __init__(self: 'COOMatrix'):
         self.matrixType = MatrixType.UNKNOWN
         self.num_cols = None
         self.num_rows = None
+        self.nnz = None
         self.row_idx = None
         self.col_idx =  None
         self.values = None
@@ -26,12 +29,13 @@ class CSRMatrix:
         self.nz = None
 
 
-    def __init__(self, num_cols:int, num_rows:int, row_idx: List[int], col_idx: List[int], values: List[float]):
+    def set_COOMatrix(self: 'COOMatrix', num_cols:int, num_rows:int, row_idx: List[int], col_idx: List[int], values: List[float]):
         
         self.matrixType = MatrixType.UNKNOWN
 
         self.num_cols = num_cols
         self.num_rows = num_rows
+        self.nnz = len(values)
 
         assert len(row_idx) == len(col_idx), "Error in Matrix Initialization: row_ptr must have length num_rows + 1"
         assert len(col_idx) == len(values), "Error in Matrix Initialization: col_idx must have length values"
@@ -49,7 +53,7 @@ class CSRMatrix:
         self.ny = None
         self.nz = None
 
-    def create_3d27pt_COOMatrix(self, nx: int, ny: int, nz: int):
+    def create_3d27pt_COOMatrix(self: 'COOMatrix', nx: int, ny: int, nz: int):
         self.matrixType = MatrixType.Stencil_3D27P
         self.num_rows = nx * ny * nz
         self.num_cols = nx * ny * nz
@@ -57,12 +61,8 @@ class CSRMatrix:
         self.ny = ny
         self.nz = nz
 
-        num_rows = self.num_rows
-
-        row_idx = []
-        col_indices = []
-        values = []
-
+        row_col_val_tuples = []
+        nnz = 0
 
         for ix in range(nx):
             for iy in range(ny):
@@ -76,19 +76,38 @@ class CSRMatrix:
                                         if ix+sx > -1 and ix+sx < nx:
                                             j = ix+sx + nx*(iy+sy) + nx*ny*(iz+sz)
                                             if i == j:
-                                                row_idx.append(i)
-                                                col_indices.append(j)
-                                                values.append(26.0)
+                                                row_col_val_tuples.append((i, j, 26.0))
+                                                nnz += 1
                                             else:
-                                                row_idx.append(i)
-                                                col_indices.append(j)
-                                                values.append(-1.0)
+                                                row_col_val_tuples.append((i, j, -1.0))
+                                                nnz += 1
 
+        # sort the tuples by row index and then by column index
+        row_col_val_tuples.sort(key=lambda x: (x[0], x[1]))
+
+        row_idx = []
+        col_indices = []
+        values = []
+
+        for row, col, val in row_col_val_tuples:
+            row_idx.append(row)
+            col_indices.append(col)
+            values.append(val)
+
+        self.nnz = nnz
         self.row_idx = row_idx
         self.col_idx = col_indices
         self.values = values
 
-    def to_np(self) -> Tuple[np.array, np.array, np.array]:
+    def iterative_values(self: 'COOMatrix'):
+        next_val = 0.1
+        for i in range(self.nnz):
+            self.values[i] = next_val
+            next_val += 0.1
+            if next_val > 11.1:
+                next_val = 0.1
+
+    def to_np(self: 'COOMatrix') -> Tuple[np.array, np.array, np.array]:
 
         # note that np does not support COO Matrices, so we return np arrays
         if self.np_matrix is not None:
@@ -102,7 +121,7 @@ class CSRMatrix:
 
             return self.np_matrix
 
-    def to_torch(self) -> Tuple[torch.tensor, torch.tensor, torch.tensor]:
+    def to_torch(self: 'COOMatrix') -> Tuple[torch.tensor, torch.tensor, torch.tensor]:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         # note that this version of torch (which we have to use for the GPU we work on),
@@ -120,35 +139,84 @@ class CSRMatrix:
 
             return self.torch_matrix
 
+    def get_element(self: 'COOMatrix', i:int, j:int)->float:
+        
+        for k in range(len(self.values)):
+            if self.row_idx[k] == i and self.col_idx[k] == j:
+                return self.values[k]
+        return 0.0
+    
+    def compare_to(self: 'COOMatrix', other: 'COOMatrix') -> bool:
 
-    def to_csr(self, csrMatrix: CSRMatrix):
+        if self.num_cols != other.num_cols:
+            if developer_mode:
+                print(f"Error: num_cols does not match: {self.num_cols} != {other.num_cols}")
+            return False
+        
+        if self.num_rows != other.num_rows:
+            if developer_mode:
+                print(f"Error: num_rows does not match: {self.num_rows} != {other.num_rows}")
+            return False
+        
+        if self.nnz != other.nnz:
+            if developer_mode:
+                print(f"Error: nnz does not match: {self.nnz} != {other.nnz}")
+            return False
+        
+        if self.row_idx != other.row_idx:
+            if developer_mode:
+                print(f"Error: row_idx does not match: {self.row_idx} != {other.row_idx}")
+            return False
+        
+        if self.col_idx != other.col_idx:
+            if developer_mode:
+                print(f"Error: col_idx does not match: {self.col_idx} != {other.col_idx}")
+            return False
+        
+        if self.values != other.values:
+            if developer_mode:
+                for i in range(len(self.values)):
+                    if self.values[i] != other.values[i]:
+                        print(f"Error: values at row {self.row_idx[i]}, col {self.col_idx[i]} do not match: {self.values[i]} != {other.values[i]}")
+                        break
+            return False
+        
+        if self.nx != other.nx:
+            if developer_mode:
+                print(f"Error: nx does not match: {self.nx} != {other.nx}")
+            return False
+        
+        if self.ny != other.ny:
+            if developer_mode:
+                print(f"Error: ny does not match: {self.ny} != {other.ny}")
+            return False
+        
+        if self.nz != other.nz:
+            if developer_mode:
+                print(f"Error: nz does not match: {self.nz} != {other.nz}")
+            return False
+        
+        if self.matrixType != other.matrixType:
+            if developer_mode:
+                print(f"Error: matrixType does not match: {self.matrixType} != {other.matrixType}")
+            return False
+        
+        # these may not have been created by one or the other
+        # if self.np_matrix != other.np_matrix:
+        #     if developer_mode:
+        #         print(f"Error: np_matrix does not match")
+        #     return False
+        
+        # if self.torch_matrix != other.torch_matrix:
+        #     if developer_mode:
+        #         print(f"Error: torch_matrix does not match")
+        #     return False   
 
-        # check that the coo matrix is sorted
-        assert all(self.row_idx[i] <= self.row_idx[i+1] for i in range(len(self.row_idx)-1)), "Error in Matrix Conversion: row_idx must be sorted"
+        return True
 
-        csrMatrix.matrixType = self.matrixType
-        csrMatrix.num_cols = self.num_cols
-        csrMatrix.num_rows = self.num_rows
-        csrMatrix.row_idx = self.row_idx
-        csrMatrix.col_idx = self.col_idx
-        csrMatrix.values = self.values
-
-        csrMatrix.nx = self.nx
-        csrMatrix.ny = self.ny
-        csrMatrix.nz = self.nz
-
-        row_ptr_csr = [0 for _ in range(self.num_rows+1)]
-        col_idx_csr = self.col_idx.copy()
-        values_csr = self.values.copy()
-
-        for i in range(len(self.values)):
-            row_ptr_csr[self.row_idx[i+1]] += 1
-
-        csrMatrix.row_ptr = row_ptr_csr
-        csrMatrix.col_idx = col_idx_csr
-        csrMatrix.values = values_csr
-
-    # def to_banded(self):
-
-
+    def to_dense(self: 'COOMatrix') -> np.array:
+        dense_matrix = np.zeros((self.num_rows, self.num_cols))
+        for i in range(self.nnz):
+            dense_matrix[self.row_idx[i], self.col_idx[i]] = self.values[i]
+        return dense_matrix
     

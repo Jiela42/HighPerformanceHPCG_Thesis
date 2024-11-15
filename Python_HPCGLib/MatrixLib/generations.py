@@ -5,20 +5,15 @@ import torch
 from typing import Tuple
 import itertools
 
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.BandedMatrix import BandedMatrix
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.CSRMatrix import CSRMatrix
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.COOMatrix import COOMatrix
+
 store = False
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def generate_torch_csr_problem(nx: int, ny: int, nz: int) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-
-    num_rows = nx*ny*nz
-
-    col_indices = [[] for _ in range(num_rows)]
-    values = [[] for _ in range(num_rows)]
-
-    # This will be the csr row index array which is why we prepend a zero
-    # (we get this by doing a prefix sum later ;))
-    nnz_per_row = [0 for _ in range(num_rows+1)]
+def generate_y_forHPCG_problem(nx:int, ny:int, nz:int)-> torch.Tensor:
 
     y = torch.zeros(nx*ny*nz, device=device, dtype=torch.float64)
 
@@ -33,29 +28,19 @@ def generate_torch_csr_problem(nx: int, ny: int, nz: int) -> Tuple[torch.Tensor,
                             if iy+sy > -1 and iy+sy < ny:
                                 for sx in range(-1, 2):
                                     if ix+sx > -1 and ix+sx < nx:
-                                        j = ix+sx + nx*(iy+sy) + nx*ny*(iz+sz)
-                                        if i == j:
-                                            col_indices[i].append(j)
-                                            values[i].append(26.0)
-                                        else:
-                                            col_indices[i].append(j)
-                                            values[i].append(-1.0)
                                         nnz_i += 1
-                nnz_per_row[i] = nnz_i
                 y[i] = 26.0 - nnz_i
 
 
-    # Concatenate all lists in col_indices and values
-    col_indices = list(itertools.chain(*col_indices))
-    values = list(itertools.chain(*values))
+    return y
 
-    col_indices = torch.tensor(col_indices, device=device, dtype=torch.int32)
-    values = torch.tensor(values, device=device, dtype=torch.float64)
+def generate_torch_csr_problem(nx: int, ny: int, nz: int) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
 
+    A = CSRMatrix()
+    A.create_3d27pt_CSRMatrix(nx, ny, nz)
+    crow_indices, col_indices, values = A.to_torch()
 
-    # turn nnz_per_row into a tensor and make it the row indices
-    nnz_per_row = torch.tensor(nnz_per_row, device=device, dtype=torch.int32)
-    crow_indices = torch.cumsum(nnz_per_row, dim=0, dtype=torch.int32)
+    y = generate_y_forHPCG_problem(nx, ny, nz)    
 
     return crow_indices, col_indices, values, y
 

@@ -6,11 +6,19 @@ import numpy as np
 import random
 import os
 import glob
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 import HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.generations as generations
 import HighPerformanceHPCG_Thesis.Python_HPCGLib.HPCGLib_versions.matlab_reference as matlab_reference
 import HighPerformanceHPCG_Thesis.Python_HPCGLib.HPCGLib_versions.BaseTorch as BaseTorch
 import HighPerformanceHPCG_Thesis.Python_HPCGLib.HPCGLib_versions.BasicStencil as BasicStencil
+
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.BandedMatrix import BandedMatrix
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.CSRMatrix import CSRMatrix
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.COOMatrix import COOMatrix
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.MatrixConversions import *
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 error_tolerance = 1e-9
@@ -58,7 +66,7 @@ def print_differeing_vectors(tested: torch.Tensor, control: torch.Tensor) -> Non
             print(f"i: {i} should be: {control[i]} but was: {tested[i]}")
 
 # this contains most of the main testing functions
-def test(sizes: List[Tuple[int, int, int]], matrix_types: List[str], methods: List[str], Versions: List[str]) -> None:
+def test_HPCGLib(sizes: List[Tuple[int, int, int]], matrix_types: List[str], methods: List[str], Versions: List[str]) -> None:
 
     for size in sizes:
 
@@ -268,17 +276,77 @@ def MG_mini_test():
         elif debug:
             print(f"MG_Mini_test: BaseTorch and original HPCG are the same for dimensions: {nx}x{ny}x{nz}", flush=True)
 
+def run_matrix_tests(sizes):
+    # we currently only test the 3d_27pt matrix
+    for nx, ny, nz in sizes:
+        A_csr = CSRMatrix()
+        A_csr.create_3d27pt_CSRMatrix(nx, ny, nz)
+        # A_csr.iterative_values()
+
+        A_coo = COOMatrix()
+        csr_to_coo(A_csr, A_coo)
+
+        coo_3d27pt = COOMatrix()
+        coo_3d27pt.create_3d27pt_COOMatrix(nx, ny, nz)
+
+        # print("Comparing CSR and COO matrices\n")
+        # print("CSR matrix:")
+        # print(A_csr.to_dense())
+        # print("COO matrix:")
+        # print(A_coo.to_dense())
+
+        # if np.array_equal(A_csr.to_dense(), A_coo.to_dense()):
+        #     raise AssertionError("coo and csr matrices are the same")
+
+        if not A_coo.compare_to(coo_3d27pt):
+            raise AssertionError("coo and csr 3d27pt matrices are different")
+
+        A_back_to_csr = CSRMatrix()
+        coo_to_csr(A_coo, A_back_to_csr)
+
+        print("Comparing CSR and COO matrices\n")
+        print("CSR matrix:")
+        print(A_csr.to_dense())
+        print("COO matrix:")
+        print(A_coo.to_dense())
+        print("Back to CSR matrix:")
+        print(A_back_to_csr.to_dense())
+
+        print("row ptr of back to csr: ", A_back_to_csr.row_ptr)
+        print("col idx of back to csr: ", A_back_to_csr.col_idx)
+        print("values of back to csr: ", A_back_to_csr.values)
+
+        if not A_csr.compare_to(A_back_to_csr):
+            raise AssertionError("csr and coo conversions fail")
+
+        A_coo.create_3d27pt_COOMatrix(nx, ny, nz)
+
+        A_banded = BandedMatrix()
+        A_coo.to_banded(A_banded)
+
+        A_back_to_coo = COOMatrix()
+        banded_to_coo(A_banded, A_back_to_coo)
+        A_coo.compare_to(A_back_to_coo)
+
+        print(f"Matrix tests passed for size {nx}x{ny}x{nz}")
+
+    print("*******************************************************************")
+    print("**********************ALL MATRIX TESTS PASSED**********************")
+    print("*******************************************************************")
+
+
+
 #################################################################################################################
 # This part allows us to run the tests from the command line
 #################################################################################################################
-# sizes =[
-#     # (2, 2, 2),
-#     (8, 8, 8),
-#     (16, 16, 16),
-#     (32, 32, 32),
-#     (64, 64, 64),
-#     (128, 128, 128),
-# ]
+sizes =[
+    (2, 2, 1),
+    (8, 8, 8),
+    (16, 16, 16),
+    (32, 32, 32),
+    (64, 64, 64),
+    (128, 128, 128),
+]
 
 # versions = [
 #     "BaseTorch",
@@ -311,7 +379,9 @@ def MG_mini_test():
 def run_tests(sizes, matrix_types, methods, versions):
     if "computeSymGS" in methods:
         symGS_mini_test(versions)
-    test(sizes, matrix_types, methods, versions)
+    test_HPCGLib(sizes, matrix_types, methods, versions)
+    # run_matrix_tests(sizes)
 
+run_matrix_tests(sizes)
 
 # print(A)
