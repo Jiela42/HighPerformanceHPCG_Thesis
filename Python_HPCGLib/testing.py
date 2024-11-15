@@ -304,17 +304,17 @@ def run_matrix_tests(sizes):
         A_back_to_csr = CSRMatrix()
         coo_to_csr(A_coo, A_back_to_csr)
 
-        print("Comparing CSR and COO matrices\n")
-        print("CSR matrix:")
-        print(A_csr.to_dense())
-        print("COO matrix:")
-        print(A_coo.to_dense())
-        print("Back to CSR matrix:")
-        print(A_back_to_csr.to_dense())
+        # print("Comparing CSR and COO matrices\n")
+        # print("CSR matrix:")
+        # print(A_csr.to_dense())
+        # print("COO matrix:")
+        # print(A_coo.to_dense())
+        # print("Back to CSR matrix:")
+        # print(A_back_to_csr.to_dense())
 
-        print("row ptr of back to csr: ", A_back_to_csr.row_ptr)
-        print("col idx of back to csr: ", A_back_to_csr.col_idx)
-        print("values of back to csr: ", A_back_to_csr.values)
+        # print("row ptr of back to csr: ", A_back_to_csr.row_ptr)
+        # print("col idx of back to csr: ", A_back_to_csr.col_idx)
+        # print("values of back to csr: ", A_back_to_csr.values)
 
         if not A_csr.compare_to(A_back_to_csr):
             raise AssertionError("csr and coo conversions fail")
@@ -322,13 +322,13 @@ def run_matrix_tests(sizes):
         A_coo.create_3d27pt_COOMatrix(nx, ny, nz)
 
         A_banded = BandedMatrix()
-        A_coo.to_banded(A_banded)
+        coo_to_banded(A_coo, A_banded)
 
         A_back_to_coo = COOMatrix()
         banded_to_coo(A_banded, A_back_to_coo)
-        A_coo.compare_to(A_back_to_coo)
+        assert A_coo.compare_to(A_back_to_coo), "banded to coo conversion failed"
 
-        print(f"Matrix tests passed for size {nx}x{ny}x{nz}")
+        print(f"Matrix tests passed for size {nx}x{ny}x{nz}", flush=True)
 
     print("*******************************************************************")
     print("**********************ALL MATRIX TESTS PASSED**********************")
@@ -340,7 +340,8 @@ def run_matrix_tests(sizes):
 # This part allows us to run the tests from the command line
 #################################################################################################################
 sizes =[
-    (2, 2, 1),
+    # (2, 2, 2),
+    (3, 3, 3),
     (8, 8, 8),
     (16, 16, 16),
     (32, 32, 32),

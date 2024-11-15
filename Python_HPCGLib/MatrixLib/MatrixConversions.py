@@ -121,6 +121,13 @@ def banded_to_csr(bandedMatrix: BandedMatrix, csrMatrix: CSRMatrix):
     assert elem_ctr == bandedMatrix.nnz, f"Error in BandedMatrix.to_CSRMatrix: elem_ctr != bandedMatrix.nnz, {elem_ctr} != {bandedMatrix.nnz}"
 
 def banded_to_coo(bandedMatrix: BandedMatrix, cooMatrix: COOMatrix):
+
+    print (f"bandedMatrix.num_rows: {bandedMatrix.num_rows}")
+    print (f"bandedMatrix.num_bands: {bandedMatrix.num_bands}")
+    print (f"len(bandedMatrix.values): {len(bandedMatrix.values)}")
+    print (f"bandedMatrix.num_rows*bandedMatrix.num_bands: {bandedMatrix.num_rows*bandedMatrix.num_bands}")
+    assert(bandedMatrix.num_rows*bandedMatrix.num_bands == len(bandedMatrix.values)), "Error in BandedMatrix.to_COOMatrix: num_rows*num_bands != len(values)"
+
     cooMatrix.num_cols = bandedMatrix.num_cols
     cooMatrix.num_rows = bandedMatrix.num_rows
     cooMatrix.nnz = bandedMatrix.nnz
@@ -138,12 +145,16 @@ def banded_to_coo(bandedMatrix: BandedMatrix, cooMatrix: COOMatrix):
     for i in range(bandedMatrix.num_rows):
         for band_j in range(bandedMatrix.num_bands):
             j = bandedMatrix.j_min_i[band_j] + i
-            val = bandedMatrix.values[i * bandedMatrix.num_rows + band_j]
+            val = bandedMatrix.values[i * bandedMatrix.num_bands + band_j]
             if val != 0.0:
                 coo_row_ind[elem_ctr] = i
                 coo_col_ind[elem_ctr] = j
                 coo_values[elem_ctr] = val
                 elem_ctr += 1
+
+    cooMatrix.row_idx = coo_row_ind
+    cooMatrix.col_idx = coo_col_ind
+    cooMatrix.values = coo_values
 
     assert elem_ctr == bandedMatrix.nnz, f"Error in BandedMatrix.to_COOMatrix: elem_ctr != bandedMatrix.nnz, {elem_ctr} != {bandedMatrix.nnz}"
 
@@ -185,11 +196,16 @@ def coo_to_csr(cooMatrix: COOMatrix, csrMatrix: CSRMatrix):
 
 def coo_to_banded(cooMatrix: COOMatrix, bandedMatrix: BandedMatrix):
     if cooMatrix.matrixType == MatrixType.Stencil_3D27P:
+        bandedMatrix.matrixType = MatrixType.Stencil_3D27P
         bandedMatrix.num_cols = cooMatrix.num_cols
         bandedMatrix.num_rows = cooMatrix.num_rows
+        bandedMatrix.nnz = cooMatrix.nnz
+        bandedMatrix.nx = cooMatrix.nx
+        bandedMatrix.ny = cooMatrix.ny
+        bandedMatrix.nz = cooMatrix.nz
         bandedMatrix.num_bands = 27
 
-        banded_values = [[0.0 for _ in range(cooMatrix.num_bands)] for _ in range(cooMatrix.num_rows)]
+        banded_values = [0.0 for _ in range(bandedMatrix.num_bands*cooMatrix.num_rows)]
         j_min_i = []
         neighbour_offsets =[
             (-1, -1, -1), (0, -1, -1), (1, -1, -1),
@@ -203,24 +219,47 @@ def coo_to_banded(cooMatrix: COOMatrix, bandedMatrix: BandedMatrix):
             (-1, 1, 1), (0, 1, 1), (1, 1, 1)
         ]
 
-        for i in range(cooMatrix.num_bands):
+        # print(f"number of neighbour offsets {len(set(neighbour_offsets))}")
+        
+
+        for i in range(bandedMatrix.num_bands):
             off_x, off_y, off_z = neighbour_offsets[i]
-            j_min_i.append(off_x + cooMatrix.nx*off_y + cooMatrix.nx*cooMatrix.ny*off_z)
+            new_offset = off_x + cooMatrix.nx*off_y + cooMatrix.nx*cooMatrix.ny*off_z
+            if new_offset in j_min_i:
+                print(f"Error: duplicate offset in j_min_i: {new_offset}")
+                print(f"tuple causing this: {off_x, off_y, off_z}")
+            j_min_i.append(new_offset)
+
+
+        bandedMatrix.j_min_i = j_min_i
 
         nnz_ctr = 0
+
+        # print(f"j_min_i: {j_min_i}")
 
         for elem in range(len(cooMatrix.values)):
             i = cooMatrix.row_idx[elem]
             j = cooMatrix.col_idx[elem]
-            elem = cooMatrix.values[elem]
+            val = cooMatrix.values[elem]
             #  make sure we don't add zero elements
-            if elem != 0.0:
+            # print(f"elem: {elem}")
+            if val != 0.0:
                 # look for the right band to store the element in
-                for band in range(cooMatrix.num_bands):
+                for band in range(bandedMatrix.num_bands):
                     if j - i == j_min_i[band]:
-                        banded_values[i][band] = elem
+                        # print(f"index: {i * cooMatrix.num_cols + band}")
+                        # print(len(banded_values))
+                        banded_values[i * bandedMatrix.num_bands + band] = val
+                        # print(f"nnz_ctr: {nnz_ctr}")
                         nnz_ctr += 1
+                        break
         
+        # print(f"nnz_ctr: {nnz_ctr}")
+        # print(f"cooMatrix.nnz: {cooMatrix.nnz}")
+
+        # print(f"num_bands: {bandedMatrix.num_bands}")
+        # print(f"num_rows: {bandedMatrix.num_rows}")
+        bandedMatrix.values = banded_values
         assert nnz_ctr == cooMatrix.nnz, "Error: Number of non-zero elements in banded matrix does not match number of non-zero elements in CSR matrix"
 
     else:
