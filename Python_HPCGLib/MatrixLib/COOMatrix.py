@@ -5,10 +5,9 @@ from typing import List, Tuple
 import itertools
 
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.MatrixUtils import MatrixType
-from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.MatrixUtils import developer_mode
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.CSRMatrix import CSRMatrix
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.BandedMatrix import BandedMatrix
-
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import developer_mode
 
 class COOMatrix:
 
@@ -121,23 +120,25 @@ class COOMatrix:
 
             return self.np_matrix
 
-    def to_torch(self: 'COOMatrix') -> Tuple[torch.tensor, torch.tensor, torch.tensor]:
+    def to_torch(self: 'COOMatrix') -> torch.sparse.Tensor:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        # note that this version of torch (which we have to use for the GPU we work on),
-        # does not have CSR matrix support so we just return three tensors
+        
 
+        row_ptr_torch = torch.tensor(self.row_idx, device=device, dtype=torch.int32)
+        col_idx_torch = torch.tensor(self.col_idx, device=device, dtype=torch.int32)
+        values_torch = torch.tensor(self.values, device=device, dtype=torch.float64)
+
+        A = torch.sparse_coo_tensor(torch.stack([row_ptr_torch, col_idx_torch]), values_torch, (self.num_rows, self.num_cols), device=device, dtype=torch.float64)
+        self.torch_matrix = A.coalesce()
+
+        return self.torch_matrix
+
+    def get_torch_matrix(self: 'COOMatrix') -> torch.sparse.Tensor:
         if self.torch_matrix is not None:
             return self.torch_matrix
         else:
-            row_ptr_torch = torch.tensor(self.row_idx, device=device, dtype=torch.int32)
-            col_idx_torch = torch.tensor(self.col_idx, device=device, dtype=torch.int32)
-            values_torch = torch.tensor(self.values, device=device, dtype=torch.float64)
-
-            A = torch.sparse_coo_tensor(torch.stack([row_ptr_torch, col_idx_torch]), values_torch, (self.num_rows, self.num_cols), device=device, dtype=torch.float64)
-            self.torch_matrix = A.coalesce()
-
-            return self.torch_matrix
+            return self.to_torch()
 
     def get_element(self: 'COOMatrix', i:int, j:int)->float:
         

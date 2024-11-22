@@ -1,9 +1,14 @@
 from gpu_timing import gpu_timer
 import torch
 import time
+import datetime
+import os
+import sys
 import random
 
-import testing
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
+
+import HighPerformanceHPCG_Thesis.Python_HPCGLib.TestingLib.testing as testing
 import HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.generations as generations
 import HighPerformanceHPCG_Thesis.Python_HPCGLib.HPCGLib_versions.matlab_reference as matlab_reference
 import HighPerformanceHPCG_Thesis.Python_HPCGLib.HPCGLib_versions.BaseTorch as BaseTorch
@@ -15,32 +20,34 @@ debug = True
 
 sizes =[
     (8, 8, 8),
-    (16, 16, 16),
-    (32, 32, 32),
+    # (16, 16, 16),
+    # (32, 32, 32),
     # (64, 64, 64),
     # (128, 128, 128),
 ]
 
 versions = [
     "BaseTorch",
-    # "MatlabReference",
+    "MatlabReference",
     # "BasicStencil",
 ]
 
 methods = [
-    # "computeSymGS",
+    "computeSymGS",
     "computeSPMV",
     # "computeRestriction",
-    # "computeMG",
+    "computeMG",
     # "computeProlongation",
-    # "computeCG",
-    # "computeWAXPBY",
-    # "computeDot",
+    "computeCG",
+    "computeWAXPBY",
+    "computeDot",
 ]
 
 matrix_types = [
     "3d_27pt"
 ]
+
+ault_node = "09-10"
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #################################################################################################################
@@ -55,6 +62,13 @@ if do_tests:
 # for each version we need the following
 # because each version has it's own name and needs to be called!
 #################################################################################################################
+
+# make new timestamped folder in data to avoid overwriting old data
+timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+base_path = "../timing_results/"
+
+new_folder_path = os.path.join(base_path, timestamp)
+
 print("Starting timing", flush=True)
 overall_start = time.time()
 
@@ -65,7 +79,7 @@ for v in versions:
             for matrix_type in matrix_types:
 
                 # initialize the matrix and vectors (not included in measurments)
-                A,y = generations.generate_torch_coo_problem(size[0], size[1], size[2])
+                _,A,y = generations.generate_torch_coo_problem(size[0], size[1], size[2])
                 x = torch.zeros(size[0]*size[1]*size[2], device=device, dtype=torch.float64)
                 
                 a,b = torch.rand(size[0]*size[1]*size[2], device=device, dtype=torch.float64), torch.rand(size[0]*size[1]*size[2], device=device, dtype=torch.float64)
@@ -75,22 +89,24 @@ for v in versions:
 
                 matrix_timer = gpu_timer(
                     version_name = v,
-                    ault_node = "41-44",
+                    ault_node = ault_node,
                     matrix_type = matrix_type,
                     nx = size[0],
                     ny = size[1],
                     nz = size[2],
-                    nnz = nnz
+                    nnz = nnz,
+                    folder_path = new_folder_path
                 )
 
                 vector_timer = gpu_timer(
                     version_name = v,
-                    ault_node = "41-44",
+                    ault_node = ault_node,
                     matrix_type = matrix_type,
                     nx = size[0],
                     ny = size[1],
                     nz = size[2],
-                    nnz = size[0]*size[1]*size[2]
+                    nnz = size[0]*size[1]*size[2],
+                    folder_path = new_folder_path
                 )
 
                 # note: CG and MG include generations of matrices!
@@ -101,7 +117,7 @@ for v in versions:
                         for i in range(num_iterations):
 
                             matrix_timer.start_timer()
-                            BaseTorch.computeCG(size[0], size[1], size[2], A, y, x)
+                            BaseTorch.computeCG(size[0], size[1], size[2], A, y, x, False)
                             matrix_timer.stop_timer("computeCG")
                     
                     elif "computeMG" == m:
@@ -152,7 +168,7 @@ for v in versions:
             for matrix_type in matrix_types:
 
                 # initialize the matrix and vectors (not included in measurments)
-                A,y = generations.generate_torch_coo_problem(size[0], size[1], size[2])
+                _,A,y = generations.generate_torch_coo_problem(size[0], size[1], size[2])
                 x = torch.zeros(size[0]*size[1]*size[2], device=device, dtype=torch.float64)
 
                 a,b = torch.rand(size[0]*size[1]*size[2], device=device, dtype=torch.float64), torch.rand(size[0]*size[1]*size[2], device=device, dtype=torch.float64)
@@ -162,22 +178,24 @@ for v in versions:
 
                 matrix_timer = gpu_timer(
                     version_name = v,
-                    ault_node = "41-44",
+                    ault_node = ault_node,
                     matrix_type = matrix_type,
                     nx = size[0],
                     ny = size[1],
                     nz = size[2],
-                    nnz = nnz
+                    nnz = nnz,
+                    folder_path = new_folder_path
                 )
 
                 vector_timer = gpu_timer(
                     version_name = v,
-                    ault_node = "41-44",
+                    ault_node = ault_node,
                     matrix_type = matrix_type,
                     nx = size[0],
                     ny = size[1],
                     nz = size[2],
-                    nnz = size[0]*size[1]*size[2]
+                    nnz = size[0]*size[1]*size[2],
+                    folder_path = new_folder_path
                 )
 
                 # note: CG and MG include generations of matrices!
@@ -189,7 +207,7 @@ for v in versions:
                         for i in range(num_iterations):
 
                             matrix_timer.start_timer()
-                            matlab_reference.computeCG(A, y, x)
+                            matlab_reference.computeCG(size[0], size[1], size[2], A, y, x, False)
                             matrix_timer.stop_timer("computeCG")
                 
                     
@@ -197,7 +215,7 @@ for v in versions:
                         for i in range(num_iterations):
 
                             matrix_timer.start_timer()
-                            matlab_reference.computeSymGS(A, y)
+                            matlab_reference.computeSymGS(size[0], size[1], size[2], A, y, x)
                             matrix_timer.stop_timer("computeSymGS")
                     
                     elif "computeSPMV" == m:
@@ -207,7 +225,7 @@ for v in versions:
                                 matrix_timer.start_timer()
                                 # careful! This way we only get "nice" numbers for the vectors, which does not reflect how spmv is used in the routines
                                 # We might possibly want to read a bunch of y options from a file and use them here
-                                matlab_reference.computeSPMV(A, y)
+                                matlab_reference.computeSPMV(size[0], size[1], size[2], A, y, x)
                                 matrix_timer.stop_timer("computeSPMV")
                                 y = y.squeeze(1) if y.dim() > 1 else y
 
@@ -215,7 +233,7 @@ for v in versions:
                         for i in range(num_iterations):
 
                             vector_timer.start_timer()
-                            matlab_reference.computeWAXPBY(a, x, beta, y)
+                            matlab_reference.computeWAXPBY(alpha, x, beta, y, x)
                             vector_timer.stop_timer("computeWAXPBY")
                     
                     elif "computeDot" == m:
@@ -247,22 +265,24 @@ for v in versions:
 
                 matrix_timer = gpu_timer(
                     version_name = v,
-                    ault_node = "41-44",
+                    ault_node = ault_node,
                     matrix_type = matrix_type,
                     nx = size[0],
                     ny = size[1],
                     nz = size[2],
-                    nnz = nnz
+                    nnz = nnz,
+                    folder_path = new_folder_path
                 )
 
                 vector_timer = gpu_timer(
                     version_name = v,
-                    ault_node = "41-44",
+                    ault_node = ault_node,
                     matrix_type = matrix_type,
                     nx = size[0],
                     ny = size[1],
                     nz = size[2],
-                    nnz = size[0]*size[1]*size[2]
+                    nnz = size[0]*size[1]*size[2],
+                    folder_path = new_folder_path
                 )
 
                 for m in methods:

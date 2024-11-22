@@ -4,7 +4,7 @@ from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.COOMatrix import COOMat
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.BandedMatrix import BandedMatrix
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.CSRMatrix import CSRMatrix
 # from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.MatrixUtils import developer_mode
-
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import developer_mode
 
 
 def csr_to_coo(csrMatrix: CSRMatrix, cooMatrix: COOMatrix):
@@ -25,21 +25,7 @@ def csr_to_coo(csrMatrix: CSRMatrix, cooMatrix: COOMatrix):
         for j in range(csrMatrix.row_ptr[i], csrMatrix.row_ptr[i+1]):
             coo_row_idx.append(i)
             coo_col_idx.append(csrMatrix.col_idx[j])
-            # loop_vals.append(csrMatrix.values[j])
 
-    # print(f"csr row_ptr: {csrMatrix.row_ptr}")
-
-    # print(f"coo row_idx: {coo_row_idx}")
-    # print(f"csr col_idx: {csrMatrix.col_idx}")
-    # print(f"coo col_idx: {coo_col_idx}")       
-
-    # print(f"nnz: {csrMatrix.nnz}")
-    # print(f"len(coo_row_idx): {len(coo_row_idx)}")
-    # print(f"len(coo_col_idx): {len(coo_col_idx)}")
-    # print(f"len(coo_values): {len(coo_values)}")
-
-    # print(f"loop_vals: {loop_vals}")
-    # print(f"coo_values: {coo_values}")
     assert len(coo_row_idx) == len(coo_col_idx) == len(coo_values), "Error in Matrix Conversion: row_idx, col_idx, and values must have the same length"
 
     cooMatrix.row_idx = coo_row_idx
@@ -122,10 +108,6 @@ def banded_to_csr(bandedMatrix: BandedMatrix, csrMatrix: CSRMatrix):
 
 def banded_to_coo(bandedMatrix: BandedMatrix, cooMatrix: COOMatrix):
 
-    print (f"bandedMatrix.num_rows: {bandedMatrix.num_rows}")
-    print (f"bandedMatrix.num_bands: {bandedMatrix.num_bands}")
-    print (f"len(bandedMatrix.values): {len(bandedMatrix.values)}")
-    print (f"bandedMatrix.num_rows*bandedMatrix.num_bands: {bandedMatrix.num_rows*bandedMatrix.num_bands}")
     assert(bandedMatrix.num_rows*bandedMatrix.num_bands == len(bandedMatrix.values)), "Error in BandedMatrix.to_COOMatrix: num_rows*num_bands != len(values)"
 
     cooMatrix.num_cols = bandedMatrix.num_cols
@@ -196,6 +178,9 @@ def coo_to_csr(cooMatrix: COOMatrix, csrMatrix: CSRMatrix):
 
 def coo_to_banded(cooMatrix: COOMatrix, bandedMatrix: BandedMatrix):
     if cooMatrix.matrixType == MatrixType.Stencil_3D27P:
+        assert cooMatrix.num_cols >= 3, "Error: cooMatrix.num_cols must be greater than or equal to 3"
+        assert cooMatrix.num_rows >= 3, "Error: cooMatrix.num_rows must be greater than or equal to 3"
+        
         bandedMatrix.matrixType = MatrixType.Stencil_3D27P
         bandedMatrix.num_cols = cooMatrix.num_cols
         bandedMatrix.num_rows = cooMatrix.num_rows
@@ -219,8 +204,6 @@ def coo_to_banded(cooMatrix: COOMatrix, bandedMatrix: BandedMatrix):
             (-1, 1, 1), (0, 1, 1), (1, 1, 1)
         ]
 
-        # print(f"number of neighbour offsets {len(set(neighbour_offsets))}")
-        
 
         for i in range(bandedMatrix.num_bands):
             off_x, off_y, off_z = neighbour_offsets[i]
@@ -235,30 +218,19 @@ def coo_to_banded(cooMatrix: COOMatrix, bandedMatrix: BandedMatrix):
 
         nnz_ctr = 0
 
-        # print(f"j_min_i: {j_min_i}")
-
         for elem in range(len(cooMatrix.values)):
             i = cooMatrix.row_idx[elem]
             j = cooMatrix.col_idx[elem]
             val = cooMatrix.values[elem]
             #  make sure we don't add zero elements
-            # print(f"elem: {elem}")
             if val != 0.0:
                 # look for the right band to store the element in
                 for band in range(bandedMatrix.num_bands):
                     if j - i == j_min_i[band]:
-                        # print(f"index: {i * cooMatrix.num_cols + band}")
-                        # print(len(banded_values))
                         banded_values[i * bandedMatrix.num_bands + band] = val
-                        # print(f"nnz_ctr: {nnz_ctr}")
                         nnz_ctr += 1
                         break
         
-        # print(f"nnz_ctr: {nnz_ctr}")
-        # print(f"cooMatrix.nnz: {cooMatrix.nnz}")
-
-        # print(f"num_bands: {bandedMatrix.num_bands}")
-        # print(f"num_rows: {bandedMatrix.num_rows}")
         bandedMatrix.values = banded_values
         assert nnz_ctr == cooMatrix.nnz, "Error: Number of non-zero elements in banded matrix does not match number of non-zero elements in CSR matrix"
 

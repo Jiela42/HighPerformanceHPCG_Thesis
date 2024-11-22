@@ -4,5 +4,3 @@ from enum import Enum
 class MatrixType(Enum):
     UNKNOWN = 0,
     Stencil_3D27P = 1,
-
-developer_mode = True

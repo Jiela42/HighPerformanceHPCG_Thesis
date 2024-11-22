@@ -3,15 +3,20 @@ import torch.linalg
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def computeWAXPBY(alpha: float, x: torch.Tensor, beta: float, y: torch.Tensor) -> torch.Tensor:
-    return alpha * x + beta * y
+def computeWAXPBY(alpha: float, x: torch.Tensor, beta: float, y: torch.Tensor, w: torch.Tensor) -> torch.Tensor:
+    solution = alpha * x + beta * y
+    w.copy_(solution)
+    return solution
 
 def computeDot(a: torch.Tensor, b: torch.Tensor) -> torch.Tensor:
     return torch.dot(a, b)
 
-def computeSPMV(A: torch.sparse.Tensor, x: torch.Tensor) -> torch.Tensor:
-
-    return torch.sparse.mm(A, x)
+def computeSPMV(nx: int, ny:int , nz:int, A: torch.sparse.Tensor, x: torch.Tensor, y: torch.tensor) -> torch.Tensor:
+    x = x.unsqueeze(1) if x.dim() == 1 else x
+    solution = torch.sparse.mm(A, x)
+    solution = solution.squeeze() if solution.dim() > 1 else solution
+    y.copy_(solution)
+    return solution
 
 def greg_symGS(A: torch.sparse.Tensor, y: torch.Tensor) -> torch.Tensor:
     
@@ -35,7 +40,7 @@ def greg_symGS(A: torch.sparse.Tensor, y: torch.Tensor) -> torch.Tensor:
     x, _ = torch.triangular_solve(A= UA, input = x1, upper=True)    
     return x
 
-def computeSymGS(A: torch.sparse.Tensor, r: torch.Tensor) -> torch.Tensor:
+def computeSymGS(nx: int, ny: int, nz: int, A: torch.sparse.Tensor, r: torch.Tensor, x_return: torch.Tensor) -> torch.Tensor:
     """
     Symmetric Gauss-Seidel preconditioner.
     
@@ -75,9 +80,13 @@ def computeSymGS(A: torch.sparse.Tensor, r: torch.Tensor) -> torch.Tensor:
     for i in range(A.size(0) - 1, -1, -1):
         x[i] = (x1[i] - torch.sparse.mm(UA, x.unsqueeze(1)).squeeze()[i]) / DA_values[i]
 
+    x_return.copy_(x)
+
     return x
 
-def computeCG(A: torch.sparse.Tensor, b: torch.Tensor, x: torch.Tensor) -> torch.Tensor:
+# we pass the nx, ny, nz, precondition as arguments to the function just to have the same parameters for all the versions
+# this will need to change if we ever have to adapt the code for other matrix types
+def computeCG(nx, ny, nz, A: torch.sparse.Tensor, b: torch.Tensor, x: torch.Tensor, precondition: bool) -> torch.Tensor:
 
     p = x.clone()
 
@@ -91,10 +100,11 @@ def computeCG(A: torch.sparse.Tensor, b: torch.Tensor, x: torch.Tensor) -> torch
 
     iter = 0
     maxiters = 100
+    dummy_tensor = torch.zeros_like(x)
 
     while normr > 1e-16 and iter < maxiters:
         iter += 1
-        z = computeSymGS(A, r)
+        z = computeSymGS(nx, ny, nz, A, r, dummy_tensor)
         # z = z.unsqueeze(1) if z.dim() == 1 else z
         if iter == 1:
             p = z
@@ -111,11 +121,11 @@ def computeCG(A: torch.sparse.Tensor, b: torch.Tensor, x: torch.Tensor) -> torch
         Ap = Ap.squeeze(1) if Ap.dim() > 1 else Ap
         pAp = torch.dot(p, Ap)
         alpha = rtz/pAp
-        x = x + alpha*p
-        r = r - alpha*Ap
+        x.add_(alpha*p)
+        r.sub_(alpha*Ap)
 
         normr = torch.sqrt(torch.dot(r,r)).item()
-
+    
 def main (A: torch.sparse.Tensor, b: torch.Tensor, x: torch.Tensor, x_exact: torch.Tensor) -> torch.Tensor:
 
     normr_exact = torch.norm(b - torch.sparse.mm(A, x_exact))

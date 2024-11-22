@@ -5,8 +5,7 @@ from typing import List, Tuple
 import itertools
 
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.MatrixUtils import MatrixType
-from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.MatrixUtils import developer_mode
-
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import developer_mode
 
 class CSRMatrix:
 

@@ -8,7 +8,7 @@ import os
 import glob
 import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 
 import HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.generations as generations
 import HighPerformanceHPCG_Thesis.Python_HPCGLib.HPCGLib_versions.matlab_reference as matlab_reference
@@ -70,7 +70,7 @@ def test_HPCGLib(sizes: List[Tuple[int, int, int]], matrix_types: List[str], met
 
     for size in sizes:
 
-        A,y = generations.generate_torch_coo_problem(size[0], size[1], size[2])
+        _, A,y = generations.generate_torch_coo_problem(size[0], size[1], size[2])
         # print(y)
         y_original = y.clone()
         A_original = A.clone()
@@ -83,10 +83,12 @@ def test_HPCGLib(sizes: List[Tuple[int, int, int]], matrix_types: List[str], met
                 for m in methods:
                     if m == "computeCG":
 
-                        BaseTorch.computeCG_no_preconditioning(size[0], size[1], size[2], A, b, x)
+                        BaseTorch.computeCG(size[0], size[1], size[2], A, b, x, False)
                         tested_x = x.clone()
-                        matlab_reference.computeCG(A, b, x)
+                        matlab_reference.computeCG(size[0], size[1], size[2], A, b, x, False)
                         control_x = x.clone()
+
+                        print(f"first elem of both vectors: {tested_x[0]} vs {control_x[0]}")
                         
                         if not torch.allclose(y, y_original, atol=error_tolerance):
                             raise AssertionError(f"BaseTorch ComputeCG changed y")
@@ -109,8 +111,10 @@ def test_HPCGLib(sizes: List[Tuple[int, int, int]], matrix_types: List[str], met
                             raise AssertionError(f"Error in BaseTorch computeDot for size {size}, version BaseTorch")
                     
                     elif m == "computeSymGS":
-
-                        control_x = matlab_reference.computeSymGS(A, y)
+                        
+                        x = torch.zeros_like(x)
+                        control_x = matlab_reference.computeSymGS(size[0], size[1], size[2], A, y, x)
+                        x = torch.zeros_like(x)
                         BaseTorch.computeSymGS(size[0], size[1], size[2], A, y, x)
                         tested_x = x.clone()
 
@@ -132,7 +136,7 @@ def test_HPCGLib(sizes: List[Tuple[int, int, int]], matrix_types: List[str], met
                         tested_solution = x.clone()
 
                         y = y.unsqueeze(1) if y.dim() == 1 else y                
-                        control_solution = matlab_reference.computeSPMV(A, y)
+                        control_solution = matlab_reference.computeSPMV(size[0], size[1], size[2], A, y, x)
 
                         y = y.squeeze() if y.dim() > 1 else y
                         if not torch.allclose(y, y_original, atol=error_tolerance):
@@ -151,7 +155,7 @@ def test_HPCGLib(sizes: List[Tuple[int, int, int]], matrix_types: List[str], met
                         BaseTorch.computeWAXPBY(alpha, a, beta, b, x)
                         tested_solution = x.clone()
 
-                        control_solution = matlab_reference.computeWAXPBY(alpha, a, beta, b)
+                        control_solution = matlab_reference.computeWAXPBY(alpha, a, beta, b, x)
 
                         if not torch.allclose(tested_solution, control_solution, atol=error_tolerance):
                             print_differeing_vectors(tested_solution, control_solution)
@@ -244,7 +248,7 @@ def symGS_mini_test(versions):
 # this function tests the MG function based on outputs we got from the original HPCG code
 def MG_mini_test():
 
-    path_to_testcases = "../hpcg_output"
+    path_to_testcases = "../../hpcg_output"
 
     sub_directories = [d for d in os.listdir(path_to_testcases)]
 
@@ -259,7 +263,7 @@ def MG_mini_test():
         ny = dimensions_dict["ny"]
         nz = dimensions_dict["nz"]
 
-        A, y = generations.generate_torch_coo_problem(nx, ny, nz)
+        _, A, y = generations.generate_torch_coo_problem(nx, ny, nz)
 
         b_computed = torch.tensor(np.loadtxt(b_computed_path), device=device, dtype=torch.float64)
         x_overlap = torch.tensor(np.loadtxt(x_overlap_path), device=device, dtype=torch.float64)
@@ -339,31 +343,32 @@ def run_matrix_tests(sizes):
 #################################################################################################################
 # This part allows us to run the tests from the command line
 #################################################################################################################
-sizes =[
+# sizes =[
     # (2, 2, 2),
-    (3, 3, 3),
-    (8, 8, 8),
-    (16, 16, 16),
-    (32, 32, 32),
-    (64, 64, 64),
-    (128, 128, 128),
-]
+    # (3, 3, 3),
+    # (8, 8, 8),
+    # (16, 16, 16),
+    # (32, 32, 32),
+    # (64, 64, 64),
+    # this size makes the matrix tests run out of memory
+    # (128, 128, 128),
+# ]
 
 # versions = [
 #     "BaseTorch",
-#     # "MatlabReference",
-#     "BasicStencil",
+#     "MatlabReference",
+#     # "BasicStencil",
 # ]
 
 # methods = [
-#     # "computeSymGS",
+#     "computeSymGS",
 #     "computeSPMV",
-#     # "computeRestriction",
-#     # "computeMG",
-#     # "computeProlongation",
-#     # "computeCG",
-#     # "computeWAXPBY",
-#     # "computeDot",
+#     "computeRestriction",
+#     "computeMG",
+#     "computeProlongation",
+#     "computeCG",
+#     "computeWAXPBY",
+#     "computeDot",
 # ]
 
 # matrix_types = [
@@ -383,6 +388,7 @@ def run_tests(sizes, matrix_types, methods, versions):
     test_HPCGLib(sizes, matrix_types, methods, versions)
     # run_matrix_tests(sizes)
 
-run_matrix_tests(sizes)
+# run_matrix_tests(sizes)
+# test_HPCGLib(sizes, matrix_types, methods, versions)
 
 # print(A)

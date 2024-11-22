@@ -44,43 +44,15 @@ def generate_torch_csr_problem(nx: int, ny: int, nz: int) -> Tuple[torch.Tensor,
 
     return crow_indices, col_indices, values, y
 
-def generate_torch_coo_problem(nx: int, ny: int, nz: int) -> Tuple[torch.sparse.Tensor, torch.Tensor]:
+def generate_torch_coo_problem(nx: int, ny: int, nz: int) -> Tuple[COOMatrix, torch.sparse.Tensor, torch.Tensor]:
 
-    row_indices = []
-    col_indices = []
-    values = []
+    A = COOMatrix()
+    A.create_3d27pt_COOMatrix(nx, ny, nz)
+    A_torch = A.to_torch()
 
-    y = torch.zeros(nx * ny * nz, device=device, dtype=torch.float64)
+    y = generate_y_forHPCG_problem(nx, ny, nz)
 
-    for ix in range(nx):
-        for iy in range(ny):
-            for iz in range(nz):
-                i = ix + nx * iy + nx * ny * iz
-                nnz_i = 0
-                for sz in range(-1, 2):
-                    if iz + sz > -1 and iz + sz < nz:
-                        for sy in range(-1, 2):
-                            if iy + sy > -1 and iy + sy < ny:
-                                for sx in range(-1, 2):
-                                    if ix + sx > -1 and ix + sx < nx:
-                                        j = ix + sx + nx * (iy + sy) + nx * ny * (iz + sz)
-                                        row_indices.append(i)
-                                        col_indices.append(j)
-                                        if i == j:
-                                            values.append(26.0)
-                                        else:
-                                            values.append(-1.0)
-                                        nnz_i += 1
-                y[i] = 26.0 - (float(nnz_i -1))
-
-    row_indices = torch.tensor(row_indices, device=device, dtype=torch.int64)
-    col_indices = torch.tensor(col_indices, device=device, dtype=torch.int64)
-    values = torch.tensor(values, device=device, dtype=torch.float64)
-
-    A = torch.sparse_coo_tensor(torch.stack([row_indices, col_indices]), values, (nx * ny * nz, nx * ny * nz), device=device, dtype=torch.float64)
-    A = A.coalesce()
-
-    return A, y
+    return A, A_torch, y
 
 """
 def generate_lil_problem(nx: int, ny: int, nz: int) -> Tuple[lil_matrix, np.ndarray]:
@@ -136,7 +108,7 @@ def generate_coarse_problem(nxf: int, nyf: int, nzf: int) -> Tuple[np.ndarray, t
 
     # print("We generate the new problem using the COO format")
     
-    Ac, yc = generate_torch_coo_problem(nxc, nyc, nzc)
+    _, Ac, yc = generate_torch_coo_problem(nxc, nyc, nzc)
 
     return f2c_op, Ac, yc
 

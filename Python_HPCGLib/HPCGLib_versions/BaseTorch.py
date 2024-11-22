@@ -231,7 +231,8 @@ def computeCG_no_preconditioning(nx: int, ny: int, nz: int,
     return 0    
 
 def computeCG(nx: int, ny: int, nz: int,
-              A: torch.sparse.Tensor, y: torch.Tensor, x: torch.Tensor) -> int:
+              A: torch.sparse.Tensor, y: torch.Tensor, x: torch.Tensor,
+              precondition: bool) -> int:
 
     norm_r = 0.0
 
@@ -259,7 +260,10 @@ def computeCG(nx: int, ny: int, nz: int,
             break
         # we always want to do the preconditioning
         # we have a seperate function for no preconditioning
-        computeMG(nx, ny, nz, A, y, z, 0)
+        if precondition:
+            computeMG(nx, ny, nz, A, y, z, 0)
+        else:
+            z = r.clone()
         
         if (i == 1):
             # copy Mr to p
@@ -285,7 +289,7 @@ def computeCG(nx: int, ny: int, nz: int,
         computeWAXPBY(1.0, r, -alpha, Ap, r)
         norm_r = computeDot(r, r)
         norm_r = torch.sqrt(norm_r)
-    
+
     return 0    
 
 #################################################################################################################
@@ -294,7 +298,7 @@ def computeCG(nx: int, ny: int, nz: int,
 num = 8
 
 
-A,y = generations.generate_torch_coo_problem(num,num,num)
+_, A,y = generations.generate_torch_coo_problem(num,num,num)
 x = torch.zeros(num*num*num, device=device, dtype=torch.float64)
 
 computeSPMV(num, num, num, A, y, x)
