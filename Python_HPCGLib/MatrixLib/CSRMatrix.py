@@ -1,11 +1,14 @@
 import numpy as np
 import torch
+import cupy as cp
+import cupyx.scipy.sparse as sp
 
 from typing import List, Tuple
 import itertools
 
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.MatrixUtils import MatrixType
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import developer_mode
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import print_elem_not_found_warnings
 
 class CSRMatrix:
 
@@ -20,6 +23,7 @@ class CSRMatrix:
 
         self.np_matrix = None
         self.torch_matrix = None
+        self.cupy_matrix = None
 
         self.nx = None
         self.ny = None
@@ -43,6 +47,7 @@ class CSRMatrix:
 
         self.np_matrix = None
         self.torch_matrix = None
+        self.cupy_matrix = None
 
         self.nx = None
         self.ny = None
@@ -114,17 +119,14 @@ class CSRMatrix:
 
     def to_np(self: 'CSRMatrix') -> Tuple[np.array, np.array, np.array]:
 
-        # note that np does not support CSR Matrices, so we return np arrays
-        if self.np_matrix is not None:
-            return self.np_matrix
-        else:
-            row_ptr_np = np.array(self.row_ptr, dtype=np.int32)
-            col_idx_np = np.array(self.col_idx, dtype=np.int32)
-            values_np = np.array(self.values, dtype=np.float64)
+       
+        row_ptr_np = np.array(self.row_ptr, dtype=np.int32)
+        col_idx_np = np.array(self.col_idx, dtype=np.int32)
+        values_np = np.array(self.values, dtype=np.float64)
 
-            self.np_matrix = (row_ptr_np, col_idx_np, values_np)
+        self.np_matrix = (row_ptr_np, col_idx_np, values_np)
 
-            return self.np_matrix
+        return self.np_matrix
 
     def to_torch(self: 'CSRMatrix') -> Tuple[torch.tensor, torch.tensor, torch.tensor]:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -132,22 +134,46 @@ class CSRMatrix:
         # note that this version of torch (which we have to use for the GPU we work on),
         # does not have CSR matrix support so we just return three tensors
 
-        if self.torch_matrix is not None:
-            return self.torch_matrix
-        else:
-            row_ptr_torch = torch.tensor(self.row_ptr, device=device, dtype=torch.int32)
-            col_idx_torch = torch.tensor(self.col_idx, device=device, dtype=torch.int32)
-            values_torch = torch.tensor(self.values, device=device, dtype=torch.float64)
+        row_ptr_torch = torch.tensor(self.row_ptr, device=device, dtype=torch.int32)
+        col_idx_torch = torch.tensor(self.col_idx, device=device, dtype=torch.int32)
+        values_torch = torch.tensor(self.values, device=device, dtype=torch.float64)
 
-            self.torch_matrix = (row_ptr_torch, col_idx_torch, values_torch)
+        self.torch_matrix = (row_ptr_torch, col_idx_torch, values_torch)
 
-            return self.torch_matrix
+        return self.torch_matrix
+
+    def to_cupy(self: 'CSRMatrix') -> sp.csr_matrix:
+        
+        row_ptr_np, col_idx_np, values_np = self.to_np()
+        row_ptr_cp = cp.array(row_ptr_np)
+        col_idx_cp = cp.array(col_idx_np)
+        values_cp = cp.array(values_np)
+
+        self.cupy_matrix = None
+        self.cupy_matrix = sp.csr_matrix((values_cp, col_idx_cp, row_ptr_cp), shape=(self.num_rows, self.num_cols))
+
+        return self.cupy_matrix
+
+    def get_np_matrix(self: 'CSRMatrix') -> Tuple[np.array, np.array, np.array]:
+        if self.np_matrix is None:
+            return self.to_np()
+        return self.np_matrix
+    
+    def get_torch_matrix(self: 'CSRMatrix') -> Tuple[torch.tensor, torch.tensor, torch.tensor]:
+        if self.torch_matrix is None:
+            return self.to_torch()
+        return self.torch_matrix
+    
+    def get_cupy_matrix(self: 'CSRMatrix') -> sp.csr_matrix:
+        if self.cupy_matrix is None:
+            return self.to_cupy()
+        return self.cupy_matrix
 
     def get_element(self: 'CSRMatrix', i: int, j: int) -> float:
         for k in range(self.row_ptr[i], self.row_ptr[i+1]):
             if self.col_idx[k] == j:
                 return self.values[k]
-        if developer_mode:
+        if developer_mode and print_elem_not_found_warnings:
             print(f"WARNING: Element ({i}, {j}) not found in CSR matrix")
         return 0.0
 

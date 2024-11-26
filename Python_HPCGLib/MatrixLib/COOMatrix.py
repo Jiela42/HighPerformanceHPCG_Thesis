@@ -5,9 +5,8 @@ from typing import List, Tuple
 import itertools
 
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.MatrixUtils import MatrixType
-from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.CSRMatrix import CSRMatrix
-from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.BandedMatrix import BandedMatrix
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import developer_mode
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import print_elem_not_found_warnings
 
 class COOMatrix:
 
@@ -123,8 +122,6 @@ class COOMatrix:
     def to_torch(self: 'COOMatrix') -> torch.sparse.Tensor:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        
-
         row_ptr_torch = torch.tensor(self.row_idx, device=device, dtype=torch.int32)
         col_idx_torch = torch.tensor(self.col_idx, device=device, dtype=torch.int32)
         values_torch = torch.tensor(self.values, device=device, dtype=torch.float64)
@@ -145,6 +142,9 @@ class COOMatrix:
         for k in range(len(self.values)):
             if self.row_idx[k] == i and self.col_idx[k] == j:
                 return self.values[k]
+        
+        if developer_mode and print_elem_not_found_warnings:
+            print(f"WARNING: Element ({i}, {j}) not found in COO matrix")
         return 0.0
     
     def compare_to(self: 'COOMatrix', other: 'COOMatrix') -> bool:

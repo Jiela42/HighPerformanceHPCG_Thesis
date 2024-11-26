@@ -2,6 +2,8 @@ import numpy as np
 # import scipy.sparse as sp
 # from scipy.sparse import lil_matrix
 import torch
+import cupy as cp
+import cupyx.scipy.sparse as sp
 from typing import Tuple
 import itertools
 
@@ -79,6 +81,20 @@ def generate_lil_problem(nx: int, ny: int, nz: int) -> Tuple[lil_matrix, np.ndar
     
     return A, y
 """
+
+def generate_cupy_csr_problem(nx: int, ny: int, nz: int) -> Tuple[CSRMatrix, sp.csr_matrix, cp.ndarray]:
+    
+        A = CSRMatrix()
+        A.create_3d27pt_CSRMatrix(nx, ny, nz)
+        A_csr = A.to_cupy()
+    
+        y_torch = generate_y_forHPCG_problem(nx, ny, nz)
+
+        y = cp.array(y_torch.cpu().numpy())
+    
+        return A, A_csr, y
+
+
 
 def generate_coarse_problem(nxf: int, nyf: int, nzf: int) -> Tuple[np.ndarray, torch.tensor, torch.tensor]:
 

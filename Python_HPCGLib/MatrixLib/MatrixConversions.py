@@ -43,7 +43,7 @@ def csr_to_banded(csrMatrix: CSRMatrix, bandedMatrix: BandedMatrix):
         bandedMatrix.num_rows = csrMatrix.num_rows
         bandedMatrix.num_bands = 27
 
-        banded_values = [[0.0 for _ in range(csrMatrix.num_bands)] for _ in range(csrMatrix.num_rows)]
+        banded_values = [0.0 for _ in range(bandedMatrix.num_bands*csrMatrix.num_rows)]
         j_min_i = []
         neighbour_offsets =[
             (-1, -1, -1), (0, -1, -1), (1, -1, -1),
@@ -57,26 +57,31 @@ def csr_to_banded(csrMatrix: CSRMatrix, bandedMatrix: BandedMatrix):
             (-1, 1, 1), (0, 1, 1), (1, 1, 1)
         ]
 
-        for i in range(csrMatrix.num_bands):
+        for i in range(bandedMatrix.num_bands):
             off_x, off_y, off_z = neighbour_offsets[i]
             j_min_i.append(off_x + csrMatrix.nx*off_y + csrMatrix.nx*csrMatrix.ny*off_z)
 
         nnz_ctr = 0
         for i in range(csrMatrix.num_rows):
-            for band_j in range(csrMatrix.num_bands):
+            for band_j in range(bandedMatrix.num_bands):
                 j = j_min_i[band_j] + i
                 # check if j is in bounds (since not every point has all 27 neighbours)
                 if (j >= 0 and j < csrMatrix.num_cols):
                     elem = csrMatrix.get_element(i, j)
                     #  also make sure we don't add zero elements
                     if elem != 0.0:
-                        banded_values[i * csrMatrix.num_bands + band_j] = elem
+                        # print(f"index: {i*bandedMatrix.num_bands + band_j}")
+                        # print(f"max value: {csrMatrix.num_rows*bandedMatrix.num_bands}")
+                        banded_values[i * bandedMatrix.num_bands + band_j] = elem
                         nnz_ctr += 1
         
         assert nnz_ctr == csrMatrix.nnz, "Error: Number of non-zero elements in banded matrix does not match number of non-zero elements in CSR matrix"
 
     else:
         assert False, "Error: to_banded only implemented for Stencil_3D27P matrices"
+    
+    bandedMatrix.values = banded_values
+    bandedMatrix.j_min_i = j_min_i
 
      
 def banded_to_csr(bandedMatrix: BandedMatrix, csrMatrix: CSRMatrix):
@@ -97,7 +102,10 @@ def banded_to_csr(bandedMatrix: BandedMatrix, csrMatrix: CSRMatrix):
     for i in range(bandedMatrix.num_rows):
         for band_j in range(bandedMatrix.num_bands):
             j = bandedMatrix.j_min_i[band_j] + i
-            val = bandedMatrix.values[i * bandedMatrix.num_rows + band_j]
+            # print(f"index: {i*bandedMatrix.num_bands + band_j}")
+            # print(f"type first element: {type(bandedMatrix.values[0])}")
+            # print(f"len: {len(bandedMatrix.values)}")
+            val = bandedMatrix.values[i * bandedMatrix.num_bands + band_j]
             if val != 0.0:
                 csr_col_ind[elem_ctr] = j
                 csr_values[elem_ctr] = val
@@ -105,6 +113,10 @@ def banded_to_csr(bandedMatrix: BandedMatrix, csrMatrix: CSRMatrix):
         csr_row_ptr[i + 1] = elem_ctr
 
     assert elem_ctr == bandedMatrix.nnz, f"Error in BandedMatrix.to_CSRMatrix: elem_ctr != bandedMatrix.nnz, {elem_ctr} != {bandedMatrix.nnz}"
+
+    csrMatrix.row_ptr = csr_row_ptr
+    csrMatrix.col_idx = csr_col_ind
+    csrMatrix.values = csr_values
 
 def banded_to_coo(bandedMatrix: BandedMatrix, cooMatrix: COOMatrix):
 

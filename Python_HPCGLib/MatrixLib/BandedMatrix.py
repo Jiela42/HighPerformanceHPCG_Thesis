@@ -9,6 +9,7 @@ import torch
 
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.MatrixUtils import MatrixType
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import developer_mode
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import print_elem_not_found_warnings
 
 class BandedMatrix:
     def __init__(self: 'BandedMatrix'):
@@ -75,7 +76,7 @@ class BandedMatrix:
             if j == i + band:
                 return self.values[i + band * self.num_rows]
         
-        if developer_mode:
+        if developer_mode and print_elem_not_found_warnings:
             print("WARNING in BandedMatrix.get_elem: Element not found in band")
         
         return 0.0

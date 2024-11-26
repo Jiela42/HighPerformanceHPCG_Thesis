@@ -1,10 +1,7 @@
 import sys
 import os
 
-# Add the directory containing HighPerformanceHPCG_Thesis to the Python path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 
-import HighPerformanceHPCG_Thesis.Python_HPCGLib.HPCGLib_versions.BaseTorch as BaseTorch
 
 import cupy as cp
 import cupyx.scipy.sparse as sp
@@ -13,9 +10,11 @@ import numpy as np
 from typing import Tuple
 
 # my personal implementation of generations for the matrices, vectors etc.
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.CSRMatrix import CSRMatrix
 import HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.generations as generations
+import HighPerformanceHPCG_Thesis.Python_HPCGLib.HPCGLib_versions.BaseTorch as BaseTorch
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import device
 
 version_name = "BaseCuPy"
 
@@ -35,31 +34,17 @@ def computeSymGS(nx: int, nz: int, ny: int,
     print(f"WARNING: computeSymGS not implemented for {version_name}, using BaseTorch implementation")
     return BaseTorch.computeSymGS(nx, nz, ny, A, r, x)
 
-def computeSPMV(nx: int, nz: int, ny: int,
-                A: torch.sparse.Tensor, x: torch.Tensor, y: torch.Tensor)-> int:
+def computeSPMV(A_csr: CSRMatrix,
+                A: sp.csr_matrix, x: cp.ndarray, y: cp.ndarray)-> int:
     
-    print("entered computeSPMV")
-    
-    num_rows = nx * ny * nz
-    num_cols = nx * ny * nz
-
-    data = cp.array(A._values().cpu().numpy(), dtype=cp.float64)
-    row_idx = cp.array(A._indices()[0].cpu().numpy(), dtype=cp.int32)
-    col_idx = cp.array(A._indices()[1].cpu().numpy(), dtype=cp.int32)
-
-    A_cupy = sp.coo_matrix((data, (row_idx, col_idx)), shape=(num_rows, num_cols))
-
-    x_cupy = cp.array(x.cpu().numpy(), dtype=cp.float64)
-
-    y_cupy = A_cupy.dot(x_cupy)
-
-    y[:] = torch.tensor(y_cupy.get(), device=device, dtype=torch.float64)
+    # print(f"type y: {type(y)}")
+    # print(f"type x: {type(x)}")
+    # print(f"type A: {type(A)}")
+    # print(f"type Adotx: {type(A.dot(x))}")
+    cp.copyto(y, A.dot(x))
 
     return 0
     
-    # print(f"WARNING: computeSPMV not implemented for {version_name}, using BaseTorch implementation")
-    # return BaseTorch.computeSPMV(nx, nz, ny, A, x, y)
-
 def computeRestriction(Afx: torch.Tensor, rf: torch.Tensor,
                        nc: int, f2c: torch.Tensor, rc: torch.Tensor)-> int:
     
@@ -103,23 +88,4 @@ def computeWAXPBY(a: float, x: torch.Tensor, b: float, y: torch.Tensor, w: torch
 def computeCG(nx: int, ny: int, nz: int,
               A: torch.sparse.Tensor, y: torch.Tensor, x: torch.Tensor) -> int:
     print(f"WARNING: computeCG not implemented for {version_name}, using BaseTorch implementation")
-
-
-
-#################################################################################################################
-# this is only a test thingy
-
-num = 8
-
-
-A,y = generations.generate_torch_coo_problem(num,num,num)
-x = torch.zeros(num*num*num, device=device, dtype=torch.float64)
-
-computeSPMV(num, num, num, A, y, x)
-print("computed SPMV")
-
-# computeMG(num, num, num, A,y,x,0)
-# computeCG(num, num, num, A, y, x)
-# print("computed CG")
-#################################################################################################################
 

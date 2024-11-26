@@ -7,7 +7,7 @@ data_path = "timing_results/"
 plot_path = "plots/"
 
 methods_to_plot = [
-    # "CG",
+    "CG",
     "MG",
     "SymGS",
     "SPMV",
@@ -20,24 +20,26 @@ methods_to_plot = [
 sizes_to_plot =[
     ("8x8x8"),
     ("16x16x16"),
+    # ("24x24x24"),
     ("32x32x32"),
     ("64x64x64"),
     ("128x64x64"),
     ("128x128x64"),
     ("128x128x128"),
-    ("256x128x128"),
+    # ("256x128x128"),
 ]
 
 versions_to_plot = [
     "BaseTorch",
-    "matlab_reference",
+    # "MatlabReference",
+    "BaseCuPy",
     "cuSparse&cuBLAS",
     "Naive Banded",
     # "Naive Banded (1 thread per physical core)",
     # "Naive Banded (4 thread per physical core)",
     "Banded explicit Shared Memory",
-    "Banded explicit Shared Memory (rows_per_SM pow2)",
-    "Banded explicit Shared Memory (rows_per_SM pow2 1024 threads)",
+    # "Banded explicit Shared Memory (rows_per_SM pow2)",
+    # "Banded explicit Shared Memory (rows_per_SM pow2 1024 threads)",
     # "Banded explicit Shared Memory (rows_per_SM pow2 1024 threads 2x physical cores)",
 ]
 
@@ -77,7 +79,7 @@ files = [os.path.join(dp, f) for dp, _, filenames in os.walk(data_path) for f in
 
 full_data = pd.DataFrame()
 
-print(len(files))
+print(len(files), flush=True)
 
 for file in files:
     # the first line contains the metadata, read it in
@@ -119,7 +121,7 @@ for file in files:
 # preprocess the data
 #################################################################################################################
 
-print(full_data)
+# print(full_data, flush=True)
 
 # time per nnz
 full_data['Time per NNZ (ms)'] = full_data['Time (ms)'] / full_data['NNZ']
@@ -153,16 +155,41 @@ all_dense_ops = [
     "WAXPBY",
     ]
 
+python_implementations = [
+    "BaseTorch",
+    "MatlabReference",
+    "BaseCuPy",
+    "Naive Banded CuPy",
+]
+
+cpp_implementations = [
+    "cuSparse&cuBLAS",
+    "Naive Banded",
+    "Naive Banded (1 thread per physical core)",
+    "Naive Banded (4 thread per physical core)",
+    "Banded explicit Shared Memory",
+    "Banded explicit Shared Memory (rows_per_SM pow2)",
+    "Banded explicit Shared Memory (rows_per_SM pow2 1024 threads)",
+    "Banded explicit Shared Memory (rows_per_SM pow2 1024 threads 2x physical cores)",
+]
+
+all_implementation = python_implementations + cpp_implementations
+for version in all_versions:
+    if version not in all_implementation:
+        print(f"Version {version} neither in list of cpp implementations nor in list of python implementations", flush=True)
+
 dense_ops_to_plot = [m for m in methods_to_plot if m in all_dense_ops]
 sparse_ops_to_plot = [m for m in methods_to_plot if m in all_sparse_ops]
+cpp_implementation_to_plot = [v for v in versions_to_plot if v in cpp_implementations]
+python_implementation_to_plot = [v for v in versions_to_plot if v in python_implementations]
 
 
 # print(full_data)
-print(all_matrix_types)
-print(all_versions)
-print(all_methods)
-print(all_ault_nodes)
-print(all_matrix_dimensions)
+print(all_matrix_types, flush=True)
+print(all_versions, flush=True)
+print(all_methods, flush=True)
+print(all_ault_nodes, flush=True)
+print(all_matrix_dimensions, flush=True)
 
 #################################################################################################################
 # generate the plots

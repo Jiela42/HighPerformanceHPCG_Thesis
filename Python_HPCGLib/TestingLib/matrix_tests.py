@@ -12,12 +12,14 @@ def test_3d27pt_matrix(nx: int, ny: int, nz: int) -> bool:
 
     A_csr = CSRMatrix()
     A_csr.create_3d27pt_CSRMatrix(nx, ny, nz)
+    A_csr.iterative_values()
 
     A_coo = COOMatrix()
     csr_to_coo(A_csr, A_coo)
 
     coo_3d27pt = COOMatrix()
     coo_3d27pt.create_3d27pt_COOMatrix(nx, ny, nz)
+    coo_3d27pt.iterative_values()
 
     if not A_coo.compare_to(coo_3d27pt):
         all_tests_passed = False
@@ -31,6 +33,7 @@ def test_3d27pt_matrix(nx: int, ny: int, nz: int) -> bool:
         print(f"csr and coo conversions fail, for size {nx}x{ny}x{nz}", flush=True)
 
     A_coo.create_3d27pt_COOMatrix(nx, ny, nz)
+    A_coo.iterative_values()
 
     A_banded = BandedMatrix()
     coo_to_banded(A_coo, A_banded)
@@ -41,6 +44,20 @@ def test_3d27pt_matrix(nx: int, ny: int, nz: int) -> bool:
     if not A_coo.compare_to(A_back_to_coo):
         all_tests_passed = False
         print(f"banded to coo conversion failed for size {nx}x{ny}x{nz}", flush=True)
+
+    A_banded = BandedMatrix()
+    A_csr = CSRMatrix()
+    A_csr.create_3d27pt_CSRMatrix(nx, ny, nz)
+    A_csr.iterative_values()
+    A_back_to_csr = CSRMatrix()
+
+    csr_to_banded(A_csr, A_banded)
+    banded_to_csr(A_banded, A_back_to_csr)
+
+    if not A_csr.compare_to(A_back_to_csr):
+        all_tests_passed = False
+        print(f"csr to banded to csr conversion failed for size {nx}x{ny}x{nz}", flush=True)
+
 
     if developer_mode and all_tests_passed:
         print(f"3D27p Matrix tests passed for size {nx}x{ny}x{nz}", flush=True)

@@ -2,8 +2,10 @@
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.COOMatrix import COOMatrix
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.CSRMatrix import CSRMatrix
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.BandedMatrix import BandedMatrix
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.MatrixConversions import coo_to_csr
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib import generations as generations
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import error_tolerance
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import cg_error_tolerance
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import developer_mode
 
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import device
@@ -13,8 +15,12 @@ from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import print_differeing_vect
 import os
 import torch
 import numpy as np
+import cupy as cp
+import cupyx.scipy.sparse as sp
 from typing import Optional
-
+##############################################################################################################################
+# COO Torch Versions
+##############################################################################################################################
 def test_CG_coo_torch(baselineCG, uutCG, A_coo: COOMatrix, A:torch.sparse.Tensor, r:torch.tensor, x:torch.tensor) -> bool:
     
     nx = A_coo.nx
@@ -26,7 +32,10 @@ def test_CG_coo_torch(baselineCG, uutCG, A_coo: COOMatrix, A:torch.sparse.Tensor
     uutCG(nx, ny, nz, A, r, x, False)
     uut_x = x.clone()
 
-    return torch.allclose(base_x, uut_x, atol=error_tolerance)
+    if not torch.allclose(base_x, uut_x, atol=cg_error_tolerance):
+        print_differeing_vectors(uut_x, base_x, 5)
+
+    return torch.allclose(base_x, uut_x, atol=cg_error_tolerance)
 
 def test_symGS_coo_torch(uutSymGS, baselineSymGS, A_coo: COOMatrix, A:torch.sparse.Tensor, r:torch.tensor, x:torch.tensor) -> bool:
     
@@ -127,6 +136,50 @@ def test_MG_against_BaseLine_torch_coo(
     x_baseline = empty_x.clone()
 
     return torch.allclose(x_uut, x_baseline, atol=error_tolerance)
+##############################################################################################################################
+# CSR Cupy Versions
+##############################################################################################################################
+def test_SPMV_csr_cupy(uut, baseline, A_csr: CSRMatrix, A: sp.csr_matrix, x: cp.ndarray, y: cp.ndarray) -> bool:
+    
+    nx = A_csr.nx
+    ny = A_csr.ny
+    nz = A_csr.nz
+
+    baseline(nx, ny, nz, A, x, y)
+    base_y = y.copy()
+    uut(nx, ny, nz, A, x, y)
+    uut_y = y.copy()
+
+    return cp.allclose(base_y, uut_y, atol=error_tolerance)
+
+##############################################################################################################################
+# baseline torch coo, unit under test cupy csr
+##############################################################################################################################
+def test_SPMV_csr_cupy_coo_torch(
+        uutSPMV, baselineSPMV,
+        A_csr: CSRMatrix, A_cupy: sp.csr_matrix, x_cupy: cp.ndarray, y_cupy: cp.ndarray,
+        A_coo: COOMatrix, A_torch:torch.sparse.Tensor, x_torch: torch.tensor, y_torch: torch.tensor
+) -> bool:
+    
+    nx = A_csr.nx
+    ny = A_csr.ny
+    nz = A_csr.nz
+
+    baselineSPMV(nx, ny, nz, A_torch, x_torch, y_torch)
+    base_y = y_torch.clone()
+    # the newer implementations just take a matrix and no dimensions (or any meta data)
+    uutSPMV(A_csr, A_cupy, x_cupy, y_cupy)
+    # print(f"y_cupy first 5: {y_cupy[:5]}")
+    uut_y = torch.tensor(y_cupy.get(), device=device, dtype=torch.float64)
+
+    test_result = torch.allclose(base_y, uut_y, atol=error_tolerance)
+    
+    if not test_result:
+        print_differeing_vectors(uut_y, base_y, 5)
+
+    return test_result
+
+##############################################################################################################################
 
 # This function is used to select the right version to test the CG method
 def test_CG(baselineCG, uutCG,
@@ -192,11 +245,35 @@ def test_SPMV(
         uutSPMV, baselineSPMV,
         A_coo: Optional[COOMatrix] = None, A_csr: Optional[CSRMatrix] = None, A_banded: Optional[BandedMatrix] = None,
         A_torch: Optional[torch.sparse.Tensor] = None, x_torch: Optional[torch.tensor] = None, y_torch: Optional[torch.tensor] = None,
+        A_cupy: Optional[sp.csr_matrix] = None, x_cupy: Optional[cp.ndarray] = None, y_cupy: Optional[cp.ndarray] = None
         ) -> bool:
     
+
     torch_implementation = A_torch is not None and x_torch is not None and y_torch is not None
-    
-    if A_coo is not None:
+    cupy_implementation = A_cupy is not None and x_cupy is not None and y_cupy is not None
+
+    if A_csr is not None and A_coo is not None:
+        # this means we have a mixed implementation (the baseline is COO, the unit under test is CSR)
+        if cupy_implementation and torch_implementation:
+            return test_SPMV_csr_cupy_coo_torch(
+                uutSPMV, baselineSPMV,
+                A_csr, A_cupy, x_cupy, y_cupy,
+                A_coo, A_torch, x_torch, y_torch
+                )
+        else:
+            if developer_mode:
+                print("ERROR: There is no version to test SPMV where the matrix is CSR and the vectors are not cupy arrays")
+            return False
+
+    elif A_csr is not None:
+        if cupy_implementation:
+            return test_SPMV_csr_cupy(uutSPMV, baselineSPMV, A_csr, A_cupy, x_cupy, y_cupy)
+        else:
+            if developer_mode:
+                print("ERROR: There is no version to test SPMV where the matrix is CSR and the vectors are not cupy arrays")
+            return False
+
+    elif A_coo is not None:
         if torch_implementation:
             return test_SPMV_coo_torch(uutSPMV, baselineSPMV, A_coo, A_torch, x_torch, y_torch)
         else:

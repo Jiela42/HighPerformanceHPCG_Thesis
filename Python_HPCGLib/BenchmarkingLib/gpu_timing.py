@@ -89,39 +89,39 @@ class gpu_timer:
 
         # write the results to a file
         if self.CG_time:
-            filename = f"{self.folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_CG.csv"
+            filename = f"{self.folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.nz}_CG.csv"
             with open(filename, "w") as f:
-                f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.ny},{self.nnz},CG\n")
+                f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.nz},{self.nnz},CG\n")
                 for time in self.elapsed_CG_time_ms:
                     f.write(f"{time}\n")
         if self.MG_time:
-            filename = f"{self.folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_MG.csv"
+            filename = f"{self.folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.nz}_MG.csv"
             with open(filename, "w") as f:
-                f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.ny},{self.nnz},MG\n")
+                f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.nz},{self.nnz},MG\n")
                 for time in self.elapsed_MG_time_ms:
                     f.write(f"{time}\n")
         if self.SymGS_time:
-            filename = f"{self.folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_SymGS.csv"
+            filename = f"{self.folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.nz}_SymGS.csv"
             with open(filename, "w") as f:
-                f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.ny},{self.nnz},SymGS\n")
+                f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.nz},{self.nnz},SymGS\n")
                 for time in self.elapsed_SymGS_time_ms:
                     f.write(f"{time}\n")
         if self.SPMV_time:
-            filename = f"{self.folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_SPMV.csv"
+            filename = f"{self.folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.nz}_SPMV.csv"
             with open(filename, "w") as f:
-                f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.ny},{self.nnz},SPMV\n")
+                f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.nz},{self.nnz},SPMV\n")
                 for time in self.elapsed_SPMV_time_ms:
                     f.write(f"{time}\n")
         if self.waxpby_time:
-            filename = f"{self.folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_WAXPBY.csv"
+            filename = f"{self.folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.nz}_WAXPBY.csv"
             with open(filename, "w") as f:
-                    f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.ny},{self.nnz},WAXPBY\n")
+                    f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.nz},{self.nnz},WAXPBY\n")
                     for time in self.elapsed_waxpby_time_ms:
                         f.write(f"{time}\n")
         if self.dot_time:
-            filename = f"{self.folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.ny}_Dot.csv"
+            filename = f"{self.folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.nz}_Dot.csv"
             with open(filename, "w") as f:
-                    f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.ny},{self.nnz},Dot\n")
+                    f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.nz},{self.nnz},Dot\n")
                     for time in self.elapsed_dot_time_ms:
                         f.write(f"{time}\n")
         

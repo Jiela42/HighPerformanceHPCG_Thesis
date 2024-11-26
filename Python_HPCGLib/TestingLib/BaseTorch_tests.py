@@ -6,8 +6,36 @@ from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.COOMatrix import COOMat
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib import generations as generations
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import device
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import developer_mode
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import limit_matrix_size_for_cg, max_dim_cg
 
 import HighPerformanceHPCG_Thesis.Python_HPCGLib.TestingLib.abstractHPCG_tests as abstract_tests
+
+def test_BaseTorch_3d27p_on_random_matrix(A_coo: COOMatrix, A_torch: torch.sparse.Tensor, y: torch.Tensor) -> bool:
+    # we use this function since we have requirements for the matrix for some of the test cases.
+    # essentially we only test spmv here
+
+    all_tests_passed = True
+    
+    nx = A_coo.nx
+    ny = A_coo.ny
+    nz = A_coo.nz
+
+    a = torch.rand(nx*ny*nz, device=device, dtype=torch.float64)
+    x = torch.zeros(nx*ny*nz, device=device, dtype=torch.float64)
+
+    baselineSPMV = matlab_reference.computeSPMV
+    testSPMV = BaseTorch.computeSPMV
+
+    SPMV_test = abstract_tests.test_SPMV(
+        baselineSPMV=baselineSPMV, uutSPMV=testSPMV,
+        A_coo=A_coo, A_torch=A_torch, x_torch = a, y_torch = x)
+    
+    if not SPMV_test:
+        the_test_passed = False
+        print(f"The BaseTorch SPMV test failed for size: {nx}x{ny}x{nz}", flush=True)
+    
+
+    return all_tests_passed
 
 def test_BaseTorch_3d27p_on_matrix(A_coo: COOMatrix, A_torch: torch.sparse.Tensor, y: torch.Tensor) -> bool:
     
@@ -35,7 +63,7 @@ def test_BaseTorch_3d27p_on_matrix(A_coo: COOMatrix, A_torch: torch.sparse.Tenso
     baselineDot = matlab_reference.computeDot
 
     # now we call the abstract test methods
-    if nx < 32 and ny < 32 and nz < 32:
+    if limit_matrix_size_for_cg and nx > max_dim_cg and ny > max_dim_cg and nz > max_dim_cg:
         CG_test = abstract_tests.test_CG(
             baselineCG=baselineCG, uutCG=testCG,
             A_coo=A_coo, A_torch=A_torch, r_torch = y, x_torch = x)
@@ -114,10 +142,20 @@ def test_BaseTorch_3d27p(nx:int, ny:int, nz:int) -> bool:
     # print(y)
 
     current_matrix_test = test_BaseTorch_3d27p_on_matrix(A_coo, A, y)
-
+    
     if not current_matrix_test:
         all_tests_passed = False
         print(f"BaseTorch on standard HPCG Matrix failed for size: {nx}x{ny}x{nz}", flush=True)
+
+    # we now also test for iterative values
+    A_coo.iterative_values()
+    A = A_coo.to_torch()
+
+    current_matrix_test = test_BaseTorch_3d27p_on_random_matrix(A_coo, A, y)
+    if not current_matrix_test:
+        all_tests_passed = False
+        print(f"BaseTorch on random HPCG Matrix failed for size: {nx}x{ny}x{nz}", flush=True)
+
     
     return all_tests_passed
 

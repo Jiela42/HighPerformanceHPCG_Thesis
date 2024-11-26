@@ -2,8 +2,8 @@ import torch
 import random
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import device
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import ault_node
-from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import max_dim_size
-from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import limit_matrix_size
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import max_dim_size, limit_matrix_size
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import limit_matrix_size_for_cg, max_dim_cg
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib import generations as generations
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.BenchmarkingLib.gpu_timing import gpu_timer
 import HighPerformanceHPCG_Thesis.Python_HPCGLib.HPCGLib_versions.BaseTorch as BaseTorch
@@ -42,6 +42,8 @@ def run_BaseTorch_3d27pt_benchmark(nx: int, ny: int, nz: int, save_folder) -> No
     )
 
     # we also include checks to not run the super big matrices
+    # if limit_matrix_size_for_cg and nx < max_dim_cg and ny < max_dim_cg and nz < max_dim_cg:
+
     if limit_matrix_size and nx < max_dim_size and ny < max_dim_size and nz < max_dim_size:
         benchmark_CG_coo_torch(CGimplementation=BaseTorch.computeCG, timer=matrix_timer, A_coo=A_coo, A=A, r=y, x=x)
         benchmark_MG_coo_torch(BaseTorch.computeMG, matrix_timer, A_coo, A, y, x)

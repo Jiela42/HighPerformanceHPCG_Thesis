@@ -60,17 +60,10 @@ def computeSymGS(nx: int, nz: int, ny: int,
 def computeSPMV(nx: int, nz: int, ny: int,
                 A: torch.sparse.Tensor, x: torch.Tensor, y: torch.Tensor)-> int:
     
-    n_rows = nx * ny * nz
-    indices = A.indices()
-    values = A.values()
-
-    for i in range(n_rows):
-
-        row_ind = indices[0] == i
-        nnz_cols = indices[1][row_ind]
-        nnz_values = values[row_ind]
-
-        y[i] = torch.dot(nnz_values, x[nnz_cols])
+    x = x.unsqueeze(1) if x.dim() == 1 else x
+    solution = torch.sparse.mm(A, x)
+    solution = solution.squeeze() if solution.dim() > 1 else solution
+    y.copy_(solution)
 
     return 0
 
