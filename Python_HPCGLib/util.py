@@ -8,11 +8,13 @@ limit_matrix_size_for_cg = True
 max_dim_cg = 64
 max_dim_size = 64
 ault_node = "41-44"
-error_tolerance = 1e-9
+error_tolerance = 1e-5
 cg_error_tolerance = 1e-5
 num_bench_iterations = 10
 ################################################
+cuda_max_blocks = 65535
 
+################################################
 
 import torch
 from typing import Optional

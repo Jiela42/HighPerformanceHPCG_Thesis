@@ -16,7 +16,7 @@ from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.BandedMatrix import Ban
 import HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.generations as generations
 import HighPerformanceHPCG_Thesis.Python_HPCGLib.HPCGLib_versions.BaseTorch as BaseTorch
 
-from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import device
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import cuda_max_blocks
 
 version_name = "Naive Banded CuPy"
 
@@ -40,39 +40,56 @@ def computeSymGS(nx: int, nz: int, ny: int,
 def SPMV_kernel(
     num_rows: int, num_cols: int, num_bands: int,
     j_min_i: cp.ndarray,
-    A_banded: cp.ndarray, x: cp.ndarray, y: cp.ndarray
+    A_banded: cp.ndarray, x: cp.ndarray, y: cp.ndarray,
+    # debug_array: cp.ndarray
     ):
     
-    tid = jit.blockIdx.x * jit.blockDim.x + jit.threadIdx.x
+    tid = int(jit.blockIdx.x * jit.blockDim.x + jit.threadIdx.x)
+    # debug_ctr = 0
 
     # every thread computes one or more rows of the matrix
     for i in range(tid, num_rows, jit.blockDim.x * jit.gridDim.x):
         sum_i = 0.0
         for band in range(num_bands):
-            j = i + j_min_i[band]
+            j = int(i + j_min_i[band])
             if j >= 0 and j < num_cols:
+                # debug_array[debug_ctr] = j
+                # debug_ctr += 1
                 sum_i += A_banded[i*num_bands + band] * x[j]
 
         y[i] = sum_i
 
 def computeSPMV(A_banded: BandedMatrix,
-                A: sp.csr_matrix, x: cp.ndarray, y: cp.ndarray)-> int:
+                j_min_i: cp.ndarray,
+                A: cp.ndarray, x: cp.ndarray, y: cp.ndarray)-> int:
     
     num_rows = A_banded.num_rows
     num_cols = A_banded.num_cols
     num_bands = A_banded.num_bands
 
-    j_min_i = cp.array(A_banded.j_min_i, dtype=cp.int32)
+    # debug_array = cp.full(num_rows * num_bands, -1, dtype=cp.int32)
 
     num_threads = 1024
-    num_blocks = math.ceil(num_rows, num_threads)
-
+    num_blocks = min(cuda_max_blocks, math.ceil(num_rows/ num_threads))
+    # print(debug_array)
     # run kernel
     SPMV_kernel[num_blocks, num_threads](num_rows, num_cols, num_bands, j_min_i, A, x, y)
 
     # synchronize
     cp.cuda.Stream.null.synchronize()
+
+    # debug_ctr = 0
+    # debug_entry = debug_array[debug_ctr]
+    # while(debug_entry != -1):
+    #     print(f"debug_array[{debug_ctr}]: {debug_entry}")
+    #     debug_ctr += 1
+    #     debug_entry = debug_array[debug_ctr]
     
+    # print(f"j_min_i: {j_min_i}")
+
+    # print("num_cols: ", num_cols)
+    # print("num_rows: ", num_rows)
+
     return 0
     
 def computeRestriction(Afx: torch.Tensor, rf: torch.Tensor,

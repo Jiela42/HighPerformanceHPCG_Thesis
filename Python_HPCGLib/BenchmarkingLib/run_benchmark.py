@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.BenchmarkingLib.baseTorch_benchmark import run_BaseTorch_benchmark
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.BenchmarkingLib.matlabReference_benchmark import run_MatlabReference_benchmark
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.BenchmarkingLib.BaseCuPy_benchmark import run_BaseCuPy_benchmark
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.BenchmarkingLib.NaiveBandedCuPy_benchmark import run_NaiveBandedCuPy_benchmark
 
 # make new timestamped folder in data to avoid overwriting old data
 timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -39,8 +40,8 @@ print("***********************************RUNNING BENCHMARK SUITE***************
 # run_BaseTorch_benchmark(128, 128, 64, new_folder_path)
 # run_BaseTorch_benchmark(256, 128, 128, new_folder_path)
 
-print("BaseTorch benchmarks done", flush=True)
-print("Starting MatlabReference benchmarks", flush=True)
+# print("BaseTorch benchmarks done", flush=True)
+# print("Starting MatlabReference benchmarks", flush=True)
 # run_MatlabReference_benchmark(8, 8, 8, new_folder_path)
 # print(f"MatlabReference Finished 8x8x8", flush=True)
 # run_MatlabReference_benchmark(16, 16, 16, new_folder_path)
@@ -49,33 +50,45 @@ print("Starting MatlabReference benchmarks", flush=True)
 # print(f"MatlabReference Finished 24x24x24", flush=True)
 # run_MatlabReference_benchmark(32, 32, 32, new_folder_path)
 # print(f"MatlabReference Finished 32x32x32", flush=True)
-run_MatlabReference_benchmark(64, 64, 64, new_folder_path)
-print(f"MatlabReference Finished 64x64x64", flush=True)
-run_MatlabReference_benchmark(128, 128, 128, new_folder_path)
-print(f"MatlabReference Finished 128x128x128", flush=True)
+# run_MatlabReference_benchmark(64, 64, 64, new_folder_path)
+# print(f"MatlabReference Finished 64x64x64", flush=True)
+# run_MatlabReference_benchmark(128, 128, 128, new_folder_path)
+# print(f"MatlabReference Finished 128x128x128", flush=True)
 
 
-print("MatlabReference benchmarks done", flush=True)
+# print("MatlabReference benchmarks done", flush=True)
 
-print("Starting BaseCuPy benchmarks", flush=True)
-run_BaseCuPy_benchmark(8, 8, 8, new_folder_path)
-print(f"BaseCuPy Finished 8x8x8", flush=True)
-run_BaseCuPy_benchmark(16, 16, 16, new_folder_path)
-print(f"BaseCuPy Finished 16x16x16", flush=True)
-run_BaseCuPy_benchmark(24, 24, 24, new_folder_path)
-print(f"BaseCuPy Finished 24x24x24", flush=True)
-run_BaseCuPy_benchmark(32, 32, 32, new_folder_path)
-print(f"BaseCuPy Finished 32x32x32", flush=True)
-run_BaseCuPy_benchmark(64, 64, 64, new_folder_path)
-print(f"BaseCuPy Finished 64x64x64", flush=True)
-run_BaseCuPy_benchmark(128, 64, 64, new_folder_path)
-print(f"BaseCuPy Finished 128x64x64", flush=True)
-run_BaseCuPy_benchmark(128, 128, 64, new_folder_path)
-print(f"BaseCuPy Finished 128x128x64", flush=True)
-run_BaseCuPy_benchmark(128, 128, 128, new_folder_path)
+# print("Starting BaseCuPy benchmarks", flush=True)
+# run_BaseCuPy_benchmark(8, 8, 8, new_folder_path)
+# run_BaseCuPy_benchmark(16, 16, 16, new_folder_path)
+# run_BaseCuPy_benchmark(24, 24, 24, new_folder_path)
+# print(f"BaseCuPy Finished 24x24x24", flush=True)
+# run_BaseCuPy_benchmark(32, 32, 32, new_folder_path)
+# run_BaseCuPy_benchmark(64, 64, 64, new_folder_path)
+# print(f"BaseCuPy Finished 64x64x64", flush=True)
+# run_BaseCuPy_benchmark(128, 64, 64, new_folder_path)
+# print(f"BaseCuPy Finished 128x64x64", flush=True)
+# run_BaseCuPy_benchmark(128, 128, 64, new_folder_path)
+# print(f"BaseCuPy Finished 128x128x64", flush=True)
+# run_BaseCuPy_benchmark(128, 128, 128, new_folder_path)
 # # run_BaseCuPy_benchmark(256, 128, 128, new_folder_path)
-
 print("BaseCuPy benchmarks done", flush=True)
+
+print("Starting NaiveBandedCuPy benchmarks", flush=True)
+run_NaiveBandedCuPy_benchmark(8, 8, 8, new_folder_path)
+run_NaiveBandedCuPy_benchmark(16, 16, 16, new_folder_path)
+run_NaiveBandedCuPy_benchmark(24, 24, 24, new_folder_path)
+print(f"NaiveBandedCuPy Finished 24x24x24", flush=True)
+run_NaiveBandedCuPy_benchmark(32, 32, 32, new_folder_path)
+run_NaiveBandedCuPy_benchmark(64, 64, 64, new_folder_path)
+print(f"NaiveBandedCuPy Finished 64x64x64", flush=True)
+run_NaiveBandedCuPy_benchmark(128, 64, 64, new_folder_path)
+print(f"NaiveBandedCuPy Finished 128x64x64", flush=True)
+run_NaiveBandedCuPy_benchmark(128, 128, 64, new_folder_path)
+print(f"NaiveBandedCuPy Finished 128x128x64", flush=True)
+run_NaiveBandedCuPy_benchmark(128, 128, 128, new_folder_path)
+print("NaiveBandedCuPy benchmarks done", flush=True)
+
 
 
 overall_end = time.time()

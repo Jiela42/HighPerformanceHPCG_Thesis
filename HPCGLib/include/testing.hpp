@@ -9,6 +9,7 @@
 #include "HPCG_versions/cusparse.hpp"
 #include "HPCG_versions/naiveBanded.cuh"
 #include "HPCG_versions/banded_shared_mem.cuh"
+#include "HPCG_versions/banded_warp_reduction.cuh"
 
 
 #include "UtilLib/cuda_utils.hpp"
@@ -50,6 +51,7 @@ bool test_SPMV(
 // functions that call the abstract tests in order to test full versions
 bool run_naiveBanded_tests(int nx, int ny, int nz);
 bool run_bandedSharedMem_tests(int nx, int ny, int nz);
+bool run_bandedWarpReduction_tests(int nx, int ny, int nz);
 
 
 #endif // TESTING_HPP

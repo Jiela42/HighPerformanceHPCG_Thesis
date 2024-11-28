@@ -40,6 +40,9 @@ target_sources(HPCGLib PRIVATE
 
     banded_shared_mem/banded_shared_mem_computeSPMV.cu
     banded_shared_mem/banded_shared_mem_kernel_SPMV.cu
+
+    banded_warp_reduction/banded_warp_reduction_computeSPMV.cu
+    banded_warp_reduction/banded_warp_reduction_kernel_SPMV.cu
 )
 
 target_link_libraries(

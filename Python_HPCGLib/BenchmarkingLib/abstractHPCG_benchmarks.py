@@ -8,9 +8,11 @@ from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import num_bench_iterations
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.BenchmarkingLib.gpu_timing import gpu_timer
 import HighPerformanceHPCG_Thesis.Python_HPCGLib.TestingLib.abstractHPCG_tests as HPCG_tests
 import HighPerformanceHPCG_Thesis.Python_HPCGLib.HPCGLib_versions.BaseTorch as BaseTorch
+import HighPerformanceHPCG_Thesis.Python_HPCGLib.HPCGLib_versions.BaseCuPy as BaseCuPy
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.COOMatrix import COOMatrix
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.CSRMatrix import CSRMatrix
-from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.MatrixConversions import csr_to_coo
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.BandedMatrix import BandedMatrix
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.MatrixConversions import csr_to_coo, banded_to_csr
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import device
 
 ####################################################################################################
@@ -152,3 +154,28 @@ def benchmark_SPMV_cupy(SPMVimplementation, timer:gpu_timer, A_csr: CSRMatrix, A
 
 
 ####################################################################################################
+# banded cupy benchmarks
+
+def benchmark_SPMV_banded_cupy(SPMVimplementation, timer:gpu_timer, A_banded: BandedMatrix, A_dense: cp.ndarray, j_min_i_cupy: cp.ndarray, x_cupy:cp.ndarray, y_cupy: cp.ndarray) -> None:
+
+    if do_tests:
+        baselineSPMV = BaseCuPy.computeSPMV
+        csr_Matrix = CSRMatrix()
+        banded_to_csr(A_banded, csr_Matrix)
+        A_sparse_cupy = csr_Matrix.get_cupy_matrix()
+
+        test_SPMV = HPCG_tests.test_SPMV(
+            baselineSPMV=baselineSPMV, uutSPMV=SPMVimplementation,
+            A_csr=csr_Matrix, A_cupy_sparse=A_sparse_cupy,
+            A_banded=A_banded, A_cupy_dense=A_dense, j_min_i_cupy=j_min_i_cupy,
+            x_cupy=x_cupy, y_cupy=y_cupy
+        )
+
+        if not test_SPMV:
+            print(f"ERROR: test failed for {SPMVimplementation.__name__} and size {A_banded.nx}x{A_banded.ny}x{A_banded.nz}")
+            return
+    
+    for i in range(num_bench_iterations):
+        timer.start_timer()
+        SPMVimplementation(A_banded, j_min_i_cupy, A_dense, x_cupy, y_cupy)
+        timer.stop_timer("computeSPMV")

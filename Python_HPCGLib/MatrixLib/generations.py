@@ -10,10 +10,10 @@ import itertools
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.BandedMatrix import BandedMatrix
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.CSRMatrix import CSRMatrix
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.COOMatrix import COOMatrix
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.MatrixLib.MatrixConversions import csr_to_banded
+from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import device
 
 store = False
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def generate_y_forHPCG_problem(nx:int, ny:int, nz:int)-> torch.Tensor:
 
@@ -94,7 +94,21 @@ def generate_cupy_csr_problem(nx: int, ny: int, nz: int) -> Tuple[CSRMatrix, sp.
     
         return A, A_csr, y
 
+def generate_cupy_banded_problem(nx: int, ny: int, nz: int) -> Tuple[BandedMatrix, cp.ndarray, cp.ndarray]:
 
+        A_csr = CSRMatrix()
+        A_csr.create_3d27pt_CSRMatrix(nx, ny, nz)
+
+        A_banded = BandedMatrix()
+        csr_to_banded(A_csr, A_banded)
+
+        A_banded_data = cp.array(A_banded.values)
+
+    
+        y_torch = generate_y_forHPCG_problem(nx, ny, nz)
+        y = cp.array(y_torch.cpu().numpy())
+    
+        return A_banded, A_banded_data, y
 
 def generate_coarse_problem(nxf: int, nyf: int, nzf: int) -> Tuple[np.ndarray, torch.tensor, torch.tensor]:
 

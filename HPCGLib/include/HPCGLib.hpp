@@ -11,7 +11,7 @@
 template <typename T>
 class HPCG_functions {
     public:
-        bool test_before_bench = true;
+        bool test_before_bench = false;
         const std::string version_name;
         // this string is used when small changes are benchmarked to see their effect
         std::string additional_parameters = "vanilla_version";

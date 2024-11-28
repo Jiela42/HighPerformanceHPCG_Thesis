@@ -1,6 +1,7 @@
 
 from typing import List
 import numpy as np
+import cupy as cp
 import torch
 # import sys
 
@@ -23,6 +24,7 @@ class BandedMatrix:
 
         self.np_matrix = None
         self.torch_matrix = None
+        self.cupy_matrix = None
 
         self.nx = None
         self.ny = None
@@ -49,28 +51,43 @@ class BandedMatrix:
             self.nz = None
     
     def to_np(self: 'BandedMatrix') -> np.ndarray:
-        if self.np_matrix is not None:
-             return self.np_matrix
-        else:
-            np_matrix = np.zeros((self.num_rows, self.num_bands), dtype=np.float64)
-            for i in range(self.num_rows):
-                for j in range(self.num_bands):
-                    np_matrix[i, j] = self.values[i + j * self.num_rows]
-            self.np_matrix = np_matrix
-            return self.np_matrix
+        
+        np_matrix = np.zeros((self.num_rows, self.num_bands), dtype=np.float64)
+        for i in range(self.num_rows):
+            for j in range(self.num_bands):
+                np_matrix[i, j] = self.values[i + j * self.num_rows]
+        self.np_matrix = np_matrix
+        return self.np_matrix
     
     def to_torch(self: 'BandedMatrix') -> torch.Tensor:
-        if self.torch_matrix is not None:
-            return self.torch_matrix
-        else:
-            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-            torch_matrix = torch.zeros(self.num_rows, self.num_bands, device=device, dtype=torch.float64)
-            for i in range(self.num_rows):
-                for j in range(self.num_bands):
-                    torch_matrix[i, j] = self.values[i + j * self.num_rows]
-            self.torch_matrix = torch_matrix
-            return self.torch_matrix
-   
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        torch_matrix = torch.zeros(self.num_rows, self.num_bands, device=device, dtype=torch.float64)
+        for i in range(self.num_rows):
+            for j in range(self.num_bands):
+                torch_matrix[i, j] = self.values[i + j * self.num_rows]
+        self.torch_matrix = torch_matrix
+        return self.torch_matrix
+    
+    def to_cupy(self: 'BandedMatrix') -> np.ndarray:
+
+        self.cupy_matrix = cp.array(self.values, dtype=cp.float64)
+        return self.cupy_matrix
+    
+    def get_np_matrix(self: 'BandedMatrix') -> np.ndarray:
+        if self.np_matrix is None:
+            return self.to_np()
+        return self.np_matrix
+    
+    def get_torch_matrix(self: 'BandedMatrix') -> torch.Tensor:
+        if self.torch_matrix is None:
+            return self.to_torch()
+        return self.torch_matrix
+    
+    def get_cupy_matrix(self: 'BandedMatrix') -> np.ndarray:
+        if self.cupy_matrix is None:
+            return self.to_cupy()
+        return self.cupy_matrix   
+
     def get_elem(self: 'BandedMatrix', i:int, j:int)-> float:
         for band in range(self.num_bands):
             if j == i + band:

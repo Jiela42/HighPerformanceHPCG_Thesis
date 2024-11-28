@@ -1,9 +1,6 @@
 #ifndef BENCHMARK_HPP
 #define BENCHMARK_HPP
 
-#include "HPCGLib.hpp"
-#include "HPCG_versions/cusparse.hpp"
-#include "HPCG_versions/naiveBanded.cuh"
 
 #include "TimingLib/timer.hpp"
 #include "testing.hpp"
@@ -14,6 +11,7 @@
 void run_cuSparse_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
 void run_naiveBanded_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
 void run_bandedSharedMem_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
+void run_banded_warp_reduction_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
 
 // this function allows us to run the whole abstract benchmark
 // we have method overloading to support different matrix types

@@ -180,6 +180,35 @@ def test_SPMV_csr_cupy_coo_torch(
     return test_result
 
 ##############################################################################################################################
+# baseline csr, uut banded, both cupy
+##############################################################################################################################
+
+def test_SPMV_banded_csr_cupy(
+        uutSPMV, baselineSPMV,
+        A_csr: CSRMatrix, A_sparse_cupy: sp.csr_matrix,
+        A_banded: BandedMatrix, A_dense_cupy: cp.ndarray, A_j_min_i_cupy: cp.ndarray,
+        x_cupy: cp.ndarray, y_cupy: cp.ndarray) -> bool:
+    
+    baselineSPMV(A_csr, A_sparse_cupy, x_cupy, y_cupy)
+    base_y = torch.tensor(y_cupy.get(), device=device, dtype=torch.float64)
+    # the newer implementations just take a matrix and no dimensions (or any meta data)
+    uutSPMV(A_banded=A_banded,
+            A= A_dense_cupy, j_min_i=A_j_min_i_cupy,
+            x=x_cupy, y=y_cupy)
+    # print(f"y_cupy first 5: {y_cupy[:5]}")
+    uut_y = torch.tensor(y_cupy.get(), device=device, dtype=torch.float64)
+
+    test_result = torch.allclose(base_y, uut_y, atol=error_tolerance)
+    
+    if not test_result:
+        print_differeing_vectors(uut_y, base_y, 5)
+
+    return test_result
+
+
+
+##############################################################################################################################
+
 
 # This function is used to select the right version to test the CG method
 def test_CG(baselineCG, uutCG,
@@ -245,19 +274,21 @@ def test_SPMV(
         uutSPMV, baselineSPMV,
         A_coo: Optional[COOMatrix] = None, A_csr: Optional[CSRMatrix] = None, A_banded: Optional[BandedMatrix] = None,
         A_torch: Optional[torch.sparse.Tensor] = None, x_torch: Optional[torch.tensor] = None, y_torch: Optional[torch.tensor] = None,
-        A_cupy: Optional[sp.csr_matrix] = None, x_cupy: Optional[cp.ndarray] = None, y_cupy: Optional[cp.ndarray] = None
+        A_cupy_sparse: Optional[sp.csr_matrix] = None, x_cupy: Optional[cp.ndarray] = None, y_cupy: Optional[cp.ndarray] = None,
+        A_cupy_dense: Optional[cp.ndarray] = None, j_min_i_cupy: Optional[cp.ndarray] = None
         ) -> bool:
     
 
     torch_implementation = A_torch is not None and x_torch is not None and y_torch is not None
-    cupy_implementation = A_cupy is not None and x_cupy is not None and y_cupy is not None
+    cupy_sparse_implementation = A_cupy_sparse is not None and x_cupy is not None and y_cupy is not None
+    cupy_dense_implementation = A_cupy_dense is not None and x_cupy is not None and y_cupy is not None and j_min_i_cupy is not None
 
     if A_csr is not None and A_coo is not None:
         # this means we have a mixed implementation (the baseline is COO, the unit under test is CSR)
-        if cupy_implementation and torch_implementation:
+        if cupy_sparse_implementation and torch_implementation:
             return test_SPMV_csr_cupy_coo_torch(
                 uutSPMV, baselineSPMV,
-                A_csr, A_cupy, x_cupy, y_cupy,
+                A_csr, A_cupy_sparse, x_cupy, y_cupy,
                 A_coo, A_torch, x_torch, y_torch
                 )
         else:
@@ -265,9 +296,17 @@ def test_SPMV(
                 print("ERROR: There is no version to test SPMV where the matrix is CSR and the vectors are not cupy arrays")
             return False
 
+    elif A_csr is not None and A_banded is not None:
+        if cupy_sparse_implementation and cupy_dense_implementation:
+            return test_SPMV_banded_csr_cupy(uutSPMV, baselineSPMV, A_csr, A_cupy_sparse, A_banded, A_cupy_dense, j_min_i_cupy, x_cupy, y_cupy)
+        else:
+            if developer_mode:
+                print("ERROR: There is no version to test SPMV where the matrices are CSR and Banded and the vectors are not cupy arrays")
+            return False
+
     elif A_csr is not None:
-        if cupy_implementation:
-            return test_SPMV_csr_cupy(uutSPMV, baselineSPMV, A_csr, A_cupy, x_cupy, y_cupy)
+        if cupy_sparse_implementation:
+            return test_SPMV_csr_cupy(uutSPMV, baselineSPMV, A_csr, A_cupy_sparse, x_cupy, y_cupy)
         else:
             if developer_mode:
                 print("ERROR: There is no version to test SPMV where the matrix is CSR and the vectors are not cupy arrays")
