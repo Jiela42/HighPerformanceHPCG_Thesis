@@ -65,7 +65,7 @@ bool test_SPMV(
     double * x_d // the vectors x is already on the device
         
 ){
-
+    
     sparse_CSR_Matrix<double> A;
     A.sparse_CSR_Matrix_from_banded(banded_A);
 
@@ -99,6 +99,45 @@ bool test_SPMV(
 
     // compare the results
     bool test_pass = vector_compare(y_baseline, y_uut);
+
+    return test_pass;
+}
+
+bool test_Dot(
+    HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
+    banded_Matrix<double> & A, // we pass A for the metadata
+    double * x_d, double * y_d // the vectors x, y and result are already on the device
+    ){
+
+    sparse_CSR_Matrix<double> A_CSR;
+    A_CSR.sparse_CSR_Matrix_from_banded(A);
+
+    double result_baseline = 0.0;
+    double result_uut = 0.0;
+
+    // allocate the memory for the result
+    double * result_baseline_d;
+    double * result_uut_d;
+
+    CHECK_CUDA(cudaMalloc(&result_baseline_d, sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&result_uut_d, sizeof(double)));
+
+    baseline.compute_Dot(A_CSR, x_d, y_d, result_baseline_d);
+    uut.compute_Dot(A, x_d, y_d, result_uut_d);
+
+    // and now we need to copy the result back and de-allocate the memory
+    CHECK_CUDA(cudaMemcpy(&result_baseline, result_baseline_d, sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(&result_uut, result_uut_d, sizeof(double), cudaMemcpyDeviceToHost));
+
+    CHECK_CUDA(cudaFree(result_baseline_d));
+    CHECK_CUDA(cudaFree(result_uut_d));
+
+    // and now we need to copy the result back and de-allocate the memory
+    bool test_pass = double_compare(result_baseline, result_uut);
+
+    if (not test_pass){
+        std::cout << "Dot product failed: baseline = " << result_baseline << " uut = " << result_uut << std::endl;
+    }
 
     return test_pass;
 }

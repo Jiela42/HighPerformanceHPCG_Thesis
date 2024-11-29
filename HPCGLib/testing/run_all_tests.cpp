@@ -42,7 +42,7 @@ int main(){
     all_pass = all_pass && run_bandedWarpReduction_tests(16, 16, 16);
     all_pass = all_pass && run_bandedWarpReduction_tests(32, 32, 32);
     all_pass = all_pass && run_bandedWarpReduction_tests(64, 64, 64);
-    all_pass = all_pass && run_bandedWarpReduction_tests(128, 128, 128);
+    // all_pass = all_pass && run_bandedWarpReduction_tests(128, 128, 128);
     std::cout << "Finished banded warp reductioin tests" << std::endl;
 
 

@@ -54,9 +54,14 @@ class HPCG_functions {
             ) = 0;
 
         virtual void compute_Dot(
-            T * x_d, T & y_d, T & result_d // again: the vectors x, y and result are already on the device
+            sparse_CSR_Matrix<T> & A, // we pass A for the metadata
+            T * x_d, T * y_d, T * result_d // again: the vectors x, y and result are already on the device
         ) = 0;
 
+        virtual void compute_Dot(
+            banded_Matrix<T> & A, // we pass A for the metadata
+            T * x_d, T * y_d, T * result_d // again: the vectors x, y and result are already on the device
+        ) = 0;
 
         int getNumberOfIterations() const {
             return num_bench_iter;

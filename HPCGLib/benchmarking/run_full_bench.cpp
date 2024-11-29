@@ -67,7 +67,7 @@ int main() {
     // run_bandedSharedMem_3d27p_benchmarks(128, 128, 64, folder_path);
     // run_bandedSharedMem_3d27p_benchmarks(128, 128, 128, folder_path);
     // run_bandedSharedMem_3d27p_benchmarks(256, 128, 128, folder_path);
-    run_bandedSharedMem_3d27p_benchmarks(256, 256, 128, folder_path);
+    // run_bandedSharedMem_3d27p_benchmarks(256, 256, 128, folder_path);
 
     std::cout << "Starting Banded Warp Reduction 3d27p Benchmarks" << std::endl;
     // run_banded_warp_reduction_3d27p_benchmarks(8, 8, 8, folder_path);
@@ -78,7 +78,7 @@ int main() {
     // run_banded_warp_reduction_3d27p_benchmarks(128, 128, 64, folder_path);
     // run_banded_warp_reduction_3d27p_benchmarks(128, 128, 128, folder_path);
     // run_banded_warp_reduction_3d27p_benchmarks(256, 128, 128, folder_path);
-    // run_banded_warp_reduction_3d27p_benchmarks(256, 256, 128, folder_path);
+    run_banded_warp_reduction_3d27p_benchmarks(256, 256, 128, folder_path);
 
 
     std::cout << "Finished Benchmark" << std::endl;

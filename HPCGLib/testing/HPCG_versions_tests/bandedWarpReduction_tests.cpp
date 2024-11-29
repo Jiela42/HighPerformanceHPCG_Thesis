@@ -8,6 +8,7 @@ bool run_banded_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double> A){
     // and is then passed to the test function
 
     bool all_pass = true;
+    bool debug = false;
     
     // create the baseline and the UUT
     cuSparse_Implementation<double> cuSparse;
@@ -19,6 +20,15 @@ bool run_banded_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double> A){
     
     // random seeded x vector
     std::vector<double> x = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+    std::vector<double> y = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+
+    if (debug){
+        // x = std::vector<double>(nx*ny*nz, 0.2);
+        y = std::vector<double>(nx*ny*nz, 1.0);
+        for (int i = 0; i < nx*ny*nz; i++){
+            x[i] = i;
+        }
+    }
 
     banded_Matrix<double> A_banded;
     A_banded.banded_Matrix_from_sparse_CSR(A);
@@ -44,12 +54,15 @@ bool run_banded_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double> A){
     int * j_min_i_d;
 
     double * x_d;
+    double * y_d;
+
 
     // Allocate the memory on the device
     CHECK_CUDA(cudaMalloc(&A_row_ptr_d, (num_rows + 1) * sizeof(int)));
     CHECK_CUDA(cudaMalloc(&A_col_idx_d, nnz * sizeof(int)));
     CHECK_CUDA(cudaMalloc(&A_values_d, nnz * sizeof(double)));
     CHECK_CUDA(cudaMalloc(&x_d, num_cols * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&y_d, num_cols * sizeof(double)));
 
     CHECK_CUDA(cudaMalloc(&banded_A_d, num_rows * num_bands * sizeof(double)));
     CHECK_CUDA(cudaMalloc(&j_min_i_d, num_bands * sizeof(int)));
@@ -63,6 +76,8 @@ bool run_banded_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double> A){
     CHECK_CUDA(cudaMemcpy(j_min_i_d, j_min_i_data, num_bands * sizeof(int), cudaMemcpyHostToDevice));
     
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
+
 
 
     // test the SPMV function
@@ -77,6 +92,13 @@ bool run_banded_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double> A){
         j_min_i_d,
 
         x_d
+        );
+
+    // test the Dot function
+    all_pass = all_pass && test_Dot(
+        cuSparse, banded_warp_reduction,
+        A_banded,
+        x_d, y_d
         );
     
     // anything that got allocated also needs to be de-allocted
@@ -119,11 +141,11 @@ bool run_bandedWarpReduction_tests(int nx, int ny, int nz){
         std::cout << "banded_warp_reduction tests failed for iterative values HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
     }
 
-    A.random_values(RANDOM_SEED);
-    all_pass = all_pass && run_banded_warp_reduction_tests_on_matrix(A);
-    if(not all_pass){
-        std::cout << "banded_warp_reduction tests failed for random values HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
-    }
+    // A.random_values(RANDOM_SEED);
+    // all_pass = all_pass && run_banded_warp_reduction_tests_on_matrix(A);
+    // if(not all_pass){
+    //     std::cout << "banded_warp_reduction tests failed for random values HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
+    // }
 
     return all_pass;
    

@@ -56,10 +56,19 @@ public:
     }
 
     void compute_Dot(
-        T * x_d, T & y_d, T & result_d // again: the vectors x, y and result are already on the device
+        banded_Matrix<T>& A, //we only pass A for the metadata
+        T * x_d, T * y_d, T * result_d // again: the vectors x, y and result are already on the device
         ) override {
         std::cerr << "Warning: compute_Dot is not implemented in Banded Shared Memory." << std::endl;
     }
+
+    void compute_Dot(
+        sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
+        T * x_d, T * y_d, T * result_d // again: the vectors x, y and result are already on the device
+        ) override {
+        std::cerr << "Warning: compute_Dot is not implemented in Banded Shared Memory and needs a banded matrix, not a CSR matrix." << std::endl;
+    }
+
 
 
     // Banded matrices need a special SPMV implementations because they have special arguments

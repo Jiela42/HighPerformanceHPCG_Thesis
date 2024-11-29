@@ -65,10 +65,21 @@ public:
     }
 
     void compute_Dot(
-        T * x_d, T & y_d, T & result_d // again: the vectors x, y and result are already on the device
+        sparse_CSR_Matrix<T> & A, // we pass A for the metadata
+        T * x_d, T * y_d, T * result_d // again: the vectors x, y and result are already on the device
         ) override {
-        std::cerr << "Warning: compute_Dot is not implemented in cuSparse_Implementation." << std::endl;
+        cusparse_computeDot(
+            A,
+            x_d, y_d, result_d);
     }
+
+    void compute_Dot(
+        banded_Matrix<T>& A, //we only pass A for the metadata
+        T * x_d, T * y_d, T * result_d // the vectors x, y and result are already on the device
+        ) override {
+        std::cerr << "Error: compute_Dot needs different parameters for the cuSparse_Implementation (specifically it takes a CSR Matrix, not a banded one)." << std::endl;
+    }
+    
 
 private:
     // here come the cuSparse functions
@@ -76,6 +87,11 @@ private:
     sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
     int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
     T * x_d, T * y_d // the vectors x and y are already on the device
+    );
+
+    void cusparse_computeDot(
+        sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
+        T * x_d, T * y_d, T * result_d // the vectors x, y and result are already on the device
     );
 };
 

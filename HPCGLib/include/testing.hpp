@@ -48,6 +48,12 @@ bool test_SPMV(
         
 );
 
+bool test_Dot(
+    HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
+    banded_Matrix<double> & A, // we pass A for the metadata
+    double * x_d, double * y_d
+);
+
 // functions that call the abstract tests in order to test full versions
 bool run_naiveBanded_tests(int nx, int ny, int nz);
 bool run_bandedSharedMem_tests(int nx, int ny, int nz);

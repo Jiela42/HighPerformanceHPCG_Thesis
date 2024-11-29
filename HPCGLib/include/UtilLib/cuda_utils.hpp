@@ -36,4 +36,15 @@
         } \
     }
 
+// Macro to check cuBLAS function calls
+#define CHECK_CUBLAS(call) \
+    { \
+        cublasStatus_t err = call; \
+        if (err != CUBLAS_STATUS_SUCCESS) { \
+            std::cerr << "cuBLAS error in file '" << __FILE__ << "' in line " << __LINE__ << ": " \
+                      << err << "." << std::endl; \
+            exit(EXIT_FAILURE); \
+        } \
+    }
+
 #endif // CUDA_UTILS_HPP

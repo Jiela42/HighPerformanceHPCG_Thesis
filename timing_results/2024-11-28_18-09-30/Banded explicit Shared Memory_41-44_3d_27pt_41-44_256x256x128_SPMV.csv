@@ -1,0 +1,11 @@
+Banded explicit Shared Memory,41-44,3d_27pt,256,256,128,224140792,SPMV,num_threads = 1024, num_blocks = theoretical maximum
+8.59779
+8.16845
+8.192
+8.12954
+8.17763
+8.16445
+8.1664
+8.15206
+8.16339
+8.21658

@@ -8,7 +8,7 @@
             double* x, double* y
         ){
             
-            int cooperation_number = 8;
+            int cooperation_number = 4;
             int tid = blockIdx.x * blockDim.x + threadIdx.x;
             int lane = threadIdx.x % cooperation_number;
 

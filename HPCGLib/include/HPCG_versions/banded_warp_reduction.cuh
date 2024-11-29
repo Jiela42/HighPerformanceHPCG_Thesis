@@ -17,7 +17,7 @@ template <typename T>
 class banded_warp_reduction_Implementation : public HPCG_functions<T> {
 public:
 
-    std::string version_name = "Banded Warp Reduction (8 cooperating threads)";
+    std::string version_name = "Banded Warp Reduction";
 
     // banded_warp_reduction_Implementation() {
     //     std::cerr << "Warning: banded warp reduction is created." << std::endl;
@@ -62,9 +62,17 @@ public:
     }
 
     void compute_Dot(
-        T * x_d, T & y_d, T & result_d // again: the vectors x, y and result are already on the device
+        sparse_CSR_Matrix<T> & A, // we pass A for the metadata
+        T * x_d, T * y_d, T * result_d // again: the vectors x, y and result are already on the device
         ) override {
-        std::cerr << "Warning: compute_Dot is not implemented in banded warp reduction." << std::endl;
+        std::cerr << "Warning: compute_Dot is not implemented using the sparse_CSR Matrix in banded warp reduction." << std::endl;
+    }
+
+    void compute_Dot(
+        banded_Matrix<T> & A, // we pass A for the metadata
+        T * x_d, T * y_d, T * result_d // again: the vectors x, y and result are already on the device
+        ) override {
+        banded_warp_reduction_computeDot(A, x_d, y_d, result_d);
     }
 
 
@@ -90,6 +98,11 @@ private:
         int num_bands, // the number of bands in the banded matrix
         int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the banded matrix
         T * x_d, T * y_d // the vectors x and y are already on the device
+    );
+
+    void banded_warp_reduction_computeDot(
+        banded_Matrix<T>& A, //we only pass A for the metadata
+        T * x_d, T * y_d, T * result_d
     );
 };
 

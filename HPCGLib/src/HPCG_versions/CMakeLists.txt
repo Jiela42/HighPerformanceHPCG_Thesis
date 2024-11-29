@@ -34,6 +34,7 @@ target_compile_options(HPCGLib PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:
 target_sources(HPCGLib PRIVATE
 
     cusparse/cusparse_computeSPMV.cpp
+    cusparse/cusparse_computeDot.cpp
 
     naiveBanded/naiveBanded_computeSPMV.cu
     naiveBanded/naiveBanded_kernel_SPMV.cu
@@ -43,6 +44,7 @@ target_sources(HPCGLib PRIVATE
 
     banded_warp_reduction/banded_warp_reduction_computeSPMV.cu
     banded_warp_reduction/banded_warp_reduction_kernel_SPMV.cu
+    banded_warp_reduction/banded_warp_reduction_computeDot.cu
 )
 
 target_link_libraries(
