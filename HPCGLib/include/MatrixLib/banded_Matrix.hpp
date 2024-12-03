@@ -30,6 +30,7 @@ class banded_Matrix {
         T get_element(int i, int j) const;
         std::vector <int>& get_j_min_i();
         std::vector <T>& get_values();
+        void set_num_rows(int num_rows);
         void print() const;
         // void compare_to(banded_Matrix<T>& other) const;
         // void write_to_file() const;

@@ -19,13 +19,6 @@ public:
 
     std::string version_name = "Banded Warp Reduction";
 
-    // banded_warp_reduction_Implementation() {
-    //     std::cerr << "Warning: banded warp reduction is created." << std::endl;
-    // }
-    // ~banded_warp_reduction_Implementation() {
-    //     std::cerr << "Warning: banded warp reduction is being destroyed." << std::endl;
-    // }
-
     void compute_CG(sparse_CSR_Matrix<T>& A, std::vector<T>& b, std::vector<T>& x) override {
         std::cerr << "Warning: compute_CG is not implemented in banded warp reduction." << std::endl;
     }
@@ -105,12 +98,5 @@ private:
         T * x_d, T * y_d, T * result_d
     );
 };
-
-// kernel functions, because they cannot be member functions
-__global__ void banded_warp_reduction_SPMV_kernel(
-double* banded_A,
-int num_rows, int num_bands, int * j_min_i,
-double* x, double* y
-);
 
 #endif // BANDED_WARP_REDUCTION_CUH

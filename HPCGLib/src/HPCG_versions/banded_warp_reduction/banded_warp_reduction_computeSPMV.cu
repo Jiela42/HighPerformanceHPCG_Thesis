@@ -2,6 +2,41 @@
 #include "UtilLib/utils.cuh"
 #include <cuda_runtime.h>
 
+
+ __global__ void banded_warp_reduction_SPMV_kernel(
+            double* banded_A,
+            int num_rows, int num_bands, int * j_min_i,
+            double* x, double* y
+        )
+{
+    
+    int cooperation_number = 4;
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    int lane = threadIdx.x % cooperation_number;
+
+    // every thread computes one or more rows of the matrix
+    for (int i = tid/cooperation_number; i < num_rows; i += (blockDim.x * gridDim.x)/cooperation_number) {
+        // compute the matrix-vector product for the ith row
+        double sum_i = 0;
+        for (int band = lane; band < num_bands; band += cooperation_number) {
+            int j = i + j_min_i[band];
+            int current_row = i * num_bands;
+            if (j >= 0 && j < num_rows) {
+                sum_i += banded_A[current_row + band] * x[j];
+            }
+        }
+
+        // now let's reduce the sum_i to a single value using warp-level reduction
+        for(int offset = cooperation_number/2; offset > 0; offset /= 2){
+            sum_i += __shfl_down_sync(0xFFFFFFFF, sum_i, offset);
+        }
+
+        if (lane == 0){
+            y[i] = sum_i;
+        }
+    }
+}
+
 template <typename T>
 void banded_warp_reduction_Implementation<T>::banded_warp_reduction_computeSPMV(
         banded_Matrix<T>& A, //we only pass A for the metadata
@@ -12,8 +47,9 @@ void banded_warp_reduction_Implementation<T>::banded_warp_reduction_computeSPMV(
         T * x_d, T * y_d // the vectors x and y are already on the device
     ) {
         // since every thread is working on one or more rows we need to base the number of threads on that
-        int num_threads = NUM_CORES_PER_SM * 4;
-        int num_blocks = std::min(NUM_PHYSICAL_CORES, ceiling_division(num_rows, num_threads));
+        int num_threads = 1024;
+        int rows_per_block = num_threads / 4;
+        int num_blocks = std::min(MAX_NUM_BLOCKS, ceiling_division(num_rows, rows_per_block));
 
         assert(num_bands == A.get_num_bands());
         assert(num_rows == A.get_num_rows());
@@ -26,6 +62,9 @@ void banded_warp_reduction_Implementation<T>::banded_warp_reduction_computeSPMV(
 
         // synchronize the device
         cudaDeviceSynchronize();
+
+        // std::cerr << "Assertion failed in function: " << __PRETTY_FUNCTION__ << std::endl;
+        // assert(false);
     }
 
 // explicit template instantiation

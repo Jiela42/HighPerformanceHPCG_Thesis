@@ -99,7 +99,6 @@ void bench_SPMV(
         }
     }
 
-
     for(int i = 0; i < num_iterations; i++){
         timer.startTimer();
         implementation.compute_SPMV(
@@ -114,6 +113,42 @@ void bench_SPMV(
     }
 
 }
+
+void bench_Dot(
+    HPCG_functions<double>& implementation,
+    CudaTimer& timer,
+    banded_Matrix<double> & A,
+    double * x_d, double * y_d, double * result_d
+    ){
+    int num_iterations = implementation.getNumberOfIterations();
+
+    if (implementation.test_before_bench){
+        // note that for the dot product the cuSparse implementation is an instanciation of warp reduction. ehem.
+        cuSparse_Implementation<double> baseline;
+        bool test_failed = !test_Dot(
+            baseline, implementation,
+            A,
+            x_d, y_d
+        );
+
+        if (test_failed){
+            num_iterations = 0;
+        }            
+    }
+
+    for(int i = 0; i < num_iterations; i++){
+        timer.startTimer();
+        implementation.compute_Dot(
+            A,
+            x_d, y_d, result_d
+        );
+        timer.stopTimer("compute_Dot");
+    }
+}
+
+
+
+
 
 // this function allows us to run the whole abstract benchmark
 // we have method overloading to support different matrix types
@@ -140,10 +175,12 @@ void bench_Implementation(
     int num_rows, int num_cols,
     int num_bands,
     int * j_min_i_d,
-    double * x_d, double * y_d
+    double * x_d, double * y_d,
+    double * result_d
     ){
 
     bench_SPMV(implementation, timer, A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);
+    bench_Dot(implementation, timer, A, x_d, y_d, result_d);
     // other functions to be benchmarked
 }
 

@@ -19,12 +19,28 @@ add_executable(run_full_bench
     benchmark_bandedWarpReduction.cpp
 )
 
+add_executable(run_specific_bench
+    run_specific_bench.cpp
+    abstract_benchmark_functions.cpp
+    benchmark_cuSparse.cpp
+    benchmark_naiveBanded.cpp
+    benchmark_bandedSharedMem.cpp
+    benchmark_bandedWarpReduction.cpp
+)
+
+
 target_link_libraries(run_bench_test
     HPCGLib
     TimingLib
 )
 
 target_link_libraries(run_full_bench
+    HPCGLib
+    TimingLib
+    TestHPCGLib
+)
+
+target_link_libraries(run_specific_bench
     HPCGLib
     TimingLib
     TestHPCGLib

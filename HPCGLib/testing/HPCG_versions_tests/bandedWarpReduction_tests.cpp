@@ -96,9 +96,7 @@ bool run_banded_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double> A){
 
     // test the Dot function
     all_pass = all_pass && test_Dot(
-        cuSparse, banded_warp_reduction,
-        A_banded,
-        x_d, y_d
+        banded_warp_reduction
         );
     
     // anything that got allocated also needs to be de-allocted

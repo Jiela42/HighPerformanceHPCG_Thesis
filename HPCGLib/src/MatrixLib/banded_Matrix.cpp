@@ -157,6 +157,11 @@ T banded_Matrix<T>::get_element(int i, int j) const{
 }
 
 template <typename T>
+void banded_Matrix<T>::set_num_rows(int num_rows){
+    this->num_rows = num_rows;
+}
+
+template <typename T>
 void banded_Matrix<T>::print() const{
     std::cout << "Banded Matrix: " << std::endl;
     std::cout << "nx: " << this->nx << " ny: " << this->ny << " nz: " << this->nz << std::endl;

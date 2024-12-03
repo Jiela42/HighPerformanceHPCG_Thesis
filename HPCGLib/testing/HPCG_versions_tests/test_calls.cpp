@@ -109,8 +109,8 @@ bool test_Dot(
     double * x_d, double * y_d // the vectors x, y and result are already on the device
     ){
 
-    sparse_CSR_Matrix<double> A_CSR;
-    A_CSR.sparse_CSR_Matrix_from_banded(A);
+    // sparse_CSR_Matrix<double> A_CSR;
+    // A_CSR.sparse_CSR_Matrix_from_banded(A);
 
     double result_baseline = 0.0;
     double result_uut = 0.0;
@@ -122,7 +122,7 @@ bool test_Dot(
     CHECK_CUDA(cudaMalloc(&result_baseline_d, sizeof(double)));
     CHECK_CUDA(cudaMalloc(&result_uut_d, sizeof(double)));
 
-    baseline.compute_Dot(A_CSR, x_d, y_d, result_baseline_d);
+    baseline.compute_Dot(A, x_d, y_d, result_baseline_d);
     uut.compute_Dot(A, x_d, y_d, result_uut_d);
 
     // and now we need to copy the result back and de-allocate the memory
@@ -137,6 +137,67 @@ bool test_Dot(
 
     if (not test_pass){
         std::cout << "Dot product failed: baseline = " << result_baseline << " uut = " << result_uut << std::endl;
+    }
+
+    return test_pass;
+}
+
+// this is a minitest, it can be called to do some rudimentary testing
+bool test_Dot(
+    HPCG_functions<double>& uut
+){
+
+    int nx = 4;
+    int ny = 4;
+    int nz = 4;
+
+    // make a matrix (for some reason we need it) (num_rows is the only thing we need to get from the matrix)
+    banded_Matrix<double> A_banded;
+    A_banded.set_num_rows(nx * ny * nz);
+    
+
+    // create two vectors
+    std::vector<double> x(nx * ny * nz, 2.0);
+    std::vector<double> y(nx * ny * nz, 0.5);
+
+    double result = 0.0;
+
+    // srand(RANDOM_SEED);
+
+    for(int i = 0; i < nx * ny * nz; i++){
+        double a = (double)rand() / RAND_MAX;
+        double b = (double)rand() / RAND_MAX;
+        x[i] = a;
+        y[i] = b;
+        result += a * b;
+        // result += x[i] * y[i];
+    }
+
+    // allocate x and y on the device
+    double * x_d;
+    double * y_d;
+    double * result_d;
+
+    CHECK_CUDA(cudaMalloc(&x_d, nx * ny * nz * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&y_d, nx * ny * nz * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&result_d, sizeof(double)));
+
+    CHECK_CUDA(cudaMemcpy(x_d, x.data(), nx * ny * nz * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), nx * ny * nz * sizeof(double), cudaMemcpyHostToDevice));
+
+    uut.compute_Dot(A_banded, x_d, y_d, result_d);
+
+    // get result back
+    double result_uut = 42;
+    CHECK_CUDA(cudaMemcpy(&result_uut, result_d, sizeof(double), cudaMemcpyDeviceToHost));
+
+    CHECK_CUDA(cudaFree(x_d));
+    CHECK_CUDA(cudaFree(y_d));
+    CHECK_CUDA(cudaFree(result_d));
+
+    bool test_pass = double_compare(result, result_uut);
+    if (not test_pass){
+        std::cout << "Dot product failed: baseline = " << result << " uut = " << result_uut << std::endl;
     }
 
     return test_pass;

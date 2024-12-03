@@ -54,6 +54,10 @@ bool test_Dot(
     double * x_d, double * y_d
 );
 
+bool test_Dot(
+    HPCG_functions<double>&uut
+);
+
 // functions that call the abstract tests in order to test full versions
 bool run_naiveBanded_tests(int nx, int ny, int nz);
 bool run_bandedSharedMem_tests(int nx, int ny, int nz);

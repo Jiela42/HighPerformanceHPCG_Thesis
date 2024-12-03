@@ -2,6 +2,7 @@
 #define CUSPARSE_HPP
 
 #include "HPCGLib.hpp"
+#include "HPCG_versions/banded_warp_reduction.cuh"
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
 #include <vector>
 #include <cuda_runtime.h>
@@ -77,11 +78,16 @@ public:
         banded_Matrix<T>& A, //we only pass A for the metadata
         T * x_d, T * y_d, T * result_d // the vectors x, y and result are already on the device
         ) override {
-        std::cerr << "Error: compute_Dot needs different parameters for the cuSparse_Implementation (specifically it takes a CSR Matrix, not a banded one)." << std::endl;
+        warp_Implementation.compute_Dot(
+            A,
+            x_d, y_d, result_d);
     }
     
 
 private:
+
+    banded_warp_reduction_Implementation<T> warp_Implementation;
+
     // here come the cuSparse functions
     void cusparse_computeSPMV(
     sparse_CSR_Matrix<T>& A, //we only pass A for the metadata

@@ -96,13 +96,4 @@ private:
     );
 };
 
-// kernel functions, because they cannot be member functions
-__global__ void banded_shared_memory_SPMV_kernel(
-    int rows_per_sm, int num_x_elem, int num_consecutive_memory_regions,
-    int* min_j, int* max_j,
-    double* banded_A,
-    int num_rows, int num_bands, int * j_min_i,
-    double* x, double* y
-);
-
 #endif // BANDEDSHAREDMEMORY_CUH

@@ -43,8 +43,11 @@ versions_to_plot = [
     # "Banded explicit Shared Memory (rows_per_SM pow2)",
     # "Banded explicit Shared Memory (rows_per_SM pow2 1024 threads)",
     # "Banded explicit Shared Memory (rows_per_SM pow2 1024 threads 2x physical cores)",
-    "Banded Warp Reduction",
-    "Banded Warp Reduction (8 cooperating threads)",
+    # "Banded Warp Reduction",
+    # "Banded Warp Reduction (8 cooperating threads)",
+    "Banded Warp Reduction - many blocks - 4 threads cooperating",
+    "Banded Warp Reduction - many blocks - 8 threads cooperating",
+     
 ]
 plot_percentage_baseline = True
 
