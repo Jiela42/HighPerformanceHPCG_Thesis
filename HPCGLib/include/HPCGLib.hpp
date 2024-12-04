@@ -6,7 +6,13 @@
 #include <string>
 
 // define number of iterations we want to have
-#define num_bench_iter 1
+#define num_bench_iter 10
+
+enum class Implementation_Type {
+    BANDED,
+    CSR,
+    UNKNOWN
+};
 
 template <typename T>
 class HPCG_functions {
@@ -15,6 +21,8 @@ class HPCG_functions {
         const std::string version_name;
         // this string is used when small changes are benchmarked to see their effect
         std::string additional_parameters = "vanilla_version";
+
+        Implementation_Type implementation_type = Implementation_Type::UNKNOWN;
     // CG starts with having the data on the CPU
         virtual void compute_CG(sparse_CSR_Matrix<T> & A, std::vector<T> & b, std::vector<T> & x) = 0;
         
@@ -65,6 +73,7 @@ class HPCG_functions {
 
         int getNumberOfIterations() const {
             return num_bench_iter;
+
     }
 };
 

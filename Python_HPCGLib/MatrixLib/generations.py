@@ -32,8 +32,6 @@ def generate_y_forHPCG_problem(nx:int, ny:int, nz:int)-> torch.Tensor:
                                     if ix+sx > -1 and ix+sx < nx:
                                         nnz_i += 1
                 y[i] = 26.0 - nnz_i
-
-
     return y
 
 def generate_torch_csr_problem(nx: int, ny: int, nz: int) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:

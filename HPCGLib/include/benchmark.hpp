@@ -12,8 +12,10 @@ void run_cuSparse_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_pa
 void run_naiveBanded_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
 void run_bandedSharedMem_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
 void run_banded_warp_reduction_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
-void run_warp_reduction_3d27p_SPMV_benchmark(int nx, int ny, int nz, std::string folder_path);
 
+void run_cuSparse_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path);
+
+void run_warp_reduction_3d27p_SPMV_benchmark(int nx, int ny, int nz, std::string folder_path);
 void run_warp_reduction_3d27p_Dot_benchmark(int nx, int ny, int nz, std::string folder_path);
 
 // this function allows us to run the whole abstract benchmark
@@ -67,5 +69,13 @@ void bench_Dot(
     CudaTimer& timer,
     banded_Matrix<double> & A,
     double * x_d, double * y_d, double * result_d
+    );
+
+void bench_SymGS(
+    HPCG_functions<double>& implementation,
+    CudaTimer& timer,
+    sparse_CSR_Matrix<double> & A,
+    int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d,
+    double * x_d, double * y_d
     );
 #endif // BENCHMARK_HPP

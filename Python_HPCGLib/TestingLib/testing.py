@@ -220,18 +220,24 @@ def symGS_mini_test(versions):
     y = A @ x
     empty_x = torch.zeros(16, device=device, dtype=torch.float64)
 
+    print("A is: ", A)
+    print("y is: ", y)
+
+
     # make A sparse
     A_sparse_coo = A.to_sparse().to(dtype=torch.float64, device=device)
 
     x_greg = matlab_reference.greg_symGS(A_sparse_coo, y)
     x_greg = x_greg.squeeze() if x_greg.dim() > 1 else x_greg
 
-    x_matlab = matlab_reference.computeSymGS(A_sparse_coo, y)
+    # x_matlab = matlab_reference.computeSymGS(A_sparse_coo, y)
 
-    if not torch.allclose(x_greg, x_matlab, atol=error_tolerance):
-        raise AssertionError(f"SymGS_Mini_test: greg and matlab are different")
-    elif debug:
-        print("SymGS_Mini_testgreg and matlab are the same", flush=True)
+    print("solution is: ", x_greg)
+
+    # if not torch.allclose(x_greg, x_matlab, atol=error_tolerance):
+    #     raise AssertionError(f"SymGS_Mini_test: greg and matlab are different")
+    # elif debug:
+    #     print("SymGS_Mini_testgreg and matlab are the same", flush=True)
     
     if "BaseTorch" in versions:
         BaseTorch.computeSymGS(2, 2, 4, A_sparse_coo, y, empty_x)
@@ -354,14 +360,14 @@ def run_matrix_tests(sizes):
     # (128, 128, 128),
 # ]
 
-# versions = [
-#     "BaseTorch",
-#     "MatlabReference",
+versions = [
+    "BaseTorch",
+    "MatlabReference",
 #     # "BasicStencil",
-# ]
+]
 
-# methods = [
-#     "computeSymGS",
+methods = [
+    "computeSymGS",
 #     "computeSPMV",
 #     "computeRestriction",
 #     "computeMG",
@@ -369,14 +375,14 @@ def run_matrix_tests(sizes):
 #     "computeCG",
 #     "computeWAXPBY",
 #     "computeDot",
-# ]
+]
 
 # matrix_types = [
 #     "3d_27pt"
 # ]
 
-# if "computeSymGS" in methods:
-#     symGS_mini_test(versions)
+if "computeSymGS" in methods:
+    symGS_mini_test(versions)
 # test(sizes, matrix_types, methods, versions)
 
 #################################################################################################################

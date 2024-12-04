@@ -12,7 +12,13 @@ void bench_SPMV(
     sparse_CSR_Matrix<double> & A,
     int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d,
     double * x_d, double * y_d
-    ){
+    )
+{
+
+    // y_d is the output vector, hence we need to store the original and write the original back after the benchmarking
+    std::vector<double> y(A.get_num_rows(), 0.0);
+
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
 
     int num_iterations = implementation.getNumberOfIterations();
 
@@ -37,6 +43,9 @@ void bench_SPMV(
         );
         timer.stopTimer("compute_SPMV");
     }
+
+    // copy the original vector back
+    CHECK_CUDA(cudaMemcpy(y.data(), y_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
 }
 
 // this SPMV supports banded matrixes which requires CSR for metadata and testing
@@ -50,6 +59,11 @@ void bench_SPMV(
     int * j_min_i_d,
     double * x_d, double * y_d
     ){
+
+    // y_d is the output vector, hence we need to store the original and write the original back after the benchmarking
+    std::vector<double> y(A.get_num_rows(), 0.0);
+
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
 
     int num_iterations = implementation.getNumberOfIterations();
 
@@ -112,6 +126,8 @@ void bench_SPMV(
         timer.stopTimer("compute_SPMV");
     }
 
+    // copy the original vector back
+    CHECK_CUDA(cudaMemcpy(y.data(), y_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
 }
 
 void bench_Dot(
@@ -144,10 +160,58 @@ void bench_Dot(
         );
         timer.stopTimer("compute_Dot");
     }
+    
 }
 
 
+void bench_SymGS(
+    HPCG_functions<double>& implementation,
+    CudaTimer& timer,
+    sparse_CSR_Matrix<double> & A,
+    int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d,
+    double * x_d, double * y_d
+    )
+{
+    int num_iterations = implementation.getNumberOfIterations();
 
+    // y_d is the output vector, hence we need to store the original and write the original back after the benchmarking
+    std::vector<double> x(A.get_num_rows(), 0.0);
+
+    CHECK_CUDA(cudaMemcpy(x_d, x.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+
+
+    // the symGS takes a vector x of all zeros (or with relevant info, but we don't have that)
+    // hence before each run we gotta do a copy in order to get the zeros into the vector
+    std::vector<double> zeros(A.get_num_cols(), 0.0);
+
+
+    if (implementation.test_before_bench){
+        cuSparse_Implementation<double> baseline;
+
+        CHECK_CUDA(cudaMemcpy(x_d, zeros.data(), A.get_num_cols() * sizeof(double), cudaMemcpyHostToDevice));
+
+        bool test_failed = !test_SymGS(
+            baseline, implementation,
+            A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d, y_d);
+        if (test_failed){
+            num_iterations = 0;
+        }
+    }
+
+    for(int i = 0; i < num_iterations; i++){
+        // always zero out the vector between runs
+        CHECK_CUDA(cudaMemcpy(x_d, zeros.data(), A.get_num_cols() * sizeof(double), cudaMemcpyHostToDevice));
+        timer.startTimer();
+        implementation.compute_SymGS(
+            A,
+            A_row_ptr_d, A_col_idx_d, A_values_d,
+            x_d, y_d
+        );
+        timer.stopTimer("compute_SymGS");
+    }
+    // copy the original vector back
+    CHECK_CUDA(cudaMemcpy(x.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+}
 
 
 // this function allows us to run the whole abstract benchmark
@@ -160,9 +224,11 @@ void bench_Implementation(
     sparse_CSR_Matrix<double> & A,
     int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d,
     double * x_d, double * y_d
-    ){
+    )
+{
 
     bench_SPMV(implementation, timer, A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d, y_d);
+    bench_SymGS(implementation, timer, A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d, y_d);
     // other functions to be benchmarked
 }
 

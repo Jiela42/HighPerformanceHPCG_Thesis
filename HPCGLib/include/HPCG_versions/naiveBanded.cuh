@@ -18,6 +18,7 @@ class naiveBanded_Implementation : public HPCG_functions<T> {
 public:
 
     std::string version_name = "Naive Banded";
+    Implementation_Type implementation_type = Implementation_Type::BANDED;
 
     void compute_CG(sparse_CSR_Matrix<T>& A, std::vector<T>& b, std::vector<T>& x) override {
         std::cerr << "Warning: compute_CG is not implemented in Naive Banded." << std::endl;
@@ -94,5 +95,13 @@ private:
         T * x_d, T * y_d // the vectors x and y are already on the device
     );
 };
+
+// we expose the kernels in case we need to call them from a different method
+__global__ void naiveBanded_SPMV_kernel(
+        double* banded_A,
+        int num_rows, int num_bands, int * j_min_i,
+        double* x, double* y
+    );
+
 
 #endif // NAIVEBANDED_CUH

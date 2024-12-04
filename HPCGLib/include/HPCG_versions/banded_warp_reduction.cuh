@@ -18,6 +18,8 @@ class banded_warp_reduction_Implementation : public HPCG_functions<T> {
 public:
 
     std::string version_name = "Banded Warp Reduction";
+    Implementation_Type implementation_type = Implementation_Type::BANDED;
+
 
     void compute_CG(sparse_CSR_Matrix<T>& A, std::vector<T>& b, std::vector<T>& x) override {
         std::cerr << "Warning: compute_CG is not implemented in banded warp reduction." << std::endl;
@@ -98,5 +100,19 @@ private:
         T * x_d, T * y_d, T * result_d
     );
 };
+
+// we expose the kernel in case we need to call it from another method
+__global__ void banded_warp_reduction_SPMV_kernel(
+        double* banded_A,
+        int num_rows, int num_bands, int * j_min_i,
+        double* x, double* y
+    );
+__global__ void banded_warp_reduction_dot_kernel(
+    int num_rows,
+    double * x_d,
+    double * y_d,
+    double * result_d
+);
+
 
 #endif // BANDED_WARP_REDUCTION_CUH

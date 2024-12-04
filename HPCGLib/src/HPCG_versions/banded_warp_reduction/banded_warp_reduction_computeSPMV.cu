@@ -3,11 +3,11 @@
 #include <cuda_runtime.h>
 
 
- __global__ void banded_warp_reduction_SPMV_kernel(
-            double* banded_A,
-            int num_rows, int num_bands, int * j_min_i,
-            double* x, double* y
-        )
+__global__ void banded_warp_reduction_SPMV_kernel(
+        double* banded_A,
+        int num_rows, int num_bands, int * j_min_i,
+        double* x, double* y
+    )
 {
     
     int cooperation_number = 4;

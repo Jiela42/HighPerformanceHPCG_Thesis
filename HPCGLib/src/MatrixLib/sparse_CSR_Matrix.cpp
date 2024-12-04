@@ -60,6 +60,48 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, MatrixT
 }
 
 template <typename T>
+sparse_CSR_Matrix<T>::sparse_CSR_Matrix(std::vector<std::vector<T>> dense_matrix){
+    
+    // check that we have two dimensions
+    assert(dense_matrix.size() > 0);
+
+    int num_rows = dense_matrix.size();
+    int num_cols = dense_matrix[0].size();
+
+    for(int i = 0; i < num_rows; i++){
+        assert(dense_matrix[i].size() == num_cols);
+    }
+
+    int nnz = 0;
+    std::vector<int> row_ptr;
+    std::vector<int> col_idx;
+    std::vector<T> values;
+
+    row_ptr.push_back(0);
+
+    // now we read the data into the sparse matrix
+    for (int i = 0; i< num_rows; i++){
+        for (int j = 0; j < num_cols; j++){
+            T val = dense_matrix[i][j];
+            if(val != 0){
+                values.push_back(val);
+                col_idx.push_back(j);
+                nnz++;
+            }
+        }
+        row_ptr.push_back(nnz);
+    }
+
+    this->matrix_type = MatrixType::UNKNOWN;
+    this->num_rows = num_rows;
+    this->num_cols = num_cols;
+    this->nnz = nnz;
+    this->row_ptr = row_ptr;
+    this->col_idx = col_idx;
+    this->values = values;
+}
+
+template <typename T>
 void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_banded(banded_Matrix<T> A){
 
     if(A.get_matrix_type() == MatrixType::Stencil_3D27P){

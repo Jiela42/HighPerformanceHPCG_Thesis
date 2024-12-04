@@ -5,7 +5,8 @@ void run_banded_warp_reduction_3d27p_benchmarks(int nx, int ny, int nz, std::str
 
     std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
     sparse_CSR_Matrix<double> A = problem.first;
-    std::vector<double> x(nx*ny*nz, 0.7);
+    std::vector<double> x = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+
 
     banded_Matrix<double> banded_A;
     banded_A.banded_Matrix_from_sparse_CSR(A);

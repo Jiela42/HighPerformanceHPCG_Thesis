@@ -11,6 +11,7 @@
 #define NUM_PHYSICAL_CORES 10496
 #define NUM_SM 84
 #define NUM_CORES_PER_SM 128
+#define WARP_SIZE 32
 // this is KB per SM
 #define SHARED_MEM_SIZE 100
 

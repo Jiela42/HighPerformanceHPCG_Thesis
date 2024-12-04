@@ -35,6 +35,7 @@ target_sources(HPCGLib PRIVATE
 
     cusparse/cusparse_computeSPMV.cpp
     cusparse/cusparse_computeDot.cpp
+    cusparse/cusparse_computeSymGS.cu
 
     naiveBanded/naiveBanded_computeSPMV.cu
 

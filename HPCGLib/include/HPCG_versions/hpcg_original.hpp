@@ -14,6 +14,7 @@ class HPCG_Original_Implementation : public HPCG_functions<T> {
 public:
 
     std::string version_name = "HPCG_Original";
+    Implementation_Type implementation_type = Implementation_Type::CSR;
 
     void compute_CG(const sparse_CSR_Matrix<T>& A, const std::vector<T>& b, std::vector<T>& x) override {
         std::cerr << "Warning: compute_CG is not implemented in HPCG_Original." << std::endl;

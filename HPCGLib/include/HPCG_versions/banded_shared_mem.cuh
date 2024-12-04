@@ -19,6 +19,7 @@ public:
 
     std::string version_name = "Banded explicit Shared Memory";
     std::string additional_parameters = "num_threads = 1024, num_blocks = theoretical maximum";
+    Implementation_Type implementation_type = Implementation_Type::BANDED;
 
     void compute_CG(sparse_CSR_Matrix<T>& A, std::vector<T>& b, std::vector<T>& x) override {
         std::cerr << "Warning: compute_CG is not implemented in Banded Shared Memory." << std::endl;
@@ -96,4 +97,12 @@ private:
     );
 };
 
+// we expose the kernels in case we need them in other methods
+__global__ void banded_shared_memory_SPMV_kernel(
+        int rows_per_sm, int num_x_elem, int num_consecutive_memory_regions,
+        int* min_j, int* max_j,
+        double* banded_A,
+        int num_rows, int num_bands, int * j_min_i,
+        double* x, double* y
+    );
 #endif // BANDEDSHAREDMEMORY_CUH

@@ -34,16 +34,16 @@ __device__ void test_val_cooperatively(double * array, int num_elements, double 
     }
 }
 
- __global__ void banded_shared_memory_SPMV_kernel(
-            int rows_per_sm, int num_x_elem, int num_consecutive_memory_regions,
-            int* min_j, int* max_j,
-            double* banded_A,
-            int num_rows, int num_bands, int * j_min_i,
-            double* x, double* y
-        )
+__global__ void banded_shared_memory_SPMV_kernel(
+        int rows_per_sm, int num_x_elem, int num_consecutive_memory_regions,
+        int* min_j, int* max_j,
+        double* banded_A,
+        int num_rows, int num_bands, int * j_min_i,
+        double* x, double* y
+    )
 {
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    int bid = blockIdx.x * blockDim.x;
+    // int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    // int bid = blockIdx.x * blockDim.x;
     int total_size_of_worked_on_rows = rows_per_sm * gridDim.x;
 
     int necessary_pad = 0;

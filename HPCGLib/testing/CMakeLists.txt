@@ -6,6 +6,7 @@ project(Testing LANGUAGES CXX CUDA)
 # set(CMAKE_CXX_STANDARD 17)
 
 add_library(TestHPCGLib
+    HPCG_versions_tests/cuSparse_tests.cpp
     HPCG_versions_tests/naiveBanded_tests.cpp
     HPCG_versions_tests/bandedSharedMem_tests.cpp
     HPCG_versions_tests/bandedWarpReduction_tests.cpp

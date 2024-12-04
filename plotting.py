@@ -35,7 +35,8 @@ versions_to_plot = [
     # "MatlabReference",
     # "BaseCuPy",
     # "NaiveBanded CuPy",
-    "cuSparse&cuBLAS",
+    # "cuSparse&cuBLAS", #this is a legacy name, it is now called CSR Implementation
+    "CSR-Implementation",
     "Naive Banded",
     # "Naive Banded (1 thread per physical core)",
     # "Naive Banded (4 thread per physical core)",
@@ -43,10 +44,10 @@ versions_to_plot = [
     # "Banded explicit Shared Memory (rows_per_SM pow2)",
     # "Banded explicit Shared Memory (rows_per_SM pow2 1024 threads)",
     # "Banded explicit Shared Memory (rows_per_SM pow2 1024 threads 2x physical cores)",
-    # "Banded Warp Reduction",
+    "Banded Warp Reduction",
     # "Banded Warp Reduction (8 cooperating threads)",
-    "Banded Warp Reduction - many blocks - 4 threads cooperating",
-    "Banded Warp Reduction - many blocks - 8 threads cooperating",
+    # "Banded Warp Reduction - many blocks - 4 threads cooperating",
+    # "Banded Warp Reduction - many blocks - 8 threads cooperating",
      
 ]
 plot_percentage_baseline = True
@@ -109,6 +110,7 @@ def read_data():
         meta_data = lines[0].split(",")
 
         version_name = str(meta_data[0])
+        version_name = "CSR-Implementation" if version_name == "cuSparse&cuBLAS" else version_name # we change the name because I am too lazy to re-run the benchmark
         ault_node = str(meta_data[1])
         matrix_type = str(meta_data[2])
         nx = int(meta_data[3])

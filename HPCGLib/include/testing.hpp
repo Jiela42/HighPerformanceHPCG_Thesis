@@ -58,7 +58,19 @@ bool test_Dot(
     HPCG_functions<double>&uut
 );
 
+bool test_SymGS(
+    HPCG_functions<double>& uut,
+    sparse_CSR_Matrix<double> & A
+);
+bool test_SymGS(
+    HPCG_functions<double>& uut, HPCG_functions<double>& baseline,
+    sparse_CSR_Matrix<double> & A, // we pass A for the metadata
+    int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d, // the matrix A is already on the device
+    double * x_d, double * y_d // the vectors x and y are already on the device
+);
+
 // functions that call the abstract tests in order to test full versions
+bool run_cuSparse_tests(int nx, int ny, int nz);
 bool run_naiveBanded_tests(int nx, int ny, int nz);
 bool run_bandedSharedMem_tests(int nx, int ny, int nz);
 bool run_bandedWarpReduction_tests(int nx, int ny, int nz);

@@ -23,6 +23,8 @@ public:
     sparse_CSR_Matrix();
     sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, MatrixType mt, T* vals, int* row_ptr, int* col_idx);
     sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, MatrixType mt, std::vector<T> vals, std::vector<int> row_ptr, std::vector<int> col_idx);
+    sparse_CSR_Matrix(std::vector<std::vector<T>> dense_matrix);
+
 
     void sparse_CSR_Matrix_from_banded(banded_Matrix<T> A);
 

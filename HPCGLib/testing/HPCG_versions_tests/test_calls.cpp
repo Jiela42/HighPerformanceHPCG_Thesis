@@ -142,7 +142,7 @@ bool test_Dot(
     return test_pass;
 }
 
-// this is a minitest, it can be called to do some rudimentary testing
+// this is a minitest, it can be called to do some rudimentary testing (currently only for banded Matrices)
 bool test_Dot(
     HPCG_functions<double>& uut
 ){
@@ -200,5 +200,116 @@ bool test_Dot(
         std::cout << "Dot product failed: baseline = " << result << " uut = " << result_uut << std::endl;
     }
 
+    return test_pass;
+}
+
+bool test_SymGS(
+    HPCG_functions<double>&uut,
+    sparse_CSR_Matrix<double> & A
+    ){
+    // This is the mini test for the SymGS function
+
+    std::vector<std::vector<double>> A_dense = {
+        {1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0.},
+        {1., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0.},
+        {0., 1., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1.},
+        {0., 0., 1., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1.},
+        {1., 0., 0., 1., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0.},
+        {1., 1., 0., 0., 1., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0.},
+        {0., 1., 1., 0., 0., 1., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1.},
+        {0., 0., 1., 1., 0., 0., 1., 1., 1., 0., 0., 1., 1., 0., 0., 1.},
+        {1., 0., 0., 1., 1., 0., 0., 1., 1., 1., 0., 0., 1., 1., 0., 0.},
+        {1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 1., 0., 0., 1., 1., 0.},
+        {0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 1., 0., 0., 1., 1.},
+        {0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 1., 0., 0., 1.},
+        {1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 1., 0., 0.},
+        {1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 1., 0.},
+        {0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 1.},
+        {0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1.}
+    };
+
+    // Define the vector y
+    std::vector<double> y = {8., 9., 9., 8., 8., 9., 9., 8., 8., 9., 9., 8., 8., 9., 9., 8.};
+
+    // Define the solution vector
+    std::vector<double> solution = {15., -7., 8., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.};
+
+    sparse_CSR_Matrix<double> A_csr (A_dense);
+    int nnz = A_csr.get_nnz();
+    int num_rows = A_csr.get_num_rows();
+
+    // A_csr.print();
+
+    // Allocate the memory on the device
+    double * A_values_d;
+    int * A_row_ptr_d;
+    int * A_col_idx_d;
+    double * y_d;
+    double * x_d;
+
+    CHECK_CUDA(cudaMalloc(&A_row_ptr_d, (num_rows + 1) * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&A_col_idx_d, nnz * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&A_values_d, nnz * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&y_d, num_rows * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&x_d, num_rows * sizeof(double)));
+
+    // Copy the data to the device
+    CHECK_CUDA(cudaMemcpy(A_row_ptr_d, A_csr.get_row_ptr().data(), (num_rows + 1) * sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(A_col_idx_d, A_csr.get_col_idx().data(), nnz * sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(A_values_d, A_csr.get_values().data(), nnz * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
+
+    // run the symGS function
+    uut.compute_SymGS(A_csr, A_row_ptr_d, A_col_idx_d, A_values_d, x_d, y_d);
+
+    // get the result back
+    std::vector<double> x(num_rows, 0.0);
+
+    CHECK_CUDA(cudaMemcpy(x.data(), x_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+
+    // free the memory
+    CHECK_CUDA(cudaFree(A_row_ptr_d));
+    CHECK_CUDA(cudaFree(A_col_idx_d));
+    CHECK_CUDA(cudaFree(A_values_d));
+    CHECK_CUDA(cudaFree(y_d));
+    CHECK_CUDA(cudaFree(x_d));
+
+    // compare the result
+    bool test_pass = vector_compare(solution, x);
+    if (not test_pass){
+        std::cout << "SymGS mini test failed" << std::endl;
+    }
+    return test_pass;
+}
+
+bool test_SymGS(
+    HPCG_functions<double> &baseline, HPCG_functions<double> &uut,
+    sparse_CSR_Matrix<double> & A,
+    int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d,
+    double * x_d, double * y_d
+    )
+{
+    int num_rows = A.get_num_rows();
+    // since symGS changes x, we preserve the original x
+    std::vector<double> x(num_rows, 0.0);
+    std::vector<double> uut_result(num_rows, 0.0);
+    std::vector<double> baseline_result(num_rows, 0.0);
+    CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
+    uut.compute_SymGS(A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d, y_d);
+
+    // get the result back
+    CHECK_CUDA(cudaMemcpy(uut_result.data(), x_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+
+    // run the baseline
+    CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
+    baseline.compute_SymGS(A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d, y_d);
+
+    // get the result back
+    CHECK_CUDA(cudaMemcpy(baseline_result.data(), x_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+
+    bool test_pass = vector_compare(uut_result, baseline_result);
+    if (not test_pass){
+        std::cout << "SymGS test failed" << std::endl;
+    }
     return test_pass;
 }
