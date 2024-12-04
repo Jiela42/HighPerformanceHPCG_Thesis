@@ -38,7 +38,19 @@ public:
         int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) override {
-        std::cerr << "Warning: compute_SymGS is not implemented in banded warp reduction." << std::endl;
+        std::cerr << "Warning: compute_SymGS requires different arguments in banded warp reduction." << std::endl;
+    }
+
+    void compute_SymGS(
+        banded_Matrix<T> & A, // we pass A for the metadata
+        T * banded_A_d, // the data of matrix A is already on the device
+        int num_rows, int num_cols,
+        int num_bands, // the number of bands in the banded matrix
+        int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the banded matrix
+        T * x_d, T * y_d // the vectors x and y are already on the device
+
+    ) override {
+        banded_warp_reduction_computeSymGS(A, banded_A_d, num_rows, num_cols, num_bands, j_min_i, x_d, y_d);
     }
 
     void compute_SPMV(
@@ -98,6 +110,15 @@ private:
     void banded_warp_reduction_computeDot(
         banded_Matrix<T>& A, //we only pass A for the metadata
         T * x_d, T * y_d, T * result_d
+    );
+
+    void banded_warp_reduction_computeSymGS(
+        banded_Matrix<T> & A, // we pass A for the metadata
+        T * banded_A_d, // the data of matrix A is already on the device
+        int num_rows, int num_cols,
+        int num_bands, // the number of bands in the banded matrix
+        int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the banded matrix
+        T * x_d, T * y_d // the vectors x and y are already on the device
     );
 };
 

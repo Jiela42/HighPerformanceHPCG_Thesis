@@ -118,3 +118,37 @@ std::vector<double> generate_random_vector(int size, int seed){
     return vec;
 
 }
+
+std::vector<double> generate_y_vector_for_HPCG_problem(int nx, int ny, int nz){
+    int num_rows = nx * ny * nz;
+    int num_cols = nx * ny * nz;
+
+    std::vector<double> y(num_rows, 0.0);
+
+    for(int ix = 0; ix < nx; ix++){
+        for(int iy = 0; iy < ny; iy++){
+            for(int iz = 0; iz < nz; iz++){
+
+                int i = ix + nx * iy + nx * ny * iz;
+                int nnz_i = 0;
+
+                for (int sz = -1; sz < 2; sz++){
+                    if(iz + sz > -1 && iz + sz < nz){
+                        for(int sy = -1; sy < 2; sy++){
+                            if(iy + sy > -1 && iy + sy < ny){
+                                for(int sx = -1; sx < 2; sx++){
+                                    if(ix + sx > -1 && ix + sx < nx){
+                                        int j = ix + sx + nx * (iy + sy) + nx * ny * (iz + sz);
+                                            nnz_i++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                y[i] = 26.0 - nnz_i;
+            }
+        }
+    }
+    return y;
+}

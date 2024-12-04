@@ -43,6 +43,7 @@ target_sources(HPCGLib PRIVATE
 
     banded_warp_reduction/banded_warp_reduction_computeSPMV.cu
     banded_warp_reduction/banded_warp_reduction_computeDot.cu
+    banded_warp_reduction/banded_warp_reduction_computeSymGS.cu
 )
 
 target_link_libraries(

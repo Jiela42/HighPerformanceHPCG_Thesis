@@ -17,8 +17,9 @@ enum class Implementation_Type {
 template <typename T>
 class HPCG_functions {
     public:
-        bool test_before_bench = false;
+        bool test_before_bench = true;
         const std::string version_name;
+        const std::string ault_nodes = "41-44";
         // this string is used when small changes are benchmarked to see their effect
         std::string additional_parameters = "vanilla_version";
 
@@ -36,6 +37,15 @@ class HPCG_functions {
         virtual void compute_SymGS(
             sparse_CSR_Matrix<T> & A, // we pass A for the metadata
             int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
+            T * x_d, T * y_d // the vectors x and y are already on the device
+            ) = 0;
+
+        virtual void compute_SymGS(
+            banded_Matrix<T> & A, // we pass A for the metadata
+            T * banded_A_d, // the data of matrix A is already on the device
+            int num_rows, int num_cols,
+            int num_bands, // the number of bands in the banded matrix
+            int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the banded matrix
             T * x_d, T * y_d // the vectors x and y are already on the device
             ) = 0;
 
@@ -73,7 +83,6 @@ class HPCG_functions {
 
         int getNumberOfIterations() const {
             return num_bench_iter;
-
     }
 };
 

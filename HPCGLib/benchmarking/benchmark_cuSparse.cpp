@@ -18,7 +18,8 @@ void run_cuSparse_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_pa
     cuSparse_Implementation<double> implementation;
     std::string implementation_name = implementation.version_name;
     std::string additional_params = implementation.additional_parameters;
-    CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, "41-44", "3d_27pt", implementation_name, additional_params, folder_path);
+    std::string ault_node = implementation.ault_nodes;
+    CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);
 
     // Allocate the memory on the device
     int * A_row_ptr_d;
@@ -70,7 +71,8 @@ void run_cuSparse_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string fold
     cuSparse_Implementation<double> implementation;
     std::string implementation_name = implementation.version_name;
     std::string additional_params = implementation.additional_parameters;
-    CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, "41-44", "3d_27pt", implementation_name, additional_params, folder_path);
+    std::string ault_node = implementation.ault_nodes;
+    CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);
 
     // Allocate the memory on the device
     int * A_row_ptr_d;

@@ -18,7 +18,7 @@ __global__ void cusparse_SymGS_kernel(
         double my_sum = 0.0;
         for (int j = A_row_ptr[i] + lane; j < A_row_ptr[i+1]; j += WARP_SIZE){
             int col = A_col_idx[j];
-            int val = A_values[j];
+            double val = A_values[j];
             my_sum -= val * x[col];
             if(i == col){
                 diag_value[0] = val;
@@ -45,7 +45,7 @@ __global__ void cusparse_SymGS_kernel(
         double my_sum = 0.0;
         for (int j = A_row_ptr[i] + lane; j < A_row_ptr[i+1]; j += WARP_SIZE){
             int col = A_col_idx[j];
-            int val = A_values[j];
+            double val = A_values[j];
             my_sum -= val * x[col];
             if(i == col){
                 diag_value[0] = val;

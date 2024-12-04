@@ -17,6 +17,7 @@ void run_cuSparse_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string fold
 
 void run_warp_reduction_3d27p_SPMV_benchmark(int nx, int ny, int nz, std::string folder_path);
 void run_warp_reduction_3d27p_Dot_benchmark(int nx, int ny, int nz, std::string folder_path);
+void run_warp_reduction_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path);
 
 // this function allows us to run the whole abstract benchmark
 // we have method overloading to support different matrix types
@@ -78,4 +79,17 @@ void bench_SymGS(
     int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d,
     double * x_d, double * y_d
     );
+
+void bench_SymGS(
+    HPCG_functions<double>& implementation,
+    CudaTimer& timer,
+    banded_Matrix<double> & A, // we pass A for the metadata and for testing against cuSparse
+    double * banded_A_d,
+    int num_rows, int num_cols,
+    int num_bands,
+    int * j_min_i_d,
+    double * x_d, double * y_d
+    );
+
+    
 #endif // BENCHMARK_HPP

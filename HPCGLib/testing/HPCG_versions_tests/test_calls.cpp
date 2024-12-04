@@ -144,12 +144,9 @@ bool test_Dot(
 
 // this is a minitest, it can be called to do some rudimentary testing (currently only for banded Matrices)
 bool test_Dot(
-    HPCG_functions<double>& uut
+    HPCG_functions<double>& uut,
+    int nx, int ny, int nz
 ){
-
-    int nx = 4;
-    int ny = 4;
-    int nz = 4;
 
     // make a matrix (for some reason we need it) (num_rows is the only thing we need to get from the matrix)
     banded_Matrix<double> A_banded;
@@ -288,6 +285,7 @@ bool test_SymGS(
     int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d,
     double * x_d, double * y_d
     )
+
 {
     int num_rows = A.get_num_rows();
     // since symGS changes x, we preserve the original x
@@ -313,3 +311,69 @@ bool test_SymGS(
     }
     return test_pass;
 }
+
+bool test_SymGS(
+    HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
+    banded_Matrix<double> & banded_A, // we pass A for the metadata
+    int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d, // the CSR matrix A is already on the device
+    
+    double * banded_A_d, // the banded matrix A is already on the device
+    int num_rows, int num_cols, // these refer to the shape of the banded matrix
+    int num_bands, // the number of bands in the banded matrix
+    int * j_min_i_d, // this is a mapping for calculating the j of some entry i,j in the banded matrix
+        
+    double * y_d // the vectors x is already on the device
+        
+){
+    
+    sparse_CSR_Matrix<double> A;
+    A.sparse_CSR_Matrix_from_banded(banded_A);
+
+    int num_rows_baseline = A.get_num_rows();
+    std::vector<double> x_baseline(num_rows, 0.0);
+    std::vector<double> x_uut(num_rows, 0.0);
+
+    double * x_baseline_d;
+    double * x_uut_d;
+
+    CHECK_CUDA(cudaMalloc(&x_baseline_d, num_rows * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&x_uut_d, num_rows * sizeof(double)));
+
+    baseline.compute_SymGS(A,
+                          A_row_ptr_d, A_col_idx_d, A_values_d,
+                          x_baseline_d, y_d);
+
+    uut.compute_SymGS(banded_A,
+                    banded_A_d,
+                    num_rows, num_cols,
+                    num_bands,
+                    j_min_i_d,
+                    x_uut_d, y_d);
+    
+    // and now we need to copy the result back and de-allocate the memory
+    CHECK_CUDA(cudaMemcpy(x_baseline.data(), x_baseline_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(x_uut.data(), x_uut_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+
+    CHECK_CUDA(cudaFree(x_baseline_d));
+    CHECK_CUDA(cudaFree(x_uut_d));
+
+    // compare the results
+    bool test_pass = vector_compare(x_baseline, x_uut);
+    
+    if (not test_pass){
+        std::cout << "SymGS test failed" << std::endl;
+    }
+
+    return test_pass;
+}
+
+
+
+
+
+
+
+
+
+
+
