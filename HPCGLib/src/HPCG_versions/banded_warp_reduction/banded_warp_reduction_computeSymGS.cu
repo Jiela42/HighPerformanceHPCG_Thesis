@@ -2,7 +2,7 @@
 #include "UtilLib/cuda_utils.hpp"
 #include <iostream>
 
-__device__ void loop_body(int lane, int i, int num_cols, int num_bands, int * j_min_i, double * banded_A, double * x, double * y, double * shared_diag){
+__device__ void loop_body(int lane, int i, int num_cols, int num_bands, int * j_min_i, double * banded_A, double * x, double * y, int diag_offset){
     
     double my_sum = 0.0;
     for (int band = lane; band < num_bands; band += WARP_SIZE){
@@ -10,9 +10,6 @@ __device__ void loop_body(int lane, int i, int num_cols, int num_bands, int * j_
         double val = banded_A[i * num_bands + band];
         if (col < num_cols && col >= 0){
             my_sum -= val * x[col];
-        }
-        if(i == col){
-            shared_diag[0] = val;
         }
     }
 
@@ -23,7 +20,7 @@ __device__ void loop_body(int lane, int i, int num_cols, int num_bands, int * j_
 
     __syncthreads();
     if (lane == 0){
-        double diag = shared_diag[0];
+        double diag = banded_A[i * num_bands + diag_offset];
         double sum = diag * x[i] + y[i] + my_sum;
         x[i] = sum / diag;           
     }
@@ -39,18 +36,27 @@ __global__ void banded_warp_reduction_SymGS_kernel(
 ){
     // note that here x is the result vector and y is the input vector
 
-    __shared__ double diag_value[1];
     int lane = threadIdx.x % WARP_SIZE;
+
+    int diag_offset = -1;
+    // find the offset for the diagonal element
+    for (int i = 0; i < num_bands; i++){
+        if (j_min_i[i] == 0){
+            diag_offset = i;
+            break;
+        }
+    }
+
     // forward pass
     for (int i = 0; i < num_rows; i++){
-        loop_body(lane, i, num_cols, num_bands, j_min_i, banded_A, x, y, diag_value);
+        loop_body(lane, i, num_cols, num_bands, j_min_i, banded_A, x, y, diag_offset);
     }
 
     __syncthreads();
 
     // backward pass
     for (int i = num_rows-1; i >= 0; i--){
-        loop_body(lane, i, num_cols, num_bands, j_min_i, banded_A, x, y, diag_value);
+        loop_body(lane, i, num_cols, num_bands, j_min_i, banded_A, x, y, diag_offset);
     }
 }
 

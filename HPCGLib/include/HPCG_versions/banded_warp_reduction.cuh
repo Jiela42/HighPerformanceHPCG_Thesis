@@ -17,7 +17,7 @@ template <typename T>
 class banded_warp_reduction_Implementation : public HPCG_functions<T> {
 public:
 
-    std::string version_name = "Banded Warp Reduction (loop body in method)";
+    std::string version_name = "Banded Warp Reduction (pre-compute diag_offset)";
     Implementation_Type implementation_type = Implementation_Type::BANDED;
 
 
