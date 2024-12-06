@@ -2,6 +2,33 @@
 #include "UtilLib/cuda_utils.hpp"
 #include <iostream>
 
+__device__ void loop_body(int lane, int i, int num_cols, int num_bands, int * j_min_i, double * banded_A, double * x, double * y, double * shared_diag){
+    
+    double my_sum = 0.0;
+    for (int band = lane; band < num_bands; band += WARP_SIZE){
+        int col = j_min_i[band] + i;
+        double val = banded_A[i * num_bands + band];
+        if (col < num_cols && col >= 0){
+            my_sum -= val * x[col];
+        }
+        if(i == col){
+            shared_diag[0] = val;
+        }
+    }
+
+    // reduce the my_sum using warp reduction
+    for (int offset = WARP_SIZE/2; offset > 0; offset /= 2){
+        my_sum += __shfl_down_sync(0xFFFFFFFF, my_sum, offset);
+    }
+
+    __syncthreads();
+    if (lane == 0){
+        double diag = shared_diag[0];
+        double sum = diag * x[i] + y[i] + my_sum;
+        x[i] = sum / diag;           
+    }
+    
+}
 
 __global__ void banded_warp_reduction_SymGS_kernel(
     int num_rows, int num_cols,
@@ -14,61 +41,16 @@ __global__ void banded_warp_reduction_SymGS_kernel(
 
     __shared__ double diag_value[1];
     int lane = threadIdx.x % WARP_SIZE;
-
     // forward pass
     for (int i = 0; i < num_rows; i++){
-        double my_sum = 0.0;
-        for (int band = lane; band < num_bands; band += WARP_SIZE){
-            int col = j_min_i[band] + i;
-            double val = banded_A[i * num_bands + band];
-            if (col < num_cols){
-                my_sum -= val * x[col];
-            }
-            if(i == col){
-                diag_value[0] = val;
-            }
-        }
-
-        // reduce the my_sum using warp reduction
-        for (int offset = WARP_SIZE/2; offset > 0; offset /= 2){
-            my_sum += __shfl_down_sync(0xFFFFFFFF, my_sum, offset);
-        }
-
-        __syncthreads();
-        if (lane == 0){
-            double diag = diag_value[0];
-            double sum = diag * x[i] + y[i] + my_sum;
-            x[i] = sum / diag;           
-        }
+        loop_body(lane, i, num_cols, num_bands, j_min_i, banded_A, x, y, diag_value);
     }
 
     __syncthreads();
 
     // backward pass
-        for (int i = num_rows-1; i >= 0; i--){
-        double my_sum = 0.0;
-        for (int band = lane; band < num_bands; band += WARP_SIZE){
-            int col = j_min_i[band] + i;
-            double val = banded_A[i * num_bands + band];
-            if (col < num_cols){
-                my_sum -= val * x[col];
-            }
-            if(i == col){
-                diag_value[0] = val;
-            }
-        }
-
-        // reduce the my_sum using warp reduction
-        for (int offset = WARP_SIZE/2; offset > 0; offset /= 2){
-            my_sum += __shfl_down_sync(0xFFFFFFFF, my_sum, offset);
-        }
-
-        __syncthreads();
-        if (lane == 0){
-            double diag = diag_value[0];
-            double sum = diag * x[i] + y[i] + my_sum;
-            x[i] = sum / diag;           
-        }
+    for (int i = num_rows-1; i >= 0; i--){
+        loop_body(lane, i, num_cols, num_bands, j_min_i, banded_A, x, y, diag_value);
     }
 }
 

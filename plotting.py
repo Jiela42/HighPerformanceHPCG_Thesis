@@ -9,8 +9,8 @@ plot_path = "plots/"
 methods_to_plot = [
     # "CG",
     # "MG",
-    # "SymGS",
-    "SPMV",
+    "SymGS",
+    # "SPMV",
     # "Restriction",
     # "Prolongation",
     # "Dot",
@@ -18,8 +18,8 @@ methods_to_plot = [
 ]
 
 sizes_to_plot =[
-    # ("8x8x8"),
-    # ("16x16x16"),
+    ("8x8x8"),
+    ("16x16x16"),
     # ("24x24x24"),
     ("32x32x32"),
     ("64x64x64"),
@@ -37,10 +37,10 @@ versions_to_plot = [
     # "NaiveBanded CuPy",
     # "cuSparse&cuBLAS", #this is a legacy name, it is now called CSR Implementation
     "CSR-Implementation",
-    "Naive Banded",
+    # "Naive Banded",
     # "Naive Banded (1 thread per physical core)",
     # "Naive Banded (4 thread per physical core)",
-    "Banded explicit Shared Memory",
+    # "Banded explicit Shared Memory",
     # "Banded explicit Shared Memory (rows_per_SM pow2)",
     # "Banded explicit Shared Memory (rows_per_SM pow2 1024 threads)",
     # "Banded explicit Shared Memory (rows_per_SM pow2 1024 threads 2x physical cores)",
@@ -53,7 +53,7 @@ versions_to_plot = [
 plot_percentage_baseline = True
 
 baseline_implementations = [
-    "cuSparse&cuBLAS",
+    "CSR-Implementation",
     ]
 
 y_axis_to_plot = [
