@@ -309,6 +309,9 @@ bool test_SymGS(
     if (not test_pass){
         std::cout << "SymGS test failed" << std::endl;
     }
+
+    // copy the original x back
+    CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
     return test_pass;
 }
 
@@ -339,6 +342,10 @@ bool test_SymGS(
     CHECK_CUDA(cudaMalloc(&x_baseline_d, num_rows * sizeof(double)));
     CHECK_CUDA(cudaMalloc(&x_uut_d, num_rows * sizeof(double)));
 
+    // we need the x to be all set to zero, otherwise with different initial conditions the results will be different
+    CHECK_CUDA(cudaMemset(x_baseline_d, 0, num_rows * sizeof(double)));
+    CHECK_CUDA(cudaMemset(x_uut_d, 0, num_rows * sizeof(double)));
+
     baseline.compute_SymGS(A,
                           A_row_ptr_d, A_col_idx_d, A_values_d,
                           x_baseline_d, y_d);
@@ -361,7 +368,7 @@ bool test_SymGS(
     bool test_pass = vector_compare(x_baseline, x_uut);
     
     if (not test_pass){
-        std::cout << "SymGS test failed" << std::endl;
+        std::cout << "SymGS test failed for uut: " << uut.version_name << std::endl;
     }
 
     return test_pass;

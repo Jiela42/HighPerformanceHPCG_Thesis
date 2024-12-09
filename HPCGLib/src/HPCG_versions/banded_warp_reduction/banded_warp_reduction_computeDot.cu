@@ -23,6 +23,8 @@ __global__ void reduce_sums(double * array, int num_elements, double * result_d)
         my_sum += __shfl_down_sync(0xFFFFFFFF, my_sum, offset);
     }
 
+    __syncthreads();
+
     if (lane == 0){
         intermediate_sums[warp_id] = my_sum;
     }
@@ -33,6 +35,8 @@ __global__ void reduce_sums(double * array, int num_elements, double * result_d)
             my_sum += __shfl_down_sync(0xFFFFFFFF, my_sum, offset);
         }
     }
+
+    __syncthreads();
 
     if(tid == 0){
         *result_d = my_sum;
@@ -69,6 +73,8 @@ __global__ void banded_warp_reduction_dot_kernel(
         my_sum += __shfl_down_sync(0xFFFFFFFF, my_sum, offset);
     }
 
+    __syncthreads();
+
     if (lane == 0){
         intermediate_sums[warp_id] = my_sum;
     }
@@ -82,6 +88,8 @@ __global__ void banded_warp_reduction_dot_kernel(
             my_sum += __shfl_down_sync(0xFFFFFFFF, my_sum, offset);
         }
     }
+
+    __syncthreads();
 
     if(tid == 0){
         result_d[blockIdx.x] = my_sum;

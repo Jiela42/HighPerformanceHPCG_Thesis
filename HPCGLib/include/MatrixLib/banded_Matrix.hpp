@@ -26,6 +26,7 @@ class banded_Matrix {
         int get_ny() const;
         int get_nz() const;
         int get_nnz() const;
+        int get_diag_index() const;
         MatrixType get_matrix_type() const;
         T get_element(int i, int j) const;
         std::vector <int>& get_j_min_i();
@@ -41,6 +42,7 @@ class banded_Matrix {
         int ny;
         int nz;
         int nnz;
+        int diag_index;
         int num_rows;
         int num_cols;
         int num_bands;

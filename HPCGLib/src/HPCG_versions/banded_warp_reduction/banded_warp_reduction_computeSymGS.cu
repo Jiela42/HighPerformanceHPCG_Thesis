@@ -2,10 +2,10 @@
 #include "UtilLib/cuda_utils.hpp"
 #include <iostream>
 
-__device__ void loop_body(int lane, int i, int num_cols, int num_bands, int * j_min_i, double * banded_A, double * x, double * y, double * shared_diag){
+__inline__ __device__ void loop_body(int lane, int i, int num_cols, int num_bands, int * j_min_i, double * banded_A, double * x, double * y, double * shared_diag){
     
     double my_sum = 0.0;
-    for (int band = lane; band < num_bands; band += (WARP_SIZE/2)){
+    for (int band = lane; band < num_bands; band += WARP_SIZE){
         int col = j_min_i[band] + i;
         double val = banded_A[i * num_bands + band];
         if (col < num_cols && col >= 0){
@@ -17,7 +17,7 @@ __device__ void loop_body(int lane, int i, int num_cols, int num_bands, int * j_
     }
 
     // reduce the my_sum using warp reduction
-    for (int offset = WARP_SIZE/4; offset > 0; offset /= 2){
+    for (int offset = WARP_SIZE/2; offset > 0; offset /= 2){
         my_sum += __shfl_down_sync(0xFFFFFFFF, my_sum, offset);
     }
 
@@ -27,7 +27,7 @@ __device__ void loop_body(int lane, int i, int num_cols, int num_bands, int * j_
         double sum = diag * x[i] + y[i] + my_sum;
         x[i] = sum / diag;           
     }
-    
+    __syncthreads();
 }
 
 __global__ void banded_warp_reduction_SymGS_kernel(
@@ -40,7 +40,7 @@ __global__ void banded_warp_reduction_SymGS_kernel(
     // note that here x is the result vector and y is the input vector
 
     __shared__ double diag_value[1];
-    int lane = threadIdx.x % (WARP_SIZE/2);
+    int lane = threadIdx.x % WARP_SIZE;
     
     // forward pass
     for (int i = 0; i < num_rows; i++){

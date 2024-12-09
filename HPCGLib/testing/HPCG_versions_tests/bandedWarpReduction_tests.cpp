@@ -118,6 +118,9 @@ bool run_banded_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double> A){
     CHECK_CUDA(cudaFree(j_min_i_d));
 
     CHECK_CUDA(cudaFree(x_d));
+    CHECK_CUDA(cudaFree(y_d));
+    CHECK_CUDA(cudaFree(a_d));
+    CHECK_CUDA(cudaFree(b_d));
 
     return all_pass;
 }

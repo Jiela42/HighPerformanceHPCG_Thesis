@@ -323,7 +323,6 @@ void bench_Implementation(
     double * result_d
     ){
     
-    std::cout << "Bench implementation" << std::endl;
     bench_SPMV(implementation, timer, A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);
     bench_Dot(implementation, timer, A, x_d, y_d, result_d);
     bench_SymGS(implementation, timer, A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);

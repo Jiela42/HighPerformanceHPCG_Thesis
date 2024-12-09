@@ -13,6 +13,7 @@ banded_Matrix<T>::banded_Matrix() {
     this->ny = 0;
     this->nz = 0;
     this->nnz = 0;
+    this->diag_index = -1;
     this->matrix_type = MatrixType::UNKNOWN;
     this->num_rows = 0;
     this->num_cols = 0;
@@ -68,6 +69,9 @@ void banded_Matrix<T>::banded_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T> A){
         int off_z = neighbour_offsets[i][2];
         
         this->j_min_i[i] = off_x + off_y * this->nx + off_z * this->nx * this->ny;
+        if (this->j_min_i[i] == 0) {
+            this->diag_index = i;
+        }
     }
 
     int elem_ctr = 0;
@@ -124,6 +128,11 @@ int banded_Matrix<T>::get_nz() const{
 template <typename T>
 int banded_Matrix<T>::get_nnz() const{
     return this->nnz;
+}
+
+template <typename T>
+int banded_Matrix<T>::get_diag_index() const{
+    return this->diag_index;
 }
 
 template <typename T>

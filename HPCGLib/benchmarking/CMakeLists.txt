@@ -17,6 +17,7 @@ add_executable(run_full_bench
     benchmark_naiveBanded.cpp
     benchmark_bandedSharedMem.cpp
     benchmark_bandedWarpReduction.cpp
+    benchmark_bandedPreprocessed.cpp
 )
 
 add_executable(run_specific_bench
@@ -26,6 +27,7 @@ add_executable(run_specific_bench
     benchmark_naiveBanded.cpp
     benchmark_bandedSharedMem.cpp
     benchmark_bandedWarpReduction.cpp
+    benchmark_bandedPreprocessed.cpp
 )
 
 

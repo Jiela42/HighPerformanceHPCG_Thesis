@@ -31,6 +31,8 @@ __global__ void banded_warp_reduction_SPMV_kernel(
             sum_i += __shfl_down_sync(0xFFFFFFFF, sum_i, offset);
         }
 
+        __syncthreads();
+
         if (lane == 0){
             y[i] = sum_i;
         }
