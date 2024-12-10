@@ -43,7 +43,7 @@ int main() {
     // run_cuSparse_3d27p_benchmarks(128, 128, 64, folder_path);
     // run_cuSparse_3d27p_benchmarks(128, 64, 64, folder_path);
     // run_cuSparse_3d27p_benchmarks(128, 128, 128, folder_path);
-    // run_cuSparse_3d27p_benchmarks(256, 128, 128, folder_path);
+    run_cuSparse_3d27p_benchmarks(256, 128, 128, folder_path);
     // run_cuSparse_3d27p_benchmarks(256, 256, 128, folder_path);
     // std::cout << "Finished cuSparse 3d27p Benchmarks 256 256 128" << std::endl;
     // run_cuSparse_3d27p_benchmarks(256, 256, 256, folder_path);
@@ -71,13 +71,13 @@ int main() {
     // run_bandedSharedMem_3d27p_benchmarks(256, 256, 128, folder_path);
 
     std::cout << "Starting Banded Warp Reduction 3d27p Benchmarks" << std::endl;
-    // run_banded_warp_reduction_3d27p_benchmarks(8, 8, 8, folder_path);
-    // run_banded_warp_reduction_3d27p_benchmarks(16, 16, 16, folder_path);
-    // run_banded_warp_reduction_3d27p_benchmarks(32, 32, 32, folder_path);
-    // run_banded_warp_reduction_3d27p_benchmarks(64, 64, 64, folder_path);
-    // run_banded_warp_reduction_3d27p_benchmarks(128, 64, 64, folder_path);
-    // run_banded_warp_reduction_3d27p_benchmarks(128, 128, 64, folder_path);
-    // run_banded_warp_reduction_3d27p_benchmarks(128, 128, 128, folder_path);
+    run_banded_warp_reduction_3d27p_benchmarks(8, 8, 8, folder_path);
+    run_banded_warp_reduction_3d27p_benchmarks(16, 16, 16, folder_path);
+    run_banded_warp_reduction_3d27p_benchmarks(32, 32, 32, folder_path);
+    run_banded_warp_reduction_3d27p_benchmarks(64, 64, 64, folder_path);
+    run_banded_warp_reduction_3d27p_benchmarks(128, 64, 64, folder_path);
+    run_banded_warp_reduction_3d27p_benchmarks(128, 128, 64, folder_path);
+    run_banded_warp_reduction_3d27p_benchmarks(128, 128, 128, folder_path);
     // run_banded_warp_reduction_3d27p_benchmarks(256, 128, 128, folder_path);
     // run_banded_warp_reduction_3d27p_benchmarks(256, 256, 128, folder_path);
 

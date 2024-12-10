@@ -24,6 +24,13 @@ class HPCG_functions {
         std::string additional_parameters = "vanilla_version";
 
         Implementation_Type implementation_type = Implementation_Type::UNKNOWN;
+        bool CG_implemented = false;
+        bool MG_implemented = false;
+        bool SymGS_implemented = false;
+        bool SPMV_implemented = false;
+        bool WAXPBY_implemented = false;
+        bool Dot_implemented = false;
+
     // CG starts with having the data on the CPU
         virtual void compute_CG(sparse_CSR_Matrix<T> & A, std::vector<T> & b, std::vector<T> & x) = 0;
         

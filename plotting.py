@@ -26,8 +26,8 @@ sizes_to_plot =[
     ("128x64x64"),
     ("128x128x64"),
     ("128x128x128"),
-    ("256x128x128"),
-    ("256x256x128"),
+    # ("256x128x128"),
+    # ("256x256x128"),
 ]
 
 versions_to_plot = [
@@ -51,6 +51,9 @@ versions_to_plot = [
     # "Banded Warp Reduction (8 cooperating threads)",
     # "Banded Warp Reduction - many blocks - 4 threads cooperating",
     # "Banded Warp Reduction - many blocks - 8 threads cooperating",
+    "Banded Preprocessed (2 rows while preprocessing)",
+    "Banded Preprocessed",
+    "Banded Preprocessed (16 rows while preprocessing)",
      
 ]
 plot_percentage_baseline = True
@@ -158,11 +161,14 @@ def get_percentage_of_baseline_data(full_data):
         baseline_medians_ms = baseline_data.groupby(['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'])['Time (ms)'].median().reset_index()
         baseline_medians_nnz = baseline_data.groupby(['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'])['Time per NNZ (ms)'].median().reset_index()
 
-        baseline_medians_ms = baseline_medians_ms.rename(columns={'Time (ms)': f'Percentage of {baseline} (Time ms)'})
-        baseline_medians_nnz = baseline_medians_nnz.rename(columns={'Time per NNZ (ms)': f'Percentage of {baseline} (Time per NNZ ms)'})
+        ms_name = f'Speedup vs {baseline} (Time ms)'
+        ms_per_nnz_name = f'Speedup vs {baseline} (Time per NNZ ms)'
 
-        y_axis_to_plot.append(f'Percentage of {baseline} (Time ms)')
-        y_axis_to_plot.append(f'Percentage of {baseline} (Time per NNZ ms)')
+        baseline_medians_ms = baseline_medians_ms.rename(columns={'Time (ms)': ms_name})
+        baseline_medians_nnz = baseline_medians_nnz.rename(columns={'Time per NNZ (ms)': ms_per_nnz_name})
+
+        y_axis_to_plot.append(ms_name)
+        y_axis_to_plot.append(ms_per_nnz_name)
 
         # Merge the baseline medians with the full data
         full_data = full_data.merge(baseline_medians_ms, on=['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'], how='left')
@@ -172,9 +178,9 @@ def get_percentage_of_baseline_data(full_data):
 
         # print(show_data.head())
 
-        # Calculate the percentage difference compared to the baseline
-        full_data[f'Percentage of {baseline} (Time ms)'] = ((full_data['Time (ms)']) / full_data[f'Percentage of {baseline} (Time ms)']) * 100
-        full_data[f'Percentage of {baseline} (Time per NNZ ms)'] = ((full_data['Time per NNZ (ms)']) / full_data[f'Percentage of {baseline} (Time per NNZ ms)']) * 100
+        # Calculate the speedup compared to the baseline
+        full_data[ms_name] = ((full_data['Time (ms)']) / full_data[ms_name])
+        full_data[ms_per_nnz_name] = ((full_data['Time per NNZ (ms)']) / full_data[ms_per_nnz_name])
 
 
     return full_data
@@ -446,7 +452,7 @@ for y_ax in y_axis_to_plot:
 
         plot_x_options(y_axis = y_ax, y_axis_scale = "linear", save_path = linear_folder, full_data = plottable_data)
 
-    if "log" in y_axis_config_to_plot and "Percentage" not in y_ax:
+    if "log" in y_axis_config_to_plot and "Speedup" not in y_ax:
         # the percentage plots are not done for log scale, because that makes no sense
 
         log_folder = os.path.join(current_plot_path, "y_axis_log_" + y_ax)

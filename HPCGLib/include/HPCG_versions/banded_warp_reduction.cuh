@@ -20,6 +20,9 @@ public:
     std::string version_name = "Banded Warp Reduction";
     Implementation_Type implementation_type = Implementation_Type::BANDED;
 
+    bool SPMV_implemented = true;
+    bool Dot_implemented = true;
+    bool SymGS_implemented = true;
 
     void compute_CG(sparse_CSR_Matrix<T>& A, std::vector<T>& b, std::vector<T>& x) override {
         std::cerr << "Warning: compute_CG is not implemented in banded warp reduction." << std::endl;

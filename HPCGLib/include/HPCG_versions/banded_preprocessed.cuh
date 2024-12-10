@@ -17,8 +17,11 @@ template <typename T>
 class banded_preprocessed_Implementation : public HPCG_functions<T> {
 public:
 
-    std::string version_name = "Banded Preprocessed";
+    std::string version_name = "Banded Preprocessed (2 rows while preprocessing)";
     std::string additional_info = "SymGS cooperation number = 16";
+
+    bool SymGS_implemented = true;
+
     Implementation_Type implementation_type = Implementation_Type::BANDED;
 
 

@@ -20,6 +20,8 @@ public:
     std::string version_name = "Naive Banded";
     Implementation_Type implementation_type = Implementation_Type::BANDED;
 
+    bool SPMV_implemented = true;
+
     void compute_CG(sparse_CSR_Matrix<T>& A, std::vector<T>& b, std::vector<T>& x) override {
         std::cerr << "Warning: compute_CG is not implemented in Naive Banded." << std::endl;
     }

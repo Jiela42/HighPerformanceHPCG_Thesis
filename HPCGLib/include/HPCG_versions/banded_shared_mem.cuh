@@ -19,6 +19,8 @@ public:
 
     std::string version_name = "Banded explicit Shared Memory";
     std::string additional_parameters = "num_threads = 1024, num_blocks = theoretical maximum";
+    
+    bool SPMV_implemented = true;
     Implementation_Type implementation_type = Implementation_Type::BANDED;
 
     void compute_CG(sparse_CSR_Matrix<T>& A, std::vector<T>& b, std::vector<T>& x) override {

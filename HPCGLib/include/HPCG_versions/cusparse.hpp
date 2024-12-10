@@ -17,6 +17,8 @@ public:
     std::string version_name = "CSR-Implementation";
     Implementation_Type implementation_type = Implementation_Type::CSR;
 
+    bool SPMV_implemented = true;
+    bool SymGS_implemented = true;
 
     void compute_CG(sparse_CSR_Matrix<T>& A, std::vector<T>& b, std::vector<T>& x) override {
         std::cerr << "Warning: compute_CG is not implemented in cuSparse_Implementation." << std::endl;
