@@ -1,6 +1,8 @@
 import os
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import plotly.graph_objects as go
+
 
 
 # first we read the colors
@@ -37,23 +39,33 @@ def visualize_coloring(file):
     
     # now we print each x,y,z with the corresponding color
 
-    # Create a 3D scatter plot
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    scatter = ax.scatter(x, y, z, c=colors, cmap='viridis')
+    # Create a 3D scatter plot using plotly
+        fig = go.Figure(data=[go.Scatter3d(
+            x=x,
+            y=y,
+            z=z,
+            mode='markers',
+            marker=dict(
+                size=5,
+                color=colors,
+                colorscale='Viridis',
+                colorbar=dict(title='Color Value')
+            )
+        )])
 
-    # Add color bar
-    color_bar = plt.colorbar(scatter, ax=ax)
-    color_bar.set_label('Color Value')
+        # Set labels
+        fig.update_layout(
+            scene=dict(
+                xaxis_title='X',
+                yaxis_title='Y',
+                zaxis_title='Z'
+            ),
+            title=f'3D Coloring Visualization for {dims}'
+        )
 
-    # Set labels
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-
-    output_file = "plots/coloring_plots/dims_" + dims + ".png"
-    plt.savefig(output_file, bbox_inches='tight')
-    plt.close(fig)     
+        # Save plot to HTML file
+        output_file = "plots/coloring_plots/dims_" + dims + ".html"
+        fig.write_html(output_file)
 
 
 
