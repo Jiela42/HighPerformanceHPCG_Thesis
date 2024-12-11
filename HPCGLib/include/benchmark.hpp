@@ -31,6 +31,7 @@ void bench_Implementation(
     CudaTimer& timer,
     sparse_CSR_Matrix<double> & A,
     int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d,
+    double * a_d, double * b_d,
     double * x_d, double * y_d);
 
 // this version supports banded matrixes
@@ -42,6 +43,7 @@ void bench_Implementation(
     int num_rows, int num_cols,
     int num_bands,
     int * j_min_i_d,
+    double * a_d, double * b_d,
     double * x_d, double * y_d,
     double * result_d
     );

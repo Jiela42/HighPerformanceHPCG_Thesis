@@ -14,11 +14,15 @@ template <typename T>
 class cuSparse_Implementation : public HPCG_functions<T> {
 public:
 
-    std::string version_name = "CSR-Implementation";
-    Implementation_Type implementation_type = Implementation_Type::CSR;
+    cuSparse_Implementation(){
+        // overwritting the inherited variables
 
-    bool SPMV_implemented = true;
-    bool SymGS_implemented = true;
+        this->version_name = "CSR-Implementation";
+        this->implementation_type = Implementation_Type::CSR;
+        this->SPMV_implemented = true;
+        this->SymGS_implemented = true;
+
+    }
 
     void compute_CG(sparse_CSR_Matrix<T>& A, std::vector<T>& b, std::vector<T>& x) override {
         std::cerr << "Warning: compute_CG is not implemented in cuSparse_Implementation." << std::endl;

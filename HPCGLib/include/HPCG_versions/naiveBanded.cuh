@@ -17,10 +17,14 @@ template <typename T>
 class naiveBanded_Implementation : public HPCG_functions<T> {
 public:
 
-    std::string version_name = "Naive Banded";
-    Implementation_Type implementation_type = Implementation_Type::BANDED;
+    naiveBanded_Implementation(){
+        // overwritting the inherited variables
 
-    bool SPMV_implemented = true;
+        this->version_name = "Naive Banded";
+        this->implementation_type = Implementation_Type::BANDED;
+        this->SPMV_implemented = true;
+
+    }
 
     void compute_CG(sparse_CSR_Matrix<T>& A, std::vector<T>& b, std::vector<T>& x) override {
         std::cerr << "Warning: compute_CG is not implemented in Naive Banded." << std::endl;

@@ -187,7 +187,7 @@ void banded_preprocessed_Implementation<T>::banded_preprocessed_computeSymGS(
     assert(num_cols == A.get_num_cols());
     assert(diag_index >= 0);
 
-    int num_rows_while_preprocessing = 2;
+    int num_rows_while_preprocessing = 4;
 
     // because this is sequential, we only spawn one warp
     int num_threads = WARP_SIZE;

@@ -5,8 +5,10 @@ void run_banded_preprocessed_3d27p_benchmarks(int nx, int ny, int nz, std::strin
 
     std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
     sparse_CSR_Matrix<double> A = problem.first;
-    std::vector<double> x = generate_random_vector(nx*ny*nz, RANDOM_SEED);
-
+    std::vector<double> y = problem.second;
+    std::vector<double> x (nx*ny*nz, 0.0);
+    std::vector<double> a = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+    std::vector<double> b = generate_random_vector(nx*ny*nz, RANDOM_SEED);
 
     banded_Matrix<double> banded_A;
     banded_A.banded_Matrix_from_sparse_CSR(A);
@@ -28,26 +30,35 @@ void run_banded_preprocessed_3d27p_benchmarks(int nx, int ny, int nz, std::strin
     // Allocate the memory on the device
     double * banded_A_d;
     int * j_min_i_d;
+    double * a_d;
+    double * b_d;
     double * x_d;
     double * y_d;
     double * result_d;
 
     CHECK_CUDA(cudaMalloc(&banded_A_d, num_bands * num_rows * sizeof(double)));
     CHECK_CUDA(cudaMalloc(&j_min_i_d, num_bands * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&a_d, num_rows * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&b_d, num_rows * sizeof(double)));
     CHECK_CUDA(cudaMalloc(&x_d, num_cols * sizeof(double)));
     CHECK_CUDA(cudaMalloc(&y_d, num_rows * sizeof(double)));
     CHECK_CUDA(cudaMalloc(&result_d, sizeof(double)));
 
     CHECK_CUDA(cudaMemcpy(banded_A_d, matrix_data, num_bands * num_rows * sizeof(double), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(j_min_i_d, j_min_i_data, num_bands * sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(a_d, a.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(b_d, b.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
 
     // run the benchmarks (without the copying back and forth)
-    bench_Implementation(implementation, *timer, banded_A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d, result_d);
+    bench_Implementation(implementation, *timer, banded_A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, a_d, b_d, x_d, y_d, result_d);
 
     // free the memory
     cudaFree(banded_A_d);
     cudaFree(j_min_i_d);
+    cudaFree(a_d);
+    cudaFree(b_d);
     cudaFree(x_d);
     cudaFree(y_d);
     cudaFree(result_d);
@@ -60,7 +71,7 @@ void run_banded_preprocessed_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::
     std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
     sparse_CSR_Matrix<double> A = problem.first;
     std::vector<double> y = problem.second;
-    std::vector<double> x (nx * ny * nz, 0.0);
+    std::vector<double> x (nx*ny*nz, 0.0);
 
     banded_Matrix<double> banded_A;
     banded_A.banded_Matrix_from_sparse_CSR(A);
@@ -93,6 +104,7 @@ void run_banded_preprocessed_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::
     CHECK_CUDA(cudaMemcpy(banded_A_d, matrix_data, num_bands * num_rows * sizeof(double), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(j_min_i_d, j_min_i_data, num_bands * sizeof(int), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
 
     bench_SymGS(implementation, *timer, banded_A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);
 

@@ -17,11 +17,15 @@ template <typename T>
 class Banded_Shared_Memory_Implementation : public HPCG_functions<T> {
 public:
 
-    std::string version_name = "Banded explicit Shared Memory";
-    std::string additional_parameters = "num_threads = 1024, num_blocks = theoretical maximum";
-    
-    bool SPMV_implemented = true;
-    Implementation_Type implementation_type = Implementation_Type::BANDED;
+    Banded_Shared_Memory_Implementation(){
+        // overwritting the inherited variables
+
+        this->version_name = "Banded Shared Memory";
+        this->additional_parameters = "num_threads = 1024, num_blocks = theoretical maximum";
+        
+        this->implementation_type = Implementation_Type::BANDED;
+        this->SPMV_implemented = true;
+    }
 
     void compute_CG(sparse_CSR_Matrix<T>& A, std::vector<T>& b, std::vector<T>& x) override {
         std::cerr << "Warning: compute_CG is not implemented in Banded Shared Memory." << std::endl;

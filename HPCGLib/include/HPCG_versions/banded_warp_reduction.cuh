@@ -17,12 +17,16 @@ template <typename T>
 class banded_warp_reduction_Implementation : public HPCG_functions<T> {
 public:
 
-    std::string version_name = "Banded Warp Reduction";
-    Implementation_Type implementation_type = Implementation_Type::BANDED;
+    banded_warp_reduction_Implementation(){
+        // overwritting the inherited variables
 
-    bool SPMV_implemented = true;
-    bool Dot_implemented = true;
-    bool SymGS_implemented = true;
+        this->version_name = "Banded Warp Reduction";
+        this->implementation_type = Implementation_Type::BANDED;
+        this->SPMV_implemented = true;
+        this->Dot_implemented = true;
+        this->SymGS_implemented = true;
+
+    }
 
     void compute_CG(sparse_CSR_Matrix<T>& A, std::vector<T>& b, std::vector<T>& x) override {
         std::cerr << "Warning: compute_CG is not implemented in banded warp reduction." << std::endl;

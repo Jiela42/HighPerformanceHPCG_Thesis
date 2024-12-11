@@ -17,13 +17,18 @@ template <typename T>
 class banded_preprocessed_Implementation : public HPCG_functions<T> {
 public:
 
-    std::string version_name = "Banded Preprocessed (2 rows while preprocessing)";
-    std::string additional_info = "SymGS cooperation number = 16";
+    banded_preprocessed_Implementation(){
 
-    bool SymGS_implemented = true;
+        // overwritting the inherited variables
 
-    Implementation_Type implementation_type = Implementation_Type::BANDED;
+        this->version_name = "Banded Preprocessed";
+        this->additional_parameters = "SymGS cooperation number = 16";
 
+        this->implementation_type = Implementation_Type::BANDED;
+
+        this->SymGS_implemented = true;
+        
+    }
 
     void compute_CG(sparse_CSR_Matrix<T>& A, std::vector<T>& b, std::vector<T>& x) override {
         std::cerr << "Warning: compute_CG is not implemented in Banded Preprocessed." << std::endl;

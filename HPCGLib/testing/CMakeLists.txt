@@ -16,8 +16,8 @@ add_library(TestHPCGLib
     HPCG_versions_tests/test_calls.cpp
 )
 
-add_executable(run_quicktesting
-    run_quicktesting.cpp
+add_executable(run_coloring
+    run_coloring.cpp
 )
 
 add_executable(run_AllTests
@@ -37,7 +37,7 @@ target_link_libraries(run_AllTests
     UtilLib
 )
 
-target_link_libraries(run_quicktesting
+target_link_libraries(run_coloring
     HPCGLib
     MatrixLib
 )

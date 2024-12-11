@@ -301,12 +301,19 @@ void bench_Implementation(
     CudaTimer& timer,
     sparse_CSR_Matrix<double> & A,
     int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d,
-    double * x_d, double * y_d
+    double * a_d, double * b_d, // a & b are random vectors
+    double * x_d, double * y_d // x & y are vectors as used in HPCG
     )
 {
+    if(implementation.SPMV_implemented){
+        bench_SPMV(implementation, timer, A, A_row_ptr_d, A_col_idx_d, A_values_d, a_d, y_d);
+    }
+    if(implementation.SymGS_implemented){
+        bench_SymGS(implementation, timer, A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d, y_d);
+    }
 
-    bench_SPMV(implementation, timer, A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d, y_d);
-    bench_SymGS(implementation, timer, A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d, y_d);
+    // bench_SPMV(implementation, timer, A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d, y_d);
+    // bench_SymGS(implementation, timer, A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d, y_d);
     // other functions to be benchmarked
 }
 
@@ -319,13 +326,23 @@ void bench_Implementation(
     int num_rows, int num_cols,
     int num_bands,
     int * j_min_i_d,
-    double * x_d, double * y_d,
-    double * result_d
+    double * a_d, double * b_d, // a & b are random vectors
+    double * x_d, double * y_d, // x & y are vectors as used in HPCG
+    double * result_d   // result is used for the dot product (it is a scalar)
     ){
-    
-    bench_SPMV(implementation, timer, A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);
-    bench_Dot(implementation, timer, A, x_d, y_d, result_d);
-    bench_SymGS(implementation, timer, A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);
+      
+    if(implementation.SPMV_implemented){
+        bench_SPMV(implementation, timer, A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, a_d, y_d);
+    }
+    if(implementation.Dot_implemented){
+        bench_Dot(implementation, timer, A, a_d, b_d, result_d);
+    }
+    if(implementation.SymGS_implemented){
+        bench_SymGS(implementation, timer, A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);
+    }
+    // bench_SPMV(implementation, timer, A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);
+    // bench_Dot(implementation, timer, A, x_d, y_d, result_d);
+    // bench_SymGS(implementation, timer, A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);
     // other functions to be benchmarked
 }
 

@@ -9,8 +9,8 @@ plot_path = "plots/"
 methods_to_plot = [
     # "CG",
     # "MG",
-    "SymGS",
-    # "SPMV",
+    # "SymGS",
+    "SPMV",
     # "Restriction",
     # "Prolongation",
     # "Dot",
@@ -23,11 +23,11 @@ sizes_to_plot =[
     # ("24x24x24"),
     ("32x32x32"),
     ("64x64x64"),
-    ("128x64x64"),
-    ("128x128x64"),
+    # ("128x64x64"),
+    # ("128x128x64"),
     ("128x128x128"),
     # ("256x128x128"),
-    # ("256x256x128"),
+    ("256x256x128"),
 ]
 
 versions_to_plot = [
@@ -37,7 +37,7 @@ versions_to_plot = [
     # "NaiveBanded CuPy",
     # "cuSparse&cuBLAS", #this is a legacy name, it is now called CSR Implementation
     "CSR-Implementation",
-    # "Naive Banded",
+    "Naive Banded",
     # "Naive Banded (1 thread per physical core)",
     # "Naive Banded (4 thread per physical core)",
     # "Banded explicit Shared Memory",
@@ -45,16 +45,28 @@ versions_to_plot = [
     # "Banded explicit Shared Memory (rows_per_SM pow2 1024 threads)",
     # "Banded explicit Shared Memory (rows_per_SM pow2 1024 threads 2x physical cores)",
     "Banded Warp Reduction",
-    "Banded Warp Reduction (pre-compute diag_offset)",
-    "Banded Warp Reduction (cooperation number = 16)",
+    # "Banded Warp Reduction (pre-compute diag_offset)",
+    # "Banded Warp Reduction (cooperation number = 16)",
     # "Banded Warp Reduction (loop body in method)",
     # "Banded Warp Reduction (8 cooperating threads)",
     # "Banded Warp Reduction - many blocks - 4 threads cooperating",
     # "Banded Warp Reduction - many blocks - 8 threads cooperating",
-    "Banded Preprocessed (2 rows while preprocessing)",
-    "Banded Preprocessed",
-    "Banded Preprocessed (16 rows while preprocessing)",
-     
+    # "Banded Preprocessed (2 rows while preprocessing)",
+    # "Banded Preprocessed",
+    # "Banded Preprocessed (16 rows while preprocessing)",
+
+    # "Banded Warp Reduction (x=0.5)",
+    # "Banded Warp Reduction (x=0)",
+    # "Banded Warp Reduction (x=2)",
+    # "Banded Warp Reduction (x=random)",
+    # "CSR-Implementation (x=0.5)",
+    # "CSR-Implementation (x=0)",
+    # "CSR-Implementation (x=2)",
+    # "CSR-Implementation (x=random)",
+    # "Banded Preprocessed (x=0.5)",
+    # "Banded Preprocessed (x=0)",
+    # "Banded Preprocessed (x=2)",
+    # "Banded Preprocessed (x=random)",     
 ]
 plot_percentage_baseline = True
 
@@ -63,13 +75,13 @@ baseline_implementations = [
     ]
 
 y_axis_to_plot = [
-    "Time per NNZ (ms)",
+    # "Time per NNZ (ms)",
     "Time (ms)",
 ]
 
 y_axis_config_to_plot = [
     "linear",
-    "log"
+    # "log"
 ]
 
 
@@ -116,7 +128,7 @@ def read_data():
         meta_data = lines[0].split(",")
 
         version_name = str(meta_data[0])
-        version_name = "CSR-Implementation" if version_name == "cuSparse&cuBLAS" else version_name # we change the name because I am too lazy to re-run the benchmark
+        version_name = "CSR-Implementation" if version_name == "cuSparse&cuBLAS" or version_name == "cuSparse-Implementation" else version_name # we change the name because I am too lazy to re-run the benchmark
         ault_node = str(meta_data[1])
         matrix_type = str(meta_data[2])
         nx = int(meta_data[3])
@@ -174,7 +186,7 @@ def get_percentage_of_baseline_data(full_data):
         full_data = full_data.merge(baseline_medians_ms, on=['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'], how='left')
         full_data = full_data.merge(baseline_medians_nnz, on=['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'], how='left')
 
-        show_data = full_data.drop(columns=['nx', 'ny', 'nz', 'NNZ', 'Density of A', 'Matrix Type', 'Ault Node', 'Matrix Dimensions, Matrix Density'])
+        show_data = full_data.drop(columns=['nx', 'ny', 'nz', 'NNZ', 'Density of A', 'Matrix Type', 'Ault Node', 'Matrix Dimensions, # Rows, Matrix Density'])
 
         # print(show_data.head())
 
@@ -195,7 +207,8 @@ def preprocess_data(full_data):
     # Here we could do preprocessing, such as time per nnz or sorting of the possible values of the columns
 
     # add a column matrix dimensions: nx x ny x nz (a string)
-    full_data['Matrix Dimensions, Matrix Density'] = full_data['nx'].astype(str) + "x" + full_data['ny'].astype(str) + "x" + full_data['nz'].astype(str) + ", " + (full_data['Density of A']* 100).round(2).astype(str) + "%" 
+    full_data['# Rows'] = full_data['nx'] * full_data['ny'] * full_data['nz']
+    full_data['Matrix Dimensions, # Rows, Matrix Density'] = full_data['nx'].astype(str) + "x" + full_data['ny'].astype(str) + "x" + full_data['nz'].astype(str) + ", "  + full_data['# Rows'].astype(str) +  ', '+ (full_data['Density of A']* 100).round(2).astype(str) + "%" 
     full_data['Matrix Size'] = full_data['nx'].astype(str) + "x" + full_data['ny'].astype(str) + "x" + full_data['nz'].astype(str)
 
     # remove any data, that is not to be plotted
@@ -207,7 +220,7 @@ def preprocess_data(full_data):
     all_versions = full_data['Version'].unique()
     all_methods = full_data['Method'].unique()
     all_ault_nodes = full_data['Ault Node'].unique()
-    all_matrix_dimensions = full_data['Matrix Dimensions, Matrix Density'].unique()
+    all_matrix_dimensions = full_data['Matrix Dimensions, # Rows, Matrix Density'].unique()
 
     all_sparse_ops = [
         "SymGS",
@@ -253,7 +266,7 @@ def preprocess_data(full_data):
         full_data = get_percentage_of_baseline_data(full_data)
 
     # for showing we remove nx,ny,nz, NNZ, Density of A
-    show_data = full_data.drop(columns=['nx', 'ny', 'nz', 'NNZ', 'Density of A', 'Matrix Type', 'Ault Node', 'Matrix Dimensions, Matrix Density'])
+    show_data = full_data.drop(columns=['nx', 'ny', 'nz', 'NNZ', 'Density of A', 'Matrix Type', 'Ault Node', 'Matrix Dimensions, # Rows, Matrix Density'])
 
     # print(show_data.head())
     print(all_matrix_types, flush=True)
@@ -281,7 +294,7 @@ def get_num_columns(hue_order):
     num_hues = len(hue_order)
 
     max_cols = 4 if longest_name <= 10 else 3
-    return max(max_cols, num_hues)
+    return min(max_cols, num_hues)
 
 def get_legend_horizontal_offset(num_cols, hue_order):
     num_hues = len(hue_order)
@@ -298,14 +311,17 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
         return
 
     sns.set(style="whitegrid")
-    plt.figure(figsize=(25, 6))
+    plt.figure(figsize=(24, 6))
 
-    ax = sns.barplot(x=x, order=x_order, y=y, hue=hue, hue_order=hue_order, data=data,  estimator= np.median, ci=98)
+    ax = sns.barplot(x=x, order=x_order, y=y, hue=hue, hue_order=hue_order, data=data, estimator= np.median, ci=98)
     fig = ax.get_figure()
 
-    ax.set_title(title)
-    ax.set_xlabel(x)
-    ax.set_ylabel(y)
+    text_size = 14
+
+    ax.set_title(title, fontsize=text_size+4)
+    ax.set_xlabel(x, fontsize=text_size+2)
+    ax.set_ylabel(y, fontsize=text_size+2)
+    ax.tick_params(axis='both', which='major', labelsize=text_size)
 
     if y_ax_scale == "log":
         ax.set_yscale('log')
@@ -313,9 +329,11 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
         ax.set_yscale('linear')
 
     nc = get_num_columns(hue_order=hue_order)
+    # print(nc, flush=True)
+    # nc = 3
     box_offset = get_legend_horizontal_offset(num_cols=nc, hue_order=hue_order)
 
-    legend = ax.legend(loc = 'lower center', bbox_to_anchor = (0.5, box_offset), ncol = nc)
+    legend = ax.legend(loc = 'lower center', bbox_to_anchor = (0.5, box_offset), ncol = nc, prop={'size': text_size})
     legend.set_title(hue)
 
     fig.savefig(save_path, bbox_inches='tight')
@@ -364,13 +382,13 @@ def plot_x_options(y_axis, y_axis_scale, save_path, full_data):
         current_sparse_methods = [m for m in sparse_ops_to_plot if m in data['Method'].unique()]
         current_dense_methods = [m for m in dense_ops_to_plot if m in data['Method'].unique()]
         current_dense_sizes = [s for s in sizes_to_plot if s in dense_data['Matrix Size'].unique()]
-        current_sparse_sizes = generate_order(sparse_data['Matrix Dimensions, Matrix Density'].unique())
+        current_sparse_sizes = generate_order(sparse_data['Matrix Dimensions, # Rows, Matrix Density'].unique())
         current_title = version
         current_dense_save_path = os.path.join(save_path, version + "_denseOps_grouped_by_sizes.png")
         current_sparse_save_path = os.path.join(save_path, version + "_sparseOps_grouped_by_sizes.png")
 
         if not sparse_data.empty:
-            plot_data(sparse_data, x = 'Matrix Dimensions, Matrix Density', x_order = current_sparse_sizes, y = y_axis, hue = 'Method', hue_order = current_sparse_methods, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
+            plot_data(sparse_data, x = 'Matrix Dimensions, # Rows, Matrix Density', x_order = current_sparse_sizes, y = y_axis, hue = 'Method', hue_order = current_sparse_methods, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
         if not dense_data.empty:
             # print(dense_data.head())
             plot_data(dense_data, x = 'Matrix Size', x_order = current_dense_sizes, y = y_axis, hue = 'Method', hue_order = current_dense_methods, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale)
@@ -379,7 +397,7 @@ def plot_x_options(y_axis, y_axis_scale, save_path, full_data):
         current_sparse_save_path = os.path.join(save_path, version + "_sparseOps_grouped_by_methods.png")
 
         if not sparse_data.empty:
-            plot_data(sparse_data, x = 'Method', x_order = current_sparse_methods, y = y_axis, hue = 'Matrix Dimensions, Matrix Density', hue_order = current_sparse_sizes, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
+            plot_data(sparse_data, x = 'Method', x_order = current_sparse_methods, y = y_axis, hue = 'Matrix Dimensions, # Rows, Matrix Density', hue_order = current_sparse_sizes, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
         if not dense_data.empty:
             plot_data(dense_data, x = 'Method', x_order = current_dense_methods, y = y_axis, hue = 'Matrix Size', hue_order = current_dense_sizes, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale)
 
@@ -391,12 +409,12 @@ def plot_x_options(y_axis, y_axis_scale, save_path, full_data):
         # we might want to sort these in accordance with the sorting instructions!
         current_versions = [v for v in versions_to_plot if v in data['Version'].unique()]
         current_dense_sizes = [s for s in sizes_to_plot if s in data['Matrix Size'].unique()]
-        current_sparse_sizes = generate_order(data['Matrix Dimensions, Matrix Density'].unique())
+        current_sparse_sizes = generate_order(data['Matrix Dimensions, # Rows, Matrix Density'].unique())
         current_title = method
         current_save_path = os.path.join(save_path, method + "_grouped_by_versions.png")
 
         if method in sparse_ops_to_plot and not data.empty:
-            plot_data(data, x = 'Matrix Dimensions, Matrix Density', x_order = current_sparse_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale)
+            plot_data(data, x = 'Matrix Dimensions, # Rows, Matrix Density', x_order = current_sparse_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale)
         if method in dense_ops_to_plot and not data.empty:
             plot_data(data, x = 'Matrix Size', x_order = current_dense_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale)
 
@@ -413,7 +431,7 @@ def plot_x_options(y_axis, y_axis_scale, save_path, full_data):
         dense_data = data[data['Method'].isin(dense_ops_to_plot)]
 
         current_dense_sizes = [s for s in sizes_to_plot if s in dense_data['Matrix Size'].unique()]
-        current_sparse_sizes = generate_order(sparse_data['Matrix Dimensions, Matrix Density'].unique())
+        current_sparse_sizes = generate_order(sparse_data['Matrix Dimensions, # Rows, Matrix Density'].unique())
 
         # we might want to sort these in accordance with the sorting instructions!
         current_versions = [v for v in versions_to_plot if v in data['Version'].unique()]
