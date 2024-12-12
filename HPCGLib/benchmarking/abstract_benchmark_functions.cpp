@@ -48,14 +48,14 @@ void bench_SPMV(
     CHECK_CUDA(cudaMemcpy(y.data(), y_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
 }
 
-// this SPMV supports banded matrixes which requires CSR for metadata and testing
+// this SPMV supports striped matrixes which requires CSR for metadata and testing
 void bench_SPMV(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
-    banded_Matrix<double> & A,
-    double * banded_A_d,
+    striped_Matrix<double> & A,
+    double * striped_A_d,
     int num_rows, int num_cols,
-    int num_bands,
+    int num_stripes,
     int * j_min_i_d,
     double * x_d, double * y_d
     ){
@@ -71,7 +71,7 @@ void bench_SPMV(
     // we always test against cusparse
         cuSparse_Implementation<double> baseline;
         sparse_CSR_Matrix<double> sparse_CSR_A;
-        sparse_CSR_A.sparse_CSR_Matrix_from_banded(A); 
+        sparse_CSR_A.sparse_CSR_Matrix_from_striped(A); 
 
         int num_rows = sparse_CSR_A.get_num_rows();
         int num_cols = sparse_CSR_A.get_num_cols();
@@ -99,9 +99,9 @@ void bench_SPMV(
             A,
             A_row_ptr_d, A_col_idx_d, A_values_d,
             
-            banded_A_d,
+            striped_A_d,
             num_rows, num_cols,
-            num_bands,
+            num_stripes,
             j_min_i_d,
 
             x_d
@@ -122,9 +122,9 @@ void bench_SPMV(
         timer.startTimer();
         implementation.compute_SPMV(
             A,
-            banded_A_d,
+            striped_A_d,
             num_rows, num_cols,
-            num_bands,
+            num_stripes,
             j_min_i_d,
             x_d, y_d
         );
@@ -138,7 +138,7 @@ void bench_SPMV(
 void bench_Dot(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
-    banded_Matrix<double> & A,
+    striped_Matrix<double> & A,
     double * x_d, double * y_d, double * result_d
     ){
     int num_iterations = implementation.getNumberOfIterations();
@@ -214,10 +214,10 @@ void bench_SymGS(
 void bench_SymGS(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
-    banded_Matrix<double> & A,
-    double * banded_A_d,
+    striped_Matrix<double> & A,
+    double * striped_A_d,
     int num_rows, int num_cols,
-    int num_bands,
+    int num_stripes,
     int * j_min_i_d,
     double * x_d, double * y_d
     )
@@ -231,7 +231,7 @@ void bench_SymGS(
 
     if(implementation.test_before_bench){
         sparse_CSR_Matrix<double> A_csr;
-        A_csr.sparse_CSR_Matrix_from_banded(A);
+        A_csr.sparse_CSR_Matrix_from_striped(A);
 
         cuSparse_Implementation<double> baseline;
 
@@ -261,9 +261,9 @@ void bench_SymGS(
             A,
             A_row_ptr_d, A_col_idx_d, A_values_d,
 
-            banded_A_d,
+            striped_A_d,
             num_rows, num_cols,
-            num_bands,
+            num_stripes,
             j_min_i_d,
 
             x_d);
@@ -284,7 +284,7 @@ void bench_SymGS(
         // copy original x into x_d
         CHECK_CUDA(cudaMemcpy(x_d, x.data(), A.get_num_cols() * sizeof(double), cudaMemcpyHostToDevice));
         timer.startTimer();
-        implementation.compute_SymGS( A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);
+        implementation.compute_SymGS( A, striped_A_d, num_rows, num_cols, num_stripes, j_min_i_d, x_d, y_d);
         timer.stopTimer("compute_SymGS");
     }
 
@@ -317,14 +317,14 @@ void bench_Implementation(
     // other functions to be benchmarked
 }
 
-// this version supports banded matrixes
+// this version supports striped matrixes
 void bench_Implementation(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
-    banded_Matrix<double> & A, // we need to pass the CSR matrix for metadata and potential testing
-    double * banded_A_d,
+    striped_Matrix<double> & A, // we need to pass the CSR matrix for metadata and potential testing
+    double * striped_A_d,
     int num_rows, int num_cols,
-    int num_bands,
+    int num_stripes,
     int * j_min_i_d,
     double * a_d, double * b_d, // a & b are random vectors
     double * x_d, double * y_d, // x & y are vectors as used in HPCG
@@ -332,17 +332,17 @@ void bench_Implementation(
     ){
       
     if(implementation.SPMV_implemented){
-        bench_SPMV(implementation, timer, A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, a_d, y_d);
+        bench_SPMV(implementation, timer, A, striped_A_d, num_rows, num_cols, num_stripes, j_min_i_d, a_d, y_d);
     }
     if(implementation.Dot_implemented){
         bench_Dot(implementation, timer, A, a_d, b_d, result_d);
     }
     if(implementation.SymGS_implemented){
-        bench_SymGS(implementation, timer, A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);
+        bench_SymGS(implementation, timer, A, striped_A_d, num_rows, num_cols, num_stripes, j_min_i_d, x_d, y_d);
     }
-    // bench_SPMV(implementation, timer, A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);
+    // bench_SPMV(implementation, timer, A, striped_A_d, num_rows, num_cols, num_stripes, j_min_i_d, x_d, y_d);
     // bench_Dot(implementation, timer, A, x_d, y_d, result_d);
-    // bench_SymGS(implementation, timer, A, banded_A_d, num_rows, num_cols, num_bands, j_min_i_d, x_d, y_d);
+    // bench_SymGS(implementation, timer, A, striped_A_d, num_rows, num_cols, num_stripes, j_min_i_d, x_d, y_d);
     // other functions to be benchmarked
 }
 

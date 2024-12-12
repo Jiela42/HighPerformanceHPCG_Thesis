@@ -1,7 +1,7 @@
 #ifndef SPARSE_CSR_MATRIX_HPP
 #define SPARSE_CSR_MATRIX_HPP
 
-#include "MatrixLib/banded_Matrix.hpp"
+#include "MatrixLib/striped_Matrix.hpp"
 #include "MatrixLib/matrix_basics.hpp"
 #include "UtilLib/utils.hpp"
 
@@ -10,9 +10,9 @@
 #include <cassert>
 
 
-// Forward declaration of banded_Matrix
+// Forward declaration of striped_Matrix
 template <typename T>
-class banded_Matrix;
+class striped_Matrix;
 
 template <typename T>
 class sparse_CSR_Matrix {
@@ -26,7 +26,7 @@ public:
     sparse_CSR_Matrix(std::vector<std::vector<T>> dense_matrix);
 
 
-    void sparse_CSR_Matrix_from_banded(banded_Matrix<T> A);
+    void sparse_CSR_Matrix_from_striped(striped_Matrix<T> A);
 
     void sanity_check_3D27P();
 
@@ -61,7 +61,7 @@ private:
     std::vector<int> col_idx;
     std::vector<T> values;
     MatrixType matrix_type;
-    void sparse_CSR_Matrix_from_banded_transformation(banded_Matrix<T>);
+    void sparse_CSR_Matrix_from_striped_transformation(striped_Matrix<T>);
 };
 
 #endif // SPARSE_CSR_MATRIX_HPP

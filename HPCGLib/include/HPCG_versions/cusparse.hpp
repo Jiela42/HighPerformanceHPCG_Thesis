@@ -2,7 +2,7 @@
 #define CUSPARSE_HPP
 
 #include "HPCGLib.hpp"
-#include "HPCG_versions/banded_warp_reduction.cuh"
+#include "HPCG_versions/striped_warp_reduction.cuh"
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
 #include <vector>
 #include <cuda_runtime.h>
@@ -48,11 +48,11 @@ public:
     }
 
     void compute_SymGS(
-        banded_Matrix<T> & A, // we pass A for the metadata
-        T * banded_A_d, // the data of matrix A is already on the device
+        striped_Matrix<T> & A, // we pass A for the metadata
+        T * striped_A_d, // the data of matrix A is already on the device
         int num_rows, int num_cols,
-        int num_bands, // the number of bands in the banded matrix
-        int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the banded matrix
+        int num_stripes, // the number of stripes in the striped matrix
+        int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the striped matrix
         T * x_d, T * y_d // the vectors x and y are already on the device
     ) override{
         std::cerr << "Error: compute_SymGS needs different parameters for the cuSparse_Implementation." << std::endl;
@@ -70,11 +70,11 @@ public:
     }
 
     void compute_SPMV(
-        banded_Matrix<T>& A, //we only pass A for the metadata
-        T * banded_A_d, // the matrix A is already on the device
-        int num_rows, int num_cols, // these refer to the shape of the banded matrix
-        int num_bands, // the number of bands in the banded matrix
-        int * j_min_i_d, // this is a mapping for calculating the j of some entry i,j in the banded matrix
+        striped_Matrix<T>& A, //we only pass A for the metadata
+        T * striped_A_d, // the matrix A is already on the device
+        int num_rows, int num_cols, // these refer to the shape of the striped matrix
+        int num_stripes, // the number of stripes in the striped matrix
+        int * j_min_i_d, // this is a mapping for calculating the j of some entry i,j in the striped matrix
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) override {
         std::cerr << "Error: compute_SPMV needs different parameters for the cuSparse_Implementation." << std::endl;
@@ -97,7 +97,7 @@ public:
     }
 
     void compute_Dot(
-        banded_Matrix<T>& A, //we only pass A for the metadata
+        striped_Matrix<T>& A, //we only pass A for the metadata
         T * x_d, T * y_d, T * result_d // the vectors x, y and result are already on the device
         ) override {
         warp_Implementation.compute_Dot(
@@ -108,7 +108,7 @@ public:
 
 private:
 
-    banded_warp_reduction_Implementation<T> warp_Implementation;
+    striped_warp_reduction_Implementation<T> warp_Implementation;
 
     // here come the cuSparse functions
     void cusparse_computeSPMV(

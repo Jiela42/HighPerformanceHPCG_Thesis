@@ -34,39 +34,39 @@ versions_to_plot = [
     # "BaseTorch",
     # "MatlabReference",
     # "BaseCuPy",
-    # "NaiveBanded CuPy",
+    # "NaiveStriped CuPy",
     # "cuSparse&cuBLAS", #this is a legacy name, it is now called CSR Implementation
     "CSR-Implementation",
-    "Naive Banded",
-    # "Naive Banded (1 thread per physical core)",
-    # "Naive Banded (4 thread per physical core)",
-    # "Banded explicit Shared Memory",
-    # "Banded explicit Shared Memory (rows_per_SM pow2)",
-    # "Banded explicit Shared Memory (rows_per_SM pow2 1024 threads)",
-    # "Banded explicit Shared Memory (rows_per_SM pow2 1024 threads 2x physical cores)",
-    "Banded Warp Reduction",
-    # "Banded Warp Reduction (pre-compute diag_offset)",
-    # "Banded Warp Reduction (cooperation number = 16)",
-    # "Banded Warp Reduction (loop body in method)",
-    # "Banded Warp Reduction (8 cooperating threads)",
-    # "Banded Warp Reduction - many blocks - 4 threads cooperating",
-    # "Banded Warp Reduction - many blocks - 8 threads cooperating",
-    # "Banded Preprocessed (2 rows while preprocessing)",
-    # "Banded Preprocessed",
-    # "Banded Preprocessed (16 rows while preprocessing)",
+    "Naive Striped",
+    # "Naive Striped (1 thread per physical core)",
+    # "Naive Striped (4 thread per physical core)",
+    # "Striped explicit Shared Memory",
+    # "Striped explicit Shared Memory (rows_per_SM pow2)",
+    # "Striped explicit Shared Memory (rows_per_SM pow2 1024 threads)",
+    # "Striped explicit Shared Memory (rows_per_SM pow2 1024 threads 2x physical cores)",
+    "Striped Warp Reduction",
+    # "Striped Warp Reduction (pre-compute diag_offset)",
+    # "Striped Warp Reduction (cooperation number = 16)",
+    # "Striped Warp Reduction (loop body in method)",
+    # "Striped Warp Reduction (8 cooperating threads)",
+    # "Striped Warp Reduction - many blocks - 4 threads cooperating",
+    # "Striped Warp Reduction - many blocks - 8 threads cooperating",
+    # "Striped Preprocessed (2 rows while preprocessing)",
+    # "Striped Preprocessed",
+    # "Striped Preprocessed (16 rows while preprocessing)",
 
-    # "Banded Warp Reduction (x=0.5)",
-    # "Banded Warp Reduction (x=0)",
-    # "Banded Warp Reduction (x=2)",
-    # "Banded Warp Reduction (x=random)",
+    # "Striped Warp Reduction (x=0.5)",
+    # "Striped Warp Reduction (x=0)",
+    # "Striped Warp Reduction (x=2)",
+    # "Striped Warp Reduction (x=random)",
     # "CSR-Implementation (x=0.5)",
     # "CSR-Implementation (x=0)",
     # "CSR-Implementation (x=2)",
     # "CSR-Implementation (x=random)",
-    # "Banded Preprocessed (x=0.5)",
-    # "Banded Preprocessed (x=0)",
-    # "Banded Preprocessed (x=2)",
-    # "Banded Preprocessed (x=random)",     
+    # "Striped Preprocessed (x=0.5)",
+    # "Striped Preprocessed (x=0)",
+    # "Striped Preprocessed (x=2)",
+    # "Striped Preprocessed (x=random)",     
 ]
 plot_percentage_baseline = True
 
@@ -129,6 +129,7 @@ def read_data():
 
         version_name = str(meta_data[0])
         version_name = "CSR-Implementation" if version_name == "cuSparse&cuBLAS" or version_name == "cuSparse-Implementation" else version_name # we change the name because I am too lazy to re-run the benchmark
+        version_name = version_name.replace("Banded", "Striped")
         ault_node = str(meta_data[1])
         matrix_type = str(meta_data[2])
         nx = int(meta_data[3])
@@ -238,18 +239,18 @@ def preprocess_data(full_data):
         "BaseTorch",
         "MatlabReference",
         "BaseCuPy",
-        "NaiveBanded CuPy"
+        "NaiveStriped CuPy"
     ]
 
     cpp_implementations = [
         "cuSparse&cuBLAS",
-        "Naive Banded",
-        "Naive Banded (1 thread per physical core)",
-        "Naive Banded (4 thread per physical core)",
-        "Banded explicit Shared Memory",
-        "Banded explicit Shared Memory (rows_per_SM pow2)",
-        "Banded explicit Shared Memory (rows_per_SM pow2 1024 threads)",
-        "Banded explicit Shared Memory (rows_per_SM pow2 1024 threads 2x physical cores)",
+        "Naive Striped",
+        "Naive Striped (1 thread per physical core)",
+        "Naive Striped (4 thread per physical core)",
+        "Striped explicit Shared Memory",
+        "Striped explicit Shared Memory (rows_per_SM pow2)",
+        "Striped explicit Shared Memory (rows_per_SM pow2 1024 threads)",
+        "Striped explicit Shared Memory (rows_per_SM pow2 1024 threads 2x physical cores)",
     ]
 
     all_implementation = python_implementations + cpp_implementations

@@ -9,10 +9,10 @@
 
 // these functions run the benchmark for specific Impelmentations and matrix sizes
 void run_cuSparse_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
-void run_naiveBanded_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
-void run_bandedSharedMem_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
-void run_banded_warp_reduction_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
-void run_banded_preprocessed_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
+void run_naiveStriped_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
+void run_stripedSharedMem_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
+void run_striped_warp_reduction_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
+void run_striped_preprocessed_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
 
 void run_cuSparse_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path);
 
@@ -20,7 +20,7 @@ void run_warp_reduction_3d27p_SPMV_benchmark(int nx, int ny, int nz, std::string
 void run_warp_reduction_3d27p_Dot_benchmark(int nx, int ny, int nz, std::string folder_path);
 void run_warp_reduction_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path);
 
-void run_banded_preprocessed_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path);
+void run_striped_preprocessed_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path);
 
 // this function allows us to run the whole abstract benchmark
 // we have method overloading to support different matrix types
@@ -34,12 +34,12 @@ void bench_Implementation(
     double * a_d, double * b_d,
     double * x_d, double * y_d);
 
-// this version supports banded matrixes
+// this version supports striped matrixes
 void bench_Implementation(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
-    banded_Matrix<double> & A, // we need to pass the CSR matrix for potential testing
-    double * banded_A_d,
+    striped_Matrix<double> & A, // we need to pass the CSR matrix for potential testing
+    double * striped_A_d,
     int num_rows, int num_cols,
     int num_bands,
     int * j_min_i_d,
@@ -62,8 +62,8 @@ void bench_SPMV(
 void bench_SPMV(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
-    banded_Matrix<double> & A, // we pass A for the metadata and for testing against cuSparse
-    double * banded_A_d,
+    striped_Matrix<double> & A, // we pass A for the metadata and for testing against cuSparse
+    double * striped_A_d,
     int num_rows, int num_cols,
     int num_bands,
     int * j_min_i_d,
@@ -73,7 +73,7 @@ void bench_SPMV(
 void bench_Dot(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
-    banded_Matrix<double> & A,
+    striped_Matrix<double> & A,
     double * x_d, double * y_d, double * result_d
     );
 
@@ -88,8 +88,8 @@ void bench_SymGS(
 void bench_SymGS(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
-    banded_Matrix<double> & A, // we pass A for the metadata and for testing against cuSparse
-    double * banded_A_d,
+    striped_Matrix<double> & A, // we pass A for the metadata and for testing against cuSparse
+    double * striped_A_d,
     int num_rows, int num_cols,
     int num_bands,
     int * j_min_i_d,

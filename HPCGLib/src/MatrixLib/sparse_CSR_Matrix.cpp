@@ -102,18 +102,18 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(std::vector<std::vector<T>> dense_matrix
 }
 
 template <typename T>
-void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_banded(banded_Matrix<T> A){
+void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped(striped_Matrix<T> A){
 
     if(A.get_matrix_type() == MatrixType::Stencil_3D27P){
-        assert(A.get_num_bands() == 27);
+        assert(A.get_num_stripes() == 27);
         assert(A.get_num_rows() == A.get_num_cols());
         assert(A.get_num_rows() == A.get_nx() * A.get_ny() * A.get_nz());
     }
-    this->sparse_CSR_Matrix_from_banded_transformation(A);
+    this->sparse_CSR_Matrix_from_striped_transformation(A);
 }
 
 template <typename T>
-void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_banded_transformation(banded_Matrix<T> A){
+void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation(striped_Matrix<T> A){
 
     this->matrix_type = A.get_matrix_type();
     this->nx = A.get_nx();
@@ -123,28 +123,28 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_banded_transformation(banded_M
     this->num_rows = A.get_num_rows();
     this->num_cols = A.get_num_cols();
 
-    assert(A.get_num_bands() == A.get_j_min_i().size());
+    assert(A.get_num_stripes() == A.get_j_min_i().size());
 
     this->row_ptr = std::vector<int>(this->num_rows + 1, 0);
     this->col_idx = std::vector<int>(this->nnz, 0);
     this->values = std::vector<T>(this->nnz, 0);
 
-    // for(int i =0; i< A.get_num_bands(); i++){
+    // for(int i =0; i< A.get_num_stripes(); i++){
     //     std::cout << A.get_values()[i] << std::endl;
     // }
 
-    std::vector<T> banded_vals = A.get_values();
+    std::vector<T> striped_vals = A.get_values();
 
-    // for(int i=0; i< A.get_num_bands(); i++){
-    //     std::cout << "banded_vals: " << banded_vals[i] << std::endl;
+    // for(int i=0; i< A.get_num_stripes(); i++){
+    //     std::cout << "striped_vals: " << striped_vals[i] << std::endl;
     // }
     int elem_count = 0;
 
     for(int i = 0; i < this->num_rows; i++){
         int nnz_i = 0;
-        for(int band_j = 0; band_j < A.get_num_bands(); band_j++){
-            int j = A.get_j_min_i()[band_j] + i;
-            double val = banded_vals[i*A.get_num_bands() + band_j];
+        for(int stripe_j = 0; stripe_j < A.get_num_stripes(); stripe_j++){
+            int j = A.get_j_min_i()[stripe_j] + i;
+            double val = striped_vals[i*A.get_num_stripes() + stripe_j];
             // int val = A.get_element(i, j);
             // if(elem_count == 0 && i == 0){
             //     std::cout << "val: " << val << std::endl;

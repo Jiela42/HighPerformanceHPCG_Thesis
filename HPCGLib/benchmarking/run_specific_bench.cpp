@@ -28,7 +28,7 @@ int main() {
 
     // generate a timestamped folder
     std::string base_path = "../../../timing_results/";
-    // base_path = "../../../dummy_timing_results/";
+    base_path = "../../../dummy_timing_results/";
 
 
     std::string folder_path = createTimestampedFolder(base_path);
@@ -36,7 +36,7 @@ int main() {
 
     std::cout << "Starting Benchmark" << std::endl;
 
-    // run_cuSparse_3d27p_SymGS_benchmark(8, 8, 8, folder_path);
+    run_cuSparse_3d27p_SymGS_benchmark(8, 8, 8, folder_path);
     // run_cuSparse_3d27p_SymGS_benchmark(16, 16, 16, folder_path);
     // run_cuSparse_3d27p_SymGS_benchmark(32, 32, 32, folder_path);
     // run_cuSparse_3d27p_SymGS_benchmark(64, 64, 64, folder_path);
@@ -44,11 +44,11 @@ int main() {
     // run_cuSparse_3d27p_SymGS_benchmark(128, 128, 64, folder_path);
     // run_cuSparse_3d27p_SymGS_benchmark(128, 128, 128, folder_path);
     // run_cuSparse_3d27p_SymGS_benchmark(256, 128, 128, folder_path);
-    run_cuSparse_3d27p_SymGS_benchmark(256, 256, 128, folder_path);
+    // run_cuSparse_3d27p_SymGS_benchmark(256, 256, 128, folder_path);
 
 
     // std::cout << "Finished cuSparse Benchmark" << std::endl;
-    // run_warp_reduction_3d27p_Dot_benchmark(8, 8, 8, folder_path);
+    run_warp_reduction_3d27p_Dot_benchmark(8, 8, 8, folder_path);
     // run_warp_reduction_3d27p_Dot_benchmark(16, 16, 16, folder_path);
     // run_warp_reduction_3d27p_Dot_benchmark(24, 24, 24, folder_path);
     // run_warp_reduction_3d27p_Dot_benchmark(32, 32, 32, folder_path);
@@ -58,7 +58,7 @@ int main() {
     // run_warp_reduction_3d27p_Dot_benchmark(128, 128, 128, folder_path);
     // run_warp_reduction_3d27p_Dot_benchmark(256, 128, 128, folder_path);
     // run_warp_reduction_3d27p_Dot_benchmark(256, 256, 128, folder_path);
-    // run_warp_reduction_3d27p_SPMV_benchmark(8, 8, 8, folder_path);
+    run_warp_reduction_3d27p_SPMV_benchmark(8, 8, 8, folder_path);
     // run_warp_reduction_3d27p_SPMV_benchmark(16, 16, 16, folder_path);
     // run_warp_reduction_3d27p_SPMV_benchmark(24, 24, 24, folder_path);
     // run_warp_reduction_3d27p_SPMV_benchmark(32, 32, 32, folder_path);
@@ -69,7 +69,7 @@ int main() {
     // run_warp_reduction_3d27p_SPMV_benchmark(256, 128, 128, folder_path);
     // run_warp_reduction_3d27p_SPMV_benchmark(256, 256, 128, folder_path);
 
-    // run_warp_reduction_3d27p_SymGS_benchmark(8, 8, 8, folder_path);
+    run_warp_reduction_3d27p_SymGS_benchmark(8, 8, 8, folder_path);
     // run_warp_reduction_3d27p_SymGS_benchmark(16, 16, 16, folder_path);
     // run_warp_reduction_3d27p_SymGS_benchmark(32, 32, 32, folder_path);
     // run_warp_reduction_3d27p_SymGS_benchmark(64, 64, 64, folder_path);
@@ -77,17 +77,17 @@ int main() {
     // run_warp_reduction_3d27p_SymGS_benchmark(128, 128, 64, folder_path);
     // run_warp_reduction_3d27p_SymGS_benchmark(128, 128, 128, folder_path);
     // run_warp_reduction_3d27p_SymGS_benchmark(256, 128, 128, folder_path);
-    run_warp_reduction_3d27p_SymGS_benchmark(256, 256, 128, folder_path);
+    // run_warp_reduction_3d27p_SymGS_benchmark(256, 256, 128, folder_path);
 
-    // run_banded_preprocessed_3d27p_SymGS_benchmark(8, 8, 8, folder_path);
-    // run_banded_preprocessed_3d27p_SymGS_benchmark(16, 16, 16, folder_path);
-    // run_banded_preprocessed_3d27p_SymGS_benchmark(32, 32, 32, folder_path);
-    // run_banded_preprocessed_3d27p_SymGS_benchmark(64, 64, 64, folder_path);
-    // run_banded_preprocessed_3d27p_SymGS_benchmark(128, 64, 64, folder_path);
-    // run_banded_preprocessed_3d27p_SymGS_benchmark(128, 128, 64, folder_path);
-    // run_banded_preprocessed_3d27p_SymGS_benchmark(128, 128, 128, folder_path);
-    // run_banded_preprocessed_3d27p_SymGS_benchmark(256, 128, 128, folder_path);
-    // run_banded_preprocessed_3d27p_SymGS_benchmark(256, 256, 128, folder_path);
+    run_striped_preprocessed_3d27p_SymGS_benchmark(8, 8, 8, folder_path);
+    // run_striped_preprocessed_3d27p_SymGS_benchmark(16, 16, 16, folder_path);
+    // run_striped_preprocessed_3d27p_SymGS_benchmark(32, 32, 32, folder_path);
+    // run_striped_preprocessed_3d27p_SymGS_benchmark(64, 64, 64, folder_path);
+    // run_striped_preprocessed_3d27p_SymGS_benchmark(128, 64, 64, folder_path);
+    // run_striped_preprocessed_3d27p_SymGS_benchmark(128, 128, 64, folder_path);
+    // run_striped_preprocessed_3d27p_SymGS_benchmark(128, 128, 128, folder_path);
+    // run_striped_preprocessed_3d27p_SymGS_benchmark(256, 128, 128, folder_path);
+    // run_striped_preprocessed_3d27p_SymGS_benchmark(256, 256, 128, folder_path);
 
     
 

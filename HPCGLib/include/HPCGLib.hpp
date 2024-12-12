@@ -9,7 +9,7 @@
 #define num_bench_iter 10
 
 enum class Implementation_Type {
-    BANDED,
+    STRIPED,
     CSR,
     UNKNOWN
 };
@@ -48,11 +48,11 @@ class HPCG_functions {
             ) = 0;
 
         virtual void compute_SymGS(
-            banded_Matrix<T> & A, // we pass A for the metadata
-            T * banded_A_d, // the data of matrix A is already on the device
+            striped_Matrix<T> & A, // we pass A for the metadata
+            T * striped_A_d, // the data of matrix A is already on the device
             int num_rows, int num_cols,
-            int num_bands, // the number of bands in the banded matrix
-            int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the banded matrix
+            int num_stripes, // the number of stripes in the striped matrix
+            int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the striped matrix
             T * x_d, T * y_d // the vectors x and y are already on the device
             ) = 0;
 
@@ -63,13 +63,13 @@ class HPCG_functions {
             T * x_d, T * y_d // the vectors x and y are already on the device
             ) = 0;
         
-        // this version is for the banded matrix
+        // this version is for the striped matrix
         virtual void compute_SPMV(
-            banded_Matrix<T>& A, //we only pass A for the metadata
-            T * banded_A_d, // the matrix A is already on the device
-            int num_rows, int num_cols, // these refer to the shape of the banded matrix
-            int num_bands, // the number of bands in the banded matrix
-            int * j_min_i_d, // this is a mapping for calculating the j of some entry i,j in the banded matrix
+            striped_Matrix<T>& A, //we only pass A for the metadata
+            T * striped_A_d, // the matrix A is already on the device
+            int num_rows, int num_cols, // these refer to the shape of the striped matrix
+            int num_stripes, // the number of stripes in the striped matrix
+            int * j_min_i_d, // this is a mapping for calculating the j of some entry i,j in the striped matrix
             T * x_d, T * y_d // the vectors x and y are already on the device
             ) = 0;
 
@@ -84,7 +84,7 @@ class HPCG_functions {
         ) = 0;
 
         virtual void compute_Dot(
-            banded_Matrix<T> & A, // we pass A for the metadata
+            striped_Matrix<T> & A, // we pass A for the metadata
             T * x_d, T * y_d, T * result_d // again: the vectors x, y and result are already on the device
         ) = 0;
 

@@ -14,20 +14,20 @@ add_executable(run_full_bench
     run_full_bench.cpp
     abstract_benchmark_functions.cpp
     benchmark_cuSparse.cpp
-    benchmark_naiveBanded.cpp
-    benchmark_bandedSharedMem.cpp
-    benchmark_bandedWarpReduction.cpp
-    benchmark_bandedPreprocessed.cpp
+    benchmark_naiveStriped.cpp
+    benchmark_stripedSharedMem.cpp
+    benchmark_stripedWarpReduction.cpp
+    benchmark_stripedPreprocessed.cpp
 )
 
 add_executable(run_specific_bench
     run_specific_bench.cpp
     abstract_benchmark_functions.cpp
     benchmark_cuSparse.cpp
-    benchmark_naiveBanded.cpp
-    benchmark_bandedSharedMem.cpp
-    benchmark_bandedWarpReduction.cpp
-    benchmark_bandedPreprocessed.cpp
+    benchmark_naiveStriped.cpp
+    benchmark_stripedSharedMem.cpp
+    benchmark_stripedWarpReduction.cpp
+    benchmark_stripedPreprocessed.cpp
 )
 
 

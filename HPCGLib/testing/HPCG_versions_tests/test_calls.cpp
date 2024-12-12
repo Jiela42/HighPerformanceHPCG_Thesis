@@ -2,7 +2,7 @@
 
 #include "HPCGLib.hpp"
 #include "HPCG_versions/cusparse.hpp"
-#include "HPCG_versions/naiveBanded.cuh"
+#include "HPCG_versions/naiveStriped.cuh"
 
 #include "UtilLib/cuda_utils.hpp"
 #include "UtilLib/utils.hpp"
@@ -51,23 +51,23 @@ bool test_SPMV(
     return test_pass;
 }
 
-// in this case the baseline requires CSR and the UUT requires both CSR and banded
+// in this case the baseline requires CSR and the UUT requires both CSR and striped
 bool test_SPMV(
     HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
-    banded_Matrix<double> & banded_A, // we pass A for the metadata
+    striped_Matrix<double> & striped_A, // we pass A for the metadata
     int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d, // the matrix A is already on the device
     
-    double * banded_A_d, // the matrix A is already on the device
-    int num_rows, int num_cols, // these refer to the shape of the banded matrix
-    int num_bands, // the number of bands in the banded matrix
-    int * j_min_i_d, // this is a mapping for calculating the j of some entry i,j in the banded matrix
+    double * striped_A_d, // the matrix A is already on the device
+    int num_rows, int num_cols, // these refer to the shape of the striped matrix
+    int num_stripes, // the number of stripes in the striped matrix
+    int * j_min_i_d, // this is a mapping for calculating the j of some entry i,j in the striped matrix
         
     double * x_d // the vectors x is already on the device
         
 ){
     
     sparse_CSR_Matrix<double> A;
-    A.sparse_CSR_Matrix_from_banded(banded_A);
+    A.sparse_CSR_Matrix_from_striped(striped_A);
 
     int num_rows_baseline = A.get_num_rows();
     std::vector<double> y_baseline(num_rows, 0.0);
@@ -83,10 +83,10 @@ bool test_SPMV(
                           A_row_ptr_d, A_col_idx_d, A_values_d,
                           x_d, y_baseline_d);
 
-    uut.compute_SPMV(banded_A,
-                    banded_A_d,
+    uut.compute_SPMV(striped_A,
+                    striped_A_d,
                     num_rows, num_cols,
-                    num_bands,
+                    num_stripes,
                     j_min_i_d,
                     x_d, y_uut_d);
     
@@ -105,12 +105,12 @@ bool test_SPMV(
 
 bool test_Dot(
     HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
-    banded_Matrix<double> & A, // we pass A for the metadata
+    striped_Matrix<double> & A, // we pass A for the metadata
     double * x_d, double * y_d // the vectors x, y and result are already on the device
     ){
 
     // sparse_CSR_Matrix<double> A_CSR;
-    // A_CSR.sparse_CSR_Matrix_from_banded(A);
+    // A_CSR.sparse_CSR_Matrix_from_striped(A);
 
     double result_baseline = 0.0;
     double result_uut = 0.0;
@@ -142,15 +142,15 @@ bool test_Dot(
     return test_pass;
 }
 
-// this is a minitest, it can be called to do some rudimentary testing (currently only for banded Matrices)
+// this is a minitest, it can be called to do some rudimentary testing (currently only for striped Matrices)
 bool test_Dot(
     HPCG_functions<double>& uut,
     int nx, int ny, int nz
 ){
 
     // make a matrix (for some reason we need it) (num_rows is the only thing we need to get from the matrix)
-    banded_Matrix<double> A_banded;
-    A_banded.set_num_rows(nx * ny * nz);
+    striped_Matrix<double> A_striped;
+    A_striped.set_num_rows(nx * ny * nz);
     
 
     // create two vectors
@@ -182,7 +182,7 @@ bool test_Dot(
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), nx * ny * nz * sizeof(double), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), nx * ny * nz * sizeof(double), cudaMemcpyHostToDevice));
 
-    uut.compute_Dot(A_banded, x_d, y_d, result_d);
+    uut.compute_Dot(A_striped, x_d, y_d, result_d);
 
     // get result back
     double result_uut = 42;
@@ -317,20 +317,20 @@ bool test_SymGS(
 
 bool test_SymGS(
     HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
-    banded_Matrix<double> & banded_A, // we pass A for the metadata
+    striped_Matrix<double> & striped_A, // we pass A for the metadata
     int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d, // the CSR matrix A is already on the device
     
-    double * banded_A_d, // the banded matrix A is already on the device
-    int num_rows, int num_cols, // these refer to the shape of the banded matrix
-    int num_bands, // the number of bands in the banded matrix
-    int * j_min_i_d, // this is a mapping for calculating the j of some entry i,j in the banded matrix
+    double * striped_A_d, // the striped matrix A is already on the device
+    int num_rows, int num_cols, // these refer to the shape of the striped matrix
+    int num_stripes, // the number of stripes in the striped matrix
+    int * j_min_i_d, // this is a mapping for calculating the j of some entry i,j in the striped matrix
         
     double * y_d // the vectors x is already on the device
         
 ){
     
     sparse_CSR_Matrix<double> A;
-    A.sparse_CSR_Matrix_from_banded(banded_A);
+    A.sparse_CSR_Matrix_from_striped(striped_A);
 
     int num_rows_baseline = A.get_num_rows();
     std::vector<double> x_baseline(num_rows, 0.0);
@@ -350,10 +350,10 @@ bool test_SymGS(
                           A_row_ptr_d, A_col_idx_d, A_values_d,
                           x_baseline_d, y_d);
 
-    uut.compute_SymGS(banded_A,
-                    banded_A_d,
+    uut.compute_SymGS(striped_A,
+                    striped_A_d,
                     num_rows, num_cols,
-                    num_bands,
+                    num_stripes,
                     j_min_i_d,
                     x_uut_d, y_d);
     

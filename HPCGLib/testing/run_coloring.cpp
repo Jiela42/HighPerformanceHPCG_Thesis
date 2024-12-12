@@ -3,7 +3,7 @@
 #include <fstream>
 #include <string>
 #include <MatrixLib/sparse_CSR_Matrix.hpp>
-#include "MatrixLib/banded_Matrix.hpp"
+#include "MatrixLib/striped_Matrix.hpp"
 #include <MatrixLib/coloring.cuh>
 #include "MatrixLib/generations.hpp"
 
@@ -32,11 +32,11 @@ void print_coloring(int nx, int ny, int nz){
     std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
     sparse_CSR_Matrix<double> A_csr = problem.first;
     
-    banded_Matrix<double> A_banded;
-    A_banded.banded_Matrix_from_sparse_CSR(A_csr);   
+    striped_Matrix<double> A_striped;
+    A_striped.striped_Matrix_from_sparse_CSR(A_csr);   
 
     // pass matrix to coloring
-    std::vector<int> colors = color_for_forward_pass(A_banded);
+    std::vector<int> colors = color_for_forward_pass(A_striped);
 
 
     // print colors
@@ -51,22 +51,60 @@ void print_coloring(int nx, int ny, int nz){
     write_coloring_to_file(colors, new_csv_file);
 }
 
+void compare_backward_forward_coloring(int nx, int ny, int nz){
+    
+    // make a matrix
+    std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
+    sparse_CSR_Matrix<double> A_csr = problem.first;
+    
+    striped_Matrix<double> A_striped;
+    A_striped.striped_Matrix_from_sparse_CSR(A_csr);   
+
+    // pass matrix to coloring
+    std::vector<int> forward_colors = color_for_forward_pass(A_striped);
+    std::vector<int> backward_colors = color_for_backward_pass(A_striped);
+
+    for(int i = 0; i < forward_colors.size(); i++){
+        int forward_color = forward_colors[i];
+        int backward_color = backward_colors[i];
+
+        int backward_color_based_on_forward = forward_colors[forward_colors.size()-1-i]; 
+        if (backward_color != backward_color_based_on_forward){
+            std::cout << "For nx = " << nx << " ny = " << ny << " nz = " << nz << " Row " << i << " has forward color " << forward_color << " and backward color " << backward_color << std::endl;
+        }
+    }
+
+    std::cout << "For nx = " << nx << " ny = " << ny << " nz = " << nz << " Backward Coloring can be computed off of forwar coloring" << std::endl;
+}
 
 int main() {
     // print_coloring(4, 4, 4);
     // print_coloring(3, 4, 5);
-    print_coloring(4, 3, 5);
-    print_coloring(5, 4, 3);
+    // print_coloring(4, 3, 5);
+    // print_coloring(5, 4, 3);
 
-    print_coloring(3,5,6);
-    print_coloring(5,3,6);
-    print_coloring(6,5,3);
+    // print_coloring(3,5,6);
+    // print_coloring(5,3,6);
+    // print_coloring(6,5,3);
     
     // print_coloring(8, 8, 8);
     // print_coloring(16, 16, 16);
     // print_coloring(24, 24, 24);
     // print_coloring(32, 32, 32);
     // print_coloring(64, 64, 64);
+
+    compare_backward_forward_coloring(4, 4, 4);
+    compare_backward_forward_coloring(3, 4, 5);
+    compare_backward_forward_coloring(4, 3, 5);
+    compare_backward_forward_coloring(5, 4, 3);
+    compare_backward_forward_coloring(3,5,6);
+    compare_backward_forward_coloring(5,3,6);
+    compare_backward_forward_coloring(6,5,3);
+    compare_backward_forward_coloring(8, 8, 8);
+    compare_backward_forward_coloring(16, 16, 16);
+    compare_backward_forward_coloring(24, 24, 24);
+    compare_backward_forward_coloring(32, 32, 32);
+    compare_backward_forward_coloring(64, 64, 64);
 
     return 0;
 }

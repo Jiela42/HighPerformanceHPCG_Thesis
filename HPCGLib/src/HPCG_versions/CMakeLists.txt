@@ -37,17 +37,17 @@ target_sources(HPCGLib PRIVATE
     cusparse/cusparse_computeDot.cpp
     cusparse/cusparse_computeSymGS.cu
 
-    naiveBanded/naiveBanded_computeSPMV.cu
+    naiveStriped/naiveStriped_computeSPMV.cu
 
-    banded_shared_mem/banded_shared_mem_computeSPMV.cu
+    striped_shared_mem/striped_shared_mem_computeSPMV.cu
 
-    banded_warp_reduction/banded_warp_reduction_computeSPMV.cu
-    banded_warp_reduction/banded_warp_reduction_computeDot.cu
-    banded_warp_reduction/banded_warp_reduction_computeSymGS.cu
+    striped_warp_reduction/striped_warp_reduction_computeSPMV.cu
+    striped_warp_reduction/striped_warp_reduction_computeDot.cu
+    striped_warp_reduction/striped_warp_reduction_computeSymGS.cu
 
-    banded_preprocessed/banded_preprocessed_computeSymGS.cu
+    striped_preprocessed/striped_preprocessed_computeSymGS.cu
 
-    banded_coloring/banded_coloring_computeSymGS.cu
+    striped_coloring/striped_coloring_computeSymGS.cu
 
 )
 
