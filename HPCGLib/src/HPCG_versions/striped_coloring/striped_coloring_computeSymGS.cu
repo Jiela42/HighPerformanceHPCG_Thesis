@@ -5,7 +5,7 @@
 // #include <iostream>
 // #include <cuda_runtime.h>
 
-__global__ void striped_coloring_SymGS_forward_kernel(
+__global__ void striped_coloring_half_SymGS_kernel(
     int color, int * colors,
     int num_rows, int num_cols,
     int num_stripes, int diag_offset,
@@ -47,7 +47,7 @@ __global__ void striped_coloring_SymGS_forward_kernel(
 
 
 __global__ void striped_coloring_SymGS_backward_kernel(
-    // int color, int * colors,
+    int color, int * colors,
     int num_rows, int num_cols,
     int num_stripes, int diag_offset,
     int * j_min_i,
@@ -55,35 +55,35 @@ __global__ void striped_coloring_SymGS_backward_kernel(
     double * x, double * y
 ){
 
-    int lane = threadIdx.x % WARP_SIZE;
-    __shared__ double shared_diag[1];
+     int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    int warp_id = tid / WARP_SIZE;
+    int lane_id = tid % WARP_SIZE;
+    int num_warps = blockDim.x * gridDim.x / WARP_SIZE;
 
-    for (int i = num_rows-1; i >= 0; i--){
-        
-        double my_sum = 0.0;
-        for (int stripe = lane; stripe < num_stripes; stripe += WARP_SIZE){
-            int col = j_min_i[stripe] + i;
-            double val = striped_A[i * num_stripes + stripe];
-            if (col < num_cols && col >= 0){
-                my_sum -= val * x[col];
+    for(int i = num_rows-1-warp_id; i >= 0; i += num_warps){
+        if(colors[i] == color){
+            double my_sum = 0.0;
+            for(int stripe = lane_id; stripe < num_stripes; stripe += WARP_SIZE){
+                int col = j_min_i[stripe] + i;
+                double val = striped_A[i * num_stripes + stripe];
+                if(col < num_cols && col >= 0){
+                    my_sum -= val * x[col];
+                }
             }
-            if(i == col){
-                shared_diag[0] = val;
+
+            // reduce the my_sum using warp reduction
+            for (int offset = WARP_SIZE/2; offset > 0; offset /= 2){
+                my_sum += __shfl_down_sync(0xFFFFFFFF, my_sum, offset);
             }
-        }
 
-        // reduce the my_sum using warp reduction
-        for (int offset = WARP_SIZE/2; offset > 0; offset /= 2){
-            my_sum += __shfl_down_sync(0xFFFFFFFF, my_sum, offset);
+            __syncthreads();
+            if (lane_id == 0){
+                double diag = striped_A[i * num_stripes + diag_offset];
+                double sum = diag * x[i] + y[i] + my_sum;
+                x[i] = sum / diag;           
+            }
+            __syncthreads();
         }
-
-        __syncthreads();
-        if (lane == 0){
-            double diag = shared_diag[0];
-            double sum = diag * x[i] + y[i] + my_sum;
-            x[i] = sum / diag;           
-        }
-        __syncthreads();
     }
 }
 
@@ -99,7 +99,6 @@ __global__ void compute_num_colors_per_row(int num_rows, int max_num_colors, int
         }
         num_colors_per_row[i] = num_rows_per_i;
     }
-
 }
 
 template <typename T>
@@ -144,10 +143,12 @@ void striped_coloring_Implementation<T>::striped_coloring_computeSymGS(
     // CHECK_CUDA(cudaDeviceSynchronize());
     // CHECK_CUDA(cudaMemcpy(num_colors_per_row.data(), num_colors_per_row_d, max_color * sizeof(int), cudaMemcpyDeviceToHost));
 
-    for(int color = 0; color < max_color; color++){
+    // printf("max_color uhum: %d\n", max_color);
+
+    int num_blocks = std::min(ceiling_division(num_rows, 1024/WARP_SIZE), MAX_NUM_BLOCKS);
+    for(int color = 0; color <= max_color; color++){
         // we need to do a forward pass
-        int num_blocks = std::min(ceiling_division(num_rows, 1024/WARP_SIZE), MAX_NUM_BLOCKS);
-        striped_coloring_SymGS_forward_kernel<<<num_blocks, 1024>>>(
+        striped_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
         color, colors_d,
         num_rows, num_cols,
         num_stripes, diag_offset,
@@ -158,19 +159,22 @@ void striped_coloring_Implementation<T>::striped_coloring_computeSymGS(
         CHECK_CUDA(cudaDeviceSynchronize());
     }
 
-    // we need to do a backward pass
-    int num_blocks = 1;
-    int num_threads = WARP_SIZE;
-    striped_coloring_SymGS_backward_kernel<<<num_blocks, num_threads>>>(
+    // we need to do a backward pass,
+    // the colors for this are the same just in reverse order
+    
+    for(int color = max_color; color  >= 0; color--){
+
+        striped_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
+        color, colors_d,
         num_rows, num_cols,
         num_stripes, diag_offset,
         j_min_i,
         striped_A_d,
         x_d, y_d
-    );
-
-    CHECK_CUDA(cudaDeviceSynchronize());
-
+        );
+        CHECK_CUDA(cudaDeviceSynchronize());
+    }
+    
 }
 
 // explicit template instantiation

@@ -361,6 +361,9 @@ bool test_SymGS(
     CHECK_CUDA(cudaMemcpy(x_baseline.data(), x_baseline_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
     CHECK_CUDA(cudaMemcpy(x_uut.data(), x_uut_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
 
+    // std::cout << "Baseline: " << x_baseline[0] << std::endl;
+    // std::cout << "UUT: " << x_uut[0] << std::endl;
+
     CHECK_CUDA(cudaFree(x_baseline_d));
     CHECK_CUDA(cudaFree(x_uut_d));
 

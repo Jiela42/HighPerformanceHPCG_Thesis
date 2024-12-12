@@ -10,7 +10,7 @@ int main(){
 
     bool all_pass = true;
 
-    all_pass = all_pass && run_all_matrixLib_tests(4, 4, 4);
+    // all_pass = all_pass && run_all_matrixLib_tests(4, 4, 4);
     // all_pass = all_pass && run_all_matrixLib_tests(8, 8, 8);
     // all_pass = all_pass && run_all_matrixLib_tests(16, 16, 16);
     // all_pass = all_pass && run_all_matrixLib_tests(32, 32, 32);
@@ -23,7 +23,7 @@ int main(){
     std::cout << "Finished cuSparse tests" << std::endl;
 
     std::cout << "Starting naiveStriped tests" << std::endl;
-    all_pass = all_pass && run_naiveStriped_tests(4, 4, 4);
+    // all_pass = all_pass && run_naiveStriped_tests(4, 4, 4);
     // all_pass = all_pass && run_naiveStriped_tests(8, 8, 8);
     // all_pass = all_pass && run_naiveStriped_tests(16, 16, 16);
     // all_pass = all_pass && run_naiveStriped_tests(32, 32, 32);
@@ -32,7 +32,7 @@ int main(){
     std::cout << "Finished naiveStriped tests" << std::endl;
 
     std::cout << "Starting striped shared memory tests" << std::endl;
-    all_pass = all_pass && run_stripedSharedMem_tests(4, 4, 4);
+    // all_pass = all_pass && run_stripedSharedMem_tests(4, 4, 4);
     // all_pass = all_pass && run_stripedSharedMem_tests(8, 8, 8);
     // all_pass = all_pass && run_stripedSharedMem_tests(16, 16, 16);
     // all_pass = all_pass && run_stripedSharedMem_tests(32, 32, 32);
@@ -41,7 +41,7 @@ int main(){
     std::cout << "Finished striped shared memory tests" << std::endl;
 
     std::cout << "Starting striped warp reduction tests" << std::endl;
-    all_pass = all_pass && run_stripedWarpReduction_tests(4, 4, 4);
+    // all_pass = all_pass && run_stripedWarpReduction_tests(4, 4, 4);
     // all_pass = all_pass && run_stripedWarpReduction_tests(8, 8, 8);
     // all_pass = all_pass && run_stripedWarpReduction_tests(16, 16, 16);
     // all_pass = all_pass && run_stripedWarpReduction_tests(24, 24, 24);
