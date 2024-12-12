@@ -47,6 +47,8 @@ target_sources(HPCGLib PRIVATE
 
     banded_preprocessed/banded_preprocessed_computeSymGS.cu
 
+    banded_coloring/banded_coloring_computeSymGS.cu
+
 )
 
 target_link_libraries(

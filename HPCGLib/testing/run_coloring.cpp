@@ -55,11 +55,18 @@ void print_coloring(int nx, int ny, int nz){
 int main() {
     // print_coloring(4, 4, 4);
     // print_coloring(3, 4, 5);
+    print_coloring(4, 3, 5);
+    print_coloring(5, 4, 3);
+
+    print_coloring(3,5,6);
+    print_coloring(5,3,6);
+    print_coloring(6,5,3);
+    
     // print_coloring(8, 8, 8);
     // print_coloring(16, 16, 16);
-    print_coloring(24, 24, 24);
-    print_coloring(32, 32, 32);
-    print_coloring(64, 64, 64);
+    // print_coloring(24, 24, 24);
+    // print_coloring(32, 32, 32);
+    // print_coloring(64, 64, 64);
 
     return 0;
 }
