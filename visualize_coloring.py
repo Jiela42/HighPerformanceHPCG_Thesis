@@ -320,12 +320,14 @@ def get_color_stats(file):
         num_rows_per_color[color] += 1
 
     max_num_rows_per_color = max(num_rows_per_color)
+    last_row_color = colors[-1]
 
     print("**************************************************************************************************************************")
     print("File: ", file)
     print("Max color: ", max_color)
     print("Number of rows: ", num_rows)
     print("Max number of rows per color: ", max_num_rows_per_color)
+    print("Last row color: ", last_row_color)
     print(f"Estimated Time Consumpution of colored compared to sequential:  {max_color/num_rows}")
     print("**************************************************************************************************************************")
 
@@ -337,7 +339,11 @@ files = os.listdir(base_path)
 
 # toy_example()
 files_to_ignore = [
-    # "coloring_32x32x32.csv",
+    "coloring_4x4x4.csv",
+    "coloring_8x8x8.csv",
+    "coloring_16x16x16.csv",
+    "coloring_24x24x24.csv",
+    "coloring_32x32x32.csv",
     "coloring_64x64x64.csv"
 ]
 
@@ -351,7 +357,7 @@ for file in files_to_color:
 
 
 for file in files:
-    if file not in files_to_ignore:
-        visualize_coloring(file)
+    # if file not in files_to_ignore:
+    #     visualize_coloring(file)
     get_color_stats(file)
 
