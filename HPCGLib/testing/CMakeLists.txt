@@ -11,6 +11,7 @@ add_library(TestHPCGLib
     HPCG_versions_tests/bandedSharedMem_tests.cpp
     HPCG_versions_tests/bandedWarpReduction_tests.cpp
     HPCG_versions_tests/bandedPreprocessed_tests.cpp
+    HPCG_versions_tests/bandedColored_tests.cpp
         
     MatrixLib_tests.cpp
     HPCG_versions_tests/test_calls.cpp

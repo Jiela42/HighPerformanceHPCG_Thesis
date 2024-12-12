@@ -55,6 +55,7 @@ target_link_libraries(
     HPCGLib
     TimingLib
     UtilLib
+    MatrixLib
     CUDA::cusparse
     CUDA::cublas
     CUDA::cudart

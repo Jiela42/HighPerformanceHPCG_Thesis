@@ -321,12 +321,18 @@ def get_color_stats(file):
 
     max_num_rows_per_color = max(num_rows_per_color)
     last_row_color = colors[-1]
+    min_num_rows_per_color = min(num_rows_per_color)
+    num_colors_with_min_rows = num_rows_per_color.count(min_num_rows_per_color)
+    num_colors_with_max_rows = num_rows_per_color.count(max_num_rows_per_color)
 
     print("**************************************************************************************************************************")
     print("File: ", file)
     print("Max color: ", max_color)
     print("Number of rows: ", num_rows)
     print("Max number of rows per color: ", max_num_rows_per_color)
+    print("Number of colors with max rows: ", num_colors_with_max_rows)
+    print("Min number of rows per color: ", min_num_rows_per_color)
+    print("Number of colors with min rows: ", num_colors_with_min_rows)
     print("Last row color: ", last_row_color)
     print(f"Estimated Time Consumpution of colored compared to sequential:  {max_color/num_rows}")
     print("**************************************************************************************************************************")

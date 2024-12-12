@@ -11,6 +11,7 @@
 #include "HPCG_versions/banded_shared_mem.cuh"
 #include "HPCG_versions/banded_warp_reduction.cuh"
 #include "HPCG_versions/banded_preprocessed.cuh"
+#include "HPCG_versions/banded_coloring.cuh"
 
 
 #include "UtilLib/cuda_utils.hpp"
@@ -90,5 +91,6 @@ bool run_naiveBanded_tests(int nx, int ny, int nz);
 bool run_bandedSharedMem_tests(int nx, int ny, int nz);
 bool run_bandedWarpReduction_tests(int nx, int ny, int nz);
 bool run_bandedPreprocessed_tests(int nx, int ny, int nz);
+bool run_bandedColored_tests(int nx, int ny, int nz);
 
 #endif // TESTING_HPP

@@ -146,9 +146,9 @@ void banded_coloring_Implementation<T>::banded_coloring_computeSymGS(
 
     for(int color = 0; color < max_color; color++){
         // we need to do a forward pass
-        int num_blocks = std::min(ceiling_division(num_rows, 1024/WARP_SIZE));
+        int num_blocks = std::min(ceiling_division(num_rows, 1024/WARP_SIZE), MAX_NUM_BLOCKS);
         banded_coloring_SymGS_forward_kernel<<<num_blocks, 1024>>>(
-        color, colors,
+        color, colors_d,
         num_rows, num_cols,
         num_bands, diag_offset,
         j_min_i,
@@ -159,8 +159,8 @@ void banded_coloring_Implementation<T>::banded_coloring_computeSymGS(
     }
 
     // we need to do a backward pass
-    int num_blocks = 1
-    int num_threads = WARP_SIZE
+    int num_blocks = 1;
+    int num_threads = WARP_SIZE;
     banded_coloring_SymGS_backward_kernel<<<num_blocks, num_threads>>>(
         num_rows, num_cols,
         num_bands, diag_offset,
