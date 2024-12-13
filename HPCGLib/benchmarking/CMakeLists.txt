@@ -18,6 +18,9 @@ add_executable(run_full_bench
     benchmark_stripedSharedMem.cpp
     benchmark_stripedWarpReduction.cpp
     benchmark_stripedPreprocessed.cpp
+    benchmark_stripedColoring.cpp
+    benchmark_noStoreStripedColoring.cpp
+
 )
 
 add_executable(run_specific_bench
@@ -28,6 +31,8 @@ add_executable(run_specific_bench
     benchmark_stripedSharedMem.cpp
     benchmark_stripedWarpReduction.cpp
     benchmark_stripedPreprocessed.cpp
+    benchmark_stripedColoring.cpp
+    benchmark_noStoreStripedColoring.cpp
 )
 
 

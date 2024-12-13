@@ -12,6 +12,7 @@
 #include "HPCG_versions/striped_warp_reduction.cuh"
 #include "HPCG_versions/striped_preprocessed.cuh"
 #include "HPCG_versions/striped_coloring.cuh"
+#include "HPCG_versions/no_store_striped_coloring.cuh"
 
 
 #include "UtilLib/cuda_utils.hpp"

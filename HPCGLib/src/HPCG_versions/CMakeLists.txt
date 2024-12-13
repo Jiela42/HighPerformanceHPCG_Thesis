@@ -49,6 +49,8 @@ target_sources(HPCGLib PRIVATE
 
     striped_coloring/striped_coloring_computeSymGS.cu
 
+    no_store_striped_coloring/no_store_striped_coloring_computeSymGS.cu
+
 )
 
 target_link_libraries(

@@ -89,7 +89,9 @@ int main() {
     // run_striped_preprocessed_3d27p_SymGS_benchmark(256, 128, 128, folder_path);
     // run_striped_preprocessed_3d27p_SymGS_benchmark(256, 256, 128, folder_path);
 
-    
+    run_striped_coloring_3d27p_SymGS_benchmark(8, 8, 8, folder_path);
+
+    run_no_store_striped_coloring_3d27p_SymGS_benchmark(8, 8, 8, folder_path);
 
 
     std::cout << "Finished Benchmark" << std::endl;  

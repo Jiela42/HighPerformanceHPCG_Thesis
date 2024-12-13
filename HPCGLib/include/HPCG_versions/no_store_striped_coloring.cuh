@@ -1,5 +1,5 @@
-#ifndef STRIPED_COLORING_CUH
-#define STRIPED_COLORING_CUH
+#ifndef NO_STORE_STRIPED_COLORING_CUH
+#define NO_STORE_STRIPED_COLORING_CUH
 
 #include "HPCGLib.hpp"
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
@@ -14,14 +14,14 @@
 #include <cuda_runtime.h>
 
 template <typename T>
-class striped_coloring_Implementation : public HPCG_functions<T> {
+class no_store_striped_coloring_Implementation : public HPCG_functions<T> {
 public:
 
-    striped_coloring_Implementation(){
+    no_store_striped_coloring_Implementation(){
 
         // overwritting the inherited variables
 
-        this->version_name = "Striped coloring (pre-computing COR Format)";
+        this->version_name = "Striped coloring (storing nothing)";
         // this->additional_parameters = "SymGS cooperation number = 16";
 
         this->implementation_type = Implementation_Type::STRIPED;
@@ -59,7 +59,7 @@ public:
         T * x_d, T * y_d // the vectors x and y are already on the device
 
     ) override {
-        striped_coloring_computeSymGS(A, striped_A_d, num_rows, num_cols, num_bands, j_min_i, x_d, y_d);
+        no_store_striped_coloring_computeSymGS(A, striped_A_d, num_rows, num_cols, num_bands, j_min_i, x_d, y_d);
     }
 
     void compute_SPMV(
@@ -107,7 +107,7 @@ public:
 
 private:
 
-    void striped_coloring_computeSymGS(
+    void no_store_striped_coloring_computeSymGS(
         striped_Matrix<T> & A, // we pass A for the metadata
         T * striped_A_d, // the data of matrix A is already on the device
         int num_rows, int num_cols,
@@ -120,4 +120,4 @@ private:
 // we expose the kernel in case we need to call it from another method
 
 
-#endif // STRIPED_COLORING_CUH
+#endif // NO_STORE_STRIPED_COLORING_CUH
