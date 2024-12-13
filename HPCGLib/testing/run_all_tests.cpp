@@ -66,6 +66,7 @@ int main(){
     all_pass = all_pass && run_stripedColored_tests(16, 16, 16);
     all_pass = all_pass && run_stripedColored_tests(32, 32, 32);
     all_pass = all_pass && run_stripedColored_tests(64, 64, 64);
+    std::cout << "ran 32x32x32" << std::endl;
     all_pass = all_pass && run_stripedColored_tests(128, 128, 128);
 
     if (all_pass){

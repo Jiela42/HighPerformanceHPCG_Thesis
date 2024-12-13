@@ -9,6 +9,13 @@ import numpy as np
 # first we read the colors
 base_path = "colorings/"
 
+def check_color_computation_theory(x,y,z,colors, dims):
+    # the theory is that color[i] = x + 2y + 4z
+    for i in range(len(x)):
+        assert colors[i] == x[i] + 2*y[i] + 4*z[i]
+    
+    print("All colors are correct for dims: ", dims)
+
 def check_xyz_coordinates(x, y, z, nx, ny, nz):
 
     i_xyz = {}
@@ -264,7 +271,7 @@ def create_animation(x, y, z, colors, dims):
 
 def visualize_coloring(file):
 
-    print("Visualizing coloring for file: ", file)
+    # print("Visualizing coloring for file: ", file)
 
     x = []
     y = []
@@ -293,10 +300,11 @@ def visualize_coloring(file):
             z.append(iz)
     
     # check_xyz_coordinates(x, y, z, nx, ny, nz)
+    check_color_computation_theory(x, y, z, colors, dims)
 
     # now we print each x,y,z with the corresponding color
     # create_animation_buggy_old_version(x, y, z, colors, dims)
-    create_animation(x, y, z, colors, dims)
+    # create_animation(x, y, z, colors, dims)
 
 def get_color_stats(file):
     # read the csv file in that order
@@ -365,5 +373,6 @@ for file in files_to_color:
 for file in files:
     # if file not in files_to_ignore:
     #     visualize_coloring(file)
-    get_color_stats(file)
+    # get_color_stats(file)
+    visualize_coloring(file)
 
