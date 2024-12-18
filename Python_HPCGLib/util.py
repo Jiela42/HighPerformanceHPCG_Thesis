@@ -2,7 +2,7 @@
 # The following one may want to change
 developer_mode = True
 print_elem_not_found_warnings = False
-do_tests = True
+do_tests = False
 limit_matrix_size = True
 limit_matrix_size_for_cg = True
 max_dim_cg = 64

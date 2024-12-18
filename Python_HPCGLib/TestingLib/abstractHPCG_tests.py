@@ -179,6 +179,31 @@ def test_SPMV_csr_cupy_coo_torch(
 
     return test_result
 
+def test_symGS_csr_cupy_coo_torch(
+        uutSymGS, baselineSymGS,
+        A_coo: COOMatrix, A_torch: torch.sparse.Tensor, x_torch: torch.Tensor, y_torch: torch.Tensor,
+        A_csr: CSRMatrix, A_cupy: sp.csr_matrix, x_cupy: cp.ndarray, y_cupy: cp.ndarray
+        ) -> bool:
+    
+    nx = A_csr.nx
+    ny = A_csr.ny
+    nz = A_csr.nz
+
+    x_torch.zero_()
+
+    baselineSymGS(nx, ny, nz, A_torch, y_torch, x_torch)
+    base_x = x_torch.clone()
+    x_cupy.fill(0)
+    uutSymGS(A_csr, A_cupy, x_cupy, y_cupy)
+    uut_x = torch.tensor(x_cupy.get(), device=device, dtype=torch.float64)
+    
+    test_result = torch.allclose(base_x, uut_x, atol=error_tolerance)
+
+    if not test_result:
+        print_differeing_vectors(uut_x, base_x, 5)
+    
+    return test_result
+   
 ##############################################################################################################################
 # baseline csr, uut banded, both cupy
 ##############################################################################################################################
@@ -256,15 +281,25 @@ def test_MG(
 
     return all_tests_passed
 
-def test_symGS(
+def test_SymGS(
         uutSymGS, baselineSymGS,
         A_coo: Optional[COOMatrix] = None, A_csr: Optional[CSRMatrix] = None, A_banded: Optional[BandedMatrix] = None,
-        A_torch: Optional[torch.sparse.Tensor] = None, r_torch: Optional[torch.tensor] = None, x_torch: Optional[torch.tensor] = None,
+        A_torch: Optional[torch.sparse.Tensor] = None, y_torch: Optional[torch.tensor] = None, x_torch: Optional[torch.tensor] = None,
+        A_cupy_sparse: Optional[sp.csr_matrix] = None, x_cupy: Optional[cp.ndarray] = None, y_cupy: Optional[cp.ndarray] = None,
         ) -> bool:
     
+    torch_implementation = A_torch is not None and y_torch is not None and x_torch is not None
+    cupy_sparse_implementation = A_cupy_sparse is not None and x_cupy is not None and y_cupy is not None
+    
     if A_coo is not None:
-        if A_torch is not None and r_torch is not None and x_torch is not None:
-            return test_symGS_coo_torch(uutSymGS, baselineSymGS, A_coo, A_torch, r_torch, x_torch)
+        if torch_implementation and cupy_sparse_implementation and A_csr is not None:
+            return test_symGS_csr_cupy_coo_torch(
+                uutSymGS=uutSymGS, baselineSymGS=baselineSymGS,
+                A_coo = A_coo, A_torch=A_torch, x_torch=x_torch, y_torch=y_torch,
+                A_csr= A_csr, A_cupy=A_cupy_sparse, x_cupy=x_cupy, y_cupy=y_cupy
+                )
+        elif torch_implementation:
+            return test_symGS_coo_torch(uutSymGS, baselineSymGS, A_coo, A_torch, y_torch, x_torch)
         else:
             if developer_mode:
                 print("ERROR: There is no version to test SymGS where the matrix is COO and the vectors are not torch tensors")

@@ -5,6 +5,8 @@ import os
 
 import cupy as cp
 import cupyx.scipy.sparse as sp
+import cupyx.scipy.sparse.linalg
+import cupyx
 import torch
 import numpy as np
 from typing import Tuple
@@ -29,10 +31,18 @@ def computeDot(x: torch.tensor, y: torch.tensor) -> float:
     return BaseTorch.computeDot(x, y)
     
 
-def computeSymGS(nx: int, nz: int, ny: int,
-                 A: torch.sparse.Tensor, r: torch.Tensor, x: torch.Tensor)-> int:
-    print(f"WARNING: computeSymGS not implemented for {version_name}, using BaseTorch implementation")
-    return BaseTorch.computeSymGS(nx, nz, ny, A, r, x)
+def computeSymGS(A_csr: CSRMatrix,
+                A: sp.csr_matrix, x: cp.ndarray, y: cp.ndarray)-> int:
+    
+    solution = cupyx.scipy.sparse.linalg.lsmr(A, b=y, x0=x, maxiter=1)
+    # solution = cupyx.scipy.sparse.linalg.gmres(A, b=y, x0=x, maxiter=1)
+
+    if solution[1] != 0:
+        print(f"WARNING: GMRES did not converge, error code: {solution[1]}")
+
+
+    cp.copyto(x, solution[0])
+    return 0
 
 def computeSPMV(A_csr: CSRMatrix,
                 A: sp.csr_matrix, x: cp.ndarray, y: cp.ndarray)-> int:
@@ -41,6 +51,8 @@ def computeSPMV(A_csr: CSRMatrix,
     # print(f"type x: {type(x)}")
     # print(f"type A: {type(A)}")
     # print(f"type Adotx: {type(A.dot(x))}")
+    # cp.dot(A, x, y)
+    # A.dot(x)
     cp.copyto(y, A.dot(x))
 
     return 0

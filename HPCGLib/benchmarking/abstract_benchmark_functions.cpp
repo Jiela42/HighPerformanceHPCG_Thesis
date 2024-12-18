@@ -221,7 +221,7 @@ void bench_SymGS(
     int * j_min_i_d,
     double * x_d, double * y_d
     )
-{
+{   
     int num_iterations = implementation.getNumberOfIterations();
 
     // x_d is the output vector, hence we need to store the original and write the original back after the benchmarking

@@ -118,6 +118,13 @@ private:
 };
 
 // we expose the kernel in case we need to call it from another method
-
+__global__ void striped_coloring_half_SymGS_kernel(
+    int color, int * color_pointer, int * color_sorted_rows,
+    int num_rows, int num_cols,
+    int num_stripes, int diag_offset,
+    int * j_min_i,
+    double * striped_A,
+    double * x, double * y
+);
 
 #endif // STRIPED_COLORING_CUH

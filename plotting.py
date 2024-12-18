@@ -9,8 +9,8 @@ plot_path = "plots/"
 methods_to_plot = [
     # "CG",
     # "MG",
-    # "SymGS",
-    "SPMV",
+    "SymGS",
+    # "SPMV",
     # "Restriction",
     # "Prolongation",
     # "Dot",
@@ -27,24 +27,27 @@ sizes_to_plot =[
     # ("128x128x64"),
     ("128x128x128"),
     # ("256x128x128"),
-    ("256x256x128"),
+    # ("256x256x128"),
 ]
 
 versions_to_plot = [
     # "BaseTorch",
     # "MatlabReference",
     # "BaseCuPy",
+    # "CuPy (no copy)",
+    "CuPy (gmres)",
+    "CuPy (lsmr)",
     # "NaiveStriped CuPy",
     # "cuSparse&cuBLAS", #this is a legacy name, it is now called CSR Implementation
     "CSR-Implementation",
-    "Naive Striped",
+    # "Naive Striped",
     # "Naive Striped (1 thread per physical core)",
     # "Naive Striped (4 thread per physical core)",
     # "Striped explicit Shared Memory",
     # "Striped explicit Shared Memory (rows_per_SM pow2)",
     # "Striped explicit Shared Memory (rows_per_SM pow2 1024 threads)",
     # "Striped explicit Shared Memory (rows_per_SM pow2 1024 threads 2x physical cores)",
-    "Striped Warp Reduction",
+    # "Striped Warp Reduction",
     # "Striped Warp Reduction (pre-compute diag_offset)",
     # "Striped Warp Reduction (cooperation number = 16)",
     # "Striped Warp Reduction (loop body in method)",
@@ -66,9 +69,13 @@ versions_to_plot = [
     # "Striped Preprocessed (x=0.5)",
     # "Striped Preprocessed (x=0)",
     # "Striped Preprocessed (x=2)",
-    # "Striped Preprocessed (x=random)",     
+    # "Striped Preprocessed (x=random)",
+    "Striped coloring (storing nothing)",
+    "Striped coloring (pre-computing COR Format)",
+    "Striped coloring (COR Format already stored on the GPU)",
+
 ]
-plot_percentage_baseline = True
+plot_percentage_baseline = False
 
 baseline_implementations = [
     "CSR-Implementation",
@@ -81,7 +88,7 @@ y_axis_to_plot = [
 
 y_axis_config_to_plot = [
     "linear",
-    # "log"
+    "log"
 ]
 
 
@@ -174,18 +181,18 @@ def get_percentage_of_baseline_data(full_data):
         baseline_medians_ms = baseline_data.groupby(['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'])['Time (ms)'].median().reset_index()
         baseline_medians_nnz = baseline_data.groupby(['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'])['Time per NNZ (ms)'].median().reset_index()
 
-        ms_name = f'Speedup vs {baseline} (Time ms)'
-        ms_per_nnz_name = f'Speedup vs {baseline} (Time per NNZ ms)'
+        ms_name = f'Normalized by {baseline}'
+        # ms_per_nnz_name = f'Speedup vs {baseline} (Time per NNZ ms)'
 
         baseline_medians_ms = baseline_medians_ms.rename(columns={'Time (ms)': ms_name})
-        baseline_medians_nnz = baseline_medians_nnz.rename(columns={'Time per NNZ (ms)': ms_per_nnz_name})
+        # baseline_medians_nnz = baseline_medians_nnz.rename(columns={'Time per NNZ (ms)': ms_per_nnz_name})
 
         y_axis_to_plot.append(ms_name)
-        y_axis_to_plot.append(ms_per_nnz_name)
+        # y_axis_to_plot.append(ms_per_nnz_name)
 
         # Merge the baseline medians with the full data
         full_data = full_data.merge(baseline_medians_ms, on=['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'], how='left')
-        full_data = full_data.merge(baseline_medians_nnz, on=['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'], how='left')
+        # full_data = full_data.merge(baseline_medians_nnz, on=['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'], how='left')
 
         show_data = full_data.drop(columns=['nx', 'ny', 'nz', 'NNZ', 'Density of A', 'Matrix Type', 'Ault Node', 'Matrix Dimensions, # Rows, Matrix Density'])
 
@@ -193,7 +200,7 @@ def get_percentage_of_baseline_data(full_data):
 
         # Calculate the speedup compared to the baseline
         full_data[ms_name] = ((full_data['Time (ms)']) / full_data[ms_name])
-        full_data[ms_per_nnz_name] = ((full_data['Time per NNZ (ms)']) / full_data[ms_per_nnz_name])
+        # full_data[ms_per_nnz_name] = ((full_data['Time per NNZ (ms)']) / full_data[ms_per_nnz_name])
 
 
     return full_data
@@ -312,12 +319,12 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
         return
 
     sns.set(style="whitegrid")
-    plt.figure(figsize=(24, 6))
+    plt.figure(figsize=(26, 8))
 
     ax = sns.barplot(x=x, order=x_order, y=y, hue=hue, hue_order=hue_order, data=data, estimator= np.median, ci=98)
     fig = ax.get_figure()
 
-    text_size = 14
+    text_size = 15
 
     ax.set_title(title, fontsize=text_size+4)
     ax.set_xlabel(x, fontsize=text_size+2)
@@ -331,11 +338,11 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
 
     nc = get_num_columns(hue_order=hue_order)
     # print(nc, flush=True)
-    # nc = 3
+    nc = 4
     box_offset = get_legend_horizontal_offset(num_cols=nc, hue_order=hue_order)
 
-    legend = ax.legend(loc = 'lower center', bbox_to_anchor = (0.5, box_offset), ncol = nc, prop={'size': text_size})
-    legend.set_title(hue)
+    legend = ax.legend(loc = 'lower center', bbox_to_anchor = (0.5, box_offset- 0.05), ncol = nc, prop={'size': text_size})
+    legend.set_title(hue, prop={'size': text_size+2})
 
     fig.savefig(save_path, bbox_inches='tight')
 
@@ -471,7 +478,7 @@ for y_ax in y_axis_to_plot:
 
         plot_x_options(y_axis = y_ax, y_axis_scale = "linear", save_path = linear_folder, full_data = plottable_data)
 
-    if "log" in y_axis_config_to_plot and "Speedup" not in y_ax:
+    if "log" in y_axis_config_to_plot: # and "Speedup" not in y_ax:
         # the percentage plots are not done for log scale, because that makes no sense
 
         log_folder = os.path.join(current_plot_path, "y_axis_log_" + y_ax)

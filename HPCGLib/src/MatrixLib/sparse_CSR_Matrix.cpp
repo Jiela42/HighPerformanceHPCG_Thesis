@@ -102,7 +102,7 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(std::vector<std::vector<T>> dense_matrix
 }
 
 template <typename T>
-void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped(striped_Matrix<T> A){
+void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped(striped_Matrix<T> &A){
 
     if(A.get_matrix_type() == MatrixType::Stencil_3D27P){
         assert(A.get_num_stripes() == 27);
@@ -113,7 +113,7 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped(striped_Matrix<T> A){
 }
 
 template <typename T>
-void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation(striped_Matrix<T> A){
+void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation(striped_Matrix<T> &A){
 
     this->matrix_type = A.get_matrix_type();
     this->nx = A.get_nx();

@@ -12,6 +12,7 @@ add_library(TestHPCGLib
     HPCG_versions_tests/stripedWarpReduction_tests.cpp
     HPCG_versions_tests/stripedPreprocessed_tests.cpp
     HPCG_versions_tests/stripedColored_tests.cpp
+    HPCG_versions_tests/stripedColoringPrecomputed_tests.cpp
         
     MatrixLib_tests.cpp
     HPCG_versions_tests/test_calls.cpp

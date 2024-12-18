@@ -15,6 +15,7 @@ void run_striped_warp_reduction_3d27p_benchmarks(int nx, int ny, int nz, std::st
 void run_striped_preprocessed_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
 void run_striped_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
 void run_no_store_striped_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
+void run_striped_coloringPrecomputed_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
 
 
 void run_cuSparse_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path);
@@ -26,9 +27,10 @@ void run_warp_reduction_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::strin
 void run_striped_preprocessed_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path);
 
 void run_striped_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path);
+
 void run_no_store_striped_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path);
 
-
+void run_striped_coloringPrecomputed_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path);
 
 // this function allows us to run the whole abstract benchmark
 // we have method overloading to support different matrix types

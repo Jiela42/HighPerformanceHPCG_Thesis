@@ -20,6 +20,7 @@ add_executable(run_full_bench
     benchmark_stripedPreprocessed.cpp
     benchmark_stripedColoring.cpp
     benchmark_noStoreStripedColoring.cpp
+    benchmark_stripedColoringPrecomputed.cpp
 
 )
 
@@ -33,6 +34,8 @@ add_executable(run_specific_bench
     benchmark_stripedPreprocessed.cpp
     benchmark_stripedColoring.cpp
     benchmark_noStoreStripedColoring.cpp
+    benchmark_stripedColoringPrecomputed.cpp
+
 )
 
 

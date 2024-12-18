@@ -14,7 +14,7 @@ def check_color_computation_theory(x,y,z,colors, dims):
     for i in range(len(x)):
         assert colors[i] == x[i] + 2*y[i] + 4*z[i]
     
-    print("All colors are correct for dims: ", dims)
+    # print("All colors are correct for dims: ", dims)
 
 def check_xyz_coordinates(x, y, z, nx, ny, nz):
 
@@ -373,6 +373,6 @@ for file in files_to_color:
 for file in files:
     # if file not in files_to_ignore:
     #     visualize_coloring(file)
-    # get_color_stats(file)
-    visualize_coloring(file)
+    get_color_stats(file)
+    # visualize_coloring(file)
 

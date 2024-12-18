@@ -17,8 +17,14 @@ template <typename T>
 class striped_Matrix {
     public:
         striped_Matrix();
-        void striped_Matrix_from_sparse_CSR(sparse_CSR_Matrix<T> A);
+        ~striped_Matrix();
+        void striped_Matrix_from_sparse_CSR(sparse_CSR_Matrix<T> & A);
 
+        void generate_coloring();
+
+        int *get_color_pointer_d();
+        int *get_color_sorted_rows_d();
+        
         int get_num_rows() const;
         int get_num_cols() const;
         int get_num_stripes() const;
@@ -49,8 +55,9 @@ class striped_Matrix {
         std::vector<int> j_min_i;
         std::vector<T> values;
         MatrixType matrix_type;
-        void striped_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T> A);
-
+        void striped_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T> & A);
+        int* color_pointer_d;
+        int* color_sorted_rows_d;
 };
 
 #endif // STRIPED_MATRIX_HPP

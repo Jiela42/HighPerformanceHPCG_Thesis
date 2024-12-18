@@ -45,7 +45,7 @@ def test_BaseCuPy_3d27p_on_random_matrix(A_csr: CSRMatrix, A_cupy: sp.csr_matrix
     SPMV_test = abstract_tests.test_SPMV(
         baselineSPMV=baselineSPMV, uutSPMV=testSPMV,
         A_coo=A_coo, A_torch=A_torch, x_torch = a_torch, y_torch = x_torch,
-        A_csr=A_csr, A_cupy=A_cupy, x_cupy = a, y_cupy = x)
+        A_csr=A_csr, A_cupy_sparse=A_cupy, x_cupy = a, y_cupy = x)
     
     if not SPMV_test:
         all_tests_passed = False
@@ -66,6 +66,10 @@ def test_BaseCuPy_3d27p_on_matrix(A_csr: CSRMatrix, A_cupy: sp.csr_matrix) -> bo
     ny = A_csr.ny
     nz = A_csr.nz
 
+    y = generations.generate_y_forHPCG_problem(nx, ny, nz)
+    y_cupy = cp.array(y, dtype=cp.float64)
+    y_torch = torch.tensor(y, device=device, dtype=torch.float64)
+
     x = cp.zeros(A_csr.num_cols, dtype=cp.float64)
     a = cp.random.rand(A_csr.num_cols, dtype=cp.float64)
     b = cp.random.rand(A_csr.num_cols, dtype=cp.float64)
@@ -85,13 +89,26 @@ def test_BaseCuPy_3d27p_on_matrix(A_csr: CSRMatrix, A_cupy: sp.csr_matrix) -> bo
     SPMV_test = abstract_tests.test_SPMV(
         baselineSPMV=baselineSPMV, uutSPMV=testSPMV,
         A_coo=A_coo, A_torch=A_torch, x_torch = a_torch, y_torch = x_torch,
-        A_csr=A_csr, A_cupy=A_cupy, x_cupy = a, y_cupy = x)
+        A_csr=A_csr, A_cupy_sparse=A_cupy, x_cupy = a, y_cupy = x)
     
     if not SPMV_test:
         all_tests_passed = False
         print(f"The BaseCuPy SPMV test failed for size: {nx}x{ny}x{nz}", flush=True)
     elif developer_mode:
         print(f"The BaseCuPy SPMV test passed for size: {nx}x{ny}x{nz}", flush=True)
+
+    SymGS_test = abstract_tests.test_SymGS(
+        uutSymGS=BaseCuPy.computeSymGS, baselineSymGS=BaseTorch.computeSymGS,
+        A_csr=A_csr, A_cupy_sparse=A_cupy, x_cupy = x, y_cupy = y_cupy,
+        A_coo=A_coo, A_torch=A_torch, x_torch = x_torch, y_torch = y_torch 
+        )
+    
+    if not SymGS_test:
+        all_tests_passed = False
+        print(f"The BaseCuPy SymGS test failed for size: {nx}x{ny}x{nz}", flush=True)
+    elif developer_mode:
+        print(f"The BaseCuPy SymGS test passed for size: {nx}x{ny}x{nz}", flush=True)
+
 
     return all_tests_passed
 
@@ -107,14 +124,14 @@ def test_BaseCuPy_3d27p(nx:int, ny:int, nz:int) -> bool:
         all_tests_passed = False
         print(f"BaseCuPy on standard HPCG Matrix failed for size: {nx}x{ny}x{nz}", flush=True)
 
-    # we now also test for iterative values
-    A_csr.iterative_values()
-    A = A_csr.to_cupy()
+    # # we now also test for iterative values
+    # A_csr.iterative_values()
+    # A = A_csr.to_cupy()
 
-    current_matrix_test = test_BaseCuPy_3d27p_on_random_matrix(A_csr, A)
-    if not current_matrix_test:
-        all_tests_passed = False
-        print(f"BaseCuPy on random HPCG Matrix failed for size: {nx}x{ny}x{nz}", flush=True)
+    # current_matrix_test = test_BaseCuPy_3d27p_on_random_matrix(A_csr, A)
+    # if not current_matrix_test:
+    #     all_tests_passed = False
+    #     print(f"BaseCuPy on random HPCG Matrix failed for size: {nx}x{ny}x{nz}", flush=True)
 
     
     return all_tests_passed

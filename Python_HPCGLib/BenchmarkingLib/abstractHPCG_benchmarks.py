@@ -141,7 +141,7 @@ def benchmark_SPMV_cupy(SPMVimplementation, timer:gpu_timer, A_csr: CSRMatrix, A
         test_SPMV = HPCG_tests.test_SPMV(
             baselineSPMV=baselineSPMV, uutSPMV=SPMVimplementation,
             A_coo= A_coo, A_torch=A_torch, x_torch=x_torch, y_torch=y_torch,
-            A_csr=A_csr, A_cupy=A_cupy, x_cupy=x_cupy, y_cupy=y_cupy)
+            A_csr=A_csr, A_cupy_sparse=A_cupy, x_cupy=x_cupy, y_cupy=y_cupy)
         if not test_SPMV:
             print(f"ERROR: test failed for {SPMVimplementation.__name__} and size {nx}x{ny}x{nz}")
             return
@@ -152,6 +152,34 @@ def benchmark_SPMV_cupy(SPMVimplementation, timer:gpu_timer, A_csr: CSRMatrix, A
         SPMVimplementation(A_csr, A_cupy, x_cupy, y_cupy)
         timer.stop_timer("computeSPMV")
 
+def benchmark_SymGS_csr_cupy(SymGSimplementation, timer:gpu_timer, A_csr: CSRMatrix, A_cupy:cs.csr_matrix, x_cupy:cp.ndarray, y_cupy:cp.ndarray) -> None:
+
+    nx = A_csr.nx
+    ny = A_csr.ny
+    nz = A_csr.nz
+
+    original_x = x_cupy.copy()
+
+    if do_tests:
+        baselineSymGS = BaseTorch.computeSymGS
+
+        A_coo = COOMatrix()
+        csr_to_coo(A_csr, A_coo)
+        A_torch = A_coo.to_torch()
+        x_torch = torch.from_numpy(x_cupy.get()).to(device)
+        y_torch = torch.from_numpy(y_cupy.get()).to(device)
+
+        test_SymGS = HPCG_tests.test_symGS_csr_cupy(SymGSimplementation, baselineSymGS, A_coo, A_torch, x_torch, y_torch, A_csr, A_cupy, x_cupy, y_cupy)
+        if not test_SymGS:
+            print(f"ERROR: test failed for {SymGSimplementation.__name__} and size {nx}x{ny}x{nz}")
+            return
+    
+    for i in range(num_bench_iterations):
+        timer.start_timer()
+        SymGSimplementation(A_csr, A_cupy, x_cupy, y_cupy)
+        timer.stop_timer("computeSymGS")
+        # because x gets changed we do need to reset it between runs
+        x_cupy = original_x.copy()
 
 ####################################################################################################
 # banded cupy benchmarks

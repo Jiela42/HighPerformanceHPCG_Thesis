@@ -254,6 +254,7 @@ bool test_SymGS(
     CHECK_CUDA(cudaMemcpy(A_row_ptr_d, A_csr.get_row_ptr().data(), (num_rows + 1) * sizeof(int), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(A_col_idx_d, A_csr.get_col_idx().data(), nnz * sizeof(int), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(A_values_d, A_csr.get_values().data(), nnz * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemset(x_d, 0.0, num_rows * sizeof(double)));
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
 
     // run the symGS function
@@ -270,6 +271,8 @@ bool test_SymGS(
     CHECK_CUDA(cudaFree(A_values_d));
     CHECK_CUDA(cudaFree(y_d));
     CHECK_CUDA(cudaFree(x_d));
+
+    std::string implementation_name = uut.version_name;
 
     // compare the result
     bool test_pass = vector_compare(solution, x);
@@ -328,13 +331,14 @@ bool test_SymGS(
     double * y_d // the vectors x is already on the device
         
 ){
-    
+
     sparse_CSR_Matrix<double> A;
     A.sparse_CSR_Matrix_from_striped(striped_A);
 
     int num_rows_baseline = A.get_num_rows();
     std::vector<double> x_baseline(num_rows, 0.0);
     std::vector<double> x_uut(num_rows, 0.0);
+
 
     double * x_baseline_d;
     double * x_uut_d;
@@ -376,14 +380,3 @@ bool test_SymGS(
 
     return test_pass;
 }
-
-
-
-
-
-
-
-
-
-
-

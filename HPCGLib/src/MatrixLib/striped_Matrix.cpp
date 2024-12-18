@@ -1,5 +1,7 @@
 #include "MatrixLib/striped_Matrix.hpp"
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
+#include "UtilLib/cuda_utils.hpp"
+#include "MatrixLib/coloring.cuh"
 
 #include <vector>
 #include <iostream>
@@ -20,10 +22,25 @@ striped_Matrix<T>::striped_Matrix() {
     this->num_stripes = 0;
     this->j_min_i.clear();
     this->values.clear();
+    this->color_pointer_d = nullptr;
+    this->color_sorted_rows_d = nullptr;
 }
 
 template <typename T>
-void striped_Matrix<T>::striped_Matrix_from_sparse_CSR(sparse_CSR_Matrix<T> A){
+striped_Matrix<T>::~striped_Matrix(){
+    if (this->color_pointer_d != nullptr) {
+        CHECK_CUDA(cudaFree(this->color_pointer_d));
+        this->color_pointer_d = nullptr;
+
+    }
+    if (this->color_sorted_rows_d != nullptr) {
+        CHECK_CUDA(cudaFree(this->color_sorted_rows_d));
+        this->color_sorted_rows_d = nullptr;
+    }
+}
+
+template <typename T>
+void striped_Matrix<T>::striped_Matrix_from_sparse_CSR(sparse_CSR_Matrix<T>& A){
     if (A.get_matrix_type() == MatrixType::Stencil_3D27P) {
         this->striped_3D27P_Matrix_from_CSR(A);
     } else {
@@ -33,7 +50,7 @@ void striped_Matrix<T>::striped_Matrix_from_sparse_CSR(sparse_CSR_Matrix<T> A){
 }
 
 template <typename T>
-void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T> A){
+void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T>& A){
     
     assert(A.get_matrix_type() == MatrixType::Stencil_3D27P);
     this->matrix_type = MatrixType::Stencil_3D27P;
@@ -46,6 +63,8 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T> A){
     this->num_stripes = 27;
     this->j_min_i = std::vector<int>(this->num_stripes, 0);
     this->values = std::vector<T>(this->num_stripes * this->num_rows, 0);
+    this->color_pointer_d = nullptr;
+    this->color_sorted_rows_d = nullptr;
 
     // first we make our mapping for the j_min_i
     // each point has num_stripe neighbours and each is associated with a coordinate relative to the point
@@ -92,6 +111,28 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T> A){
         }
     }
     assert(elem_ctr == this->nnz);
+}
+
+template <typename T>
+void striped_Matrix<T>::generate_coloring(){
+
+    int num_colors = nx + 2 * ny + 4 * nz + 1;
+
+    // first we allocate the space on the GPU
+    CHECK_CUDA(cudaMalloc(&this->color_pointer_d, (num_colors + 1) * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&this->color_sorted_rows_d, this->num_rows * sizeof(int)));
+
+    get_color_row_mapping(this->nx, this->ny, this->nz, this->color_pointer_d, this->color_sorted_rows_d);
+}
+
+template <typename T>
+int* striped_Matrix<T>::get_color_pointer_d(){
+    return this->color_pointer_d;
+}
+
+template <typename T>
+int* striped_Matrix<T>::get_color_sorted_rows_d(){
+    return this->color_sorted_rows_d;
 }
 
 template <typename T>

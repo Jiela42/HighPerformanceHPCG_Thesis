@@ -26,7 +26,7 @@ public:
     sparse_CSR_Matrix(std::vector<std::vector<T>> dense_matrix);
 
 
-    void sparse_CSR_Matrix_from_striped(striped_Matrix<T> A);
+    void sparse_CSR_Matrix_from_striped(striped_Matrix<T> &A);
 
     void sanity_check_3D27P();
 
@@ -61,7 +61,7 @@ private:
     std::vector<int> col_idx;
     std::vector<T> values;
     MatrixType matrix_type;
-    void sparse_CSR_Matrix_from_striped_transformation(striped_Matrix<T>);
+    void sparse_CSR_Matrix_from_striped_transformation(striped_Matrix<T>&);
 };
 
 #endif // SPARSE_CSR_MATRIX_HPP

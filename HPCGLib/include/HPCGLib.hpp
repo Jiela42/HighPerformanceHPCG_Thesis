@@ -17,7 +17,7 @@ enum class Implementation_Type {
 template <typename T>
 class HPCG_functions {
     public:
-        bool test_before_bench = false;
+        bool test_before_bench = true;
         std::string version_name = "unknown";
         const std::string ault_nodes = "41-44";
         // this string is used when small changes are benchmarked to see their effect

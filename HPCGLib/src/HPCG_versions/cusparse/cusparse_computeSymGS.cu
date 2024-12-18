@@ -13,6 +13,7 @@ __global__ void cusparse_SymGS_kernel(
     __shared__ double diag_value[1];
     int lane = threadIdx.x % WARP_SIZE;
 
+
     // forward pass
     for (int i = 0; i < num_rows; i++){
         double my_sum = 0.0;
@@ -61,7 +62,8 @@ __global__ void cusparse_SymGS_kernel(
         if (lane == 0){
             double diag = diag_value[0];
             double sum = diag * x[i] + y[i] + my_sum;
-            x[i] = sum / diag;           
+            x[i] = sum / diag;
+            // printf("x[%d] = %f\n", i, x[i]);           
         }
     }
 }
