@@ -13,4 +13,6 @@ bool double_compare(double a, double b);
 // Function to compare two vectors of doubles with a tolerance
 bool vector_compare(const std::vector<double>& a, const std::vector<double>& b);
 
+bool vector_compare(const std::vector<int>& a, const std::vector<int>& b, std::string info);
+
 #endif // UTILS_HPP

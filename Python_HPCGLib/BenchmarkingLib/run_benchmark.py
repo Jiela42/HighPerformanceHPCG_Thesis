@@ -71,7 +71,7 @@ print(f"BaseCuPy Finished 128x64x64", flush=True)
 run_BaseCuPy_benchmark(128, 128, 64, new_folder_path)
 print(f"BaseCuPy Finished 128x128x64", flush=True)
 run_BaseCuPy_benchmark(128, 128, 128, new_folder_path)
-run_BaseCuPy_benchmark(256, 128, 128, new_folder_path)
+# run_BaseCuPy_benchmark(256, 128, 128, new_folder_path)
 # run_BaseCuPy_benchmark(256, 256, 128, new_folder_path)
 print("BaseCuPy benchmarks done", flush=True)
 

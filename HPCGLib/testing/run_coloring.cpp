@@ -7,6 +7,21 @@
 #include <MatrixLib/coloring.cuh>
 #include "MatrixLib/generations.hpp"
 
+void print_COR_Format(int nx, int ny, int nz){
+
+    // make a matrix
+    std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
+    sparse_CSR_Matrix<double> A_csr = problem.first;
+
+    striped_Matrix<double> A_striped;
+    A_striped.striped_Matrix_from_sparse_CSR(A_csr);
+
+    // make coloring
+    A_striped.generate_coloring();
+    A_striped.print_COR_Format();
+
+}
+
 void write_coloring_to_file(std::vector<int> colors, std::string filename){
    std::ofstream outfile(filename);
     if (!outfile.is_open()) {
@@ -93,18 +108,20 @@ int main() {
     // print_coloring(32, 32, 32);
     // print_coloring(64, 64, 64);
 
-    compare_backward_forward_coloring(4, 4, 4);
-    compare_backward_forward_coloring(3, 4, 5);
-    compare_backward_forward_coloring(4, 3, 5);
-    compare_backward_forward_coloring(5, 4, 3);
-    compare_backward_forward_coloring(3,5,6);
-    compare_backward_forward_coloring(5,3,6);
-    compare_backward_forward_coloring(6,5,3);
-    compare_backward_forward_coloring(8, 8, 8);
-    compare_backward_forward_coloring(16, 16, 16);
-    compare_backward_forward_coloring(24, 24, 24);
-    compare_backward_forward_coloring(32, 32, 32);
-    compare_backward_forward_coloring(64, 64, 64);
+    // compare_backward_forward_coloring(4, 4, 4);
+    // compare_backward_forward_coloring(3, 4, 5);
+    // compare_backward_forward_coloring(4, 3, 5);
+    // compare_backward_forward_coloring(5, 4, 3);
+    // compare_backward_forward_coloring(3,5,6);
+    // compare_backward_forward_coloring(5,3,6);
+    // compare_backward_forward_coloring(6,5,3);
+    // compare_backward_forward_coloring(8, 8, 8);
+    // compare_backward_forward_coloring(16, 16, 16);
+    // compare_backward_forward_coloring(24, 24, 24);
+    // compare_backward_forward_coloring(32, 32, 32);
+    // compare_backward_forward_coloring(64, 64, 64);
+
+    print_COR_Format(4, 4, 4);
 
     return 0;
 }

@@ -10,9 +10,15 @@ import numpy as np
 base_path = "colorings/"
 
 def check_color_computation_theory(x,y,z,colors, dims):
+
+
     # the theory is that color[i] = x + 2y + 4z
+    print("Checking color computation theory for dims: ", dims)
     for i in range(len(x)):
         assert colors[i] == x[i] + 2*y[i] + 4*z[i]
+        # print("Color: ", colors[i], " x: ", x[i], " y: ", y[i], " z: ", z[i])
+        cxyz.append((colors[i], x[i], y[i], z[i]))
+    
     
     # print("All colors are correct for dims: ", dims)
 
@@ -277,6 +283,8 @@ def visualize_coloring(file):
     y = []
     z = []
 
+    cxyz = []
+
     # read the csv file in that order
     with open(base_path + file, 'r') as f:
         dims = file.replace('.csv', '').replace('coloring_', '')
@@ -298,9 +306,18 @@ def visualize_coloring(file):
             x.append(ix)
             y.append(iy)
             z.append(iz)
+
+            cxyz.append((int(color), ix, iy, iz, i))
     
+    cxyz = sorted(cxyz, key=lambda x: x[0])
+
+    print("Coloring for dims: ", dims)
+    for c, x, y, z, row in cxyz:
+        if c == 4:
+            print(f"Color: {c}, x: {x}, y: {y}, z: {z}, row: {row}")
+
     # check_xyz_coordinates(x, y, z, nx, ny, nz)
-    check_color_computation_theory(x, y, z, colors, dims)
+    # check_color_computation_theory(x, y, z, colors, dims)
 
     # now we print each x,y,z with the corresponding color
     # create_animation_buggy_old_version(x, y, z, colors, dims)
@@ -333,6 +350,13 @@ def get_color_stats(file):
     num_colors_with_min_rows = num_rows_per_color.count(min_num_rows_per_color)
     num_colors_with_max_rows = num_rows_per_color.count(max_num_rows_per_color)
 
+    temp_nx = nx if nx % 2 == 0 else nx - 1
+    temp_ny = ny if ny % 2 == 0 else ny - 1
+    temp_nz = nz if nz % 2 == 0 else nz - 1
+
+    max_num_rows_per_color_calculated = nx//2 * ny//2
+
+
     print("**************************************************************************************************************************")
     print("File: ", file)
     print("Max color: ", max_color)
@@ -343,6 +367,11 @@ def get_color_stats(file):
     print("Number of colors with min rows: ", num_colors_with_min_rows)
     print("Last row color: ", last_row_color)
     print(f"Estimated Time Consumpution of colored compared to sequential:  {max_color/num_rows}")
+
+    if max_num_rows_per_color != max_num_rows_per_color_calculated:
+        print("Max number of rows per color calculated: ", max_num_rows_per_color_calculated)
+        print("Actual max number of rows per color: ", max_num_rows_per_color)
+
     print("**************************************************************************************************************************")
 
         
@@ -353,7 +382,7 @@ files = os.listdir(base_path)
 
 # toy_example()
 files_to_ignore = [
-    "coloring_4x4x4.csv",
+    # "coloring_4x4x4.csv",
     "coloring_8x8x8.csv",
     "coloring_16x16x16.csv",
     "coloring_24x24x24.csv",
@@ -366,13 +395,15 @@ files_to_color= [
     # "coloring_64x64x64.csv"
 ]
 
-for file in files_to_color:
-    visualize_coloring(file)
+# for file in files_to_color:
+#     visualize_coloring(file)
 
+# visualize_coloring("coloring_4x4x4.csv")
 
 for file in files:
-    # if file not in files_to_ignore:
-    #     visualize_coloring(file)
-    get_color_stats(file)
+#     if file not in files_to_ignore:
+        # visualize_coloring(file)
+        # get_color_stats(file)
     # visualize_coloring(file)
-
+    get_color_stats(file)
+# 

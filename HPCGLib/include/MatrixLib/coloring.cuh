@@ -8,6 +8,7 @@ std::vector<int> color_for_forward_pass(striped_Matrix<double> A);
 std::vector<int> color_for_backward_pass(striped_Matrix<double> A);
 std::pair<std::vector<int>, std::vector<int>> get_color_row_mapping(int nx, int ny, int nz);
 void get_color_row_mapping(int nx, int ny, int nz, int * color_pointer_d, int * color_sorted_row_d);
+void print_COR_Format(int max_color, int num_rows, int * color_pointer, int * color_sorted_rows);
 
 __global__ void color_for_forward_pass_kernel(
     int num_rows, int num_bands, int diag_offset,

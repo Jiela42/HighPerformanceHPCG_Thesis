@@ -116,7 +116,7 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T>& A){
 template <typename T>
 void striped_Matrix<T>::generate_coloring(){
 
-    int num_colors = nx + 2 * ny + 4 * nz + 1;
+    int num_colors = (nx -1) + 2 * (ny-1) + 4 * (nz-1) + 1;
 
     // first we allocate the space on the GPU
     CHECK_CUDA(cudaMalloc(&this->color_pointer_d, (num_colors + 1) * sizeof(int)));
@@ -133,6 +133,29 @@ int* striped_Matrix<T>::get_color_pointer_d(){
 template <typename T>
 int* striped_Matrix<T>::get_color_sorted_rows_d(){
     return this->color_sorted_rows_d;
+}
+
+template <typename T>
+std::vector<int> striped_Matrix<T>::get_color_pointer_vector(){
+
+    int num_colors = (this->nx-1) + 2 * (this->ny -1) + 4 *(this->nz-1) + 1;
+    std::vector<int> color_pointer(num_colors + 1, 0);
+    CHECK_CUDA(cudaMemcpy(color_pointer.data(), this->color_pointer_d, (num_colors + 1) * sizeof(int), cudaMemcpyDeviceToHost));
+    return color_pointer;
+}
+
+template <typename T>
+std::vector<int> striped_Matrix<T>::get_color_sorted_rows_vector(){
+
+    std::vector<int> color_sorted_rows(this->num_rows, 0);
+    CHECK_CUDA(cudaMemcpy(color_sorted_rows.data(), this->color_sorted_rows_d, this->num_rows * sizeof(int), cudaMemcpyDeviceToHost));
+    return color_sorted_rows;
+}
+
+template <typename T>
+void striped_Matrix<T>::print_COR_Format(){
+    int max_color = (this->nx-1) + 2 * (this->ny-1) + 4 * (this->nz -1) + 1;
+    ::print_COR_Format(max_color, this->num_rows, this->color_pointer_d, this->color_sorted_rows_d);
 }
 
 template <typename T>

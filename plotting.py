@@ -24,7 +24,7 @@ sizes_to_plot =[
     ("32x32x32"),
     ("64x64x64"),
     # ("128x64x64"),
-    # ("128x128x64"),
+    ("128x128x64"),
     ("128x128x128"),
     # ("256x128x128"),
     # ("256x256x128"),
@@ -37,9 +37,10 @@ versions_to_plot = [
     # "CuPy (no copy)",
     "CuPy (gmres)",
     "CuPy (lsmr)",
+    "CuPy (minres)",
     # "NaiveStriped CuPy",
     # "cuSparse&cuBLAS", #this is a legacy name, it is now called CSR Implementation
-    "CSR-Implementation",
+    # "CSR-Implementation",
     # "Naive Striped",
     # "Naive Striped (1 thread per physical core)",
     # "Naive Striped (4 thread per physical core)",
@@ -338,7 +339,7 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
 
     nc = get_num_columns(hue_order=hue_order)
     # print(nc, flush=True)
-    nc = 4
+    nc = 3
     box_offset = get_legend_horizontal_offset(num_cols=nc, hue_order=hue_order)
 
     legend = ax.legend(loc = 'lower center', bbox_to_anchor = (0.5, box_offset- 0.05), ncol = nc, prop={'size': text_size})

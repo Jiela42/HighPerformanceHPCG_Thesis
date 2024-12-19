@@ -108,7 +108,7 @@ __global__ void count_num_row_per_color_kernel(
     int * color_pointer
 ){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    int max_color = nx + 2*ny + 4*nz;
+    int max_color = (nx-1) + 2*(ny-1) + 4*(nz-1);
 
     // each thread will count the number of rows with a specific color
 
@@ -117,28 +117,39 @@ __global__ void count_num_row_per_color_kernel(
 
         // to search for the rows with a specific color we can do some math
         for(int xy = 0; xy < nx * ny; xy++){
-            int x = xy % ny;
-            int y = xy / ny;
+            int x = xy / ny;
+            int y = xy % ny;
 
             int enumerator = color - x - 2*y;
 
+            // if (color == 16){
+            //     printf("tid %d, x %d, y %d, enumerator %d \n",tid, x, y, enumerator);
+            // }
+
             if(enumerator < 0){
-                break;
+                continue;
             }
             if(enumerator % 4 != 0){
                 continue;
             }
 
             int z = enumerator / 4;
+            // if(color == 16){
+            //     printf("color %d, x %d, y %d, z %d \n", color, x, y, z);
+            // }
 
             if (z < nz){
                 my_num_rows++;
-            } else {
-                break;
+                // if (color == 16){
+                // printf("color %d, x %d, y %d, z %d, my_num_rows %d \n", color, x, y, z, my_num_rows);
+                // }
             }
+            // else {
+            //     break;
+            // }
         }
         // this is because we are using a prefix sum and need the first element to be 0
-        color_pointer[color + 1] = my_num_rows;
+        color_pointer[color+1] = my_num_rows;
     }
 }
 
@@ -149,9 +160,13 @@ __global__ void set_color_pointer_kernel(
     // this kernel is sequential, we could use a fancy prefix sum kernel, if I wanted to implement it
     // before this kernel each color_pointer[i] contains the number of rows with color i
 
-    int max_color = nx + 2*ny + 4*nz;
+    int max_color = (nx-1) + 2*(ny-1) + 4*(nz-1);
+    int num_colors = max_color + 1;
 
-    for(int i = 1; i <= max_color; i++){
+    color_pointer[0] = 0;
+
+    for(int i = 1; i <= num_colors; i++){
+        // printf("color %d has %d rows\n", i, color_pointer[i]);
         color_pointer[i] = color_pointer[i] + color_pointer[i-1];
     }
 }
@@ -162,20 +177,35 @@ __global__ void sort_rows_by_color_kernel(
 ){
 
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    int max_color = nx + 2*ny + 4*nz;
+    int max_color = (nx-1) + 2*(ny-1) + 4*(nz-1);
+
+
+    // if(tid == 0){
+    //     printf("Max color from sort rows by color kernel %d\n", max_color);
+    //     printf("nx %d, ny %d, nz %d\n", nx, ny, nz);
+    // }
 
     for(int color = tid; color <= max_color; color += gridDim.x * blockDim.x){
         int my_color_ptr = color_pointer[color];
 
         // to search for the rows with a specific color we can do some math
         for(int xy = 0; xy < nx * ny; xy++){
-            int x = xy % ny;
-            int y = xy / ny;
+            int x = xy / ny;
+            int y = xy % ny;
+
+            // if(my_color_ptr == 3){
+            //     printf("I am thread %d, block %d, color %d, x %d, y %d\n", threadIdx.x, blockIdx.x, color, x, y);
+            // }
+
+            // if(my_color_ptr >= color_pointer[color+1]){
+            //     printf("Error my_color pointer %d is bigger than the next color pointer %d, thread %d, color %d, x %d, y %d\n",my_color_ptr, color_pointer[color+1], threadIdx.x, color, x, y);
+            //     break;
+            // }
 
             int enumerator = color - x - 2*y;
 
             if(enumerator < 0){
-                break;
+                continue;
             }
             if(enumerator % 4 != 0){
                 continue;
@@ -186,8 +216,30 @@ __global__ void sort_rows_by_color_kernel(
             if (z < nz){
                 int row = x + y * nx + z * nx * ny;
                 color_sorted_rows[my_color_ptr] = row;
+                
+                // if(my_color_ptr == 3){
+                //     printf("I am thread %d, block %d, color %d, x %d, y %d, z %d, row %d\n", threadIdx.x, blockIdx.x, color, x, y, z, row);
+                // }
+
                 my_color_ptr++;
             }
+        }
+    }
+}
+
+__global__ void print_COR_Format_kernel(
+    int max_colors, int num_rows, int * color_pointer, int * color_sorted_rows
+){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid == 0){
+        printf("COLOR POINTER\n");
+        for(int i = 0; i <= max_colors; i++){
+            printf("%d\n", color_pointer[i]);
+        }
+        // printf("\n");
+        printf("COLOR SORTED ROWS\n");
+        for(int i = 0; i < num_rows; i++){
+            printf("%d\n", color_sorted_rows[i]);
         }
     }
 }
@@ -270,13 +322,12 @@ std::vector <int> color_for_backward_pass(striped_Matrix <double> A){
 
 }
 
-
 void get_color_row_mapping(int nx, int ny, int nz, int *color_pointer_d, int * color_sorted_rows_d){
     
     // first we find the number of rows per color
     // i.e. set the color_pointer_d
 
-    int max_color = nx + 2*ny + 4*nz;
+    int max_color = (nx-1) + 2*(ny-1) + 4*(nz-1);
 
     int num_threads = 1024;
     int num_blocks = std::min(ceiling_division(max_color+1, num_threads), MAX_NUM_BLOCKS);
@@ -302,7 +353,7 @@ void get_color_row_mapping(int nx, int ny, int nz, int *color_pointer_d, int * c
 std::pair<std::vector<int>, std::vector<int>> get_color_row_mapping(int nx, int ny, int nz)
 {
     
-    int max_color = nx + 2*ny + 4*nz;
+    int max_color = (nx-1) + 2*(ny-1) + 4*(nz-1);
     int num_rows = nx * ny * nz;
 
     std::vector<int> color_pointer (max_color+1, 0);
@@ -329,4 +380,11 @@ std::pair<std::vector<int>, std::vector<int>> get_color_row_mapping(int nx, int 
 
     return std::make_pair(color_pointer, color_sorted_rows);
 
+}
+
+void print_COR_Format(int max_colors, int num_rows, int* color_pointer, int* color_sorted_rows){
+    printf("Max colors: %d\n", max_colors);
+    printf("Num rows: %d\n", num_rows);
+
+    print_COR_Format_kernel<<<1,1>>>(max_colors, num_rows, color_pointer, color_sorted_rows);
 }

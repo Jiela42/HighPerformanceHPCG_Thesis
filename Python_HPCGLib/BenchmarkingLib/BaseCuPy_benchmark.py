@@ -23,7 +23,7 @@ def run_BaseCuPy_3d27pt_benchmark(nx: int, ny: int, nz: int, save_folder) -> Non
 
     nnz = A_csr.nnz
 
-    version_name = "CuPy (gmres)"
+    version_name = "CuPy (minres)"
 
     matrix_timer = gpu_timer(
         version_name = version_name,
@@ -50,7 +50,7 @@ def run_BaseCuPy_3d27pt_benchmark(nx: int, ny: int, nz: int, save_folder) -> Non
     # if limit_matrix_size and nx < max_dim_size and ny < max_dim_size and nz < max_dim_size:
     #     benchmark_CG_csr_cupy(CGimplementation=BaseCuPy.computeCG, timer=matrix_timer, A_csr=A_csr, A=A_cupy, r=y_cupy, x=x_cupy)
     #     benchmark_MG_csr_cupy(BaseCuPy.computeMG, matrix_timer, A_csr, A_cupy, y_cupy, x_cupy)
-    benchmark_SymGS_csr_cupy(BaseCuPy.computeSymGS, matrix_timer, A_csr, A_cupy, y_cupy, x_cupy)
+    benchmark_SymGS_csr_cupy(BaseCuPy.computeSymGS, matrix_timer, A_csr, A_cupy, x_cupy, y_cupy)
     
 
     # benchmark_SPMV_cupy(BaseCuPy.computeSPMV, matrix_timer, A_csr, A_cupy, x_cupy, y_cupy)

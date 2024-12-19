@@ -24,6 +24,8 @@ class striped_Matrix {
 
         int *get_color_pointer_d();
         int *get_color_sorted_rows_d();
+        std::vector<int> get_color_pointer_vector();
+        std::vector<int> get_color_sorted_rows_vector();
         
         int get_num_rows() const;
         int get_num_cols() const;
@@ -38,6 +40,7 @@ class striped_Matrix {
         std::vector <int>& get_j_min_i();
         std::vector <T>& get_values();
         void set_num_rows(int num_rows);
+        void print_COR_Format();
         void print() const;
         // void compare_to(striped_Matrix<T>& other) const;
         // void write_to_file() const;

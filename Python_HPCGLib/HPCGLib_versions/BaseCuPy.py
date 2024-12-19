@@ -34,11 +34,13 @@ def computeDot(x: torch.tensor, y: torch.tensor) -> float:
 def computeSymGS(A_csr: CSRMatrix,
                 A: sp.csr_matrix, x: cp.ndarray, y: cp.ndarray)-> int:
     
-    solution = cupyx.scipy.sparse.linalg.lsmr(A, b=y, x0=x, maxiter=1)
+    solution = cupyx.scipy.sparse.linalg.minres(A, b=y, x0=x, maxiter=1)
+    # solution = cupyx.scipy.sparse.linalg.lsmr(A, b=y, x0=x, maxiter=1)
     # solution = cupyx.scipy.sparse.linalg.gmres(A, b=y, x0=x, maxiter=1)
 
-    if solution[1] != 0:
-        print(f"WARNING: GMRES did not converge, error code: {solution[1]}")
+
+    # if solution[1] != 0:
+    #     print(f"WARNING: GMRES did not converge, error code: {solution[1]}")
 
 
     cp.copyto(x, solution[0])
