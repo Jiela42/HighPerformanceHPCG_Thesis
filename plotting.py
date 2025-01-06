@@ -9,8 +9,8 @@ plot_path = "plots/"
 methods_to_plot = [
     # "CG",
     # "MG",
-    "SymGS",
-    # "SPMV",
+    # "SymGS",
+    "SPMV",
     # "Restriction",
     # "Prolongation",
     # "Dot",
@@ -18,13 +18,13 @@ methods_to_plot = [
 ]
 
 sizes_to_plot =[
-    ("8x8x8"),
+    # ("8x8x8"),
     ("16x16x16"),
     # ("24x24x24"),
     ("32x32x32"),
     ("64x64x64"),
     # ("128x64x64"),
-    ("128x128x64"),
+    # ("128x128x64"),
     ("128x128x128"),
     # ("256x128x128"),
     # ("256x256x128"),
@@ -33,22 +33,22 @@ sizes_to_plot =[
 versions_to_plot = [
     # "BaseTorch",
     # "MatlabReference",
-    # "BaseCuPy",
+    "BaseCuPy",
     # "CuPy (no copy)",
-    "CuPy (gmres)",
-    "CuPy (lsmr)",
-    "CuPy (minres)",
+    # "CuPy (gmres)",
+    # "CuPy (lsmr)",
+    # "CuPy (minres)",
     # "NaiveStriped CuPy",
     # "cuSparse&cuBLAS", #this is a legacy name, it is now called CSR Implementation
-    # "CSR-Implementation",
-    # "Naive Striped",
+    "CSR-Implementation",
+    "Naive Striped",
     # "Naive Striped (1 thread per physical core)",
     # "Naive Striped (4 thread per physical core)",
     # "Striped explicit Shared Memory",
     # "Striped explicit Shared Memory (rows_per_SM pow2)",
     # "Striped explicit Shared Memory (rows_per_SM pow2 1024 threads)",
     # "Striped explicit Shared Memory (rows_per_SM pow2 1024 threads 2x physical cores)",
-    # "Striped Warp Reduction",
+    "Striped Warp Reduction",
     # "Striped Warp Reduction (pre-compute diag_offset)",
     # "Striped Warp Reduction (cooperation number = 16)",
     # "Striped Warp Reduction (loop body in method)",
@@ -71,12 +71,12 @@ versions_to_plot = [
     # "Striped Preprocessed (x=0)",
     # "Striped Preprocessed (x=2)",
     # "Striped Preprocessed (x=random)",
-    "Striped coloring (storing nothing)",
-    "Striped coloring (pre-computing COR Format)",
-    "Striped coloring (COR Format already stored on the GPU)",
+    # "Striped coloring (storing nothing)",
+    # "Striped coloring (pre-computing COR Format)",
+    # "Striped coloring (COR Format already stored on the GPU)",
 
 ]
-plot_percentage_baseline = False
+plot_percentage_baseline = True
 
 baseline_implementations = [
     "CSR-Implementation",
@@ -89,7 +89,7 @@ y_axis_to_plot = [
 
 y_axis_config_to_plot = [
     "linear",
-    "log"
+    # "log"
 ]
 
 
@@ -182,7 +182,7 @@ def get_percentage_of_baseline_data(full_data):
         baseline_medians_ms = baseline_data.groupby(['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'])['Time (ms)'].median().reset_index()
         baseline_medians_nnz = baseline_data.groupby(['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'])['Time per NNZ (ms)'].median().reset_index()
 
-        ms_name = f'Normalized by {baseline}'
+        ms_name = f'Time normalized by {baseline}'
         # ms_per_nnz_name = f'Speedup vs {baseline} (Time per NNZ ms)'
 
         baseline_medians_ms = baseline_medians_ms.rename(columns={'Time (ms)': ms_name})
@@ -325,7 +325,7 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
     ax = sns.barplot(x=x, order=x_order, y=y, hue=hue, hue_order=hue_order, data=data, estimator= np.median, ci=98)
     fig = ax.get_figure()
 
-    text_size = 15
+    text_size = 18
 
     ax.set_title(title, fontsize=text_size+4)
     ax.set_xlabel(x, fontsize=text_size+2)
@@ -339,7 +339,7 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
 
     nc = get_num_columns(hue_order=hue_order)
     # print(nc, flush=True)
-    nc = 3
+    nc = 4
     box_offset = get_legend_horizontal_offset(num_cols=nc, hue_order=hue_order)
 
     legend = ax.legend(loc = 'lower center', bbox_to_anchor = (0.5, box_offset- 0.05), ncol = nc, prop={'size': text_size})
