@@ -7,6 +7,7 @@
 
 #include "HPCGLib.hpp"
 #include "HPCG_versions/cusparse.hpp"
+#include "HPCG_versions/AMGX.hpp"
 #include "HPCG_versions/naiveStriped.cuh"
 #include "HPCG_versions/striped_shared_mem.cuh"
 #include "HPCG_versions/striped_warp_reduction.cuh"
@@ -89,6 +90,7 @@ bool test_SymGS(
 
 // functions that call the abstract tests in order to test full versions
 bool run_cuSparse_tests(int nx, int ny, int nz);
+bool run_amgx_tests(int nx, int ny, int nz);
 bool run_naiveStriped_tests(int nx, int ny, int nz);
 bool run_stripedSharedMem_tests(int nx, int ny, int nz);
 bool run_stripedWarpReduction_tests(int nx, int ny, int nz);

@@ -88,7 +88,13 @@ void amgx_Implementation<T>::amgx_computeSPMV(
     // we convert the result back to the CSR format
     AMGX_vector_download(vec_y, y_d);
 
-
+    // Clean up
+    AMGX_vector_destroy(vec_x);
+    AMGX_vector_destroy(vec_y);
+    AMGX_matrix_destroy(matrix);
+    AMGX_resources_destroy(rsrc);
+    AMGX_config_destroy(config);
+    AMGX_finalize();
 }
 
 // explicit template instantiation

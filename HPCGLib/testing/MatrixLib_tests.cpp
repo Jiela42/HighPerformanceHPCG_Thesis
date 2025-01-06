@@ -43,6 +43,7 @@ bool read_save_test(striped_Matrix<double> A, std::string info){
     // if (not test_passed){
     //     std::cerr << "Test failed for " << info << std::endl;
     // }
+    return true;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////

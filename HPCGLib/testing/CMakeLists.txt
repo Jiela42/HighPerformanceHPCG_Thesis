@@ -7,6 +7,7 @@ project(Testing LANGUAGES CXX CUDA)
 
 add_library(TestHPCGLib
     HPCG_versions_tests/cuSparse_tests.cpp
+    HPCG_versions_tests/amgx_tests.cpp
     HPCG_versions_tests/naiveStriped_tests.cpp
     HPCG_versions_tests/stripedSharedMem_tests.cpp
     HPCG_versions_tests/stripedWarpReduction_tests.cpp

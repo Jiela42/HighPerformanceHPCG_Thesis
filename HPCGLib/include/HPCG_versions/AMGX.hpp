@@ -66,6 +66,17 @@ public:
             x_d, y_d);
     }
 
+    void compute_SPMV(
+        striped_Matrix<T>& A, //we only pass A for the metadata
+        T * striped_A_d, // the matrix A is already on the device
+        int num_rows, int num_cols, // these refer to the shape of the striped matrix
+        int num_stripes, // the number of stripes in the striped matrix
+        int * j_min_i_d, // this is a mapping for calculating the j of some entry i,j in the striped matrix
+        T * x_d, T * y_d // the vectors x and y are already on the device
+        ) override {
+        std::cerr << "Warning: compute_SPMV needs different parameters in AMGX." << std::endl;
+    }
+
     void compute_WAXPBY(
         T * x_d, T * y_d, T * w_d, // the vectors x, y and w are already on the device
         T alpha, T beta
@@ -79,6 +90,14 @@ public:
         ) override {
         std::cerr << "Warning: compute_Dot is not implemented in AMGX." << std::endl;
     }
+    void compute_Dot(
+        striped_Matrix<T> & A, // we pass A for the metadata
+        T * x_d, T * y_d, T * result_d // again: the vectors x, y and result are already on the device
+        ) override {
+        std::cerr << "Warning: compute_Dot needs different parameters in AMGX." << std::endl;
+    }
+
+            
 
 private:
    void amgx_computeSPMV(
