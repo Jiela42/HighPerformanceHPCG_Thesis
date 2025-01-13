@@ -129,7 +129,7 @@ bool coloring_test(striped_Matrix<double> A){
 
     // std::cout << "num colors " << max_col_dyn + 1 << std::endl;
 
-    std::cout << "size: " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz() << std::endl;
+    // std::cout << "size: " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz() << std::endl;
 
 
     std::vector<int> color_ptr_dyn(max_col_dyn+2, 0);
@@ -139,7 +139,7 @@ bool coloring_test(striped_Matrix<double> A){
         int color_ct_i = count(colors_dynamically.begin(), colors_dynamically.end(), i);
         color_ptr_dyn[i+1] = color_ptr_dyn[i] + count(colors_dynamically.begin(), colors_dynamically.end(), i);
         color_ptr_stat[i+1] = color_ptr_dyn[i] + std::count(colors_statically.begin(), colors_statically.end(), i);
-        std::cout << "color " << i << " has " << color_ct_i << " rows" << std::endl;
+        // std::cout << "color " << i << " has " << color_ct_i << " rows" << std::endl;
     }
 
     bool color_ptr_stat_vs_dyn_test = vector_compare(color_ptr_stat, color_ptr_dyn, "coloring ptr test");

@@ -76,10 +76,12 @@ versions_to_plot = [
     # "Striped coloring (COR Format already stored on the GPU)",
 
 ]
-plot_percentage_baseline = True
+plot_percentage_baseline = False
+plot_speedup_vs_baseline = True
 
 baseline_implementations = [
-    "CSR-Implementation",
+    # "CSR-Implementation",
+    "BaseCuPy",
     ]
 
 y_axis_to_plot = [
@@ -206,6 +208,36 @@ def get_percentage_of_baseline_data(full_data):
 
     return full_data
 
+def get_speedup_vs_baseline_data(full_data):
+    for baseline in baseline_implementations:
+        baseline_data = full_data[full_data['Version'] == baseline]
+        baseline_medians_ms = baseline_data.groupby(['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'])['Time (ms)'].median().reset_index()
+        # baseline_medians_nnz = baseline_data.groupby(['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'])['Time per NNZ (ms)'].median().reset_index()
+
+        ms_name = f'Speedup vs {baseline}'
+        # ms_per_nnz_name = f'Speedup vs {baseline} (Time per NNZ ms)'
+
+        baseline_medians_ms = baseline_medians_ms.rename(columns={'Time (ms)': ms_name})
+        # baseline_medians_nnz = baseline_medians_nnz.rename(columns={'Time per NNZ (ms)': ms_per_nnz_name})
+
+        y_axis_to_plot.append(ms_name)
+        # y_axis_to_plot.append(ms_per_nnz_name)
+
+        # Merge the baseline medians with the full data
+        full_data = full_data.merge(baseline_medians_ms, on=['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'], how='left')
+        # full_data = full_data.merge(baseline_medians_nnz, on=['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'], how='left')
+
+        show_data = full_data.drop(columns=['nx', 'ny', 'nz', 'NNZ', 'Density of A', 'Matrix Type', 'Ault Node', 'Matrix Dimensions, # Rows, Matrix Density'])
+
+        # print(show_data.head())
+
+        # Calculate the speedup compared to the baseline
+        full_data[ms_name] = (full_data[ms_name] / full_data['Time (ms)'])
+        # full_data[ms_per_nnz_name] = ((full_data['Time per NNZ (ms)']) / full_data[ms_per_nnz_name])
+
+
+    return full_data
+
 def preprocess_data(full_data):
     global dense_ops_to_plot, sparse_ops_to_plot, cpp_implementation_to_plot, python_implementation_to_plot
     # print(full_data, flush=True)
@@ -273,6 +305,9 @@ def preprocess_data(full_data):
 
     if plot_percentage_baseline:
         full_data = get_percentage_of_baseline_data(full_data)
+
+    if plot_speedup_vs_baseline:
+        full_data = get_speedup_vs_baseline_data(full_data)
 
     # for showing we remove nx,ny,nz, NNZ, Density of A
     show_data = full_data.drop(columns=['nx', 'ny', 'nz', 'NNZ', 'Density of A', 'Matrix Type', 'Ault Node', 'Matrix Dimensions, # Rows, Matrix Density'])
@@ -465,6 +500,18 @@ full_data = preprocess_data(full_data)
 print(sparse_ops_to_plot, flush=True)
 print(dense_ops_to_plot, flush=True)
 print(y_axis_to_plot, flush=True)
+
+#######################
+# we want to print a specific piece of data
+filter_data = full_data[
+    (full_data['Method'] == "SPMV") &
+    (full_data['Version'] == "Striped Warp Reduction") &
+    (full_data['Matrix Size'] == "128x128x128")
+    ]
+median_speedup = filter_data['Speedup vs BaseCuPy'].median()
+print(f"Median Speedup vs BaseCuPy for SPMV, Striped Warp Reduction, 128x128x128: {median_speedup}", flush=True)
+
+#######################
 
 for y_ax in y_axis_to_plot:
 

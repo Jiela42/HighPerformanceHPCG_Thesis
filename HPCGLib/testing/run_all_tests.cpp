@@ -25,7 +25,7 @@ int main(){
     // all_pass = all_pass && run_cuSparse_tests(4, 4, 4);
     // std::cout << "Finished cuSparse tests" << std::endl;
 
-    // all_pass = all_pass && run_amgx_tests(4, 4, 4);
+    all_pass = all_pass && run_amgx_tests(4, 4, 4);
     // all_pass = all_pass && run_amgx_tests(8, 8, 8);
     // all_pass = all_pass && run_amgx_tests(16, 16, 16);
     // all_pass = all_pass && run_amgx_tests(32, 32, 32);

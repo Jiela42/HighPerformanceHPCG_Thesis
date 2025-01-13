@@ -17,7 +17,7 @@ void run_striped_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::string f
 void run_no_store_striped_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
 void run_striped_coloringPrecomputed_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
 
-
+void run_cuSparse_3d27p_SPMV_benchmark(int nx, int ny, int nz, std::string folder_path);
 void run_cuSparse_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path);
 
 void run_warp_reduction_3d27p_SPMV_benchmark(int nx, int ny, int nz, std::string folder_path);
