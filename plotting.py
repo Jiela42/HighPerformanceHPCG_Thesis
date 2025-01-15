@@ -18,7 +18,7 @@ methods_to_plot = [
 ]
 
 sizes_to_plot =[
-    # ("8x8x8"),
+    ("8x8x8"),
     ("16x16x16"),
     # ("24x24x24"),
     ("32x32x32"),
@@ -41,6 +41,7 @@ versions_to_plot = [
     # "NaiveStriped CuPy",
     # "cuSparse&cuBLAS", #this is a legacy name, it is now called CSR Implementation
     "CSR-Implementation",
+    "AMGX",
     "Naive Striped",
     # "Naive Striped (1 thread per physical core)",
     # "Naive Striped (4 thread per physical core)",
@@ -75,13 +76,15 @@ versions_to_plot = [
     # "Striped coloring (pre-computing COR Format)",
     # "Striped coloring (COR Format already stored on the GPU)",
 
+
 ]
 plot_percentage_baseline = False
 plot_speedup_vs_baseline = True
 
 baseline_implementations = [
     # "CSR-Implementation",
-    "BaseCuPy",
+    # "BaseCuPy",
+    "AMGX",
     ]
 
 y_axis_to_plot = [
@@ -374,7 +377,7 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
 
     nc = get_num_columns(hue_order=hue_order)
     # print(nc, flush=True)
-    nc = 4
+    nc = 5
     box_offset = get_legend_horizontal_offset(num_cols=nc, hue_order=hue_order)
 
     legend = ax.legend(loc = 'lower center', bbox_to_anchor = (0.5, box_offset- 0.05), ncol = nc, prop={'size': text_size})
@@ -503,13 +506,16 @@ print(y_axis_to_plot, flush=True)
 
 #######################
 # we want to print a specific piece of data
-filter_data = full_data[
-    (full_data['Method'] == "SPMV") &
-    (full_data['Version'] == "Striped Warp Reduction") &
-    (full_data['Matrix Size'] == "128x128x128")
-    ]
-median_speedup = filter_data['Speedup vs BaseCuPy'].median()
-print(f"Median Speedup vs BaseCuPy for SPMV, Striped Warp Reduction, 128x128x128: {median_speedup}", flush=True)
+# filter_data = full_data[
+#     (full_data['Method'] == "SPMV") &
+#     (full_data['Version'] == "Striped Warp Reduction") &
+#     (full_data['Matrix Size'] == "128x128x128")
+#     ]
+# median_speedup = filter_data['Speedup vs BaseCuPy'].median()
+# print(f"Median Speedup vs BaseCuPy for SPMV, Striped Warp Reduction, 128x128x128: {median_speedup}", flush=True)
+
+# filtered_data = full_data[ full_data['Version'] == "AMGX"]
+# print(filtered_data, flush=True)
 
 #######################
 
