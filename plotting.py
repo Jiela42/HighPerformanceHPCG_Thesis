@@ -9,8 +9,8 @@ plot_path = "plots/"
 methods_to_plot = [
     # "CG",
     # "MG",
-    # "SymGS",
-    "SPMV",
+    "SymGS",
+    # "SPMV",
     # "Restriction",
     # "Prolongation",
     # "Dot",
@@ -20,12 +20,12 @@ methods_to_plot = [
 sizes_to_plot =[
     ("8x8x8"),
     ("16x16x16"),
-    # ("24x24x24"),
+    ("24x24x24"),
     ("32x32x32"),
     ("64x64x64"),
-    # ("128x64x64"),
+    ("128x64x64"),
     # ("128x128x64"),
-    ("128x128x128"),
+    # ("128x128x128"),
     # ("256x128x128"),
     # ("256x256x128"),
 ]
@@ -33,23 +33,27 @@ sizes_to_plot =[
 versions_to_plot = [
     # "BaseTorch",
     # "MatlabReference",
-    "BaseCuPy",
+    # "BaseCuPy",
     # "CuPy (no copy)",
     # "CuPy (gmres)",
     # "CuPy (lsmr)",
     # "CuPy (minres)",
     # "NaiveStriped CuPy",
     # "cuSparse&cuBLAS", #this is a legacy name, it is now called CSR Implementation
-    "CSR-Implementation",
+    # "CSR-Implementation",
     "AMGX",
-    "Naive Striped",
+    "AMGX 2 iterations",
+    "AMGX 3 iterations",
+    "AMGX 4 iterations",
+    "AMGX 5 iterations",
+    # "Naive Striped",
     # "Naive Striped (1 thread per physical core)",
     # "Naive Striped (4 thread per physical core)",
     # "Striped explicit Shared Memory",
     # "Striped explicit Shared Memory (rows_per_SM pow2)",
     # "Striped explicit Shared Memory (rows_per_SM pow2 1024 threads)",
     # "Striped explicit Shared Memory (rows_per_SM pow2 1024 threads 2x physical cores)",
-    "Striped Warp Reduction",
+    # "Striped Warp Reduction",
     # "Striped Warp Reduction (pre-compute diag_offset)",
     # "Striped Warp Reduction (cooperation number = 16)",
     # "Striped Warp Reduction (loop body in method)",
@@ -74,7 +78,7 @@ versions_to_plot = [
     # "Striped Preprocessed (x=random)",
     # "Striped coloring (storing nothing)",
     # "Striped coloring (pre-computing COR Format)",
-    # "Striped coloring (COR Format already stored on the GPU)",
+    "Striped coloring (COR Format already stored on the GPU)",
 
 
 ]
@@ -82,9 +86,9 @@ plot_percentage_baseline = False
 plot_speedup_vs_baseline = True
 
 baseline_implementations = [
-    # "CSR-Implementation",
+    "CSR-Implementation",
     # "BaseCuPy",
-    "AMGX",
+    # "AMGX",
     ]
 
 y_axis_to_plot = [
@@ -108,8 +112,23 @@ import numpy as np
 import seaborn as sns
 import os
 from io import StringIO
+from collections import defaultdict
 import datetime
 import warnings
+import re
+
+
+#################################################################################################################
+# Standard L2 Norms for perfectly dependent SymGS
+SymGS_L2_Norms = defaultdict(lambda: 0.0, {
+    "8x8x8": 30.25627326455036,
+    "16x16x16": 59.00057727121956,
+    "24x24x24": 100.89687347113858,
+    "32x32x32": 155.16087169517397,
+    "64x64x64": 461.57263495961604,
+    "128x64x64": 663.2354204119574
+})
+
 
 #################################################################################################################
 # Suppress all FutureWarnings
@@ -151,6 +170,21 @@ def read_data():
         nnz = int(meta_data[6])
         method = str(meta_data[7])
         sparsity_of_A = nnz / (nx * ny * nz) ** 2 if method not in ["Dot", "WAXPBY"] else 1
+        additional_info = str(meta_data[8]) if len(meta_data) > 8 else ""
+
+        # grab the norm
+        norm_pattern = r"L2 Norm: ([\d\.]+)"
+        norm_match = re.search(norm_pattern, additional_info)
+
+        if norm_match:
+            l2_norm = float(norm_match.group(1))
+            if method == "SymGS" and version_name in versions_to_plot:
+
+                print(f"Found L2 Norm: {l2_norm}, {nx}, {version_name}", flush=True)
+        else:
+            l2_norm = SymGS_L2_Norms[f"{nx}x{ny}x{nz}"]
+            if method == "SymGS" and version_name in versions_to_plot:
+                print(f"no L2 Norm found, {additional_info}", flush=True)
 
         # read in the rest of the data i.e. the timings
 
@@ -166,6 +200,15 @@ def read_data():
         data['NNZ'] = nnz
         data['Method'] = method
         data['Density of A'] = sparsity_of_A
+
+        # if (version_name in versions_to_plot and method == "SymGS"):
+        #     print(f"Read in data for {version_name}, {ault_node}, {matrix_type}, {nx}x{ny}x{nz}, {method}, {additional_info}, {l2_norm}", flush=True)
+    
+
+        # only symmetric gauss seidel produces a norm
+        if "SymGS" in method:
+            data['L2 Norm'] = l2_norm
+            # print(l2_norm, flush=True)
 
         # Append the data to the full_data DataFrame
         full_data = pd.concat([full_data, data], ignore_index=True)
@@ -362,6 +405,21 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
 
     ax = sns.barplot(x=x, order=x_order, y=y, hue=hue, hue_order=hue_order, data=data, estimator= np.median, ci=98)
     fig = ax.get_figure()
+    
+    # Group the data by the relevant columns
+    grouped_data = data.groupby(['Method', 'Version', 'nx', 'ny', 'nz'])
+
+    # Annotate the bars with the L2 norm values for SymGS methods
+    for bar, (method, version, nx, ny, nz), group in zip(ax.patches, grouped_data.groups.keys(), grouped_data):
+        group_data = group[1]  # Access the DataFrame part of the tuple
+        l2_norm = group_data['L2 Norm'].values[0]  # Assuming one L2 norm per group
+        height = bar.get_height()
+        if method == 'SymGS' and not np.isnan(l2_norm):
+            ax.annotate(f'{int(round(l2_norm))}',
+                        xy=(bar.get_x() + bar.get_width() / 2, height),
+                        xytext=(0, 3),  # 3 points vertical offset
+                        textcoords="offset points",
+                        ha='center', va='bottom')
 
     text_size = 18
 
@@ -377,7 +435,7 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
 
     nc = get_num_columns(hue_order=hue_order)
     # print(nc, flush=True)
-    nc = 5
+    nc = 
     box_offset = get_legend_horizontal_offset(num_cols=nc, hue_order=hue_order)
 
     legend = ax.legend(loc = 'lower center', bbox_to_anchor = (0.5, box_offset- 0.05), ncol = nc, prop={'size': text_size})

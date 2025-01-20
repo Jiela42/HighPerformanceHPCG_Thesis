@@ -168,3 +168,20 @@ def test_BaseTorch(nx:int, ny:int, nz:int) -> bool:
 
     return all_tests_passed
 
+def get_L2_norm_SymGS(nx:int, ny:int, nz:int):
+
+
+    A_coo, A, y = generations.generate_torch_coo_problem(nx, ny, nz)
+    x = torch.zeros(nx*ny*nz, device=device, dtype=torch.float64)
+
+    BaseTorch.computeSymGS(nx, ny, nz, A, x, y)
+
+    import numpy as np
+    import cupy as cp
+
+    Ax = A @ x
+    norm = np.linalg.norm(cp.array(Ax) - cp.array(y))
+
+    print(f"{nx}x{ny}x{nz}: {norm}", flush=True)
+
+

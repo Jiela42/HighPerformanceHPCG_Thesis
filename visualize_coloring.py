@@ -12,6 +12,35 @@ num_col_row_stats = True
 # first we read the colors
 base_path = "colorings/"
 
+def get_xyzc(file):
+        
+    xyzc = []
+    with open(base_path + file, 'r') as f:
+        dims = file.replace('.csv', '').replace('coloring_', '').replace('amgx_', '')
+        nx = int(dims.split('x')[0])
+        ny = int(dims.split('x')[1])
+        nz = int(dims.split('x')[2])
+        lines = f.readlines()
+        colors = lines[0].split(',')
+        colors = [color for color in colors if color != '' and color != '\n']
+        for i, color in enumerate(colors):
+            colors[i] = int(color)
+
+            ix = i % nx
+            iy = (i//nx) % ny
+            iz = i // (nx * ny)
+
+            xyzc.append((ix, iy, iz, int(color)))
+
+    return xyzc
+
+def get_dims(file):
+    dims = file.replace('.csv', '').replace('coloring_', ''). replace('amgx_', '')
+    nx = int(dims.split('x')[0])
+    ny = int(dims.split('x')[1])
+    nz = int(dims.split('x')[2])
+    return nx, ny, nz
+
 def rows_per_color_closed_form(c, nx, ny, nz):
 
     upper_bound_y = min(c//2, nx)
@@ -247,6 +276,23 @@ def create_animation_buggy_old_version(x, y, z, colors, dims):
 
 def create_animation(x, y, z, colors, dims):
 
+    # print("x: ", x)
+    # print("y: ", y)
+    # print("z: ", z)
+    # print("colors: ", colors)
+
+    # print("type x: ", type(x))
+    # print("type y: ", type(y))
+    # print("type z: ", type(z))
+    # print("type colors: ", type(colors))
+
+    output_file = "plots/coloring_plots/dims_" + dims + ".html"
+
+    # check if the file already exists
+    if os.path.exists(output_file):
+        print("Skipping file: ", output_file)
+        return
+
     min_x = min(x) - 1
     max_x = max(x) + 1
     min_y = min(y) - 1
@@ -366,7 +412,7 @@ def create_animation(x, y, z, colors, dims):
     )
 
     # Save plot to HTML file
-    output_file = "plots/coloring_plots/dims_" + dims + ".html"
+    # output_file = "plots/coloring_plots/dims_" + dims + ".html"
     fig.write_html(output_file, include_plotlyjs=True, full_html=True)
 
 
@@ -382,7 +428,9 @@ def visualize_coloring(file):
 
     # read the csv file in that order
     with open(base_path + file, 'r') as f:
-        dims = file.replace('.csv', '').replace('coloring_', '')
+        # print("Reading file: ", file)
+        dims = file.replace('.csv', '').replace('coloring_', '').replace('amgx_', '')
+        # print("Dims: ", dims)
         nx = int(dims.split('x')[0])
         ny = int(dims.split('x')[1])
         nz = int(dims.split('x')[2])
@@ -407,16 +455,18 @@ def visualize_coloring(file):
     cxyz = sorted(cxyz, key=lambda x: x[0])
 
     print("Coloring for dims: ", dims)
-    for c, x, y, z, row in cxyz:
-        if c == 4:
-            print(f"Color: {c}, x: {x}, y: {y}, z: {z}, row: {row}")
+    # for c, x, y, z, row in cxyz:
+    #     if c == 4:
+    #         print(f"Color: {c}, x: {x}, y: {y}, z: {z}, row: {row}")
 
     # check_xyz_coordinates(x, y, z, nx, ny, nz)
     # check_color_computation_theory(x, y, z, colors, dims)
 
     # now we print each x,y,z with the corresponding color
     # create_animation_buggy_old_version(x, y, z, colors, dims)
-    # create_animation(x, y, z, colors, dims)
+    name_adjustment = "_amgx" if "amgx" in file else ""
+    print("Creating animation for dims: ", dims)
+    create_animation(x, y, z, colors, dims + name_adjustment)
 
 def get_color_stats(file):
 
@@ -575,10 +625,48 @@ def get_color_stats(file):
         
         # assert(not has_duplicates(x0_face_colors))
 
+def from_raw_to_csv(raw_file):
+    csv_file = raw_file.replace('raw_', '').replace('.txt', '.csv')
+    with open(raw_file, 'r') as infile, open(csv_file, 'w') as outfile:
+        colors = []
+        for line in infile:
+            color = line.split()[-1]  # Get the last element which is the color digit
+            colors.append(color)
+        outfile.write(','.join(colors))   
+
+def check_distance(x, y, z, colors, nx, ny, nz):
+    print("Checking distance between colors for dims: ", nx, ny, nz, flush=True)
+    xyzc = list(zip(x, y, z, colors))
+
+    for ix, iy, iz, color in xyzc:
+        # print(f"Checking color: {color} at {ix, iy, iz}", flush=True)
+        # check neighbours if they have the same color
+        neighbors = []
+        for sz in range(-1, 2):
+            for sy in range(-1, 2):
+                for sx in range(-1, 2):
+                    if sz + sy + sx != 0 and ix+sx > -1 and ix+sx < nx and iy+sy > -1 and iy+sy < ny and iz+sz > -1 and iz+sz < nz:
+                        neighbors.append((ix+sx, iy+sy, iz+sz))
+
     
+        for nxi, nyi, nzi in neighbors:
+            if (nxi, nyi, nzi, color) in xyzc:
+                print(f"Found neighbor with same color: {color} at {nxi, nyi, nzi}")
         
 # grab all the files in the directory
 files = os.listdir(base_path)
+
+csv_files = [file for file in files if file.endswith('.csv')]
+
+# first check if there is raw data that needs to be converted to csv
+raw_files = [file for file in files if file.endswith('.txt')]
+for raw_file in raw_files:
+    new_name = raw_file.replace('raw_', '').replace('.txt', '.csv')
+    if new_name not in csv_files:
+        print(f"Converting raw file: {raw_file} to csv")
+        from_raw_to_csv(base_path + raw_file)
+
+amgx_files = [file for file in csv_files if 'amgx' in file]
 
 # visualize_coloring(files[0])
 
@@ -620,17 +708,39 @@ files_to_inspect=[
     
 ]
 
+for file in amgx_files:
+    # visualize_coloring(file)
+    xyzc = get_xyzc(file)
+    
+    # Unzipping xyzc into independent lists
+    x, y, z, colors = zip(*xyzc)
+    
+    # Convert tuples to lists if needed
+    x = list(x)
+    y = list(y)
+    z = list(z)
+    colors = list(colors)
+
+    nx, ny, nz = get_dims(file)
+    if (nx, ny, nz) == (16, 16, 16):
+    
+        check_distance(x, y, z, colors, nx, ny, nz)
+
+
+# for file in files_to_color:
+#     visualize_coloring(file)
+
 # for file in files_to_color:
 #     visualize_coloring(file)
 
 # visualize_coloring("coloring_4x4x4.csv")
 
-for file in files:
+# for file in files:
 #     if file not in files_to_ignore:
         # visualize_coloring(file)
         # get_color_stats(file)
     # visualize_coloring(file)
-    get_color_stats(file)
+    # get_color_stats(file)
 
 # for file in files_to_inspect:
 #     if file in files:

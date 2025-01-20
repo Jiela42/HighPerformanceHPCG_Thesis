@@ -5,6 +5,7 @@ import datetime
 class gpu_timer:
 
     def __init__(self, version_name, ault_node, matrix_type, nx, ny, nz, nnz, folder_path):
+        self.additional_info = ""
         self.folder_path = folder_path
         self.version_name = version_name
         self.ault_node = ault_node
@@ -91,40 +92,46 @@ class gpu_timer:
         if self.CG_time:
             filename = f"{self.folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.nz}_CG.csv"
             with open(filename, "w") as f:
-                f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.nz},{self.nnz},CG\n")
+                f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.nz},{self.nnz},CG,{self.additional_info}\n")
                 for time in self.elapsed_CG_time_ms:
                     f.write(f"{time}\n")
         if self.MG_time:
             filename = f"{self.folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.nz}_MG.csv"
             with open(filename, "w") as f:
-                f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.nz},{self.nnz},MG\n")
+                f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.nz},{self.nnz},MG,{self.additional_info}\n")
                 for time in self.elapsed_MG_time_ms:
                     f.write(f"{time}\n")
         if self.SymGS_time:
             filename = f"{self.folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.nz}_SymGS.csv"
             with open(filename, "w") as f:
-                f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.nz},{self.nnz},SymGS\n")
+                f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.nz},{self.nnz},SymGS,{self.additional_info}\n")
                 for time in self.elapsed_SymGS_time_ms:
                     f.write(f"{time}\n")
         if self.SPMV_time:
             filename = f"{self.folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.nz}_SPMV.csv"
             with open(filename, "w") as f:
-                f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.nz},{self.nnz},SPMV\n")
+                f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.nz},{self.nnz},SPMV,{self.additional_info}\n")
                 for time in self.elapsed_SPMV_time_ms:
                     f.write(f"{time}\n")
         if self.waxpby_time:
             filename = f"{self.folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.nz}_WAXPBY.csv"
             with open(filename, "w") as f:
-                    f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.nz},{self.nnz},WAXPBY\n")
+                    f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.nz},{self.nnz},WAXPBY,{self.additional_info}\n")
                     for time in self.elapsed_waxpby_time_ms:
                         f.write(f"{time}\n")
         if self.dot_time:
             filename = f"{self.folder_path}/{self.version_name}_{self.ault_node}_{self.matrix_type}_{self.nx}x{self.ny}x{self.nz}_Dot.csv"
             with open(filename, "w") as f:
-                    f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.nz},{self.nnz},Dot\n")
+                    f.write(f"{self.version_name},{self.ault_node},{self.matrix_type},{self.nx},{self.ny},{self.nz},{self.nnz},Dot,{self.additional_info}\n")
                     for time in self.elapsed_dot_time_ms:
                         f.write(f"{time}\n")
         
         # print("Timer destroyed")
+
+    def update_additional_info(self, additional_info):
+        self.additional_info = additional_info
+
+    def get_additional_info(self):
+        return self.additional_info
         
             
