@@ -12,7 +12,7 @@ import scipy.sparse as sparse
 import numpy as np
 import cupy as cp
 
-def bench_AMGX_SymGS(nx, ny, nz, A_csr_scipy, x_np, y, timer):
+def bench_AMGX_SymGS(nx, ny, nz, A_csr_scipy, x_np, y, timer, num_iterations):
 
     # in the beginning x is going to be all zeros.
     # remember to zero it out between runs
@@ -23,12 +23,13 @@ def bench_AMGX_SymGS(nx, ny, nz, A_csr_scipy, x_np, y, timer):
     "config_version": 2,
             "determinism_flag": 1,
             "exception_handling" : 1,
+            "print_coloring_info": 1,
             # "max_iters": 1,
             "solver": {
                 # "monitor_residual": 1,
                 "solver": "MULTICOLOR_GS",
                 "symmetric_GS": 1, 
-                "max_iters": 2,
+                "max_iters": num_iterations,
                 # "solver_verbose":1,
                 "relaxation_factor": 1,
                 # "obtain_timings": 1,
@@ -40,6 +41,7 @@ def bench_AMGX_SymGS(nx, ny, nz, A_csr_scipy, x_np, y, timer):
     })
 
     rsc = pyamgx.Resources().create_simple(cfg)
+
 
     # Create matrices and vectors:
     A = pyamgx.Matrix().create(rsc)
@@ -54,7 +56,8 @@ def bench_AMGX_SymGS(nx, ny, nz, A_csr_scipy, x_np, y, timer):
     x.upload(x_np)
     
     # Setup and solve system:
-    for i in range (num_bench_iterations):
+    for i in range (1):
+        print("setup and solve system")
         x.upload(np.zeros_like(x_np))
         timer.start_timer()
         solver.setup(A)
@@ -62,7 +65,6 @@ def bench_AMGX_SymGS(nx, ny, nz, A_csr_scipy, x_np, y, timer):
         timer.stop_timer("computeSymGS")
         # zero out x
 
-    # Download solution
     x.download(x_np)
 
     # print(f"Solution: {x_np[:10]}")
@@ -71,11 +73,12 @@ def bench_AMGX_SymGS(nx, ny, nz, A_csr_scipy, x_np, y, timer):
     # Ax - b
     norm = np.linalg.norm(cp.array(A_csr_scipy @ x_np) - cp.array(y))
     # print(f"Norm: {norm}")
+    # Download solution
 
     timer.update_additional_info(timer.get_additional_info() + f"L2 Norm: {norm}")
 
 
-    # Clean up:
+    # Clean up
     A.destroy()
     x.destroy()
     b.destroy()
@@ -89,40 +92,44 @@ def bench_AMGX_SymGS(nx, ny, nz, A_csr_scipy, x_np, y, timer):
 def run_AMGX_benchmark(nx: int, ny: int, nz: int, save_folder):
 
     meta_data , A_csr, y = generations.generate_cupy_csr_problem(nx, ny, nz)
-
-
-    nnz = meta_data.nnz
-
-    version_name = "AMGX 2 iterations"
-
-    matrix_timer = gpu_timer(
-        version_name = version_name,
-        ault_node = ault_node,
-        matrix_type = "3d_27pt",
-        nx = nx,
-        ny = ny,
-        nz = nz,
-        nnz = nnz,
-        folder_path = save_folder
-    )
-
-    vector_timer = gpu_timer(
-        version_name = version_name,
-        ault_node = ault_node,
-        matrix_type = "3d_27pt",
-        nx = nx,
-        ny = ny,
-        nz = nz,
-        nnz = nx*ny*nz,
-        folder_path = save_folder
-    )
-
     x = np.zeros(meta_data.num_rows, dtype=np.float64)
     A_csr_scipy =  sparse.csr_matrix((A_csr.data.get(), A_csr.indices.get(), A_csr.indptr.get()), shape=A_csr.shape)
 
-    bench_AMGX_SymGS(nx, ny, nz, A_csr_scipy, x, y, matrix_timer)
+    nnz = meta_data.nnz
 
-    matrix_timer.destroy_timer()
-    vector_timer.destroy_timer()
+    for num_iterations in range(1, 2):
+
+        name_addition = ""
+
+        version_name = f"AMGX {num_iterations} iterations" + name_addition if num_iterations > 1 else "AMGX" + name_addition
+
+        matrix_timer = gpu_timer(
+            version_name = version_name,
+            ault_node = ault_node,
+            matrix_type = "3d_27pt",
+            nx = nx,
+            ny = ny,
+            nz = nz,
+            nnz = nnz,
+            folder_path = save_folder
+        )
+
+        vector_timer = gpu_timer(
+            version_name = version_name,
+            ault_node = ault_node,
+            matrix_type = "3d_27pt",
+            nx = nx,
+            ny = ny,
+            nz = nz,
+            nnz = nx*ny*nz,
+            folder_path = save_folder
+        )
+
+
+
+        bench_AMGX_SymGS(nx, ny, nz, A_csr_scipy, x, y, matrix_timer, num_iterations)
+
+        matrix_timer.destroy_timer()
+        vector_timer.destroy_timer()
 
     return

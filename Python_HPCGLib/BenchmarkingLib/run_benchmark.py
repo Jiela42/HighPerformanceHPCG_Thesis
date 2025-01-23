@@ -17,7 +17,7 @@ timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 base_path = "../../timing_results/"
 
 # we use this to overwrite the other path for testing
-# base_path = "../test_timing_results/"
+base_path = "../test_timing_results/"
 
 new_folder_path = os.path.join(base_path, timestamp)
 
@@ -93,11 +93,11 @@ print("***********************************RUNNING BENCHMARK SUITE***************
 # print("NaiveBandedCuPy benchmarks done", flush=True)
 
 run_AMGX_benchmark(8, 8, 8, new_folder_path)
-run_AMGX_benchmark(16, 16, 16, new_folder_path)
-run_AMGX_benchmark(24, 24, 24, new_folder_path)
-run_AMGX_benchmark(32, 32, 32, new_folder_path)
-run_AMGX_benchmark(64, 64, 64, new_folder_path)
-run_AMGX_benchmark(128, 64, 64, new_folder_path)
+# run_AMGX_benchmark(16, 16, 16, new_folder_path)
+# run_AMGX_benchmark(24, 24, 24, new_folder_path)
+# run_AMGX_benchmark(32, 32, 32, new_folder_path)
+# run_AMGX_benchmark(64, 64, 64, new_folder_path)
+# run_AMGX_benchmark(128, 64, 64, new_folder_path)
 # the following run out of memory
 # run_AMGX_benchmark(128, 128, 64, new_folder_path)
 # run_AMGX_benchmark(128, 128, 128, new_folder_path)
