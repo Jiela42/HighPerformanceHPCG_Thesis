@@ -7,7 +7,6 @@
 
 #include "HPCGLib.hpp"
 #include "HPCG_versions/cusparse.hpp"
-#include "HPCG_versions/AMGX.hpp"
 #include "HPCG_versions/naiveStriped.cuh"
 #include "HPCG_versions/striped_shared_mem.cuh"
 #include "HPCG_versions/striped_warp_reduction.cuh"
@@ -18,10 +17,14 @@
 
 
 #include "UtilLib/cuda_utils.hpp"
+#include "UtilLib/utils.hpp"
+#include "UtilLib/utils.cuh"
 
 #include <iostream>
 
 #define RANDOM_SEED 42
+
+bool run_all_util_tests(int nx, int ny, int nz);
 
 // MatrixLib testing functions
 bool run_all_matrixLib_tests(int nx, int ny, int nz);

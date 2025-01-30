@@ -98,6 +98,15 @@ bool test_SPMV(
     CHECK_CUDA(cudaFree(y_uut_d));
 
     // compare the results
+
+    // for my sanity print the first 10 elements
+
+    // std::cout << "SPMV results" << std::endl;
+
+    // for(int i = 0; i < 10; i++){
+    //     std::cout << "baseline[" << i << "] = " << y_baseline[i] << " uut[" << i << "] = " << y_uut[i] << std::endl;
+    // }
+
     bool test_pass = vector_compare(y_baseline, y_uut);
 
     return test_pass;

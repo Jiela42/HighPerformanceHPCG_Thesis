@@ -97,7 +97,23 @@ def analyze_box_coloring(nx, ny, nz, bx, by, bz):
 
                     if (calculated_x, calculated_y, calculated_z, c) not in xyzc:
                         print(f"Node ({calculated_x}, {calculated_y}, {calculated_z}) with color {c} not found")
-                        assert False, "Node not found"
+                        assert False, "Node not found in tripple loop"
+
+        for i in range(num_nodes_with_color):
+
+            iy = i // (adjusted_cols * adjusted_faces)
+            ix = (i // adjusted_faces) % adjusted_cols
+            iz = i % adjusted_faces
+
+            calculated_x = ix * bx + offs_x
+            calculated_y = iy * by + offs_y
+            calculated_z = iz * bz + offs_z
+
+            if (calculated_x, calculated_y, calculated_z, c) not in xyzc:
+                print(f"Node ({calculated_x}, {calculated_y}, {calculated_z}) with color {c} not found")
+                assert False, "Node not found in single loop"
+
+
 
 
 def main():

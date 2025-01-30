@@ -20,7 +20,7 @@ methods_to_plot = [
 sizes_to_plot =[
     ("8x8x8"),
     ("16x16x16"),
-    ("24x24x24"),
+    # ("24x24x24"),
     ("32x32x32"),
     ("64x64x64"),
     ("128x64x64"),
@@ -35,22 +35,35 @@ versions_to_plot = [
     # "MatlabReference",
     # "BaseCuPy",
     # "CuPy (no copy)",
-    # "CuPy (gmres)",
+    "CuPy (gmres)",
+    # "CuPy 2 iterations (gmres)",
+    # "CuPy 3 iterations (gmres)",
+    # "CuPy 4 iterations (gmres)",
+    # "CuPy 5 iterations (gmres)",
     # "CuPy (lsmr)",
-    # "CuPy (minres)",
+    # "CuPy 2 iterations (lsmr)",
+    # "CuPy 3 iterations (lsmr)",
+    # "CuPy 4 iterations (lsmr)",
+    # "CuPy 5 iterations (lsmr)",
+    "CuPy (minres)",
+    # "CuPy 2 iterations (minres)",
+    # "CuPy 3 iterations (minres)",
+    # "CuPy 4 iterations (minres)",
+    "CuPy 5 iterations (minres)",
+    
     # "NaiveStriped CuPy",
     # "cuSparse&cuBLAS", #this is a legacy name, it is now called CSR Implementation
     # "CSR-Implementation",
-    "AMGX",
+    # "AMGX",
     "AMGX non-deterministic",
     "AMGX 2 iterations",
-    "AMGX 2 iterations non-deterministic",
-    "AMGX 3 iterations",
-    "AMGX 3 iterations non-deterministic",
-    "AMGX 4 iterations",
-    "AMGX 4 iterations non-deterministic",
-    "AMGX 5 iterations",
-    "AMGX 5 iterations non-deterministic",
+    # "AMGX 2 iterations non-deterministic",
+    # "AMGX 3 iterations",
+    # "AMGX 3 iterations non-deterministic",
+    # "AMGX 4 iterations",
+    # "AMGX 4 iterations non-deterministic",
+    # "AMGX 5 iterations",
+    # "AMGX 5 iterations non-deterministic",
     # "Naive Striped",
     # "Naive Striped (1 thread per physical core)",
     # "Naive Striped (4 thread per physical core)",
@@ -83,12 +96,22 @@ versions_to_plot = [
     # "Striped Preprocessed (x=random)",
     # "Striped coloring (storing nothing)",
     # "Striped coloring (pre-computing COR Format)",
-    # "Striped coloring (COR Format already stored on the GPU)",
+    "Striped coloring (COR Format already stored on the GPU)",
+    # "Striped Box coloring (coloringBox: 4x4x4) (coop_num: 4)",
+    # "Striped Box coloring (coloringBox: 5x5x5) (coop_num: 4)",
+    # "Striped Box coloring (coloringBox: 6x6x6) (coop_num: 4)",
+    # "Striped Box coloring (coloringBox: 7x7x7) (coop_num: 4)",
+    # "Striped Box coloring (coloringBox: 8x8x8) (coop_num: 4)",
+    
+    "Striped Box coloring (coloringBox: 3x3x3) (coop_num: 4)",
+    # "Striped Box coloring (coloringBox: 3x3x3) (coop_num: 8)",
+    # "Striped Box coloring (coloringBox: 3x3x3) (coop_num: 16)",
+    # "Striped Box coloring (coloringBox: 3x3x3) (coop_num: 32)",
 
 
 ]
 plot_percentage_baseline = False
-plot_speedup_vs_baseline = True
+plot_speedup_vs_baseline = False
 
 baseline_implementations = [
     # "CSR-Implementation",
@@ -134,6 +157,18 @@ SymGS_L2_Norms = defaultdict(lambda: 0.0, {
     "128x64x64": 663.2354204119574
 })
 
+y_L2_Norms = defaultdict(lambda: 1.0, {
+    "8x8x8": 175.3396703544295,
+    "16x16x16": 336.9391636482764,
+    "24x24x24": 500.8392955829245,
+    "32x32x32": 667.6466131120565,
+    "64x64x64": 1364.858967073155,
+    "128x64x64": 1781.8080704722381,
+    "128x128x64": 2294.576213595879,
+    "128x128x128": 2897.5341240440985,
+    "256x128x128": 3828.4398911305893
+})
+
 
 #################################################################################################################
 # Suppress all FutureWarnings
@@ -156,6 +191,7 @@ def read_data():
 
     # print(len(files), flush=True)
 
+
     for file in files:
         # the first line contains the metadata, read it in
         with open(file, "r") as f:
@@ -176,22 +212,33 @@ def read_data():
         method = str(meta_data[7])
         sparsity_of_A = nnz / (nx * ny * nz) ** 2 if method not in ["Dot", "WAXPBY"] else 1
         additional_info = str(meta_data[8]) if len(meta_data) > 8 else ""
-
         # grab the norm
-        norm_pattern = r"L2 Norm: ([\d\.]+)"
-        norm_match = re.search(norm_pattern, additional_info)
+        l2_norm_pattern = r"L2 Norm: ([\d\.]+)"
+        l2_norm_match = re.search(l2_norm_pattern, additional_info)
+        rr_norm_pattern = r"rr_norm: ([\d\.]+)"
+        rr_norm_match = re.search(rr_norm_pattern, additional_info)
 
-        if norm_match:
-            l2_norm = float(norm_match.group(1))
+        if l2_norm_match:
+            l2_norm = float(l2_norm_match.group(1))
             # if method == "SymGS" and version_name in versions_to_plot:
 
-                # print(f"Found L2 Norm: {l2_norm}, {nx}, {version_name}", flush=True)
+            #     print(f"Found L2 Norm: {l2_norm}, {nx}, {version_name}", flush=True)
         else:
             l2_norm = SymGS_L2_Norms[f"{nx}x{ny}x{nz}"]
             # if method == "SymGS" and version_name in versions_to_plot:
-                # print(f"no L2 Norm found, {additional_info}", flush=True)
-
+            #     print(f"no L2 Norm found, {additional_info}, {version_name}", flush=True)
+            #     print(meta_data, flush=True)
         # read in the rest of the data i.e. the timings
+
+        if rr_norm_match:
+            rr_norm = float(rr_norm_match.group(1))
+        else:
+
+        # assert y_L2_Norms[f"{nx}x{ny}x{nz}"] != 0, f"y_L2_Norms[{nx}x{ny}x{nz}] is 0"
+
+
+            rr_norm = l2_norm / y_L2_Norms[f"{nx}x{ny}x{nz}"]
+        # rr_norm = l2_norm / (nx * ny * nz)
 
         data = pd.read_csv(StringIO("\n".join(lines[1:])), header=None, names=['Time (ms)'])
 
@@ -213,6 +260,7 @@ def read_data():
         # only symmetric gauss seidel produces a norm
         if "SymGS" in method:
             data['L2 Norm'] = l2_norm
+            data['rr_norm'] = rr_norm
             # print(l2_norm, flush=True)
 
         # Append the data to the full_data DataFrame
@@ -410,21 +458,49 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
 
     ax = sns.barplot(x=x, order=x_order, y=y, hue=hue, hue_order=hue_order, data=data, estimator= np.median, ci=98)
     fig = ax.get_figure()
-    
-    # Group the data by the relevant columns
-    grouped_data = data.groupby(['Method', 'Version', 'nx', 'ny', 'nz'])
 
-    # Annotate the bars with the L2 norm values for SymGS methods
-    for bar, (method, version, nx, ny, nz), group in zip(ax.patches, grouped_data.groups.keys(), grouped_data):
-        group_data = group[1]  # Access the DataFrame part of the tuple
-        l2_norm = group_data['L2 Norm'].values[0]  # Assuming one L2 norm per group
-        height = bar.get_height()
-        if method == 'SymGS' and not np.isnan(l2_norm):
-            ax.annotate(f'{int(round(l2_norm))}',
-                        xy=(bar.get_x() + bar.get_width() / 2, height),
-                        xytext=(0, 3),  # 3 points vertical offset
-                        textcoords="offset points",
-                        ha='center', va='bottom')
+    # print(f"**************************", flush=True)
+    # print(f"Title: {title}", flush=True)
+    # print("**************************", flush=True)
+    
+   # Group the data by the relevant columns
+    grouped_data = data.groupby([x, hue])
+
+    # Initialize bar counter
+    bar_ctr = 0
+
+    # Iterate over x_order and hue_order to annotate bars
+    for hue_value in hue_order:
+        for x_value in x_order:
+            # Get the group corresponding to the current x_value and hue_value
+            group_key = (x_value, hue_value)
+            if group_key in grouped_data.groups:
+                group_data = grouped_data.get_group(group_key)
+                l2_norms = np.unique(group_data['L2 Norm'].values)
+                rr_norms = np.unique(group_data['rr_norm'].values)
+                assert len(rr_norms) <= 1, "More than one rr norm found for a group, this could be because of old data that doesn't contain an rr norm mixed with new data that does"
+                assert len(l2_norms) <= 1, "More than one L2 norm found for a group, this could be because of old data that doesn't contain an L2 norm mixed with new data that does"
+                l2_norm = group_data['L2 Norm'].values[0]  # Assuming one L2 norm per group
+                rr_norm = group_data['rr_norm'].values[0]  # Assuming one rr norm per group
+                
+                # Annotate the current bar with the L2 norm
+                bar = ax.patches[bar_ctr]
+                height = bar.get_height()
+                bar_x = bar.get_x()
+                bar_width = bar.get_width()
+                # print(f"Bar {bar_ctr} coordinates: x={bar_x}, width={bar_width}, height={height}", flush=True)
+                # print(f"Annotating Bar {bar_ctr} with L2 Norm: {l2_norm}", flush=True)
+                # print(f"Group Key: {group_key}", flush=True)
+                
+                if not np.isnan(rr_norm):
+                    ax.annotate(f'{round(rr_norm, 3)}',
+                                xy=(bar_x + bar_width / 2, height),
+                                xytext=(0, 3),  # 3 points vertical offset
+                                textcoords="offset points",
+                                ha='center', va='bottom')
+                
+                # Increment the bar counter
+                bar_ctr += 1
 
     text_size = 18
 

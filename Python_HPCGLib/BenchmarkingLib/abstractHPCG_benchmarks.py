@@ -2,6 +2,7 @@
 import torch
 import cupy as cp
 import cupyx.scipy.sparse as cs
+import numpy as np
 
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import do_tests
 from HighPerformanceHPCG_Thesis.Python_HPCGLib.util import num_bench_iterations
@@ -175,11 +176,19 @@ def benchmark_SymGS_csr_cupy(SymGSimplementation, timer:gpu_timer, A_csr: CSRMat
             return
     
     for i in range(num_bench_iterations):
+        # because x gets changed we do need to reset it between runs
+        x_cupy = original_x.copy()
         timer.start_timer()
         SymGSimplementation(A_csr, A_cupy, x_cupy, y_cupy)
         timer.stop_timer("computeSymGS")
-        # because x gets changed we do need to reset it between runs
-        x_cupy = original_x.copy()
+
+    # greb the norm and store it
+    norm = np.linalg.norm(cp.array(A_cupy @ x_cupy) - cp.array(y_cupy))
+
+    timer.update_additional_info(timer.get_additional_info() + f"L2 Norm: {norm}")
+
+    # reset the x vector
+    x_cupy = original_x.copy()
 
 ####################################################################################################
 # banded cupy benchmarks

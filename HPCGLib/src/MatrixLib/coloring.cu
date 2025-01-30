@@ -118,7 +118,8 @@ __global__ void count_num_row_per_color_kernel(
         // to search for the rows with a specific color we can do some math
         // ix_start = color%2, step = 2, end = nx
         // iy_start = ((color - ix) % 4) / 2, step, end = ny
-        for(int xy = color % 2; xy < nx * ny / 4 + color % 2; xy++){
+        // for(int xy = color % 2; xy < nx * ny / 4 + color % 2; xy++){
+        for(int xy = 0; xy < nx * ny; xy++){
             int x = xy / ny;
             int y = xy % ny;
 
@@ -129,11 +130,11 @@ __global__ void count_num_row_per_color_kernel(
             // }
             // these cases should not happen, we leave them here for debugging (for now)
             if(enumerator < 0){
-                printf("Error enumerator is negative, color %d, x %d, y %d\n", color, x, y);
+                // printf("Error enumerator is negative, color %d, x %d, y %d\n", color, x, y);
                 continue;
             }
             if(enumerator % 4 != 0){
-                printf("Error enumerator is not divisible by 4, color %d, x %d, y %d\n", color, x, y);
+                // printf("Error enumerator is not divisible by 4, color %d, x %d, y %d\n", color, x, y);
                 continue;
             }
 

@@ -1,4 +1,5 @@
 #include "benchmark.hpp"
+#include <sstream>
 // #include "TimingLib/timer.hpp"
 
 // these function calls the abstract function the required number of times and records the time
@@ -179,13 +180,17 @@ void bench_SymGS(
 {
     int num_iterations = implementation.getNumberOfIterations();
 
+    // we need the following parameters to compute the norm
+    int num_rows = A.get_num_rows();
+    int num_cols = A.get_num_cols();
+
     // y_d is the output vector, hence we need to store the original and write the original back after the benchmarking
     std::vector<double> x(A.get_num_rows(), 0.0);
 
     CHECK_CUDA(cudaMemcpy(x.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
 
 
-    if (implementation.test_before_bench){
+    if (implementation.test_before_bench && !implementation.norm_based){
         cuSparse_Implementation<double> baseline;
 
         bool test_failed = !test_SymGS(
@@ -207,6 +212,18 @@ void bench_SymGS(
         );
         timer.stopTimer("compute_SymGS");
     }
+
+    // greb da norm and store it in additional infos
+    double norm = L2_norm_for_SymGS(
+        num_rows, num_cols,
+        A_row_ptr_d, A_col_idx_d, A_values_d,
+        x_d, y_d);
+
+    std::ostringstream oss;
+    oss << "L2 Norm: " << norm;
+    std::string norm_string = oss.str();
+    timer.add_additional_parameters(norm_string);
+
     // copy the original vector back
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
 }
@@ -229,7 +246,7 @@ void bench_SymGS(
 
     CHECK_CUDA(cudaMemcpy(x.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
 
-    if(implementation.test_before_bench){
+    if(implementation.test_before_bench && !implementation.norm_based){
         sparse_CSR_Matrix<double> A_csr;
         A_csr.sparse_CSR_Matrix_from_striped(A);
 
@@ -287,6 +304,19 @@ void bench_SymGS(
         implementation.compute_SymGS( A, striped_A_d, num_rows, num_cols, num_stripes, j_min_i_d, x_d, y_d);
         timer.stopTimer("compute_SymGS");
     }
+
+    // greb da norm and store it in additional infos
+    double norm = L2_norm_for_SymGS(
+    num_rows, num_cols,
+    num_stripes, j_min_i_d,
+    striped_A_d,
+    x_d, y_d);
+
+    std::ostringstream oss;
+    oss << "L2 Norm: " << norm;
+    std::string norm_string = oss.str();
+    timer.add_additional_parameters(norm_string);
+
 
     // copy the original vector back
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));

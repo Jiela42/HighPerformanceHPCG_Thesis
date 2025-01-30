@@ -4,6 +4,7 @@
 
 #include "TimingLib/timer.hpp"
 #include "testing.hpp"
+#include "HPCG_versions/striped_box_coloring.cuh"
 
 #include <string>
 
@@ -31,6 +32,8 @@ void run_striped_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::str
 void run_no_store_striped_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path);
 
 void run_striped_coloringPrecomputed_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path);
+
+void run_striped_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path);
 
 // this function allows us to run the whole abstract benchmark
 // we have method overloading to support different matrix types

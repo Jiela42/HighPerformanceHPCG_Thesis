@@ -7,14 +7,14 @@ project(Testing LANGUAGES CXX CUDA)
 
 add_library(TestHPCGLib
     HPCG_versions_tests/cuSparse_tests.cpp
-    HPCG_versions_tests/amgx_tests.cpp
     HPCG_versions_tests/naiveStriped_tests.cpp
     HPCG_versions_tests/stripedSharedMem_tests.cpp
     HPCG_versions_tests/stripedWarpReduction_tests.cpp
     HPCG_versions_tests/stripedPreprocessed_tests.cpp
     HPCG_versions_tests/stripedColored_tests.cpp
     HPCG_versions_tests/stripedColoringPrecomputed_tests.cpp
-        
+    
+    UtilLib_tests.cpp
     MatrixLib_tests.cpp
     HPCG_versions_tests/test_calls.cpp
 )
@@ -25,6 +25,10 @@ add_executable(run_coloring
 
 add_executable(run_AllTests
     run_all_tests.cpp
+)
+
+add_executable(run_get_Norm
+    run_get_Norm.cpp
 )
 
 target_link_libraries(TestHPCGLib
@@ -43,4 +47,10 @@ target_link_libraries(run_AllTests
 target_link_libraries(run_coloring
     HPCGLib
     MatrixLib
+)
+
+target_link_libraries(run_get_Norm
+    HPCGLib
+    MatrixLib
+    UtilLib
 )

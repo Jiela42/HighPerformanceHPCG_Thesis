@@ -44,8 +44,6 @@ target_sources(HPCGLib PRIVATE
     cusparse/cusparse_computeDot.cpp
     cusparse/cusparse_computeSymGS.cu
 
-    AMGX/amgx_computeSPMV.cpp
-
     naiveStriped/naiveStriped_computeSPMV.cu
 
     striped_shared_mem/striped_shared_mem_computeSPMV.cu
@@ -62,6 +60,8 @@ target_sources(HPCGLib PRIVATE
 
     striped_coloringPrecomputed/striped_coloringPrecomputed_computeSymGS.cu
 
+    striped_box_coloring/striped_box_coloring_computeSymGS.cu
+
 )
 
 target_link_libraries(
@@ -72,6 +72,6 @@ target_link_libraries(
     CUDA::cusparse
     CUDA::cublas
     CUDA::cudart
-    ${AMGX_LIB}
+    # ${AMGX_LIB}
     # Thrust
 )

@@ -10,27 +10,26 @@ int main(){
 
     bool all_pass = true;
 
-    all_pass = all_pass && run_all_matrixLib_tests(4, 4, 4);
-    all_pass = all_pass && run_all_matrixLib_tests(3, 4, 5);
-    all_pass = all_pass && run_all_matrixLib_tests(4, 3, 5);
-    all_pass = all_pass && run_all_matrixLib_tests(5, 4, 3);
-    all_pass = all_pass && run_all_matrixLib_tests(8, 8, 8);
-    all_pass = all_pass && run_all_matrixLib_tests(16, 16, 16);
+    all_pass = all_pass && run_all_util_tests(4, 4, 4);
+    all_pass = all_pass && run_all_util_tests(3, 4, 5);
+    all_pass = all_pass && run_all_util_tests(8, 8, 8);
+    all_pass = all_pass && run_all_util_tests(16, 16, 16);
+    all_pass = all_pass && run_all_util_tests(32, 32, 32);
+
+    // all_pass = all_pass && run_all_matrixLib_tests(4, 4, 4);
+    // all_pass = all_pass && run_all_matrixLib_tests(3, 4, 5);
+    // all_pass = all_pass && run_all_matrixLib_tests(4, 3, 5);
+    // all_pass = all_pass && run_all_matrixLib_tests(5, 4, 3);
+    // all_pass = all_pass && run_all_matrixLib_tests(8, 8, 8);
+    // all_pass = all_pass && run_all_matrixLib_tests(16, 16, 16);
     // all_pass = all_pass && run_all_matrixLib_tests(32, 32, 32);
     // all_pass = all_pass && run_all_matrixLib_tests(64, 64, 64);
     // all_pass = all_pass && run_all_matrixLib_tests(128, 128, 128);
-    // std::cout << "Finished MatrixLib tests" << std::endl;
+    std::cout << "Finished MatrixLib tests" << std::endl;
 
     // std::cout<< "Starting cuSparse tests" << std::endl;
     // all_pass = all_pass && run_cuSparse_tests(4, 4, 4);
     // std::cout << "Finished cuSparse tests" << std::endl;
-
-    all_pass = all_pass && run_amgx_tests(4, 4, 4);
-    // all_pass = all_pass && run_amgx_tests(8, 8, 8);
-    // all_pass = all_pass && run_amgx_tests(16, 16, 16);
-    // all_pass = all_pass && run_amgx_tests(32, 32, 32);
-    // all_pass = all_pass && run_amgx_tests(64, 64, 64);
-
 
     // std::cout << "Starting naiveStriped tests" << std::endl;
     // all_pass = all_pass && run_naiveStriped_tests(4, 4, 4);

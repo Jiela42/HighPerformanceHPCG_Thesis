@@ -24,12 +24,17 @@ class HPCG_functions {
         std::string additional_parameters = "vanilla_version";
 
         Implementation_Type implementation_type = Implementation_Type::UNKNOWN;
+        bool norm_based = false;
         bool CG_implemented = false;
         bool MG_implemented = false;
         bool SymGS_implemented = false;
         bool SPMV_implemented = false;
         bool WAXPBY_implemented = false;
         bool Dot_implemented = false;
+
+    void add_additional_parameters(std::string another_parameter) {
+        additional_parameters += "_" + another_parameter;
+    }
 
     // CG starts with having the data on the CPU
         virtual void compute_CG(sparse_CSR_Matrix<T> & A, std::vector<T> & b, std::vector<T> & x) = 0;
@@ -91,6 +96,51 @@ class HPCG_functions {
         int getNumberOfIterations() const {
             return num_bench_iter;
     }
+
+        double getSymGS_rrNrom(int nx, int ny, int nz){
+
+            // The relative residual norm for 2x2x2 is 0.03859589326112207
+            // The relative residual norm for 4x4x4 is 0.1627214749610502
+            // The relative residual norm for 8x8x8 is 0.1878644061539017
+            // The relative residual norm for 16x16x16 is 0.1868789912880421
+            // The relative residual norm for 32x32x32 is 0.2386720453340627
+            // The relative residual norm for 64x64x64 is 0.3411755350583427
+            // The relative residual norm for 128x64x64 is 0.375064237277454
+            // The relative residual norm for 128x128x64 is 0.4186180854459645
+            // The relative residual norm for 128x128x128 is 0.47348419196090
+
+            if(nx == 2 and ny == 2 and nz == 2){
+                return 0.03859589326112207;
+            } else if(nx == 4 and ny == 4 and nz == 4){
+                return 0.1627214749610502;
+            } else if(nx == 8 and ny == 8 and nz == 8){
+                return 0.1878644061539017;
+            } else if(nx == 16 and ny == 16 and nz == 16){
+                return 0.1868789912880421;
+            } else if(nx == 32 and ny == 32 and nz == 32){
+                return 0.2386720453340627;
+            } else if(nx == 64 and ny == 64 and nz == 64){
+                return 0.3411755350583427;
+            } else if(nx == 128 and ny == 64 and nz == 64){
+                return 0.375064237277454;
+            } else if(nx == 128 and ny == 128 and nz == 64){
+                return 0.4186180854459645;
+            } else if(nx == 128 and ny == 128 and nz == 128){
+                return 0.47348419196090;
+            } else if (nx == 256 and ny == 128 and nz == 128){
+                return 0.51171735634656
+            } else if (nx == 256 and ny == 256 and nz == 128){
+                return 0.5586609181757166
+            }
+            } else {
+                std::cout << "The relative residual norm is not implemented for the size " << nx <<"x"<< ny << "x"<<nz << std::endl;
+                std::cout << "Please add the size run_get_Norm in the testing lib and run it to obtain the relative residual norm" << std::endl;
+                std::cout << "then add the obtained value to the HPCG_functions::getSymGS_rrNrom function" << std::endl;
+                std::cout << "and re-run the benchmark" << std::endl;
+                std::cout << "Returning -1.0, this will cause an assertion error." << std::endl;
+                return -1.0;
+            }
+        }
 };
 
 #endif // HPCGLIB_HPP

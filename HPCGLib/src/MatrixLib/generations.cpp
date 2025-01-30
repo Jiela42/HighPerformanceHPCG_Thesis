@@ -3,6 +3,7 @@
 #include <vector>
 #include <iostream>
 #include <cassert>
+#include <random>
 #include <utility> // for std::pair
 
 std::pair<sparse_CSR_Matrix<double>, std::vector<double>> generate_HPCG_Problem(int nx, int ny, int nz){
@@ -117,6 +118,22 @@ std::vector<double> generate_random_vector(int size, int seed){
     }
     return vec;
 
+}
+
+// Function to generate a random vector with values between min_val and max_val
+std::vector<double> generate_random_vector(int size, double min_val, double max_val, int seed) {
+    std::vector<double> vec(size);
+
+    // Initialize random number generator with the given seed
+    std::mt19937 gen(seed);
+    std::uniform_real_distribution<> dis(min_val, max_val);
+
+    // Fill the vector with random values between min_val and max_val
+    for (double &val : vec) {
+        val = dis(gen);
+    }
+
+    return vec;
 }
 
 std::vector<double> generate_y_vector_for_HPCG_problem(int nx, int ny, int nz){

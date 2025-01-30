@@ -50,16 +50,41 @@ def run_BaseCuPy_3d27pt_benchmark(nx: int, ny: int, nz: int, save_folder) -> Non
     # if limit_matrix_size and nx < max_dim_size and ny < max_dim_size and nz < max_dim_size:
     #     benchmark_CG_csr_cupy(CGimplementation=BaseCuPy.computeCG, timer=matrix_timer, A_csr=A_csr, A=A_cupy, r=y_cupy, x=x_cupy)
     #     benchmark_MG_csr_cupy(BaseCuPy.computeMG, matrix_timer, A_csr, A_cupy, y_cupy, x_cupy)
-    # benchmark_SymGS_csr_cupy(BaseCuPy.computeSymGS, matrix_timer, A_csr, A_cupy, x_cupy, y_cupy)
     
 
-    benchmark_SPMV_cupy(BaseCuPy.computeSPMV, matrix_timer, A_csr, A_cupy, x_cupy, y_cupy)
+    # benchmark_SPMV_cupy(BaseCuPy.computeSPMV, matrix_timer, A_csr, A_cupy, x_cupy, y_cupy)
     # benchmark_WAXPBY_cupy(BaseCuPy.computeWAXPBY, vector_timer, alpha=alpha, x=a, beta=beta, y=b, w=x_cupy)
     # benchmark_dot_cupy(BaseCuPy.computbeDot, vector_timer, a, b, x_cupy)
 
     matrix_timer.destroy_timer()
     vector_timer.destroy_timer()
 
+
+
+    # the BaseCuPy contains three different versions of the SymGS algorithm so we need to benchmark all of them
+    symGS_Implementations_Names = [
+        (BaseCuPy.computeSymGS_minres, "CuPy 5 iterations (minres)"),
+        (BaseCuPy.computeSymGS_lsmr, "CuPy 5 iterations (lsmr)"),
+        (BaseCuPy.computeSymGS_gmres, "CuPy 5 iterations (gmres)")
+    ]
+
+    for symGS_Implementation, symGS_name in symGS_Implementations_Names:
+
+        # get a new matrix timer each time
+        matrix_timer = gpu_timer(
+            version_name = symGS_name,
+            ault_node = ault_node,
+            matrix_type = "3d_27pt",
+            nx = nx,
+            ny = ny,
+            nz = nz,
+            nnz = nnz,
+            folder_path = save_folder
+        )
+
+        benchmark_SymGS_csr_cupy(symGS_Implementation, matrix_timer, A_csr, A_cupy, x_cupy, y_cupy)
+
+        matrix_timer.destroy_timer()
 
 
 

@@ -29,6 +29,10 @@ public:
     // Function to stop the timer and record the elapsed time
     void stopTimer(std::string method_name);
 
+    void add_additional_parameters(std::string another_parameter) {
+        additional_parameters += "_" + another_parameter;
+    }
+
 
 private:
     // Function to write the timing results to a CSV file
