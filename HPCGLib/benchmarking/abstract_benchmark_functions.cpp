@@ -190,7 +190,7 @@ void bench_SymGS(
     CHECK_CUDA(cudaMemcpy(x.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
 
 
-    if (implementation.test_before_bench && !implementation.norm_based){
+    if (implementation.test_before_bench){
         cuSparse_Implementation<double> baseline;
 
         bool test_failed = !test_SymGS(
@@ -214,13 +214,13 @@ void bench_SymGS(
     }
 
     // greb da norm and store it in additional infos
-    double norm = L2_norm_for_SymGS(
+    double norm = relative_residual_norm_for_SymGS(
         num_rows, num_cols,
         A_row_ptr_d, A_col_idx_d, A_values_d,
         x_d, y_d);
 
     std::ostringstream oss;
-    oss << "L2 Norm: " << norm;
+    oss << "RR Norm: " << norm;
     std::string norm_string = oss.str();
     timer.add_additional_parameters(norm_string);
 
@@ -240,13 +240,14 @@ void bench_SymGS(
     )
 {   
     int num_iterations = implementation.getNumberOfIterations();
+    // std::cout << "benching symgs for " << num_iterations << " iterations" << std::endl;
 
     // x_d is the output vector, hence we need to store the original and write the original back after the benchmarking
     std::vector<double> x(A.get_num_rows(), 0.0);
 
     CHECK_CUDA(cudaMemcpy(x.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
 
-    if(implementation.test_before_bench && !implementation.norm_based){
+    if(implementation.test_before_bench){
         sparse_CSR_Matrix<double> A_csr;
         A_csr.sparse_CSR_Matrix_from_striped(A);
 
@@ -283,7 +284,7 @@ void bench_SymGS(
             num_stripes,
             j_min_i_d,
 
-            x_d);
+            y_d);
 
         // now we need to free the memory
         CHECK_CUDA(cudaFree(A_row_ptr_d));
@@ -295,7 +296,7 @@ void bench_SymGS(
         }
     }
         
-    for (int i = 0; i < num_bench_iter; i++){
+    for (int i = 0; i < num_iterations; i++){
         // std::cout<< "Iteration: " << i << std::endl;
         // std::cout<< "Num iterations: " << num_iterations << std::endl;
         // copy original x into x_d
@@ -306,14 +307,14 @@ void bench_SymGS(
     }
 
     // greb da norm and store it in additional infos
-    double norm = L2_norm_for_SymGS(
+    double norm = relative_residual_norm_for_SymGS(
     num_rows, num_cols,
     num_stripes, j_min_i_d,
     striped_A_d,
     x_d, y_d);
 
     std::ostringstream oss;
-    oss << "L2 Norm: " << norm;
+    oss << "RR Norm: " << norm;
     std::string norm_string = oss.str();
     timer.add_additional_parameters(norm_string);
 

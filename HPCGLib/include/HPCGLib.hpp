@@ -6,7 +6,7 @@
 #include <string>
 
 // define number of iterations we want to have
-#define num_bench_iter 1
+#define num_bench_iter 10
 
 enum class Implementation_Type {
     STRIPED,
@@ -17,7 +17,7 @@ enum class Implementation_Type {
 template <typename T>
 class HPCG_functions {
     public:
-        bool test_before_bench = false;
+        bool test_before_bench = true;
         std::string version_name = "unknown";
         const std::string ault_nodes = "41-44";
         // this string is used when small changes are benchmarked to see their effect
@@ -97,7 +97,53 @@ class HPCG_functions {
             return num_bench_iter;
     }
 
-        double getSymGS_rrNrom(int nx, int ny, int nz){
+        double getSymGS_rrNorm(int nx, int ny, int nz){
+            // The relative residual norm for 2x2x2 for random initialization is 0.01780163474925223
+            // The relative residual norm for 4x4x4 for random initialization is 0.06265609442727489
+            // The relative residual norm for 8x8x8 for random initialization is 0.06901259891475327
+            // The relative residual norm for 16x16x16 for random initialization is 0.1093031516812343
+            // The relative residual norm for 32x32x32 for random initialization is 0.2059749871712245
+            // The relative residual norm for 64x64x64 for random initialization is 0.3318764588131313
+            // The relative residual norm for 128x64x64 for random initialization is 0.3686739441774081
+            // The relative residual norm for 128x128x64 for random initialization is 0.415239353783707
+            // The relative residual norm for 128x128x128 for random initialization is 0.4761695919404465
+            // The relative residual norm for 256x128x128 for random initialization is 0.5161210410022423
+
+            if (nx == 2 && ny == 2 && nz == 2) {
+                return 0.01780163474925223;
+            } else if (nx == 4 && ny == 4 && nz == 4) {
+                return 0.06265609442727489;
+            } else if (nx == 8 && ny == 8 && nz == 8) {
+                return 0.06901259891475327;
+            } else if (nx == 16 && ny == 16 && nz == 16) {
+                return 0.1093031516812343;
+            } else if (nx == 24 && ny == 24 && nz == 24) {
+                return 0.161818728347593;
+            } else if (nx == 32 && ny == 32 && nz == 32) {
+                return 0.2059749871712245;
+            } else if (nx == 64 && ny == 64 && nz == 64) {
+                return 0.3318764588131313;
+            } else if (nx == 128 && ny == 64 && nz == 64) {
+                return 0.3686739441774081;
+            } else if (nx == 128 && ny == 128 && nz == 64) {
+                return 0.415239353783707;
+            } else if (nx == 128 && ny == 128 && nz == 128) {
+               return 0.4761695919404465;
+            } else if (nx == 256 && ny == 128 && nz == 128) {
+               return 0.5161210410022423;
+            }else if (nx == 256 && ny == 256 && nz == 128) {
+               return 0.5649574838245627;
+            } else {
+                std::cout << "The relative residual norm is not implemented for the size " << nx <<"x"<< ny << "x"<<nz << std::endl;
+                std::cout << "Please add the size run_get_Norm in the testing lib and run it to obtain the relative residual norm" << std::endl;
+                std::cout << "then add the obtained value to the HPCG_functions::getSymGS_rrNrom function" << std::endl;
+                std::cout << "and re-run the benchmark" << std::endl;
+                assert(false);
+            }
+
+        }
+
+        double getSymGS_rrNorm_zero_init(int nx, int ny, int nz){
 
             // The relative residual norm for 2x2x2 is 0.03859589326112207
             // The relative residual norm for 4x4x4 is 0.1627214749610502
@@ -128,10 +174,9 @@ class HPCG_functions {
             } else if(nx == 128 and ny == 128 and nz == 128){
                 return 0.47348419196090;
             } else if (nx == 256 and ny == 128 and nz == 128){
-                return 0.51171735634656
+                return 0.51171735634656;
             } else if (nx == 256 and ny == 256 and nz == 128){
-                return 0.5586609181757166
-            }
+                return 0.5586609181757166;
             } else {
                 std::cout << "The relative residual norm is not implemented for the size " << nx <<"x"<< ny << "x"<<nz << std::endl;
                 std::cout << "Please add the size run_get_Norm in the testing lib and run it to obtain the relative residual norm" << std::endl;

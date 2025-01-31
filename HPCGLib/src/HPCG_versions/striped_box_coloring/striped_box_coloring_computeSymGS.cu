@@ -94,13 +94,20 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
 
     // check that the box size does not violate dependencies
     // we assume a 3d 27pt stencil
-    assert(this->bx >= 3);
-    assert(this->by >= 3);
-    assert(this->bz >= 3);
+    int bx = this->bx;
+    int by = this->by;
+    int bz = this->bz;
+
+    assert(bx >= 3);
+    assert(by >= 3);
+    assert(bz >= 3);
     
     int nx = A.get_nx();
     int ny = A.get_ny();
     int nz = A.get_nz();
+
+    double threshold_rr_Norm = this->getSymGS_rrNorm(nx, ny, nz);
+    assert(threshold_rr_Norm >= 0.0);
 
     int cooperation_number = this->SymGS_cooperation_number;
 
@@ -111,39 +118,100 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
 
     int num_blocks = std::min(ceiling_division(max_num_rows_per_color, 1024/cooperation_number), MAX_NUM_BLOCKS);
 
+    double L2_norm_y;
 
-    for(int color = 0; color <= max_color; color++){
-        // we need to do a forward pass
-        striped_box_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
-        cooperation_number,
-        color, bx, by, bz,
-        nx, ny, nz,
-        num_rows, num_cols,
-        num_stripes, diag_offset,
-        j_min_i,
-        striped_A_d,
-        x_d, y_d
-        );
-        CHECK_CUDA(cudaDeviceSynchronize());
-    }
+    cudaStream_t y_Norm_stream;
+    CHECK_CUDA(cudaStreamCreate(&y_Norm_stream));
 
-    // we need to do a backward pass,
-    // the colors for this are the same just in reverse order
+    L2_norm_for_Device_Vector(y_Norm_stream, num_rows, y_d, &L2_norm_y);
     
-    for(int color = max_color; color  >= 0; color--){
+    // to do the L2 norm asynchroneously we do the first iteration outside of the loop
+    for(int color = 0; color <= max_color; color++){
+            // we need to do a forward pass
+            striped_box_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
+            cooperation_number,
+            color, bx, by, bz,
+            nx, ny, nz,
+            num_rows, num_cols,
+            num_stripes, diag_offset,
+            j_min_i,
+            striped_A_d,
+            x_d, y_d
+            );
+            CHECK_CUDA(cudaDeviceSynchronize());
+        }
 
-        striped_box_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
-        cooperation_number,
-        color, bx, by, bz,
-        nx, ny, nz,
-        num_rows, num_cols,
-        num_stripes, diag_offset,
-        j_min_i,
-        striped_A_d,
-        x_d, y_d
-        );
-        CHECK_CUDA(cudaDeviceSynchronize());
+        // we need to do a backward pass,
+        // the colors for this are the same just in reverse order
+        
+        for(int color = max_color; color  >= 0; color--){
+
+            striped_box_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
+            cooperation_number,
+            color, bx, by, bz,
+            nx, ny, nz,
+            num_rows, num_cols,
+            num_stripes, diag_offset,
+            j_min_i,
+            striped_A_d,
+            x_d, y_d
+            );
+            CHECK_CUDA(cudaDeviceSynchronize());
+        }
+
+        double L2_norm = L2_norm_for_SymGS(num_rows, num_cols, num_stripes, j_min_i, striped_A_d, x_d, y_d);
+        CHECK_CUDA(cudaStreamSynchronize(y_Norm_stream));
+        CHECK_CUDA(cudaStreamDestroy(y_Norm_stream));
+   
+        double rr_norm = L2_norm / L2_norm_y;
+
+    // std::cout << "rr_norm after one iteration: " << rr_norm << std::endl;
+
+    int iter = 1;
+
+    while (iter < 100 and rr_norm > threshold_rr_Norm){
+
+        for(int color = 0; color <= max_color; color++){
+            // we need to do a forward pass
+            striped_box_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
+            cooperation_number,
+            color, bx, by, bz,
+            nx, ny, nz,
+            num_rows, num_cols,
+            num_stripes, diag_offset,
+            j_min_i,
+            striped_A_d,
+            x_d, y_d
+            );
+            CHECK_CUDA(cudaDeviceSynchronize());
+        }
+
+        // we need to do a backward pass,
+        // the colors for this are the same just in reverse order
+        
+        for(int color = max_color; color  >= 0; color--){
+
+            striped_box_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
+            cooperation_number,
+            color, bx, by, bz,
+            nx, ny, nz,
+            num_rows, num_cols,
+            num_stripes, diag_offset,
+            j_min_i,
+            striped_A_d,
+            x_d, y_d
+            );
+            CHECK_CUDA(cudaDeviceSynchronize());
+        }
+
+        double L2_norm = L2_norm_for_SymGS(num_rows, num_cols, num_stripes, j_min_i, striped_A_d, x_d, y_d);
+   
+        rr_norm = L2_norm / L2_norm_y;
+
+        iter ++;
     }
+
+    // std::cout << "SymGS for size " << nx << "x" << ny << "x" << nz << " took " << iter << " iterations." << std::endl;
 }
 
 // explicit template instantiation

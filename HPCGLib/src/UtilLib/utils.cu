@@ -210,7 +210,7 @@ double relative_residual_norm_for_SymGS(
     double * x,
     double * y
 ){
-    
+    // std::cout << "relative_residual_norm_for_SymGS" << std::endl;
     // make new cuda stream for the vector y computation
     cudaStream_t stream;
     CHECK_CUDA(cudaStreamCreate(&stream));
@@ -223,6 +223,9 @@ double relative_residual_norm_for_SymGS(
 
     CHECK_CUDA(cudaStreamSynchronize(stream));
     CHECK_CUDA(cudaStreamDestroy(stream));
+    CHECK_CUDA(cudaDeviceSynchronize());
+    // std::cout << "L2_norm: " << L2_norm << std::endl;
+    // std::cout << "L2_norm_y: " << L2_norm_y << std::endl;
     return L2_norm / L2_norm_y;
 }
 

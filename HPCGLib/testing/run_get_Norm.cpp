@@ -6,6 +6,8 @@
 #include "UtilLib/cuda_utils.hpp"
 #include "UtilLib/utils.cuh"
 
+#define COMPARE_NORMS 0
+
 
 void print_rrNorm(int nx, int ny, int nz){
 
@@ -14,7 +16,7 @@ void print_rrNorm(int nx, int ny, int nz){
     sparse_CSR_Matrix<double> A = problem.first;
     std::vector<double> y = problem.second;
 
-    std::vector<double> x(A.get_num_cols(), 0.0);
+    std::vector<double> x = generate_random_vector(A.get_num_cols(), 42);
 
 
     // copy A, x, y to device
@@ -46,11 +48,30 @@ void print_rrNorm(int nx, int ny, int nz){
                           x_d, y_d);
 
     // calculate the l2 norm on the device
-    double rr_norm = relative_residual_norm_for_SymGS(
+    double random_x_norm = relative_residual_norm_for_SymGS(
                                             num_rows, num_cols,
                                             A_row_ptr_d, A_col_idx_d, A_values_d,
                                             x_d, y_d
                                         );
+
+    double zero_x_norm = -1.0;
+
+    if (COMPARE_NORMS){
+
+        CHECK_CUDA(cudaMemset(x_d, 0, x.size() * sizeof(double)));
+
+        cuSparse.compute_SymGS(A,
+                            A_row_ptr_d, A_col_idx_d, A_values_d,
+                            x_d, y_d);
+
+        // calculate the l2 norm on the device
+        zero_x_norm = relative_residual_norm_for_SymGS(
+                                                num_rows, num_cols,
+                                                A_row_ptr_d, A_col_idx_d, A_values_d,
+                                                x_d, y_d
+                                            );
+    }
+
 
     // free the memory
     cudaFree(A_row_ptr_d);
@@ -60,7 +81,12 @@ void print_rrNorm(int nx, int ny, int nz){
     cudaFree(y_d);
 
     std::cout << std::setprecision(std::numeric_limits<double>::digits10 + 1);
-    std::cout << "The relative residual norm for " << nx << "x" << ny << "x" << nz << " is " << rr_norm << std::endl;
+    std::cout << "The relative residual norm for " << nx << "x" << ny << "x" << nz << " for random initialization is " << random_x_norm << std::endl;
+    
+    if(COMPARE_NORMS){
+        std::cout << "The relative residual norm for " << nx << "x" << ny << "x" << nz << " for zero initialization is " << zero_x_norm << std::endl;
+        std::cout << "The difference is " << zero_x_norm - random_x_norm << std::endl;
+    }
 }
 
 int main(){
@@ -70,6 +96,7 @@ int main(){
     // print_rrNorm(4, 4, 4);
     // print_rrNorm(8, 8, 8);
     // print_rrNorm(16, 16, 16);
+    print_rrNorm(24, 24, 24);
     // print_rrNorm(32, 32, 32);
     // print_rrNorm(64, 64, 64);
     // print_rrNorm(128, 64, 64);

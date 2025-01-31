@@ -53,6 +53,8 @@ void run_striped_box_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std:
         std::string ault_node = implementation.ault_nodes;
         CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);
 
+        // std::cout << "Running the SymGS benchmark for the implementation: " << implementation_name << std::endl;
+
         bench_SymGS(implementation, *timer, striped_A, striped_A_d, num_rows, num_cols, num_stripes, j_min_i_d, x_d, y_d);
     
         delete timer;

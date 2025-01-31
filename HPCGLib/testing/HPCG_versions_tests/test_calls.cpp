@@ -310,16 +310,47 @@ bool test_SymGS(
     // get the result back
     CHECK_CUDA(cudaMemcpy(uut_result.data(), x_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
 
-    // run the baseline
-    CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
-    baseline.compute_SymGS(A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d, y_d);
+    // testing is either done by a comparison of the results or by checking the relative residual
+    // this depends on the version
 
-    // get the result back
-    CHECK_CUDA(cudaMemcpy(baseline_result.data(), x_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+    bool test_pass = true;
 
-    bool test_pass = vector_compare(uut_result, baseline_result);
-    if (not test_pass){
-        std::cout << "SymGS test failed" << std::endl;
+    if(uut.norm_based){
+        double rr_norm = relative_residual_norm_for_SymGS(
+            num_rows, A.get_num_cols(),
+            A_row_ptr_d, A_col_idx_d, A_values_d,
+            x_d, y_d
+        );
+
+        int nx = A.get_nx();
+        int ny = A.get_ny();
+        int nz = A.get_nz();
+
+        double threshold_norm = uut.getSymGS_rrNorm(nx, ny, nz);
+        
+        test_pass = rr_norm <= threshold_norm;
+
+        if (not test_pass){
+            std::cout << "SymGS test failed for size " << nx << "x" << ny << "x" << nz << std::endl;
+            std::cout << "The rr norm was " << rr_norm << " and the threshold was " << threshold_norm << std::endl;
+            // test_pass = false;
+        }
+        // else {
+        //     std::cout << "SymGS test passed for size " << nx << "x" << ny << "x" << nz << std::endl;
+        //     std::cout << "The rr norm was " << rr_norm << " and the threshold was " << threshold_norm << std::endl;
+        // }
+    } else{
+        // run the baseline
+        CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
+        baseline.compute_SymGS(A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d, y_d);
+
+        // get the result back
+        CHECK_CUDA(cudaMemcpy(baseline_result.data(), x_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+
+        test_pass = vector_compare(uut_result, baseline_result);
+        if (not test_pass){
+            std::cout << "SymGS test failed" << std::endl;
+        }
     }
 
     // copy the original x back
@@ -345,23 +376,15 @@ bool test_SymGS(
     A.sparse_CSR_Matrix_from_striped(striped_A);
 
     int num_rows_baseline = A.get_num_rows();
-    std::vector<double> x_baseline(num_rows, 0.0);
-    std::vector<double> x_uut(num_rows, 0.0);
 
 
-    double * x_baseline_d;
     double * x_uut_d;
-
-    CHECK_CUDA(cudaMalloc(&x_baseline_d, num_rows * sizeof(double)));
     CHECK_CUDA(cudaMalloc(&x_uut_d, num_rows * sizeof(double)));
-
-    // we need the x to be all set to zero, otherwise with different initial conditions the results will be different
-    CHECK_CUDA(cudaMemset(x_baseline_d, 0, num_rows * sizeof(double)));
     CHECK_CUDA(cudaMemset(x_uut_d, 0, num_rows * sizeof(double)));
 
-    baseline.compute_SymGS(A,
-                          A_row_ptr_d, A_col_idx_d, A_values_d,
-                          x_baseline_d, y_d);
+
+    std::vector<double> x_baseline(num_rows, 0.0);
+    std::vector<double> x_uut(num_rows, 0.0);
 
     uut.compute_SymGS(striped_A,
                     striped_A_d,
@@ -369,23 +392,75 @@ bool test_SymGS(
                     num_stripes,
                     j_min_i_d,
                     x_uut_d, y_d);
-    
-    // and now we need to copy the result back and de-allocate the memory
-    CHECK_CUDA(cudaMemcpy(x_baseline.data(), x_baseline_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(x_uut.data(), x_uut_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
 
-    // std::cout << "Baseline: " << x_baseline[0] << std::endl;
-    // std::cout << "UUT: " << x_uut[0] << std::endl;
+    // testing depends on the version it either checks for a relative residual or for the result
 
-    CHECK_CUDA(cudaFree(x_baseline_d));
-    CHECK_CUDA(cudaFree(x_uut_d));
+    bool test_pass;
 
-    // compare the results
-    bool test_pass = vector_compare(x_baseline, x_uut);
-    
-    if (not test_pass){
-        std::cout << "SymGS test failed for uut: " << uut.version_name << std::endl;
+    if (uut.norm_based){
+
+        // std::cout << "SymGS norm based test" << std::endl;
+        // std::cout << "version name " << uut.version_name << std::endl;
+
+        double rr_norm = relative_residual_norm_for_SymGS(
+            num_rows, num_cols,
+            num_stripes,
+            j_min_i_d,
+            striped_A_d,
+            x_uut_d, y_d
+        );
+
+        int nx = A.get_nx();
+        int ny = A.get_ny();
+        int nz = A.get_nz();
+
+        double threshold_norm = uut.getSymGS_rrNorm(nx, ny, nz);
+        
+        test_pass = rr_norm <= threshold_norm;
+
+        if (not test_pass){
+            std::cout << "SymGS test failed for size " << nx << "x" << ny << "x" << nz << std::endl;
+            std::cout << "The rr norm was " << rr_norm << " and the threshold is " << threshold_norm << std::endl;
+            // std::cout << "heul doch" << std::endl;
+            // test_pass = false;
+        }
+        // else {
+        //     std::cout << "SymGS test passed for size " << nx << "x" << ny << "x" << nz << std::endl;
+        //     std::cout << "The rr norm was " << rr_norm << " and the threshold was " << threshold_norm << std::endl;
+        // }
+
+    } else{
+        // this is the case where we compare to a baseline
+        double * x_baseline_d;
+
+        CHECK_CUDA(cudaMalloc(&x_baseline_d, num_rows * sizeof(double)));
+
+        // we need the x to be all set to zero, otherwise with different initial conditions the results will be different
+        CHECK_CUDA(cudaMemset(x_baseline_d, 0, num_rows * sizeof(double)));
+
+        baseline.compute_SymGS(A,
+                            A_row_ptr_d, A_col_idx_d, A_values_d,
+                            x_baseline_d, y_d);
+
+        
+        // and now we need to copy the result back and de-allocate the memory
+        CHECK_CUDA(cudaMemcpy(x_baseline.data(), x_baseline_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+        CHECK_CUDA(cudaMemcpy(x_uut.data(), x_uut_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+        
+        CHECK_CUDA(cudaFree(x_baseline_d));
+
+        // compare the results
+        test_pass = vector_compare(x_baseline, x_uut);
+        
+        if (not test_pass){
+            std::cout << "SymGS test failed for uut: " << uut.version_name << std::endl;
+        }
+        // std::cout << "Baseline: " << x_baseline[0] << std::endl;
+        // std::cout << "UUT: " << x_uut[0] << std::endl;
     }
 
+    CHECK_CUDA(cudaFree(x_uut_d));
+
+    
     return test_pass;
 }

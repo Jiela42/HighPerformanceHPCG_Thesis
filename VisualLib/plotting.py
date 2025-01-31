@@ -215,7 +215,7 @@ def read_data():
         # grab the norm
         l2_norm_pattern = r"L2 Norm: ([\d\.]+)"
         l2_norm_match = re.search(l2_norm_pattern, additional_info)
-        rr_norm_pattern = r"rr_norm: ([\d\.]+)"
+        rr_norm_pattern = r"RR Norm: ([\d\.]+)"
         rr_norm_match = re.search(rr_norm_pattern, additional_info)
 
         if l2_norm_match:

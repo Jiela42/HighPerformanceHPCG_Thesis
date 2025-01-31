@@ -14,6 +14,7 @@
 #include "HPCG_versions/striped_coloring.cuh"
 #include "HPCG_versions/no_store_striped_coloring.cuh"
 #include "HPCG_versions/striped_coloringPrecomputed.cuh"
+#include "HPCG_versions/striped_box_coloring.cuh"
 
 
 #include "UtilLib/cuda_utils.hpp"
@@ -100,5 +101,6 @@ bool run_stripedWarpReduction_tests(int nx, int ny, int nz);
 bool run_stripedPreprocessed_tests(int nx, int ny, int nz);
 bool run_stripedColored_tests(int nx, int ny, int nz);
 bool run_stripedColoringPrecomputed_tests(int nx, int ny, int nz);
+bool run_stripedBoxColoring_tests(int nx, int ny, int nz);
 
 #endif // TESTING_HPP
