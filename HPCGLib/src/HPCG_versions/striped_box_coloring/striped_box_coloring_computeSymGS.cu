@@ -101,12 +101,14 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
     assert(bx >= 3);
     assert(by >= 3);
     assert(bz >= 3);
+
+    // std::cout << "bx: " << bx << " by: " << by << " bz: " << bz << std::endl;
     
     int nx = A.get_nx();
     int ny = A.get_ny();
     int nz = A.get_nz();
 
-    double threshold_rr_Norm = this->getSymGS_rrNorm(nx, ny, nz);
+    double threshold_rr_Norm = this->getSymGS_rrNorm_zero_init(nx, ny, nz);
     assert(threshold_rr_Norm >= 0.0);
 
     int cooperation_number = this->SymGS_cooperation_number;
@@ -169,7 +171,9 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
 
     int iter = 1;
 
-    while (iter < 100 and rr_norm > threshold_rr_Norm){
+    // threshold_rr_Norm = 0.16;
+
+    while (iter < 500 and rr_norm > threshold_rr_Norm){
 
         for(int color = 0; color <= max_color; color++){
             // we need to do a forward pass
@@ -211,7 +215,9 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
         iter ++;
     }
 
-    // std::cout << "SymGS for size " << nx << "x" << ny << "x" << nz << " took " << iter << " iterations." << std::endl;
+    std::cout << "SymGS for size " << nx << "x" << ny << "x" << nz << " took " << iter << " iterations." << std::endl;
+    // std::cout << "RR norm after " << iter << " iterations: " << rr_norm << std::endl;
+    // std::cout << "Threshold RR norm: " << threshold_rr_Norm << std::endl;
 }
 
 // explicit template instantiation

@@ -169,3 +169,43 @@ void run_cuSparse_3d27p_SPMV_benchmark(int nx, int ny, int nz, std::string folde
 
     delete timer;
 }
+
+void run_cuSparse_3d27p_Dot_benchmark(int nx, int ny, int nz, std::string folder_path){
+
+    // generate matrix
+    std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
+    sparse_CSR_Matrix<double> A = problem.first;
+
+    // generate x & y vectors
+    std::vector<double> x = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+    std::vector<double> y = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+
+    cuSparse_Implementation<double> implementation;
+    std::string implementation_name = implementation.version_name;
+    std::string additional_params = implementation.additional_parameters;
+    std::string ault_node = implementation.ault_nodes;
+    CudaTimer* timer = new CudaTimer (nx, ny, nz, nx*ny*nz, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);
+
+    // Allocate the memory on the device
+    double * x_d;
+    double * y_d;
+    double * result_d;
+
+    CHECK_CUDA(cudaMalloc(&x_d, nx*ny*nz * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&y_d, nx*ny*nz * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&result_d, sizeof(double)));
+
+    CHECK_CUDA(cudaMemcpy(x_d, x.data(), nx*ny*nz * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), nx*ny*nz * sizeof(double), cudaMemcpyHostToDevice));
+
+    bench_Dot(implementation, *timer, A, x_d, y_d, result_d);
+
+    // free the memory
+    cudaFree(x_d);
+    cudaFree(y_d);
+    cudaFree(result_d);
+
+    delete timer;
+
+}
+

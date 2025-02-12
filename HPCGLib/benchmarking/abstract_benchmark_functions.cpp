@@ -169,6 +169,39 @@ void bench_Dot(
     
 }
 
+void bench_Dot(
+    HPCG_functions<double>& implementation,
+    CudaTimer& timer,
+    sparse_CSR_Matrix<double> & A,
+    double * x_d, double * y_d, double * result_d
+    ){
+    int num_iterations = implementation.getNumberOfIterations();
+
+    if (implementation.test_before_bench){
+        // note that for the dot product the cuSparse implementation is an instanciation of warp reduction. ehem.
+        cuSparse_Implementation<double> baseline;
+        bool test_failed = !test_Dot(
+            implementation,
+            A,
+            x_d, y_d
+        );
+
+        if (test_failed){
+            num_iterations = 0;
+        }            
+    }
+
+    for(int i = 0; i < num_iterations; i++){
+        timer.startTimer();
+        implementation.compute_Dot(
+            A,
+            x_d, y_d, result_d
+        );
+        timer.stopTimer("compute_Dot");
+    }
+    
+}
+
 
 void bench_SymGS(
     HPCG_functions<double>& implementation,

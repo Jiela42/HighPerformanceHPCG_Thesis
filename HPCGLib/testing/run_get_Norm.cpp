@@ -6,7 +6,7 @@
 #include "UtilLib/cuda_utils.hpp"
 #include "UtilLib/utils.cuh"
 
-#define COMPARE_NORMS 0
+#define COMPARE_NORMS 1
 
 
 void print_rrNorm(int nx, int ny, int nz){
@@ -92,16 +92,15 @@ void print_rrNorm(int nx, int ny, int nz){
 int main(){
 
     std::cout << "Getting the relative residual norm" << std::endl;
-    // print_rrNorm(2, 2, 2);
-    // print_rrNorm(4, 4, 4);
-    // print_rrNorm(8, 8, 8);
-    // print_rrNorm(16, 16, 16);
+    print_rrNorm(2, 2, 2);
+    print_rrNorm(4, 4, 4);
+    print_rrNorm(8, 8, 8);
+    print_rrNorm(16, 16, 16);
     print_rrNorm(24, 24, 24);
-    // print_rrNorm(32, 32, 32);
-    // print_rrNorm(64, 64, 64);
-    // print_rrNorm(128, 64, 64);
-    // print_rrNorm(128, 128, 64);
-    // print_rrNorm(128, 128, 128);
-    // print_rrNorm(256, 128, 128);
-    // print_rrNorm(256, 256, 128);
+    print_rrNorm(32, 32, 32);
+    print_rrNorm(64, 64, 64);
+    print_rrNorm(128, 64, 64);
+    print_rrNorm(128, 128, 64);
+    print_rrNorm(128, 128, 128);
+    print_rrNorm(256, 128, 128);
 }

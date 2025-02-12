@@ -121,3 +121,13 @@ def getSymGS_rrNorm_zero_based(nx, ny, nz):
         print("then add the obtained value to the getSymGS_rrNorm function")
         print("and re-run the benchmark")
         raise ValueError("Relative residual norm not implemented for the given size")
+    
+num_its_zerobased_AMGX = {
+    (2,2,2): 1,
+    (4,4,4): 2,
+    (8,8,8): 2,
+    (16,16,16): 2,
+    (32,32,32): 2,
+    (64,64,64): 2,
+    (128,64,64): 3
+}

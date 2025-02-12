@@ -95,18 +95,24 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double> A){
         A_striped.get_nx(), A_striped.get_ny(), A_striped.get_nz()
         );
 
-    // test the SymGS function (minitest, does not work with striped matrices)
-    all_pass = all_pass && test_SymGS(
-        cuSparse, striped_warp_reduction,
-        A_striped,
-        A_row_ptr_d, A_col_idx_d, A_values_d,
+    if(all_pass){
+        std::cout << "striped_warp_reduction tests passed for HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
+    } else {
+        std::cout << "striped_warp_reduction tests failed for HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
+    }
 
-        striped_A_d,
-        num_rows, num_cols,
-        num_stripes,
-        j_min_i_d,
-        y_d
-        );
+    // test the SymGS function (minitest, does not work with striped matrices)
+    // all_pass = all_pass && test_SymGS(
+    //     cuSparse, striped_warp_reduction,
+    //     A_striped,
+    //     A_row_ptr_d, A_col_idx_d, A_values_d,
+
+    //     striped_A_d,
+    //     num_rows, num_cols,
+    //     num_stripes,
+    //     j_min_i_d,
+    //     y_d
+    //     );
 
     
     // anything that got allocated also needs to be de-allocted

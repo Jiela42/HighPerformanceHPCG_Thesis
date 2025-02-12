@@ -161,6 +161,11 @@ def benchmark_SymGS_csr_cupy(SymGSimplementation, timer:gpu_timer, A_csr: CSRMat
 
     original_x = x_cupy.copy()
 
+    # check if original x is all zeros
+    if not np.allclose(original_x, np.zeros_like(original_x)):
+        print("ERROR: original x is not all zeros")
+        return
+
     if do_tests:
         baselineSymGS = BaseTorch.computeSymGS
 
@@ -183,9 +188,11 @@ def benchmark_SymGS_csr_cupy(SymGSimplementation, timer:gpu_timer, A_csr: CSRMat
         timer.stop_timer("computeSymGS")
 
     # greb the norm and store it
-    norm = np.linalg.norm(cp.array(A_cupy @ x_cupy) - cp.array(y_cupy))
+    norm = np.linalg.norm(cp.array(A_cupy @ x_cupy) - cp.array(y_cupy)) / np.linalg.norm(cp.array(y_cupy))
 
-    timer.update_additional_info(timer.get_additional_info() + f"L2 Norm: {norm}")
+    # print(f"RR Norm: {norm:.3f} for {SymGSimplementation.__name__} and size {nx}x{ny}x{nz}", flush=True)
+
+    timer.update_additional_info(timer.get_additional_info() + f"RR Norm: {norm}")
 
     # reset the x vector
     x_cupy = original_x.copy()

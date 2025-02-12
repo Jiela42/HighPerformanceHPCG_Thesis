@@ -9,11 +9,11 @@ plot_path = "plots/"
 methods_to_plot = [
     # "CG",
     # "MG",
-    "SymGS",
+    # "SymGS",
     # "SPMV",
     # "Restriction",
     # "Prolongation",
-    # "Dot",
+    "Dot",
     # "WAXPBY",
 ]
 
@@ -23,19 +23,19 @@ sizes_to_plot =[
     # ("24x24x24"),
     ("32x32x32"),
     ("64x64x64"),
-    ("128x64x64"),
+    # ("128x64x64"),
     # ("128x128x64"),
-    # ("128x128x128"),
+    ("128x128x128"),
     # ("256x128x128"),
     # ("256x256x128"),
 ]
 
 versions_to_plot = [
-    # "BaseTorch",
+    "BaseTorch",
     # "MatlabReference",
     # "BaseCuPy",
     # "CuPy (no copy)",
-    "CuPy (gmres)",
+    # "CuPy (gmres)",
     # "CuPy 2 iterations (gmres)",
     # "CuPy 3 iterations (gmres)",
     # "CuPy 4 iterations (gmres)",
@@ -45,18 +45,22 @@ versions_to_plot = [
     # "CuPy 3 iterations (lsmr)",
     # "CuPy 4 iterations (lsmr)",
     # "CuPy 5 iterations (lsmr)",
-    "CuPy (minres)",
+    # "CuPy (minres)",
     # "CuPy 2 iterations (minres)",
     # "CuPy 3 iterations (minres)",
     # "CuPy 4 iterations (minres)",
-    "CuPy 5 iterations (minres)",
+    # "CuPy 5 iterations (minres)",
+
+    # "CuPy (converging) (minres)",
+    # "CuPy (converging) (lsmr)",
+    # "CuPy (converging) (gmres)",
     
     # "NaiveStriped CuPy",
-    # "cuSparse&cuBLAS", #this is a legacy name, it is now called CSR Implementation
-    # "CSR-Implementation",
+    "CSR-Implementation",
+    # "AMGX (converging) (non deterministic)",
     # "AMGX",
-    "AMGX non-deterministic",
-    "AMGX 2 iterations",
+    # "AMGX non-deterministic",
+    # "AMGX 2 iterations",
     # "AMGX 2 iterations non-deterministic",
     # "AMGX 3 iterations",
     # "AMGX 3 iterations non-deterministic",
@@ -71,7 +75,9 @@ versions_to_plot = [
     # "Striped explicit Shared Memory (rows_per_SM pow2)",
     # "Striped explicit Shared Memory (rows_per_SM pow2 1024 threads)",
     # "Striped explicit Shared Memory (rows_per_SM pow2 1024 threads 2x physical cores)",
-    # "Striped Warp Reduction",
+    "Striped Warp Reduction",
+    "Striped Warp Reduction (thrust reduction)",
+    "Striped Warp Reduction (kernel reduction)",
     # "Striped Warp Reduction (pre-compute diag_offset)",
     # "Striped Warp Reduction (cooperation number = 16)",
     # "Striped Warp Reduction (loop body in method)",
@@ -96,14 +102,16 @@ versions_to_plot = [
     # "Striped Preprocessed (x=random)",
     # "Striped coloring (storing nothing)",
     # "Striped coloring (pre-computing COR Format)",
-    "Striped coloring (COR Format already stored on the GPU)",
+    # "Striped coloring (COR Format already stored on the GPU)",
+    
+    # "Striped Box coloring (coloringBox: 3x3x3) (coop_num: 4)",
+
     # "Striped Box coloring (coloringBox: 4x4x4) (coop_num: 4)",
     # "Striped Box coloring (coloringBox: 5x5x5) (coop_num: 4)",
     # "Striped Box coloring (coloringBox: 6x6x6) (coop_num: 4)",
     # "Striped Box coloring (coloringBox: 7x7x7) (coop_num: 4)",
     # "Striped Box coloring (coloringBox: 8x8x8) (coop_num: 4)",
     
-    "Striped Box coloring (coloringBox: 3x3x3) (coop_num: 4)",
     # "Striped Box coloring (coloringBox: 3x3x3) (coop_num: 8)",
     # "Striped Box coloring (coloringBox: 3x3x3) (coop_num: 16)",
     # "Striped Box coloring (coloringBox: 3x3x3) (coop_num: 32)",
@@ -117,6 +125,7 @@ baseline_implementations = [
     # "CSR-Implementation",
     # "BaseCuPy",
     "AMGX",
+    # "AMGX (converging) (non deterministic)",
     ]
 
 y_axis_to_plot = [
@@ -129,6 +138,9 @@ y_axis_config_to_plot = [
     # "log"
 ]
 
+
+# Developer options
+update_legend_labels = True
 
 #################################################################################################################
 # import necessary libraries
@@ -203,6 +215,11 @@ def read_data():
         version_name = str(meta_data[0])
         version_name = "CSR-Implementation" if version_name == "cuSparse&cuBLAS" or version_name == "cuSparse-Implementation" else version_name # we change the name because I am too lazy to re-run the benchmark
         version_name = version_name.replace("Banded", "Striped")
+
+        # this portion can help finding the old measurements that we don't need anymore
+        # if version_name ==  "Striped coloring (COR Format already stored on the GPU)":
+        #     print(f"Found Striped coloring (COR Format already stored on the GPU) in {file}", flush=True)
+
         ault_node = str(meta_data[1])
         matrix_type = str(meta_data[2])
         nx = int(meta_data[3])
@@ -469,6 +486,9 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
     # Initialize bar counter
     bar_ctr = 0
 
+    text_size = 20
+
+
     # Iterate over x_order and hue_order to annotate bars
     for hue_value in hue_order:
         for x_value in x_order:
@@ -478,8 +498,9 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
                 group_data = grouped_data.get_group(group_key)
                 l2_norms = np.unique(group_data['L2 Norm'].values)
                 rr_norms = np.unique(group_data['rr_norm'].values)
-                assert len(rr_norms) <= 1, "More than one rr norm found for a group, this could be because of old data that doesn't contain an rr norm mixed with new data that does"
-                assert len(l2_norms) <= 1, "More than one L2 norm found for a group, this could be because of old data that doesn't contain an L2 norm mixed with new data that does"
+                v_name = group_data['Version'].values[0]
+                assert len(rr_norms) <= 1, f"More than one rr norm found for a group, this could be because of old data that doesn't contain an rr norm mixed with new data that does, version: {v_name}"
+                assert len(l2_norms) <= 1, f"More than one L2 norm found for a group, this could be because of old data that doesn't contain an L2 norm mixed with new data that does, version: {v_name}"
                 l2_norm = group_data['L2 Norm'].values[0]  # Assuming one L2 norm per group
                 rr_norm = group_data['rr_norm'].values[0]  # Assuming one rr norm per group
                 
@@ -497,12 +518,12 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
                                 xy=(bar_x + bar_width / 2, height),
                                 xytext=(0, 3),  # 3 points vertical offset
                                 textcoords="offset points",
-                                ha='center', va='bottom')
+                                ha='center', va='bottom',
+                                fontsize=text_size-4)
                 
                 # Increment the bar counter
                 bar_ctr += 1
 
-    text_size = 18
 
     ax.set_title(title, fontsize=text_size+4)
     ax.set_xlabel(x, fontsize=text_size+2)
@@ -516,10 +537,27 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
 
     nc = get_num_columns(hue_order=hue_order)
     # print(nc, flush=True)
-    nc = 2
+    nc = 5
     box_offset = get_legend_horizontal_offset(num_cols=nc, hue_order=hue_order)
 
-    legend = ax.legend(loc = 'lower center', bbox_to_anchor = (0.5, box_offset- 0.05), ncol = nc, prop={'size': text_size})
+    if update_legend_labels:
+        legend_label_updates = {
+            "CuPy (converging) (minres)" : "CuPy MINRES",
+            "CuPy (converging) (lsmr)" : "CuPy LSMR",
+            "CuPy (converging) (gmres)" : "CuPy GMRES",
+            "AMGX (converging) (non deterministic)" : "AMGX",
+            "Striped coloring (COR Format already stored on the GPU)": "Striped coloring (propagated dependencies)",
+            "Striped Box coloring (coloringBox: 3x3x3) (coop_num: 4)": "Striped Box coloring (direct dependencies)",
+            }
+
+        handles, labels = ax.get_legend_handles_labels()
+        legend_labels = [legend_label_updates.get(label, label) for label in labels]
+        legend = ax.legend(handles, legend_labels, loc='lower center', bbox_to_anchor=(0.5, box_offset - 0.05), ncol=nc, prop={'size': text_size})
+    else:
+        legend = ax.legend(loc='lower center', bbox_to_anchor=(0.5, box_offset - 0.05), ncol=nc, prop={'size': text_size})
+
+
+    # legend = ax.legend(loc = 'lower center', bbox_to_anchor = (0.5, box_offset- 0.05), ncol = nc, prop={'size': text_size}, labels = legend_labels)
     legend.set_title(hue, prop={'size': text_size+2})
 
     fig.savefig(save_path, bbox_inches='tight')

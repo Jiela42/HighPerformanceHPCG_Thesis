@@ -17,14 +17,19 @@ template <typename T>
 class striped_warp_reduction_Implementation : public HPCG_functions<T> {
 public:
 
+    int dot_cooperation_number; // the cooperation number for the dot product
+
     striped_warp_reduction_Implementation(){
         // overwritting the inherited variables
+
+        this->dot_cooperation_number = 8;
 
         this->version_name = "Striped Warp Reduction";
         this->implementation_type = Implementation_Type::STRIPED;
         this->SPMV_implemented = true;
         this->Dot_implemented = true;
         this->SymGS_implemented = true;
+        
 
     }
 

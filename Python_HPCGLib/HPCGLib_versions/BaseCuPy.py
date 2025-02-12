@@ -67,16 +67,16 @@ num_its_minres = {
 }
 
 num_its_lsrm_zeroBased = {
-    (2,2,2): 2,
+    (2,2,2): 1,
     (4,4,4): 3,
-    (8,8,8): 3,
-    (16,16,16): 4,
+    (8,8,8): 7,
+    (16,16,16): 7,
     # (24,24,24): 8,
-    (32,32,32): 5,
-    (64,64,64): 6,
-    (128,64,64): 6,
-    (128,128,64): 6,
-    (128,128,128): 5,
+    (32,32,32): 8,
+    (64,64,64): 8,
+    (128,64,64): 8,
+    (128,128,64): 7,
+    # (128,128,128): 6,
 }
 
 # minres for size 2x2x2 (zerobased) converged at 1 iterations
@@ -100,15 +100,33 @@ num_its_minres_zeroBased = {
     (128,128,128): 3,
 }
 
+num_its_gmres_zeroBased = {
+    (2,2,2): 1,
+    (4,4,4): 1,
+    (8,8,8): 1,
+    (16,16,16): 1,
+    (32,32,32): 1,
+    (64,64,64): 1,
+    (128,64,64): 1,
+    (128,128,64): 1,
+    (128,128,128): 1
+
+}
+
 def computeDot(x: torch.tensor, y: torch.tensor) -> float:
     print(f"WARNING: computeDot not implemented for {version_name}, using BaseTorch implementation")
     return BaseTorch.computeDot(x, y)
     
 
-def computeSymGS_minres(A_csr: CSRMatrix,
+def computeSymGS_minres(
+                A_csr: CSRMatrix,
                 A: sp.csr_matrix, x: cp.ndarray, y: cp.ndarray)-> int:
     
-    solution = cupyx.scipy.sparse.linalg.minres(A, b=y, x0=x, maxiter=5)
+    nx = A_csr.nx
+    ny = A_csr.ny
+    nz = A_csr.nz
+
+    solution = cupyx.scipy.sparse.linalg.minres(A, b=y, x0=x, maxiter=num_its_minres_zeroBased.get((nx, ny, nz)))
 
     # if solution[1] != 0:
     #     print(f"WARNING: GMRES did not converge, error code: {solution[1]}")
@@ -116,16 +134,24 @@ def computeSymGS_minres(A_csr: CSRMatrix,
     cp.copyto(x, solution[0])
     return 0
 
-def computeSymGS_lsmr(A_csr: CSRMatrix,
+def computeSymGS_lsmr(
+                A_csr: CSRMatrix,
                 A: sp.csr_matrix, x: cp.ndarray, y: cp.ndarray)-> int:
     
-    solution = cupyx.scipy.sparse.linalg.lsmr(A, b=y, x0=x, maxiter=1)
+    nx = A_csr.nx
+    ny = A_csr.ny
+    nz = A_csr.nz
+    solution = cupyx.scipy.sparse.linalg.lsmr(A, b=y, x0=x, maxiter=num_its_lsrm_zeroBased.get((nx, ny, nz)))
     cp.copyto(x, solution[0])
     return 0
 
-def computeSymGS_gmres(A_csr: CSRMatrix,
+def computeSymGS_gmres(
+                A_csr: CSRMatrix,
                 A: sp.csr_matrix, x: cp.ndarray, y: cp.ndarray)-> int:
-    solution = cupyx.scipy.sparse.linalg.gmres(A, b=y, x0=x, maxiter=5)
+    nx = A_csr.nx
+    ny = A_csr.ny
+    nz = A_csr.nz
+    solution = cupyx.scipy.sparse.linalg.gmres(A, b=y, x0=x, maxiter=num_its_gmres_zeroBased.get((nx, ny, nz)))
     cp.copyto(x, solution[0])
     return 0
 
@@ -265,6 +291,8 @@ def check_num_its(nx, ny, nz):
     # now we run both solvers for both versions and see if the number of iterations is enough to go below the threshold
 
     check_randomized = False
+    check_lsmr = True
+    check_minres = False
 
     fail_test_offset = 0
 
@@ -273,9 +301,9 @@ def check_num_its(nx, ny, nz):
     failure_ctr_lsmr_randomized = 0
     failure_ctr_minres_randomized = 0
 
-    for i in range (20):
+    for i in range (1):
 
-        x_zero = x_randomized_original.copy()
+        x_zero = x_zero_original.copy()
 
         if check_randomized:
             x_randomized = cp.random.rand(y.shape[0])
@@ -286,10 +314,13 @@ def check_num_its(nx, ny, nz):
             if rr_norm > rr_norm_threshold_randomized:
                 failure_ctr_lsmr_randomized += 1
                 # print(f"lsmr for size {nx}x{ny}x{nz} (randomized) did not converge at {current_num_its_lsmr} iterations", flush=True)
-
+            
         
         current_num_its_lsmr_zeroBased = num_its_lsrm_zeroBased.get((nx, ny, nz)) + fail_test_offset
-        solution = cupyx.scipy.sparse.linalg.lsmr(A_cupy, b=y, x0=x_zero, maxiter=current_num_its_lsmr_zeroBased)
+        
+        print(f"number iterations for size {nx}x{ny}x{nz} (zerobased): {current_num_its_lsmr_zeroBased}")
+
+        solution = cupyx.scipy.sparse.linalg.lsmr(A_cupy, b=y, x0=x_zero, maxiter=num_its_lsrm_zeroBased.get((nx, ny, nz)))
         rr_norm = np.linalg.norm(y - A_cupy.dot(solution[0]))/np.linalg.norm(y)
 
         if rr_norm > rr_norm_threshold_zeroBased:
@@ -297,36 +328,86 @@ def check_num_its(nx, ny, nz):
             # print(f"lsmr for size {nx}x{ny}x{nz} (zerobased): rr_norm is {rr_norm}, but should be below {rr_norm_threshold_zeroBased}", flush=True)
             # print(f"lsmr for size {nx}x{ny}x{nz} (zerobased) did not converge at {current_num_its_lsmr_zeroBased} iterations", flush=True)
         
-        
-        x_zero = x_zero_original.copy()
+        print(f"lsmr for size {nx}x{ny}x{nz} (zerobased) had rr_norm {rr_norm}, the threshold was {rr_norm_threshold_zeroBased}", flush=True)
 
-        if check_randomized:
-            x_randomized = cp.random.rand(y.shape[0])
+        if check_minres:
 
-            current_num_its_minres = num_its_minres.get((nx, ny, nz)) + fail_test_offset
-            solution = cupyx.scipy.sparse.linalg.minres(A_cupy, b=y, x0=x_randomized, maxiter=current_num_its_minres)
+            x_zero = x_zero_original.copy()
+
+            if check_randomized:
+                x_randomized = cp.random.rand(y.shape[0])
+
+                current_num_its_minres = num_its_minres.get((nx, ny, nz)) + fail_test_offset
+                solution = cupyx.scipy.sparse.linalg.minres(A_cupy, b=y, x0=x_randomized, maxiter=current_num_its_minres)
+                rr_norm = np.linalg.norm(y - A_cupy.dot(solution[0]))/np.linalg.norm(y)
+
+                if rr_norm > rr_norm_threshold_randomized:
+                    failure_ctr_minres_randomized += 1
+                    # print(f"minres for size {nx}x{ny}x{nz} (randomized): rr_norm is {rr_norm}, but should be below {rr_norm_threshold_randomized}", flush=True)
+                    # print(f"minres for size {nx}x{ny}x{nz} (randomized) did not converge at {current_num_its_minres} iterations", flush=True)
+            
+            current_num_its_minres_zeroBased = num_its_minres_zeroBased.get((nx, ny, nz)) + fail_test_offset
+            solution = cupyx.scipy.sparse.linalg.minres(A_cupy, b=y, x0=x_zero, maxiter=current_num_its_minres_zeroBased)
             rr_norm = np.linalg.norm(y - A_cupy.dot(solution[0]))/np.linalg.norm(y)
 
-            if rr_norm > rr_norm_threshold_randomized:
-                failure_ctr_minres_randomized += 1
-                # print(f"minres for size {nx}x{ny}x{nz} (randomized): rr_norm is {rr_norm}, but should be below {rr_norm_threshold_randomized}", flush=True)
-                # print(f"minres for size {nx}x{ny}x{nz} (randomized) did not converge at {current_num_its_minres} iterations", flush=True)
-        
-        current_num_its_minres_zeroBased = num_its_minres_zeroBased.get((nx, ny, nz)) + fail_test_offset
-        solution = cupyx.scipy.sparse.linalg.minres(A_cupy, b=y, x0=x_zero, maxiter=current_num_its_minres_zeroBased)
-        rr_norm = np.linalg.norm(y - A_cupy.dot(solution[0]))/np.linalg.norm(y)
+            if rr_norm > rr_norm_threshold_zeroBased:
+                failure_ctr_minres_zeroBased += 1
+                # print(f"minres for size {nx}x{ny}x{nz} (zerobased) did not converge at {current_num_its_minres_zeroBased} iterations", flush=True)
 
-        if rr_norm > rr_norm_threshold_zeroBased:
-            failure_ctr_minres_zeroBased += 1
-            # print(f"minres for size {nx}x{ny}x{nz} (zerobased) did not converge at {current_num_its_minres_zeroBased} iterations", flush=True)
-
-    print(f"lsmr for size {nx}x{ny}x{nz} (zerobased) failed to converge {failure_ctr_lsmr_zeroBased} times out of 20", flush=True)
-    print(f"minres for size {nx}x{ny}x{nz} (zerobased) failed to converge {failure_ctr_minres_zeroBased} times out of 20", flush=True)
+    # print(f"lsmr for size {nx}x{ny}x{nz} (zerobased) failed to converge {failure_ctr_lsmr_zeroBased} times out of 20", flush=True)
+    
+    if check_minres:
+        print(f"minres for size {nx}x{ny}x{nz} (zerobased) failed to converge {failure_ctr_minres_zeroBased} times out of 20", flush=True)
 
     if check_randomized:
         print(f"lsmr for size {nx}x{ny}x{nz} (randomized) failed to converge {failure_ctr_lsmr_randomized} times out of 20", flush=True)
-        print(f"minres for size {nx}x{ny}x{nz} (randomized) failed to converge {failure_ctr_minres_randomized} times out of 20", flush=True)
+        if check_minres:
+            print(f"minres for size {nx}x{ny}x{nz} (randomized) failed to converge {failure_ctr_minres_randomized} times out of 20", flush=True)
 
+def check_num_its_gmres(nx, ny, nz):
+    
+    A_CSR, A_cupy, y = generations.generate_cupy_csr_problem(nx, ny, nz)
+    x = cp.zeros_like(y)
+    original_x = x.copy()
+    rr_norm_threshold = getSymGS_rrNorm_zero_based(nx, ny, nz)
+
+    num_its = num_its_gmres_zeroBased.get((nx, ny, nz))
+    solution = cupyx.scipy.sparse.linalg.gmres(A_cupy, b=y, x0=x, maxiter=num_its)
+    rr_norm = np.linalg.norm(y - A_cupy.dot(solution[0]))/np.linalg.norm(y)
+
+    if rr_norm > rr_norm_threshold:
+        print(f"gmres for size {nx}x{ny}x{nz} (zerobased) did not converge at {num_its} iterations, achieved norm: {rr_norm}, threshold: {rr_norm_threshold}", flush=True)
+    else:
+        print(f"gmres for size {nx}x{ny}x{nz} (zerobased) converged at {num_its} iterations, achieved norm: {rr_norm:.3f}, threshold: {rr_norm_threshold:.3f}", flush=True)
+
+def check_num_its_lsmr(nx, ny, nz):
+
+    A_CSR, A_cupy, y = generations.generate_cupy_csr_problem(nx, ny, nz)
+    x = cp.zeros_like(y)
+    original_x = x.copy()
+    rr_norm_threshold = getSymGS_rrNorm_zero_based(nx, ny, nz)
+
+    num_its = num_its_lsrm_zeroBased.get((nx, ny, nz))
+    solution = cupyx.scipy.sparse.linalg.lsmr(A_cupy, b=y, x0=x, maxiter=num_its)
+    rr_norm = np.linalg.norm(y - A_cupy.dot(solution[0]))/np.linalg.norm(y)
+
+    if rr_norm > rr_norm_threshold:
+        print(f"lsmr for size {nx}x{ny}x{nz} (zerobased) did not converge at {solution[2]} iterations", flush=True)
+    else:
+        print(f"lsmr for size {nx}x{ny}x{nz} (zerobased) converged at {solution[2]} iterations", flush=True)
+
+def print_norm_lsmr(nx, ny, nz):
+    A_csr, A_cupy, y = generations.generate_cupy_csr_problem(nx, ny, nz)
+
+    x = cp.zeros_like(y)
+
+    print(f"number of iterations for size {nx}x{ny}x{nz} (zerobased): {num_its_lsrm_zeroBased.get((nx, ny, nz))}")
+
+    solution = cupyx.scipy.sparse.linalg.lsmr(A_cupy, b=y, x0=x, maxiter=num_its_lsrm_zeroBased.get((nx, ny, nz)))
+
+    rr_norm = np.linalg.norm(y - A_cupy.dot(solution[0]))/np.linalg.norm(y)
+
+    print(f"lsmr for size {nx}x{ny}x{nz} (zerobased) has rr_norm: {rr_norm:.10f}", flush=True)
 
 if __name__ == "__main__":
     # This portion helped me figure out exactly how many iterations I need for each of the solvers
@@ -364,8 +445,32 @@ if __name__ == "__main__":
     # check_num_its(32,32,32)
     # check_num_its(64,64,64)
     # check_num_its(128,64,64)
-    check_num_its(128,128,64)
+    # check_num_its(128,128,64)
     # check_num_its(128,128,128)
+
+    # check_num_its_lsmr(2,2,2)
+    # check_num_its_lsmr(4,4,4)
+    # check_num_its_lsmr(8,8,8)
+    # check_num_its_lsmr(16,16,16)
+    # check_num_its_lsmr(32,32,32)
+    # check_num_its_lsmr(64,64,64)
+    # check_num_its_lsmr(128,64,64)
+    # check_num_its_lsmr(128,128,64)
+
+    check_num_its_gmres(2,2,2)
+    check_num_its_gmres(4,4,4)
+    check_num_its_gmres(8,8,8)
+    check_num_its_gmres(16,16,16)
+    check_num_its_gmres(32,32,32)
+    check_num_its_gmres(64,64,64)
+    check_num_its_gmres(128,64,64)
+    check_num_its_gmres(128,128,64)
+    check_num_its_gmres(128,128,128)
+
+    # print_norm_lsmr(8,8,8)
+    # print_norm_lsmr(16,16,16)
+    # print_norm_lsmr(32,32,32)
+    # print_norm_lsmr(64,64,64)
 
     # A_CSR, A_cupy, y = generations.generate_cupy_csr_problem(4, 4, 4)
     # x = np.zeros_like(y)

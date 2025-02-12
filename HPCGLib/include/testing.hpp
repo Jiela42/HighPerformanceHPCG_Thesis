@@ -64,6 +64,12 @@ bool test_Dot(
 );
 
 bool test_Dot(
+    HPCG_functions<double>& uut,
+    sparse_CSR_Matrix<double> & A,
+    double * x_d, double * y_d // the vectors x, y and result are already on the device
+);
+
+bool test_Dot(
     HPCG_functions<double>&uut,
     int nx, int ny, int nz
 );

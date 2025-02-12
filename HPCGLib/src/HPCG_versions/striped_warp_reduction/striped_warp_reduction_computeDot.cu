@@ -4,6 +4,9 @@
 #include "HPCG_versions/striped_warp_reduction.cuh"
 #include "UtilLib/cuda_utils.hpp"
 #include <iostream>
+#include <thrust/reduce.h>
+#include <thrust/functional.h>
+#include <thrust/device_ptr.h>
 
 __global__ void reduce_sums(double * array, int num_elements, double * result_d){
 
@@ -28,6 +31,8 @@ __global__ void reduce_sums(double * array, int num_elements, double * result_d)
     if (lane == 0){
         intermediate_sums[warp_id] = my_sum;
     }
+
+    __syncthreads();
 
     if(warp_id == 0){
         my_sum = intermediate_sums[lane];
@@ -54,6 +59,7 @@ __global__ void striped_warp_reduction_dot_kernel(
 
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     int lane = threadIdx.x % 32;
+    // warp_id within the block
     int warp_id = threadIdx.x / 32;
 
     // first we reduce as much as we can without cooperation
@@ -91,9 +97,13 @@ __global__ void striped_warp_reduction_dot_kernel(
 
     __syncthreads();
 
-    if(tid == 0){
+    // printf("my_sum = %f\n", my_sum);
+    if(threadIdx.x == 0){
         result_d[blockIdx.x] = my_sum;
-        // printf("result_d = %f\n", *result_d);
+        // if (my_sum != 0.0){
+
+        // printf("result_d[%d] = %f\n", blockIdx.x, result_d[blockIdx.x]);
+        // }
     }
 }
 
@@ -104,19 +114,25 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeDot
     T * y_d,
     T * result_d
     ){
+    
+    int coop_num = this->dot_cooperation_number;
     // we compute z = xy
 
     int num_rows = A.get_num_rows();
     int num_threads = 1024;
-    int num_blocks = std::min(num_rows/8, 8*num_threads);
-    num_blocks = 1;
+    int num_blocks = std::min(num_rows/(num_threads*coop_num), MAX_NUM_BLOCKS);
+    // we need at least one block
+    num_blocks = max(num_blocks, 1);
 
-    // get some shared memory for the subsequent reduction
-    // double * intermediate_sums_d;
-    // CHECK_CUDA(cudaMalloc(&intermediate_sums_d, num_blocks * sizeof(double)));    
+    // allocate memory for the intermediate vector
+    double *intermediate_sums_d;
+
+    CHECK_CUDA(cudaMalloc(&intermediate_sums_d, num_blocks * sizeof(double)));
+
+    // std::cout << "calling the kernel with " << num_blocks << " blocks" << std::endl;
 
     striped_warp_reduction_dot_kernel<<<num_blocks, num_threads>>>(
-        num_rows, x_d, y_d, result_d
+        num_rows, x_d, y_d, intermediate_sums_d
     );
 
     // CHECK_CUDA(cudaDeviceSynchronize());
@@ -125,7 +141,27 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeDot
 
     CHECK_CUDA(cudaDeviceSynchronize());
 
+    // use thrust to reduce the intermediate sums
+    // thrust::device_ptr<double> thrust_intermediate_sums(intermediate_sums_d);
+    // double result = thrust::reduce(thrust_intermediate_sums, thrust_intermediate_sums + num_blocks, 0.0, thrust::plus<double>());
 
+
+    // print intermediate sums
+    // double * intermediate_sums = new double[num_blocks];
+    // CHECK_CUDA(cudaMemcpy(intermediate_sums, intermediate_sums_d, num_blocks * sizeof(double), cudaMemcpyDeviceToHost));
+
+    // for (int i = 0; i < num_blocks; i++){
+    //     std::cout << "intermediate_sums[" << i << "] = " << intermediate_sums[i] << std::endl;
+    // }
+
+    // // write the result to the device
+    // CHECK_CUDA(cudaMemcpy(result_d, &result, sizeof(double), cudaMemcpyHostToDevice));
+
+    // use a kernel to reduce the intermediate sums
+    reduce_sums<<<1, num_threads>>>(intermediate_sums_d, num_blocks, result_d);
+
+    CHECK_CUDA(cudaDeviceSynchronize());
+    CHECK_CUDA(cudaFree(intermediate_sums_d));
 
 }
 

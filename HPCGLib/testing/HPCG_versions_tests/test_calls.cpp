@@ -151,6 +151,49 @@ bool test_Dot(
     return test_pass;
 }
 
+bool test_Dot(
+    HPCG_functions<double>& uut,
+    sparse_CSR_Matrix<double> & A,
+    double * x_d, double * y_d // the vectors x, y and result are already on the device
+    ){
+
+        // get the result on the device
+        double * result_uut_d;
+        double result_uut = 0.0;
+
+        CHECK_CUDA(cudaMalloc(&result_uut_d, sizeof(double)));
+
+        uut.compute_Dot(A, x_d, y_d, result_uut_d);
+
+        // and now we need to copy the result back and de-allocate the memory
+        CHECK_CUDA(cudaMemcpy(&result_uut, result_uut_d, sizeof(double), cudaMemcpyDeviceToHost));
+
+        CHECK_CUDA(cudaFree(result_uut_d));
+
+        double result_baseline = 0.0;
+
+        // calculate the baseline result (on the host like a mooron)
+        std::vector <double> x_h(A.get_num_rows());
+        std::vector <double> y_h(A.get_num_rows());
+
+        CHECK_CUDA(cudaMemcpy(x_h.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+        CHECK_CUDA(cudaMemcpy(y_h.data(), y_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+
+        for(int i = 0; i < A.get_num_rows(); i++){
+            result_baseline += x_h[i] * y_h[i];
+        }
+
+        // and now we need to copy the result back and de-allocate the memory
+        bool test_pass = double_compare(result_baseline, result_uut);
+
+        if(not test_pass){
+            std::cout << "Dot product failed for Implementation: " << uut.version_name << " baseline = " << result_baseline << " uut = " << result_uut << std::endl;
+        }
+
+        return test_pass;
+
+    }
+
 // this is a minitest, it can be called to do some rudimentary testing (currently only for striped Matrices)
 bool test_Dot(
     HPCG_functions<double>& uut,
@@ -165,6 +208,7 @@ bool test_Dot(
     // create two vectors
     std::vector<double> x(nx * ny * nz, 2.0);
     std::vector<double> y(nx * ny * nz, 0.5);
+    // std::cout << "we use this function" << std::endl;
 
     double result = 0.0;
 
@@ -205,6 +249,9 @@ bool test_Dot(
     if (not test_pass){
         std::cout << "Dot product failed: baseline = " << result << " uut = " << result_uut << std::endl;
     }
+    // else {
+    //     std::cout << "Dot product passed: baseline = " << result << " uut = " << result_uut << std::endl;
+    // }
 
     return test_pass;
 }
@@ -326,7 +373,7 @@ bool test_SymGS(
         int ny = A.get_ny();
         int nz = A.get_nz();
 
-        double threshold_norm = uut.getSymGS_rrNorm(nx, ny, nz);
+        double threshold_norm = uut.getSymGS_rrNorm_zero_init(nx, ny, nz);
         
         test_pass = rr_norm <= threshold_norm;
 
@@ -414,12 +461,12 @@ bool test_SymGS(
         int ny = A.get_ny();
         int nz = A.get_nz();
 
-        double threshold_norm = uut.getSymGS_rrNorm(nx, ny, nz);
+        double threshold_norm = uut.getSymGS_rrNorm_zero_init(nx, ny, nz);
         
         test_pass = rr_norm <= threshold_norm;
 
         if (not test_pass){
-            std::cout << "SymGS test failed for size " << nx << "x" << ny << "x" << nz << std::endl;
+            std::cout << "SymGS test failed for size " << nx << "x" << ny << "x" << nz << " version: " << uut.version_name << std::endl;
             std::cout << "The rr norm was " << rr_norm << " and the threshold is " << threshold_norm << std::endl;
             // std::cout << "heul doch" << std::endl;
             // test_pass = false;

@@ -63,9 +63,9 @@ def run_BaseCuPy_3d27pt_benchmark(nx: int, ny: int, nz: int, save_folder) -> Non
 
     # the BaseCuPy contains three different versions of the SymGS algorithm so we need to benchmark all of them
     symGS_Implementations_Names = [
-        (BaseCuPy.computeSymGS_minres, "CuPy 5 iterations (minres)"),
-        (BaseCuPy.computeSymGS_lsmr, "CuPy 5 iterations (lsmr)"),
-        (BaseCuPy.computeSymGS_gmres, "CuPy 5 iterations (gmres)")
+        # (BaseCuPy.computeSymGS_minres, "CuPy (converging) (minres)"),
+        (BaseCuPy.computeSymGS_lsmr, "CuPy (converging) (lsmr)"),
+        (BaseCuPy.computeSymGS_gmres, "CuPy (converging) (gmres)")
     ]
 
     for symGS_Implementation, symGS_name in symGS_Implementations_Names:

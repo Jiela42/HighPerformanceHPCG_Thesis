@@ -20,6 +20,7 @@ void run_striped_coloringPrecomputed_3d27p_benchmarks(int nx, int ny, int nz, st
 
 void run_cuSparse_3d27p_SPMV_benchmark(int nx, int ny, int nz, std::string folder_path);
 void run_cuSparse_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path);
+void run_cuSparse_3d27p_Dot_benchmark(int nx, int ny, int nz, std::string folder_path);
 
 void run_warp_reduction_3d27p_SPMV_benchmark(int nx, int ny, int nz, std::string folder_path);
 void run_warp_reduction_3d27p_Dot_benchmark(int nx, int ny, int nz, std::string folder_path);
@@ -87,6 +88,13 @@ void bench_Dot(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
     striped_Matrix<double> & A,
+    double * x_d, double * y_d, double * result_d
+    );
+
+void bench_Dot(
+    HPCG_functions<double>& implementation,
+    CudaTimer& timer,
+    sparse_CSR_Matrix<double> & A,
     double * x_d, double * y_d, double * result_d
     );
 
