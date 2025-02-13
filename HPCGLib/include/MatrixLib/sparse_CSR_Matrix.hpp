@@ -46,6 +46,10 @@ public:
     int* get_col_idx_d();
     T* get_values_d();
 
+    void copy_Matrix_toGPU();
+
+    void remove_Matrix_from_GPU();
+
     int get_num_rows() const;
     int get_num_cols() const;
     int get_nx() const;
@@ -75,6 +79,8 @@ private:
     T * values_d;
     MatrixType matrix_type;
     void sparse_CSR_Matrix_from_striped_transformation(striped_Matrix<T>&);
+    void sparse_CSR_Matrix_from_striped_transformation_CPU(striped_Matrix<T>&);
+    void sparse_CSR_Matrix_from_striped_transformation_GPU(striped_Matrix<T>&);
 };
 
 #endif // SPARSE_CSR_MATRIX_HPP

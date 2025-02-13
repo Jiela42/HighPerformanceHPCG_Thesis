@@ -41,40 +41,29 @@ class HPCG_functions {
         
     // MG, SymGS, SPMV, WAXPBY and Dot have the data on the GPU already
         virtual void compute_MG(
-            sparse_CSR_Matrix<T> & A, // we pass A for the metadata
-            int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
+            sparse_CSR_Matrix<T> & A,
             T * x_d, T * y_d // the vectors x and y are already on the device
             ) = 0;
 
         virtual void compute_SymGS(
-            sparse_CSR_Matrix<T> & A, // we pass A for the metadata
-            int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
+            sparse_CSR_Matrix<T> & A,
             T * x_d, T * y_d // the vectors x and y are already on the device
             ) = 0;
 
         virtual void compute_SymGS(
-            striped_Matrix<T> & A, // we pass A for the metadata
-            T * striped_A_d, // the data of matrix A is already on the device
-            int num_rows, int num_cols,
-            int num_stripes, // the number of stripes in the striped matrix
-            int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the striped matrix
+            striped_Matrix<T> & A,
             T * x_d, T * y_d // the vectors x and y are already on the device
             ) = 0;
 
         // this version supports CSR
         virtual void compute_SPMV(
-            sparse_CSR_Matrix<T> & A, // we pass A for the metadata
-            int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
+            sparse_CSR_Matrix<T> & A,
             T * x_d, T * y_d // the vectors x and y are already on the device
             ) = 0;
         
         // this version is for the striped matrix
         virtual void compute_SPMV(
             striped_Matrix<T>& A, //we only pass A for the metadata
-            T * striped_A_d, // the matrix A is already on the device
-            int num_rows, int num_cols, // these refer to the shape of the striped matrix
-            int num_stripes, // the number of stripes in the striped matrix
-            int * j_min_i_d, // this is a mapping for calculating the j of some entry i,j in the striped matrix
             T * x_d, T * y_d // the vectors x and y are already on the device
             ) = 0;
 

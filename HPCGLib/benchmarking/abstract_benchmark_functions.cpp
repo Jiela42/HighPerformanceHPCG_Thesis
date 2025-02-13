@@ -11,7 +11,6 @@ void bench_SPMV(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
     sparse_CSR_Matrix<double> & A,
-    int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d,
     double * x_d, double * y_d
     )
 {
@@ -28,7 +27,7 @@ void bench_SPMV(
         cuSparse_Implementation<double> baseline;
         bool test_failed = !test_SPMV(
             baseline, implementation,
-            A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d);
+            A, x_d);
         if (test_failed){
             num_iterations = 0;
         }
@@ -39,7 +38,6 @@ void bench_SPMV(
         timer.startTimer();
         implementation.compute_SPMV(
             A,
-            A_row_ptr_d, A_col_idx_d, A_values_d,
             x_d, y_d
         );
         timer.stopTimer("compute_SPMV");
@@ -54,10 +52,6 @@ void bench_SPMV(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
     striped_Matrix<double> & A,
-    double * striped_A_d,
-    int num_rows, int num_cols,
-    int num_stripes,
-    int * j_min_i_d,
     double * x_d, double * y_d
     ){
 
@@ -77,41 +71,13 @@ void bench_SPMV(
         int num_rows = sparse_CSR_A.get_num_rows();
         int num_cols = sparse_CSR_A.get_num_cols();
         int nnz = sparse_CSR_A.get_nnz();
-
-        int * A_row_ptr_data = sparse_CSR_A.get_row_ptr().data();
-        int * A_col_idx_data = sparse_CSR_A.get_col_idx().data();
-        double * A_values_data = sparse_CSR_A.get_values().data();
-
-        int * A_row_ptr_d;
-        int * A_col_idx_d;
-        double * A_values_d;
-
-        CHECK_CUDA(cudaMalloc(&A_row_ptr_d, (num_rows + 1) * sizeof(int)));
-        CHECK_CUDA(cudaMalloc(&A_col_idx_d, nnz * sizeof(int)));
-        CHECK_CUDA(cudaMalloc(&A_values_d, nnz * sizeof(double)));
-
-        CHECK_CUDA(cudaMemcpy(A_row_ptr_d, A_row_ptr_data, (num_rows + 1) * sizeof(int), cudaMemcpyHostToDevice));
-        CHECK_CUDA(cudaMemcpy(A_col_idx_d, A_col_idx_data, nnz * sizeof(int), cudaMemcpyHostToDevice));
-        CHECK_CUDA(cudaMemcpy(A_values_d, A_values_data, nnz * sizeof(double), cudaMemcpyHostToDevice));
     
         // test the SPMV function
         bool test_failed = !test_SPMV(
             baseline, implementation,
             A,
-            A_row_ptr_d, A_col_idx_d, A_values_d,
-            
-            striped_A_d,
-            num_rows, num_cols,
-            num_stripes,
-            j_min_i_d,
-
             x_d
             );
-
-        // free the memory
-        cudaFree(A_row_ptr_d);
-        cudaFree(A_col_idx_d);
-        cudaFree(A_values_d);
 
         if (test_failed)
         {
@@ -123,10 +89,6 @@ void bench_SPMV(
         timer.startTimer();
         implementation.compute_SPMV(
             A,
-            striped_A_d,
-            num_rows, num_cols,
-            num_stripes,
-            j_min_i_d,
             x_d, y_d
         );
         timer.stopTimer("compute_SPMV");
@@ -206,8 +168,7 @@ void bench_Dot(
 void bench_SymGS(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
-    sparse_CSR_Matrix<double> & A,
-    int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d,
+    sparse_CSR_Matrix<double> & A,   
     double * x_d, double * y_d
     )
 {
@@ -228,7 +189,7 @@ void bench_SymGS(
 
         bool test_failed = !test_SymGS(
             baseline, implementation,
-            A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d, y_d);
+            A, x_d, y_d);
         if (test_failed){
             num_iterations = 0;
         }
@@ -240,7 +201,6 @@ void bench_SymGS(
         timer.startTimer();
         implementation.compute_SymGS(
             A,
-            A_row_ptr_d, A_col_idx_d, A_values_d,
             x_d, y_d
         );
         timer.stopTimer("compute_SymGS");
@@ -248,8 +208,7 @@ void bench_SymGS(
 
     // greb da norm and store it in additional infos
     double norm = relative_residual_norm_for_SymGS(
-        num_rows, num_cols,
-        A_row_ptr_d, A_col_idx_d, A_values_d,
+        A,
         x_d, y_d);
 
     std::ostringstream oss;
@@ -265,10 +224,6 @@ void bench_SymGS(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
     striped_Matrix<double> & A,
-    double * striped_A_d,
-    int num_rows, int num_cols,
-    int num_stripes,
-    int * j_min_i_d,
     double * x_d, double * y_d
     )
 {   
@@ -289,40 +244,12 @@ void bench_SymGS(
         int num_rows = A_csr.get_num_rows();
         int num_cols = A_csr.get_num_cols();
         int nnz = A_csr.get_nnz();
-
-        int * A_row_ptr_data = A_csr.get_row_ptr().data();
-        int * A_col_idx_data = A_csr.get_col_idx().data();
-        double * A_values_data = A_csr.get_values().data();
-
-        int * A_row_ptr_d;
-        int * A_col_idx_d;
-        double * A_values_d;
-
-        CHECK_CUDA(cudaMalloc(&A_row_ptr_d, (num_rows + 1) * sizeof(int)));
-        CHECK_CUDA(cudaMalloc(&A_col_idx_d, nnz * sizeof(int)));
-        CHECK_CUDA(cudaMalloc(&A_values_d, nnz * sizeof(double)));
-
-        CHECK_CUDA(cudaMemcpy(A_row_ptr_d, A_row_ptr_data, (num_rows + 1) * sizeof(int), cudaMemcpyHostToDevice));
-        CHECK_CUDA(cudaMemcpy(A_col_idx_d, A_col_idx_data, nnz * sizeof(int), cudaMemcpyHostToDevice));
-        CHECK_CUDA(cudaMemcpy(A_values_d, A_values_data, nnz * sizeof(double), cudaMemcpyHostToDevice));
             
 
         bool test_failed = !test_SymGS(
             baseline, implementation,
             A,
-            A_row_ptr_d, A_col_idx_d, A_values_d,
-
-            striped_A_d,
-            num_rows, num_cols,
-            num_stripes,
-            j_min_i_d,
-
             y_d);
-
-        // now we need to free the memory
-        CHECK_CUDA(cudaFree(A_row_ptr_d));
-        CHECK_CUDA(cudaFree(A_col_idx_d));
-        CHECK_CUDA(cudaFree(A_values_d));
 
         if (test_failed){
             num_iterations = 0;
@@ -335,15 +262,13 @@ void bench_SymGS(
         // copy original x into x_d
         CHECK_CUDA(cudaMemcpy(x_d, x.data(), A.get_num_cols() * sizeof(double), cudaMemcpyHostToDevice));
         timer.startTimer();
-        implementation.compute_SymGS( A, striped_A_d, num_rows, num_cols, num_stripes, j_min_i_d, x_d, y_d);
+        implementation.compute_SymGS( A, x_d, y_d);
         timer.stopTimer("compute_SymGS");
     }
 
     // greb da norm and store it in additional infos
     double norm = relative_residual_norm_for_SymGS(
-    num_rows, num_cols,
-    num_stripes, j_min_i_d,
-    striped_A_d,
+    A,
     x_d, y_d);
 
     std::ostringstream oss;
@@ -364,16 +289,15 @@ void bench_Implementation(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
     sparse_CSR_Matrix<double> & A,
-    int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d,
     double * a_d, double * b_d, // a & b are random vectors
     double * x_d, double * y_d // x & y are vectors as used in HPCG
     )
 {
     if(implementation.SPMV_implemented){
-        bench_SPMV(implementation, timer, A, A_row_ptr_d, A_col_idx_d, A_values_d, a_d, y_d);
+        bench_SPMV(implementation, timer, A, a_d, y_d);
     }
     if(implementation.SymGS_implemented){
-        bench_SymGS(implementation, timer, A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d, y_d);
+        bench_SymGS(implementation, timer, A, x_d, y_d);
     }
 
     // bench_SPMV(implementation, timer, A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d, y_d);
@@ -386,23 +310,19 @@ void bench_Implementation(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
     striped_Matrix<double> & A, // we need to pass the CSR matrix for metadata and potential testing
-    double * striped_A_d,
-    int num_rows, int num_cols,
-    int num_stripes,
-    int * j_min_i_d,
     double * a_d, double * b_d, // a & b are random vectors
     double * x_d, double * y_d, // x & y are vectors as used in HPCG
     double * result_d   // result is used for the dot product (it is a scalar)
     ){
       
     if(implementation.SPMV_implemented){
-        bench_SPMV(implementation, timer, A, striped_A_d, num_rows, num_cols, num_stripes, j_min_i_d, a_d, y_d);
+        bench_SPMV(implementation, timer, A, a_d, y_d);
     }
     if(implementation.Dot_implemented){
         bench_Dot(implementation, timer, A, a_d, b_d, result_d);
     }
     if(implementation.SymGS_implemented){
-        bench_SymGS(implementation, timer, A, striped_A_d, num_rows, num_cols, num_stripes, j_min_i_d, x_d, y_d);
+        bench_SymGS(implementation, timer, A, x_d, y_d);
     }
     // bench_SPMV(implementation, timer, A, striped_A_d, num_rows, num_cols, num_stripes, j_min_i_d, x_d, y_d);
     // bench_Dot(implementation, timer, A, x_d, y_d, result_d);

@@ -33,20 +33,6 @@ bool run_striped_coloringPrecomputed_tests_on_matrix(sparse_CSR_Matrix<double> A
 
     int num_stripes = A_striped.get_num_stripes();
 
-    const int * A_row_ptr_data = A.get_row_ptr().data();
-    const int * A_col_idx_data = A.get_col_idx().data();
-    const double * A_values_data = A.get_values().data();
-
-    const double * A_striped_data = A_striped.get_values().data();
-    const int * j_min_i_data = A_striped.get_j_min_i().data();
-
-    int * A_row_ptr_d;
-    int * A_col_idx_d;
-    double * A_values_d;
-
-    double * striped_A_d;
-    int * j_min_i_d;
-
     double * a_d;
     double * b_d;
     double * x_d;
@@ -54,25 +40,12 @@ bool run_striped_coloringPrecomputed_tests_on_matrix(sparse_CSR_Matrix<double> A
 
 
     // Allocate the memory on the device
-    CHECK_CUDA(cudaMalloc(&A_row_ptr_d, (num_rows + 1) * sizeof(int)));
-    CHECK_CUDA(cudaMalloc(&A_col_idx_d, nnz * sizeof(int)));
-    CHECK_CUDA(cudaMalloc(&A_values_d, nnz * sizeof(double)));
     CHECK_CUDA(cudaMalloc(&a_d, num_cols * sizeof(double)));
     CHECK_CUDA(cudaMalloc(&b_d, num_cols * sizeof(double)));
     CHECK_CUDA(cudaMalloc(&x_d, num_cols * sizeof(double)));
     CHECK_CUDA(cudaMalloc(&y_d, num_cols * sizeof(double)));
 
-    CHECK_CUDA(cudaMalloc(&striped_A_d, num_rows * num_stripes * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&j_min_i_d, num_stripes * sizeof(int)));
-
-    // Copy the data to the device
-    CHECK_CUDA(cudaMemcpy(A_row_ptr_d, A_row_ptr_data, (num_rows + 1) * sizeof(int), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(A_col_idx_d, A_col_idx_data, nnz * sizeof(int), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(A_values_d, A_values_data, nnz * sizeof(double), cudaMemcpyHostToDevice));
-    
-    CHECK_CUDA(cudaMemcpy(striped_A_d, A_striped_data, num_rows * num_stripes * sizeof(double), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(j_min_i_d, j_min_i_data, num_stripes * sizeof(int), cudaMemcpyHostToDevice));
-    
+    // Copy the data to the device    
     CHECK_CUDA(cudaMemcpy(a_d, a.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(b_d, b.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
@@ -81,24 +54,12 @@ bool run_striped_coloringPrecomputed_tests_on_matrix(sparse_CSR_Matrix<double> A
     all_pass = all_pass && test_SymGS(
         cuSparse, striped_coloringPrecomputed,
         A_striped,
-        A_row_ptr_d, A_col_idx_d, A_values_d,
-
-        striped_A_d,
-        num_rows, num_cols,
-        num_stripes,
-        j_min_i_d,
+        
         y_d
         );
 
     
     // anything that got allocated also needs to be de-allocted
-    CHECK_CUDA(cudaFree(A_row_ptr_d));
-    CHECK_CUDA(cudaFree(A_col_idx_d));
-    CHECK_CUDA(cudaFree(A_values_d));
-
-    CHECK_CUDA(cudaFree(striped_A_d));
-    CHECK_CUDA(cudaFree(j_min_i_d));
-
     CHECK_CUDA(cudaFree(x_d));
     CHECK_CUDA(cudaFree(y_d));
     CHECK_CUDA(cudaFree(a_d));
@@ -117,9 +78,8 @@ bool run_stripedColoringPrecomputed_tests(int nx, int ny, int nz){
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     
-    // create the matrix and vectors both CSR and striped
-    std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
-    sparse_CSR_Matrix<double> A = problem.first;
+    sparse_CSR_Matrix<double> A;
+    A.generateMatrix_onGPU(nx, ny, nz);
 
     all_pass = all_pass && run_striped_coloringPrecomputed_tests_on_matrix(A);
 

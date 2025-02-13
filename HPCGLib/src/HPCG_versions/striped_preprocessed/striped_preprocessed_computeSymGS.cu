@@ -173,19 +173,17 @@ __global__ void striped_backward_SymGS(
 
 template <typename T>
 void striped_preprocessed_Implementation<T>::striped_preprocessed_computeSymGS(
-    striped_Matrix<T> & A, // we pass A for the metadata
-    T * striped_A_d, // the data of matrix A is already on the device
-    int num_rows, int num_cols,
-    int num_stripes, // the number of stripes in the striped matrix
-    int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the striped matrix
+    striped_Matrix<T> & A,
     T * x_d, T * y_d // the vectors x and y are already on the device
         
 ){
-    int diag_index = A.get_diag_index();
+    int num_rows = A.get_num_rows();
+    int num_cols = A.get_num_cols();
+    int num_stripes = A.get_num_stripes();
+    int * j_min_i = A.get_j_min_i_d();
+    T * striped_A_d = A.get_values_d();
 
-    assert(num_rows == A.get_num_rows());
-    assert(num_cols == A.get_num_cols());
-    assert(diag_index >= 0);
+    int diag_index = A.get_diag_index();
 
     int num_rows_while_preprocessing = 4;
 

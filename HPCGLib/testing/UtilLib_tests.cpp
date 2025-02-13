@@ -16,26 +16,19 @@ bool test_l2_norm(
     int num_rows = A.get_num_rows();
     int num_cols = A.get_num_cols();
 
-    double * striped_A_d;
-    int * j_min_i_d;
     double * x_d;
     double * y_d;
 
-    CHECK_CUDA(cudaMalloc(&striped_A_d, num_stripes * A.get_num_rows() * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&j_min_i_d, num_stripes * sizeof(int)));
     CHECK_CUDA(cudaMalloc(&x_d, x_solution.size() * sizeof(double)));
     CHECK_CUDA(cudaMalloc(&y_d, y.size() * sizeof(double)));
 
-    CHECK_CUDA(cudaMemcpy(striped_A_d, striped_A.get_values().data(), num_stripes * A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(j_min_i_d, striped_A.get_j_min_i().data(), num_stripes * sizeof(int), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(x_d, x_solution.data(), x_solution.size() * sizeof(double), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), y.size() * sizeof(double), cudaMemcpyHostToDevice));
 
     // calculate the l2 norm on the device
 
     double l2_norm_device_calculated = L2_norm_for_SymGS(
-                                            num_rows, num_cols,
-                                            num_stripes, j_min_i_d, striped_A_d,
+                                            striped_A,
                                             x_d, y_d
                                         );
 
@@ -45,8 +38,6 @@ bool test_l2_norm(
     // CHECK_CUDA(cudaMemcpy(x_d, x_solution.data(), x_solution.size() * sizeof(double), cudaMemcpyHostToDevice));
 
     // free the memory
-    CHECK_CUDA(cudaFree(striped_A_d));
-    CHECK_CUDA(cudaFree(j_min_i_d));
     CHECK_CUDA(cudaFree(x_d));
     CHECK_CUDA(cudaFree(y_d));
 
@@ -74,15 +65,9 @@ bool test_l2_norm(sparse_CSR_Matrix<double>& A, std::vector<double>& x_solution,
     double * x_d;
     double * y_d;
 
-    CHECK_CUDA(cudaMalloc(&A_row_ptr_d, A.get_row_ptr().size() * sizeof(int)));
-    CHECK_CUDA(cudaMalloc(&A_col_idx_d, A.get_col_idx().size() * sizeof(int)));
-    CHECK_CUDA(cudaMalloc(&A_values_d, A.get_values().size() * sizeof(double)));
     CHECK_CUDA(cudaMalloc(&x_d, x_solution.size() * sizeof(double)));
     CHECK_CUDA(cudaMalloc(&y_d, y.size() * sizeof(double)));
 
-    CHECK_CUDA(cudaMemcpy(A_row_ptr_d, A.get_row_ptr().data(), A.get_row_ptr().size() * sizeof(int), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(A_col_idx_d, A.get_col_idx().data(), A.get_col_idx().size() * sizeof(int), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(A_values_d, A.get_values().data(), A.get_values().size() * sizeof(double), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(x_d, x_solution.data(), x_solution.size() * sizeof(double), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), y.size() * sizeof(double), cudaMemcpyHostToDevice));
 
@@ -91,15 +76,11 @@ bool test_l2_norm(sparse_CSR_Matrix<double>& A, std::vector<double>& x_solution,
 
     // calculate the l2 norm on the device
     double l2_norm_device_calculated = L2_norm_for_SymGS(
-                                            num_rows, num_cols,
-                                            A_row_ptr_d, A_col_idx_d, A_values_d,
+                                            A,
                                             x_d, y_d
                                         );
 
     // free the memory
-    cudaFree(A_row_ptr_d);
-    cudaFree(A_col_idx_d);
-    cudaFree(A_values_d);
     cudaFree(x_d);
     cudaFree(y_d);
 
@@ -119,22 +100,14 @@ bool test_rr_norm(sparse_CSR_Matrix<double>& A, std::vector<double>& x_solution,
 
     // device calculated solution
 
-    // copy A, x, y to device
-    int * A_row_ptr_d;
-    int * A_col_idx_d;
-    double * A_values_d;
+    // copy x, y to device
+
     double * x_d;
     double * y_d;
 
-    CHECK_CUDA(cudaMalloc(&A_row_ptr_d, A.get_row_ptr().size() * sizeof(int)));
-    CHECK_CUDA(cudaMalloc(&A_col_idx_d, A.get_col_idx().size() * sizeof(int)));
-    CHECK_CUDA(cudaMalloc(&A_values_d, A.get_values().size() * sizeof(double)));
     CHECK_CUDA(cudaMalloc(&x_d, x_solution.size() * sizeof(double)));
     CHECK_CUDA(cudaMalloc(&y_d, y.size() * sizeof(double)));
 
-    CHECK_CUDA(cudaMemcpy(A_row_ptr_d, A.get_row_ptr().data(), A.get_row_ptr().size() * sizeof(int), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(A_col_idx_d, A.get_col_idx().data(), A.get_col_idx().size() * sizeof(int), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(A_values_d, A.get_values().data(), A.get_values().size() * sizeof(double), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(x_d, x_solution.data(), x_solution.size() * sizeof(double), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), y.size() * sizeof(double), cudaMemcpyHostToDevice));
 
@@ -143,15 +116,12 @@ bool test_rr_norm(sparse_CSR_Matrix<double>& A, std::vector<double>& x_solution,
 
     // calculate the l2 norm on the device
     double rr_norm_device_calculated = relative_residual_norm_for_SymGS(
-                                            num_rows, num_cols,
-                                            A_row_ptr_d, A_col_idx_d, A_values_d,
+                                            A,
                                             x_d, y_d
                                         );
 
     // free the memory
-    cudaFree(A_row_ptr_d);
-    cudaFree(A_col_idx_d);
-    cudaFree(A_values_d);
+
     cudaFree(x_d);
     cudaFree(y_d);
 
@@ -183,27 +153,21 @@ bool test_rr_norm(
     double * x_d;
     double * y_d;
 
-    CHECK_CUDA(cudaMalloc(&striped_A_d, num_stripes * A.get_num_rows() * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&j_min_i_d, num_stripes * sizeof(int)));
     CHECK_CUDA(cudaMalloc(&x_d, x_solution.size() * sizeof(double)));
     CHECK_CUDA(cudaMalloc(&y_d, y.size() * sizeof(double)));
 
-    CHECK_CUDA(cudaMemcpy(striped_A_d, striped_A.get_values().data(), num_stripes * A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(j_min_i_d, striped_A.get_j_min_i().data(), num_stripes * sizeof(int), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(x_d, x_solution.data(), x_solution.size() * sizeof(double), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), y.size() * sizeof(double), cudaMemcpyHostToDevice));
 
     // calculate the l2 norm on the device
 
     double rr_norm_device_calculated = relative_residual_norm_for_SymGS(
-                                            num_rows, num_cols,
-                                            num_stripes, j_min_i_d, striped_A_d,
+                                            striped_A,
                                             x_d, y_d
                                         );
 
     // free the memory
-    CHECK_CUDA(cudaFree(striped_A_d));
-    CHECK_CUDA(cudaFree(j_min_i_d));
+
     CHECK_CUDA(cudaFree(x_d));
     CHECK_CUDA(cudaFree(y_d));
 

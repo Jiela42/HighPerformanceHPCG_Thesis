@@ -76,14 +76,16 @@ void L2_norm_for_Device_Vector(
 }
 
 double L2_norm_for_SymGS(
-    int num_rows,
-    int num_cols,
-    int * row_ptr,
-    int * col_idx,
-    double * values,
+    sparse_CSR_Matrix<double> & A,
     double * x,
     double * y
 ){
+
+    int num_rows = A.get_num_rows();
+    int * row_ptr = A.get_row_ptr_d();
+    int * col_idx = A.get_col_idx_d();
+    double * values = A.get_values_d();
+
     // Allocate memory for Ax on the device
     double *Ax;
     double *diff;
@@ -122,14 +124,16 @@ double L2_norm_for_SymGS(
 }
 
 double L2_norm_for_SymGS(
-    int num_rows,
-    int num_cols,
-    int num_stripes,
-    int * j_min_i,
-    double * A,
+    striped_Matrix<double> & A,
     double * x,
     double * y
-){    
+){
+    
+    int num_rows = A.get_num_rows();
+    int num_stripes = A.get_num_stripes();
+    int * j_min_i = A.get_j_min_i_d();
+    double * striped_A_d = A.get_values_d();
+    
     // Allocate memory for Ax on the device
     double *Ax;
     double *diff;
@@ -142,9 +146,9 @@ double L2_norm_for_SymGS(
 
     int blockSize = 1024;
     int numBlocks = (num_rows + blockSize - 1) / blockSize;
-    
+
     naiveStriped_SPMV_kernel<<<numBlocks, blockSize>>>(
-        A,
+        striped_A_d,
         num_rows, num_stripes, j_min_i,
         x, Ax);
 
@@ -177,14 +181,15 @@ double L2_norm_for_SymGS(
 
 
 double relative_residual_norm_for_SymGS(
-    int num_rows,
-    int num_cols,
-    int * row_ptr,
-    int * col_idx,
-    double * values,
+    sparse_CSR_Matrix<double> & A,
     double * x,
     double * y
 ){
+
+    int num_rows = A.get_num_rows();
+    int * row_ptr = A.get_row_ptr_d();
+    int * col_idx = A.get_col_idx_d();
+    double * values = A.get_values_d();
 
     
     // make new cuda stream for the vector y computation
@@ -194,7 +199,7 @@ double relative_residual_norm_for_SymGS(
 
     L2_norm_for_Device_Vector(stream, num_rows, y, &L2_norm_y);
     // the order of the calls is important, because L2_norm_for_SymGS will synchronize the default stream and not return until it does
-    double L2_norm = L2_norm_for_SymGS(num_rows, num_cols, row_ptr, col_idx, values, x, y);
+    double L2_norm = L2_norm_for_SymGS(A, x, y);
 
     CHECK_CUDA(cudaStreamSynchronize(stream));
     CHECK_CUDA(cudaStreamDestroy(stream));
@@ -202,14 +207,18 @@ double relative_residual_norm_for_SymGS(
 }
 
 double relative_residual_norm_for_SymGS(
-    int num_rows,
-    int num_cols,
-    int num_stripes,
-    int * j_min_i,
-    double * A,
+    striped_Matrix<double> & A,
     double * x,
     double * y
 ){
+
+    int num_rows = A.get_num_rows();
+    int num_cols = A.get_num_cols();
+
+    int num_stripes = A.get_num_stripes();
+    int * j_min_i = A.get_j_min_i_d();
+    double * striped_A_d = A.get_values_d();
+
     // std::cout << "relative_residual_norm_for_SymGS" << std::endl;
     // make new cuda stream for the vector y computation
     cudaStream_t stream;
@@ -219,7 +228,7 @@ double relative_residual_norm_for_SymGS(
 
     L2_norm_for_Device_Vector(stream, num_rows, y, &L2_norm_y);
     // the order of the calls is important, because L2_norm_for_SymGS will synchronize the default stream and not return until it does
-    double L2_norm = L2_norm_for_SymGS(num_rows, num_cols, num_stripes, j_min_i, A, x, y);
+    double L2_norm = L2_norm_for_SymGS(A, x, y);
 
     CHECK_CUDA(cudaStreamSynchronize(stream));
     CHECK_CUDA(cudaStreamDestroy(stream));

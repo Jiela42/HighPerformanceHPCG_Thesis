@@ -37,22 +37,14 @@ bool read_save_test(striped_Matrix<double>& A, std::string info);
 // abstract test functions from HPCG_functions
 bool test_SPMV(
     HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
-    sparse_CSR_Matrix<double> & A, // we pass A for the metadata
-    int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d, // the matrix A is already on the device
+    sparse_CSR_Matrix<double> & A,
     double * x_d // the vectors x is already on the device
     );
 
 // this one supports testing a striped matrix i.e. the naiveStriped implementation
 bool test_SPMV(
     HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
-    striped_Matrix<double> & A, // we pass A for the metadata
-    int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d, // the matrix A is already on the device
-    
-    double * striped_A_d, // the matrix A is already on the device
-    int num_rows, int num_cols, // these refer to the shape of the striped matrix
-    int num_stripes, // the number of stripes in the striped matrix
-    int * j_min_i_d, // this is a mapping for calculating the j of some entry i,j in the striped matrix
-        
+    striped_Matrix<double> & A,        
     double * x_d // the vectors x is already on the device
         
 );
@@ -80,20 +72,13 @@ bool test_SymGS(
 );
 bool test_SymGS(
     HPCG_functions<double>& uut, HPCG_functions<double>& baseline,
-    sparse_CSR_Matrix<double> & A, // we pass A for the metadata
-    int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d, // the matrix A is already on the device
+    sparse_CSR_Matrix<double> & A,
     double * x_d, double * y_d // the vectors x and y are already on the device
 );
 
 bool test_SymGS(
     HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
-    striped_Matrix<double> & striped_A, // we pass A for the metadata
-    int * A_row_ptr_d, int * A_col_idx_d, double * A_values_d, // the CSR matrix A is already on the device
-    
-    double * striped_A_d, // the striped matrix A is already on the device
-    int num_rows, int num_cols, // these refer to the shape of the striped matrix
-    int num_stripes, // the number of stripes in the striped matrix
-    int * j_min_i_d, // this is a mapping for calculating the j of some entry i,j in the striped matrix
+    striped_Matrix<double> & striped_A,
         
     double * y_d // the vectors x is already on the device
 );

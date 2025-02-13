@@ -41,21 +41,19 @@ __global__ void striped_warp_reduction_SPMV_kernel(
 
 template <typename T>
 void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeSPMV(
-        striped_Matrix<T>& A, //we only pass A for the metadata
-        T * striped_A_d, // the data of matrix A is already on the device
-        int num_rows, int num_cols, // these refer to the shape of the striped matrix
-        int num_stripes, // the number of stripes in the striped matrix
-        int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the striped matrix
+        striped_Matrix<T>& A,
         T * x_d, T * y_d // the vectors x and y are already on the device
     ) {
+
+        int num_rows = A.get_num_rows();
+        int num_stripes = A.get_num_stripes();
+        int * j_min_i = A.get_j_min_i_d();
+        T * striped_A_d = A.get_values_d();
+
         // since every thread is working on one or more rows we need to base the number of threads on that
         int num_threads = 1024;
         int rows_per_block = num_threads / 4;
         int num_blocks = std::min(MAX_NUM_BLOCKS, ceiling_division(num_rows, rows_per_block));
-
-        assert(num_stripes == A.get_num_stripes());
-        assert(num_rows == A.get_num_rows());
-        assert(num_cols == A.get_num_cols());
 
         // call the kernel
         striped_warp_reduction_SPMV_kernel<<<num_blocks, num_threads>>>(

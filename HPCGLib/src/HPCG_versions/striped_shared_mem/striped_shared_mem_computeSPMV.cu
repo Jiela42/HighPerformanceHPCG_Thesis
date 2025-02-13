@@ -171,11 +171,7 @@ void eliminate_overlap(int* min_j, int* max_j, int num_thick_stripes, int* num_x
 
 template <typename T>
 void Striped_Shared_Memory_Implementation<T>::striped_shared_memory_computeSPMV(
-        striped_Matrix<T>& A, //we only pass A for the metadata
-        T * striped_A_d, // the data of matrix A is already on the device
-        int num_rows, int num_cols, // these refer to the shape of the striped matrix
-        int num_stripes, // the number of stripes in the striped matrix
-        int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the striped matrix
+        striped_Matrix<T>& A,
         T * x_d, T * y_d // the vectors x and y are already on the device
     ) {
 
@@ -184,7 +180,15 @@ void Striped_Shared_Memory_Implementation<T>::striped_shared_memory_computeSPMV(
         // dynamically calculate how many rows can be handled at the same time
         // i.e. how many doubles are required per row
 
-        std::vector<int> j_min_i_host = A.get_j_min_i();
+        int num_rows = A.get_num_rows();
+        int num_stripes = A.get_num_stripes();
+        int * j_min_i = A.get_j_min_i_d();
+        T * striped_A_d = A.get_values_d();
+
+        std::vector<int> j_min_i_host(num_stripes);
+
+        // copy j_min_i to the host
+        CHECK_CUDA(cudaMemcpy(j_min_i_host.data(), j_min_i, num_stripes * sizeof(int), cudaMemcpyDeviceToHost));
 
         int new_elem_per_row = 1;
 

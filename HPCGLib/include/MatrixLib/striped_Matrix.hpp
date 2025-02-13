@@ -3,6 +3,7 @@
 
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
 #include "MatrixLib/matrix_basics.hpp"
+#include "MatrixLib/generations.cuh"
 
 #include <vector>
 #include <iostream>
@@ -39,6 +40,8 @@ class striped_Matrix {
         T get_element(int i, int j) const;
         std::vector <int>& get_j_min_i();
         std::vector <T>& get_values();
+        int * get_j_min_i_d();
+        T * get_values_d();
         void set_num_rows(int num_rows);
         void print_COR_Format();
         void print() const;
@@ -59,6 +62,9 @@ class striped_Matrix {
         std::vector<T> values;
         MatrixType matrix_type;
         void striped_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T> & A);
+        void striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T> & A);
+        int *j_min_i_d;
+        T *values_d;
         int* color_pointer_d;
         int* color_sorted_rows_d;
 };

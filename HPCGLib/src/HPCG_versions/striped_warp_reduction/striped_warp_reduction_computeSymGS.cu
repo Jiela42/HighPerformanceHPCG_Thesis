@@ -57,17 +57,15 @@ __global__ void striped_warp_reduction_SymGS_kernel(
 
 template <typename T>
 void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeSymGS(
-    striped_Matrix<T> & A, // we pass A for the metadata
-    T * striped_A_d, // the data of matrix A is already on the device
-    int num_rows, int num_cols,
-    int num_stripes, // the number of stripes in the striped matrix
-    int * j_min_i, // this is a mapping for calculating the j of some entry i,j in the striped matrix
-    T * x_d, T * y_d // the vectors x and y are already on the device
-        
+    striped_Matrix<T> & A,
+    T * x_d, T * y_d // the vectors x and y are already on the device   
 ){
 
-    assert(num_rows == A.get_num_rows());
-    assert(num_cols == A.get_num_cols());
+    int num_rows = A.get_num_rows();
+    int num_cols = A.get_num_cols();
+    int num_stripes = A.get_num_stripes();
+    int * j_min_i = A.get_j_min_i_d();
+    double * striped_A_d = A.get_values_d();
     
     // because this is sequential, we only spawn one warp
     int num_threads = WARP_SIZE;

@@ -206,6 +206,19 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation(striped
 
     assert(A.get_num_stripes() == A.get_j_min_i().size());
 
+    // check if A is on the GPU
+    if(A.get_values_d() != nullptr and A.get_j_min_i_d() != nullptr){
+        // std::cout << "A is on the GPU" << std::endl;
+        this->sparse_CSR_Matrix_from_striped_transformation_GPU(A);
+    }
+    else{
+        // std::cout << "A is on the CPU" << std::endl;
+        this->sparse_CSR_Matrix_from_striped_transformation_CPU(A);
+    }
+}
+
+template <typename T>
+void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation_CPU(striped_Matrix<T> & A){
     this->row_ptr = std::vector<int>(this->num_rows + 1, 0);
     this->col_idx = std::vector<int>(this->nnz, 0);
     this->values = std::vector<T>(this->nnz, 0);
@@ -247,6 +260,28 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation(striped
     // std::cout << "elem_count: " << elem_count << std::endl;
     // std::cout << "nnz: " << this->nnz << std::endl;
     assert(elem_count == this->nnz);
+}
+template <typename T>
+void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation_GPU(striped_Matrix<T> & A){
+
+    // allocate space for the device pointers
+    CHECK_CUDA(cudaMalloc(&this->row_ptr_d, (this->num_rows + 1) * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&this->col_idx_d, this->nnz * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&this->values_d, this->nnz * sizeof(T)));
+
+    // set them to zero
+    CHECK_CUDA(cudaMemset(this->row_ptr_d, 0, (this->num_rows + 1) * sizeof(int)));
+    CHECK_CUDA(cudaMemset(this->col_idx_d, 0, this->nnz * sizeof(int)));
+    CHECK_CUDA(cudaMemset(this->values_d, 0, this->nnz * sizeof(T)));
+
+    int new_nnz = generate_CSR_from_Striped(
+        this->num_rows, A.get_num_stripes(),
+        A.get_j_min_i_d(), A.get_values_d(),
+        this->row_ptr_d, this->col_idx_d, this->values_d
+    );
+    
+    assert(new_nnz == this->nnz);
+    assert(new_nnz == A.get_nnz());
 
 }
 
@@ -325,6 +360,48 @@ int* sparse_CSR_Matrix<T>::get_col_idx_d(){
 template <typename T>
 T* sparse_CSR_Matrix<T>::get_values_d(){
     return this->values_d;
+}
+
+template <typename T>
+void sparse_CSR_Matrix<T>::copy_Matrix_toGPU(){
+    
+    // clear the data from the GPU
+    this->remove_Matrix_from_GPU();
+
+    // allocate space for the device pointers
+    CHECK_CUDA(cudaMalloc(&this->row_ptr_d, (this->num_rows + 1) * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&this->col_idx_d, this->nnz * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&this->values_d, this->nnz * sizeof(T)));
+
+    // copy the data to the GPU
+    CHECK_CUDA(cudaMemcpy(this->row_ptr_d, this->row_ptr.data(), (this->num_rows + 1) * sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(this->col_idx_d, this->col_idx.data(), this->nnz * sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(this->values_d, this->values.data(), this->nnz * sizeof(T), cudaMemcpyHostToDevice));
+}
+
+// these functions should not be called lightly by a user.
+// we expose them since we need them in case of a mess up in the striped matrix
+// but we don't really want anyone to call them (except for the devs)
+template <typename T>
+void sparse_CSR_Matrix<T>::remove_Matrix_from_GPU(){
+    if(this->row_ptr_d != nullptr or this->col_idx_d != nullptr or this->values_d != nullptr){
+    std::cerr << "WARNING: remove_Matrix_from_GPU called" << std::endl;
+    std::cerr << "This call indicates that there is something wrong with the memory management of the matrix" << std::endl;
+    std::cerr << "The most likely case for this to happen is when the matrix is expected to be on the GPU, but isn't or is only partially." << std::endl;
+    std::cerr << "If the matrix did not contain relevant data, this is okay" << std::endl;
+    }
+    if (this->row_ptr_d != nullptr) {
+        CHECK_CUDA(cudaFree(this->row_ptr_d));
+        this->row_ptr_d = nullptr;
+    }
+    if (this->col_idx_d != nullptr) {
+        CHECK_CUDA(cudaFree(this->col_idx_d));
+        this->col_idx_d = nullptr;
+    }
+    if (this->values_d != nullptr) {
+        CHECK_CUDA(cudaFree(this->values_d));
+        this->values_d = nullptr;
+    }
 }
 
 template <typename T>
@@ -553,7 +630,6 @@ void sparse_CSR_Matrix<T>::read_from_file(std::string nx, std::string ny, std::s
     }
 
     file.close();
-
 
     this->row_ptr = row_ptr;
     this->col_idx = col_idx;

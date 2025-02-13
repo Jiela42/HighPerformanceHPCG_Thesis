@@ -70,13 +70,17 @@ __global__ void cusparse_SymGS_kernel(
 
 template <typename T>
 void cuSparse_Implementation<T>::cusparse_computeSymGS(
-    sparse_CSR_Matrix<T> & A, // we pass A for the metadata
-    int * A_row_ptr_d, int * A_col_idx_d, T * A_values_d, // the matrix A is already on the device
+    sparse_CSR_Matrix<T> & A,
     T * x_d, T * y_d // the vectors x and y are already on the device
         
 ){
 
     int num_rows = A.get_num_rows();
+
+    int * A_row_ptr_d = A.get_row_ptr_d();
+    int * A_col_idx_d = A.get_col_idx_d();
+    T * A_values_d = A.get_values_d();
+     
     
     // because this is sequential, we only spawn one warp
     int num_threads = WARP_SIZE;

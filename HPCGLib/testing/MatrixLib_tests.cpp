@@ -46,6 +46,127 @@ bool read_save_test(striped_Matrix<double>& A, std::string info){
     // }
     return true;
 }
+//////////////////////////////////////////////////////////////////////////////////////////////
+// Make sure the parallel generation of the CSR Matrix is correct
+bool parallel_CSR_generation_test(sparse_CSR_Matrix<double>& A){
+
+    std::string dim_info = std::to_string(A.get_nx()) + "x" + std::to_string(A.get_ny()) + "x" + std::to_string(A.get_nz());
+    
+    int nx = A.get_nx();
+    int ny = A.get_ny();
+    int nz = A.get_nz();
+
+    sparse_CSR_Matrix<double> A_copy;
+    A_copy.generateMatrix_onGPU(nx, ny, nz);
+
+    // copy data from GPU to CPU
+    std::vector<int> row_ptr_host(nx*ny*nz + 1, 0);
+    std::vector<int> col_idx_host(A_copy.get_nnz(), 0);
+    std::vector<double> values_host(A_copy.get_nnz(), 0);
+
+    if(A.get_nnz() != A_copy.get_nnz()){
+        std::cerr << "nnz mismatch for generateMatrix_onGPU test for " << dim_info << std::endl;
+        std::cerr << "A nnz: " << A.get_nnz() << " A_copy nnz: " << A_copy.get_nnz() << std::endl;
+        return false;
+    }
+
+    CHECK_CUDA(cudaMemcpy(row_ptr_host.data(), A_copy.get_row_ptr_d(), (nx*ny*nz + 1) * sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(col_idx_host.data(), A_copy.get_col_idx_d(), A_copy.get_nnz() * sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(values_host.data(), A_copy.get_values_d(), A_copy.get_nnz() * sizeof(double), cudaMemcpyDeviceToHost));
+
+
+    sparse_CSR_Matrix<double> A_host_copy(nx, ny, nz, A_copy.get_nnz(), MatrixType::Stencil_3D27P, values_host, row_ptr_host, col_idx_host);
+
+    bool test_pass = A.compare_to(A_host_copy, "generateMatrix_onGPU test for " + dim_info);
+
+    if(not test_pass){
+        std::cerr << "generateMatrix_onGPU test failed for " << dim_info << std::endl;
+    }
+
+    return test_pass;
+}
+
+bool parallel_generation_from_CSR_test(sparse_CSR_Matrix<double>& A){
+
+    // first we generate the matrix on the GPU
+    int nx = A.get_nx();
+    int ny = A.get_ny();
+    int nz = A.get_nz();
+
+    striped_Matrix<double> striped_A_host;
+    striped_Matrix<double> striped_A;
+    
+    // if the CSR is on the CPU, the striped matrix is generated on the CPU
+    striped_A_host.striped_Matrix_from_sparse_CSR(A);
+    
+    A.generateMatrix_onGPU(nx, ny, nz);
+    // if the CSR is on the GPU, the striped matrix is generated on the GPU
+    striped_A.striped_Matrix_from_sparse_CSR(A);
+
+    // grab the values from the GPU
+    std::vector<int> j_min_i_host(striped_A.get_num_stripes(), 0);
+    std::vector<double> values_host(striped_A.get_num_stripes() * nx * ny * nz, 0);
+
+    CHECK_CUDA(cudaMemcpy(j_min_i_host.data(), striped_A.get_j_min_i_d(), striped_A.get_num_stripes() * sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(values_host.data(), striped_A.get_values_d(), striped_A.get_num_stripes() * nx * ny * nz * sizeof(double), cudaMemcpyDeviceToHost));
+
+    // since we cannot just generate from j_min_i and values we do the comparison manually
+
+    // first we check all the single values and make sure they are equal
+    bool test_passed = true;
+
+    if(striped_A.get_num_stripes() != striped_A_host.get_num_stripes()){
+        std::cerr << "num stripes mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
+        test_passed = false;
+    }
+    if(striped_A.get_num_rows() != striped_A_host.get_num_rows()){
+        std::cerr << "num rows mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
+        test_passed = false;
+    }
+    if(striped_A.get_num_cols() != striped_A_host.get_num_cols()){
+        std::cerr << "num cols mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
+        test_passed = false;
+    }
+    if(striped_A.get_nx() != striped_A_host.get_nx()){
+        std::cerr << "nx mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
+        test_passed = false;
+    }
+    if(striped_A.get_ny() != striped_A_host.get_ny()){
+        std::cerr << "ny mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
+        test_passed = false;
+    }
+    if(striped_A.get_nz() != striped_A_host.get_nz()){
+        std::cerr << "nz mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
+        test_passed = false;
+    }
+    if(striped_A.get_nnz() != striped_A_host.get_nnz()){
+        std::cerr << "nnz mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
+        test_passed = false;
+    }
+    if(striped_A.get_diag_index() != striped_A_host.get_diag_index()){
+        std::cerr << "diag index mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
+        test_passed = false;
+    }
+    if(striped_A.get_matrix_type() != striped_A_host.get_matrix_type()){
+        std::cerr << "matrix type mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
+        test_passed = false;
+    }
+    
+    for(int i = 0; i < striped_A.get_num_stripes(); i++){
+        if(j_min_i_host[i] != striped_A.get_j_min_i()[i]){
+            std::cerr << "j_min_i mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
+            test_passed = false;
+        }
+    }
+
+    if(not vector_compare(values_host, striped_A.get_values())){
+        std::cerr << "values mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
+        test_passed = false;
+    }
+
+    return test_passed;
+
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // striped vs csr tests
@@ -237,69 +358,20 @@ bool run_all_matrixLib_tests(int nx, int ny, int nz){
     std::string dim_info = std::to_string(nx) + "x" + std::to_string(ny) + "x" + std::to_string(nz);
 
     // run tests on standard 3d27p matrices
-    // auto start = std::chrono::high_resolution_clock::now(); // Start timing
     std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
     sparse_CSR_Matrix<double> A = problem.first;
-    // auto end = std::chrono::high_resolution_clock::now(); // End timing
-    // std::chrono::duration<double> elapsed = end - start;
-    // std::cout << dim_info << ": Time taken to generate Matrix on host: " << elapsed.count() << " seconds" << std::endl;
 
+    striped_Matrix<double> striped_A;
+    striped_A.striped_Matrix_from_sparse_CSR(A);
 
-
-    // auto start_gpu = std::chrono::high_resolution_clock::now(); // Start timing
-    sparse_CSR_Matrix<double> A_copy;
-    A_copy.generateMatrix_onGPU(nx, ny, nz);
-    // auto end_gpu = std::chrono::high_resolution_clock::now(); // End timing
-    // std::chrono::duration<double> elapsed_gpu = end_gpu - start_gpu;
-    // std::cout << dim_info << ": Time taken to generate matrix on GPU: " << elapsed_gpu.count() << " seconds" << std::endl;
-
-    // copy data from GPU to CPU
-    std::vector<int> row_ptr_host(nx*ny*nz + 1, 0);
-    std::vector<int> col_idx_host(A_copy.get_nnz(), 0);
-    std::vector<double> values_host(A_copy.get_nnz(), 0);
-
-    if(A.get_nnz() != A_copy.get_nnz()){
-        std::cerr << "nnz mismatch for generateMatrix_onGPU test for " << dim_info << std::endl;
-        std::cerr << "A nnz: " << A.get_nnz() << " A_copy nnz: " << A_copy.get_nnz() << std::endl;
-        return false;
-    }
-
-
-    CHECK_CUDA(cudaMemcpy(row_ptr_host.data(), A_copy.get_row_ptr_d(), (nx*ny*nz + 1) * sizeof(int), cudaMemcpyDeviceToHost));
-    
-    // for (int i = 0; i< nx*ny*nz + 1; i++){
-    //     if(row_ptr_host[i] != A.get_row_ptr()[i]){
-    //         std::cerr << "row_ptr mismatch for generateMatrix_onGPU test for " << dim_info << std::endl;
-    //         std::cerr << "row_ptr_host[" << i-1 << "] = " << row_ptr_host[i-1] << " row_ptr[" << i-1 << "] = " << A.get_row_ptr()[i-1] << std::endl;
-    //         std::cerr << "row_ptr_host[" << i << "] = " << row_ptr_host[i] << " row_ptr[" << i << "] = " << A.get_row_ptr()[i] << std::endl;
-    //         return false;
-    //     }
-    // }
-
-    CHECK_CUDA(cudaMemcpy(col_idx_host.data(), A_copy.get_col_idx_d(), A_copy.get_nnz() * sizeof(int), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(values_host.data(), A_copy.get_values_d(), A_copy.get_nnz() * sizeof(double), cudaMemcpyDeviceToHost));
-
-
-    sparse_CSR_Matrix<double> A_host_copy(nx, ny, nz, A_copy.get_nnz(), MatrixType::Stencil_3D27P, values_host, row_ptr_host, col_idx_host);
-
-    // A.print();
-    // A_host_copy.print();
-
-
-    bool all_pass = A.compare_to(A_host_copy, "generateMatrix_onGPU test for " + dim_info);
-
-
-
-    // striped_Matrix<double> striped_A;
-    // striped_A.striped_Matrix_from_sparse_CSR(A);
-
-    // bool all_pass = true;
+    bool all_pass = true;
 
     // all_pass = all_pass && read_save_test(A, "read_save_test on 3d27p CSR Matrix for " + dim_info);
     // read_save_test(striped_A, "read_save_test on 3d27p striped Matrix for " + dim_info);
-    // all_pass = all_pass && run_striped_csr_conversion_test(nx, ny, nz);
-    // all_pass = all_pass && coloring_test(striped_A);
+    
+    all_pass = all_pass && parallel_CSR_generation_test(A);
+    all_pass = all_pass && run_striped_csr_conversion_test(nx, ny, nz);
+    all_pass = all_pass && coloring_test(striped_A);
 
     return all_pass;
-
 }

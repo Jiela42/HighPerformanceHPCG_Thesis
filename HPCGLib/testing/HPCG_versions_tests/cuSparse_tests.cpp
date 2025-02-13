@@ -1,6 +1,6 @@
 #include "testing.hpp"
 
-bool run_cuSparse_tests_on_Matrix(sparse_CSR_Matrix<double> A){
+bool run_cuSparse_tests_on_Matrix(sparse_CSR_Matrix<double>& A){
 
     // for now we only have the dot test
     // generate a & b vectors
@@ -36,18 +36,26 @@ bool run_cuSparse_tests(int nx, int ny, int nz){
     // for now we just do the symGS minitest
     cuSparse_Implementation<double> cuSparse;
     sparse_CSR_Matrix<double> A;
+    A.generateMatrix_onGPU(nx, ny, nz);
     bool all_pass = true;
 
     if (nx == 4 && ny == 4 && nz == 4){
 
-        all_pass = all_pass && test_SymGS(cuSparse, A);
+        sparse_CSR_Matrix<double> A_mini_test;
+
+        all_pass = all_pass && test_SymGS(cuSparse, A_mini_test);
 
         if (not all_pass){
-            std::cout << "cuSparse SymGS mini test failed for size " << nx << "x" << ny << "x" << nz << std::endl;
+            std::cout << "cuSparse SymGS mini test failed" << std::endl;
         }
     }
 
-    all_pass = all_pass && run_cuSparse_tests_on_Matrix(A);
+    bool current_pass = run_cuSparse_tests_on_Matrix(A);
+    if(not current_pass){
+        std::cerr << "cuSparse test failed for size " << nx << "x" << ny << "x" << nz << std::endl;
+        all_pass = false;
+    }
+
 
     return all_pass;
 }
