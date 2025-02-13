@@ -1,5 +1,6 @@
 # Ignore example matrices
 example_matrices/
+Python_HPCGLib/MatrixLib/example_stencil_matrices
 src/__pycache__/
 HPCGLib/build/
 HPCGLib/example_matrices/
