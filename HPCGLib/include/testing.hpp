@@ -30,8 +30,8 @@ bool run_all_util_tests(int nx, int ny, int nz);
 // MatrixLib testing functions
 bool run_all_matrixLib_tests(int nx, int ny, int nz);
 
-bool read_save_test(sparse_CSR_Matrix<double> A, std::string info);
-bool read_save_test(striped_Matrix<double> A, std::string info);
+bool read_save_test(sparse_CSR_Matrix<double>& A, std::string info);
+bool read_save_test(striped_Matrix<double>& A, std::string info);
 
 
 // abstract test functions from HPCG_functions

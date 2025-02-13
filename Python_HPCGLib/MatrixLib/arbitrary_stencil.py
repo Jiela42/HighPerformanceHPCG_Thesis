@@ -77,10 +77,10 @@ def generate_stencil_matrix(dimension: int, shape: Shape, halo: int, dimension_s
     output_dir = os.path.join(os.path.dirname(__file__), "example_stencil_matrices")
 
     # Print the absolute path of the directory
-    print(f"Matrix will be stored in: {os.path.abspath(output_dir)}")
+    # print(f"Matrix will be stored in: {os.path.abspath(output_dir)}")
 
 
-    filename = get_matrix_type_string(dimension, shape, halo, dimension_sizes)
+    # filename = get_matrix_type_string(dimension, shape, halo, dimension_sizes)
 
     # store_matrix(matrix, "example_stencil_matrices/" + filename + ".txt")
 

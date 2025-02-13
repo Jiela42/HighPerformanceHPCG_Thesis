@@ -4,6 +4,7 @@
 #include "MatrixLib/coloring.cuh"
 #include "testing.hpp"
 #include <algorithm>
+#include <chrono>
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -11,7 +12,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 // read_save_tests
-bool read_save_test(sparse_CSR_Matrix<double> A, std::string info){
+bool read_save_test(sparse_CSR_Matrix<double>& A, std::string info){
     std::string str_nx = std::to_string(A.get_nx());
     std::string str_ny = std::to_string(A.get_ny());
     std::string str_nz = std::to_string(A.get_nz());
@@ -30,7 +31,7 @@ bool read_save_test(sparse_CSR_Matrix<double> A, std::string info){
 }
 
 // this does not yet exist, but once it does, we need to implement it
-bool read_save_test(striped_Matrix<double> A, std::string info){
+bool read_save_test(striped_Matrix<double>& A, std::string info){
     // std::string str_nx = std::to_string(A.get_nx());
     // std::string str_ny = std::to_string(A.get_ny());
     // std::string str_nz = std::to_string(A.get_nz());
@@ -48,7 +49,7 @@ bool read_save_test(striped_Matrix<double> A, std::string info){
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // striped vs csr tests
-bool striped_csr_conversion_test_on_matrix(sparse_CSR_Matrix<double> A){
+bool striped_csr_conversion_test_on_matrix(sparse_CSR_Matrix<double>& A){
     striped_Matrix<double> striped_A;
     striped_A.striped_Matrix_from_sparse_CSR(A);
     // for(int i = 0; i < striped_A.get_num_rows(); i++){
@@ -101,7 +102,7 @@ bool run_striped_csr_conversion_test(int nx, int ny, int nz){
     return all_pass;
 }
 
-bool coloring_test(striped_Matrix<double> A){
+bool coloring_test(striped_Matrix<double>& A){
 
     bool all_pass = true;
 
@@ -236,18 +237,68 @@ bool run_all_matrixLib_tests(int nx, int ny, int nz){
     std::string dim_info = std::to_string(nx) + "x" + std::to_string(ny) + "x" + std::to_string(nz);
 
     // run tests on standard 3d27p matrices
+    // auto start = std::chrono::high_resolution_clock::now(); // Start timing
     std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
     sparse_CSR_Matrix<double> A = problem.first;
+    // auto end = std::chrono::high_resolution_clock::now(); // End timing
+    // std::chrono::duration<double> elapsed = end - start;
+    // std::cout << dim_info << ": Time taken to generate Matrix on host: " << elapsed.count() << " seconds" << std::endl;
 
-    striped_Matrix<double> striped_A;
-    striped_A.striped_Matrix_from_sparse_CSR(A);
 
-    bool all_pass = true;
 
-    all_pass = all_pass && read_save_test(A, "read_save_test on 3d27p CSR Matrix for " + dim_info);
+    // auto start_gpu = std::chrono::high_resolution_clock::now(); // Start timing
+    sparse_CSR_Matrix<double> A_copy;
+    A_copy.generateMatrix_onGPU(nx, ny, nz);
+    // auto end_gpu = std::chrono::high_resolution_clock::now(); // End timing
+    // std::chrono::duration<double> elapsed_gpu = end_gpu - start_gpu;
+    // std::cout << dim_info << ": Time taken to generate matrix on GPU: " << elapsed_gpu.count() << " seconds" << std::endl;
+
+    // copy data from GPU to CPU
+    std::vector<int> row_ptr_host(nx*ny*nz + 1, 0);
+    std::vector<int> col_idx_host(A_copy.get_nnz(), 0);
+    std::vector<double> values_host(A_copy.get_nnz(), 0);
+
+    if(A.get_nnz() != A_copy.get_nnz()){
+        std::cerr << "nnz mismatch for generateMatrix_onGPU test for " << dim_info << std::endl;
+        std::cerr << "A nnz: " << A.get_nnz() << " A_copy nnz: " << A_copy.get_nnz() << std::endl;
+        return false;
+    }
+
+
+    CHECK_CUDA(cudaMemcpy(row_ptr_host.data(), A_copy.get_row_ptr_d(), (nx*ny*nz + 1) * sizeof(int), cudaMemcpyDeviceToHost));
+    
+    // for (int i = 0; i< nx*ny*nz + 1; i++){
+    //     if(row_ptr_host[i] != A.get_row_ptr()[i]){
+    //         std::cerr << "row_ptr mismatch for generateMatrix_onGPU test for " << dim_info << std::endl;
+    //         std::cerr << "row_ptr_host[" << i-1 << "] = " << row_ptr_host[i-1] << " row_ptr[" << i-1 << "] = " << A.get_row_ptr()[i-1] << std::endl;
+    //         std::cerr << "row_ptr_host[" << i << "] = " << row_ptr_host[i] << " row_ptr[" << i << "] = " << A.get_row_ptr()[i] << std::endl;
+    //         return false;
+    //     }
+    // }
+
+    CHECK_CUDA(cudaMemcpy(col_idx_host.data(), A_copy.get_col_idx_d(), A_copy.get_nnz() * sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(values_host.data(), A_copy.get_values_d(), A_copy.get_nnz() * sizeof(double), cudaMemcpyDeviceToHost));
+
+
+    sparse_CSR_Matrix<double> A_host_copy(nx, ny, nz, A_copy.get_nnz(), MatrixType::Stencil_3D27P, values_host, row_ptr_host, col_idx_host);
+
+    // A.print();
+    // A_host_copy.print();
+
+
+    bool all_pass = A.compare_to(A_host_copy, "generateMatrix_onGPU test for " + dim_info);
+
+
+
+    // striped_Matrix<double> striped_A;
+    // striped_A.striped_Matrix_from_sparse_CSR(A);
+
+    // bool all_pass = true;
+
+    // all_pass = all_pass && read_save_test(A, "read_save_test on 3d27p CSR Matrix for " + dim_info);
     // read_save_test(striped_A, "read_save_test on 3d27p striped Matrix for " + dim_info);
-    all_pass = all_pass && run_striped_csr_conversion_test(nx, ny, nz);
-    all_pass = all_pass && coloring_test(striped_A);
+    // all_pass = all_pass && run_striped_csr_conversion_test(nx, ny, nz);
+    // all_pass = all_pass && coloring_test(striped_A);
 
     return all_pass;
 

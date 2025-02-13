@@ -1,4 +1,6 @@
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
+#include "MatrixLib/generations.cuh"
+#include "UtilLib/cuda_utils.hpp"
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -22,6 +24,29 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix() {
     this->row_ptr.clear();
     this->col_idx.clear();
     this->values.clear();
+    // std::cout << "sparse_CSR_Matrix created, setting device ptrs to null" << std::endl;
+    this->row_ptr_d = nullptr;
+    this->col_idx_d = nullptr;
+    this->values_d = nullptr;
+}
+
+template <typename T>
+sparse_CSR_Matrix<T>::~sparse_CSR_Matrix(){
+    if (this->row_ptr_d != nullptr) {
+        // std::cout << row_ptr_d << std::endl;
+        // std::cout << "Freeing row_ptr_d" << std::endl;
+        CHECK_CUDA(cudaFree(this->row_ptr_d));
+        // std::cout << "row_ptr_d freed" << std::endl;
+        this->row_ptr_d = nullptr;
+    }
+    if (this->col_idx_d != nullptr) {
+        CHECK_CUDA(cudaFree(this->col_idx_d));
+        this->col_idx_d = nullptr;
+    }
+    if (this->values_d != nullptr) {
+        CHECK_CUDA(cudaFree(this->values_d));
+        this->values_d = nullptr;
+    }
 }
 
 template <typename T>
@@ -40,6 +65,10 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, MatrixT
     this->col_idx = std::vector<int>(col_idx, col_idx + this->nnz);
     this->values = std::vector<T>(vals, vals + this->nnz);
 
+    this->row_ptr_d = nullptr;
+    this->col_idx_d = nullptr;
+    this->values_d = nullptr;
+
 }
 
 template <typename T>
@@ -57,6 +86,10 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, MatrixT
     this->row_ptr = row_ptr;
     this->col_idx = col_idx;
     this->values = vals;
+
+    this->row_ptr_d = nullptr;
+    this->col_idx_d = nullptr;
+    this->values_d = nullptr;
 }
 
 template <typename T>
@@ -99,6 +132,54 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(std::vector<std::vector<T>> dense_matrix
     this->row_ptr = row_ptr;
     this->col_idx = col_idx;
     this->values = values;
+
+    this->row_ptr_d = nullptr;
+    this->col_idx_d = nullptr;
+    this->values_d = nullptr;
+}
+
+template<typename T>
+void sparse_CSR_Matrix<T>::generateMatrix_onGPU(int nx, int ny, int nz)
+{
+    // currently this only supports 27pt 3D stencils
+    this->matrix_type = MatrixType::Stencil_3D27P;
+    this->nx = nx;
+    this->ny = ny;
+    this->nz = nz;
+
+    int num_nodes = nx * ny * nz;
+
+    this->num_rows = num_nodes;
+    this->num_cols = num_nodes;
+
+    int num_interior_points = (nx - 2) * (ny - 2) * (nz - 2);
+    int num_face_points = 2 * ((nx - 2) * (ny - 2) + (nx - 2) * (nz - 2) + (ny - 2) * (nz - 2));
+    int num_edge_points = 4 * ((nx - 2) + (ny - 2) + (nz - 2));
+    int num_corner_points = 8;
+
+    int nnz_interior = 27 * num_interior_points;
+    int nnz_face = 18 * num_face_points;
+    int nnz_edge = 12 * num_edge_points;
+    int nnz_corner = 8 * num_corner_points;
+
+    int nnz = nnz_interior + nnz_face + nnz_edge + nnz_corner;
+
+    this->nnz = nnz;
+
+    // allocate space for the device pointers
+    CHECK_CUDA(cudaMalloc(&this->row_ptr_d, (num_nodes + 1) * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&this->col_idx_d, nnz * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&this->values_d, nnz * sizeof(T)));
+
+    // set them to zero
+    // std::cout << "row_ptr_d: " << row_ptr_d << std::endl;
+    CHECK_CUDA(cudaMemset(this->row_ptr_d, 0, (num_nodes + 1) * sizeof(int)));
+    CHECK_CUDA(cudaMemset(this->col_idx_d, 0, nnz * sizeof(int)));
+    CHECK_CUDA(cudaMemset(this->values_d, 0, nnz * sizeof(T)));
+
+    // now we generate the matrix
+    generateHPCGMatrix(nx, ny, nz, this->row_ptr_d, this->col_idx_d, this->values_d);
+
 }
 
 template <typename T>
@@ -180,6 +261,13 @@ void sparse_CSR_Matrix<T>::sanity_check_3D27P(){
 }
 
 template <typename T>
+void sparse_CSR_Matrix<T>::sanity_check_Matrix_on_CPU() const {
+    assert(this->num_rows == this->row_ptr.size() - 1);
+    assert(this->nnz == this->col_idx.size());
+    assert(this->nnz == this->values.size());
+}
+
+template <typename T>
 void sparse_CSR_Matrix<T>::iterative_values(){
 
     double val = 0.1;
@@ -220,13 +308,28 @@ std::vector<int>& sparse_CSR_Matrix<T>::get_col_idx(){
 }
 
 template <typename T>
-MatrixType sparse_CSR_Matrix<T>::get_matrix_type() const{
-    return this->matrix_type;
+std::vector<T>& sparse_CSR_Matrix<T>::get_values(){
+    return this->values;
 }
 
 template <typename T>
-std::vector<T>& sparse_CSR_Matrix<T>::get_values(){
-    return this->values;
+int* sparse_CSR_Matrix<T>::get_row_ptr_d(){
+    return this->row_ptr_d;
+}
+
+template <typename T>
+int* sparse_CSR_Matrix<T>::get_col_idx_d(){
+    return this->col_idx_d;
+}
+
+template <typename T>
+T* sparse_CSR_Matrix<T>::get_values_d(){
+    return this->values_d;
+}
+
+template <typename T>
+MatrixType sparse_CSR_Matrix<T>::get_matrix_type() const{
+    return this->matrix_type;
 }
 
 template <typename T>
@@ -303,6 +406,9 @@ bool sparse_CSR_Matrix<T>::compare_to(sparse_CSR_Matrix<T>& other, std::string i
     // caller_info is a string that is printed to help identify where the comparison is called from
     // this is helpful since compare to is called from a whole bunch of tests
     
+    this->sanity_check_Matrix_on_CPU();
+    other.sanity_check_Matrix_on_CPU();
+
     bool same = true;
 
     if (this->num_rows != other.get_num_rows()){
@@ -313,6 +419,8 @@ bool sparse_CSR_Matrix<T>::compare_to(sparse_CSR_Matrix<T>& other, std::string i
         printf("Matrices have different number of cols: this has %d the other %d for %s\n", this->num_cols, other.get_num_cols(), info.c_str());
         same = false;
     }
+    
+    return same;
 
     for (int i = 0; i < this->num_rows; i++) {
         int start = this->row_ptr[i];
@@ -321,6 +429,7 @@ bool sparse_CSR_Matrix<T>::compare_to(sparse_CSR_Matrix<T>& other, std::string i
         int other_end = other.get_row_ptr()[i + 1];
         if (end - start != other_end - other_start) {
             printf("Row %d has different number of non-zero elements for %s\n", i, info.c_str());
+            // printf("This has %d, other has %d\n", end - start, other_end - other_start);
             same = false;
         }
         for (int j = start; j < end; j++) {

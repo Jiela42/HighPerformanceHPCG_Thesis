@@ -17,6 +17,7 @@ target_sources(MatrixLib PRIVATE
     sparse_CSR_Matrix.cpp
     striped_Matrix.cpp
     generations.cpp
+    generations.cu
     coloring.cu
 )
 
