@@ -190,11 +190,6 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped(striped_Matrix<T> &A){
         assert(A.get_num_rows() == A.get_num_cols());
         assert(A.get_num_rows() == A.get_nx() * A.get_ny() * A.get_nz());
     }
-    this->sparse_CSR_Matrix_from_striped_transformation(A);
-}
-
-template <typename T>
-void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation(striped_Matrix<T> &A){
 
     this->matrix_type = A.get_matrix_type();
     this->nx = A.get_nx();
@@ -334,37 +329,66 @@ void sparse_CSR_Matrix<T>::random_values(int seed){
 
 template <typename T>
 std::vector<int>& sparse_CSR_Matrix<T>::get_row_ptr(){
+
+    // these assume that the matrix is on the CPU, so if they are not, we need to copy them to the CPU
+    if(this->row_ptr_d != nullptr or this->col_idx_d != nullptr or this->values_d != nullptr){
+        this->copy_Matrix_toCPU();
+    }
+
     return this->row_ptr;
 }
 
 template <typename T>
 std::vector<int>& sparse_CSR_Matrix<T>::get_col_idx(){
+    // these assume that the matrix is on the CPU, so if they are not, we need to copy them to the CPU
+    if(this->row_ptr_d != nullptr or this->col_idx_d != nullptr or this->values_d != nullptr){
+        this->copy_Matrix_toCPU();
+    }
     return this->col_idx;
 }
 
 template <typename T>
 std::vector<T>& sparse_CSR_Matrix<T>::get_values(){
+    // these assume that the matrix is on the CPU, so if they are not, we need to copy them to the CPU
+    if(this->row_ptr_d != nullptr or this->col_idx_d != nullptr or this->values_d != nullptr){
+        this->copy_Matrix_toCPU();
+    }
     return this->values;
 }
 
 template <typename T>
 int* sparse_CSR_Matrix<T>::get_row_ptr_d(){
+
+    // these assume that the matrix is on the GPU, so if they are not, we need to copy them to the GPU
+    // if(this->row_ptr_d == nullptr or this->col_idx_d == nullptr or this->values_d == nullptr){
+        // this->copy_Matrix_toGPU();
+    // }
     return this->row_ptr_d;
 }
 
 template <typename T>
 int* sparse_CSR_Matrix<T>::get_col_idx_d(){
+    // these assume that the matrix is on the GPU, so if they are not, we need to copy them to the GPU
+    // if(this->row_ptr_d == nullptr or this->col_idx_d == nullptr or this->values_d == nullptr){
+    //     this->copy_Matrix_toGPU();
+    // }
     return this->col_idx_d;
 }
 
 template <typename T>
 T* sparse_CSR_Matrix<T>::get_values_d(){
+    // these assume that the matrix is on the GPU, so if they are not, we need to copy them to the GPU
+    // if(this->row_ptr_d == nullptr or this->col_idx_d == nullptr or this->values_d == nullptr){
+    //     this->copy_Matrix_toGPU();
+    // }
     return this->values_d;
 }
 
 template <typename T>
 void sparse_CSR_Matrix<T>::copy_Matrix_toGPU(){
     
+    std::cout << "Warning: copying a sparse CSR Matrix to the GPU" << std::endl;
+
     // clear the data from the GPU
     this->remove_Matrix_from_GPU();
 
@@ -379,15 +403,32 @@ void sparse_CSR_Matrix<T>::copy_Matrix_toGPU(){
     CHECK_CUDA(cudaMemcpy(this->values_d, this->values.data(), this->nnz * sizeof(T), cudaMemcpyHostToDevice));
 }
 
+template <typename T>
+void sparse_CSR_Matrix<T>::copy_Matrix_toCPU(){
+
+    // check that the matrix is on the GPU
+    assert(this->row_ptr_d != nullptr);
+    assert(this->col_idx_d != nullptr);
+    assert(this->values_d != nullptr);
+
+    // Resize the vectors to the appropriate size
+    this->row_ptr.resize(this->num_rows + 1);
+    this->col_idx.resize(this->nnz);
+    this->values.resize(this->nnz);
+    // copy the data to the CPU
+    CHECK_CUDA(cudaMemcpy(this->row_ptr.data(), this->row_ptr_d, (this->num_rows + 1) * sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(this->col_idx.data(), this->col_idx_d, this->nnz * sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(this->values.data(), this->values_d, this->nnz * sizeof(T), cudaMemcpyDeviceToHost));
+}
+
 // these functions should not be called lightly by a user.
 // we expose them since we need them in case of a mess up in the striped matrix
 // but we don't really want anyone to call them (except for the devs)
 template <typename T>
 void sparse_CSR_Matrix<T>::remove_Matrix_from_GPU(){
+
     if(this->row_ptr_d != nullptr or this->col_idx_d != nullptr or this->values_d != nullptr){
     std::cerr << "WARNING: remove_Matrix_from_GPU called" << std::endl;
-    std::cerr << "This call indicates that there is something wrong with the memory management of the matrix" << std::endl;
-    std::cerr << "The most likely case for this to happen is when the matrix is expected to be on the GPU, but isn't or is only partially." << std::endl;
     std::cerr << "If the matrix did not contain relevant data, this is okay" << std::endl;
     }
     if (this->row_ptr_d != nullptr) {
@@ -441,6 +482,8 @@ int sparse_CSR_Matrix<T>::get_nnz() const{
 
 template <typename T>
 T sparse_CSR_Matrix<T>::get_element(int row, int col) const{
+    // this currently only works if the matrix is on the CPU
+    this->sanity_check_Matrix_on_CPU();
     
     int start = this->row_ptr[row];
     int end = this->row_ptr[row + 1];
@@ -459,6 +502,9 @@ T sparse_CSR_Matrix<T>::get_element(int row, int col) const{
 
 template <typename T>
 void sparse_CSR_Matrix<T>::print() const{
+    // this currently only works if the matrix is on the CPU
+    this->sanity_check_Matrix_on_CPU();
+
     std::cout << "Row Pointer: ";
     for (int i = 0; i < this->num_rows + 1; i++) {
         std::cout << this->row_ptr[i] << " ";
@@ -479,12 +525,18 @@ void sparse_CSR_Matrix<T>::print() const{
 }
 
 template <typename T>
-bool sparse_CSR_Matrix<T>::compare_to(sparse_CSR_Matrix<T>& other, std::string info) const{
+bool sparse_CSR_Matrix<T>::compare_to(sparse_CSR_Matrix<T>& other, std::string info){
     // caller_info is a string that is printed to help identify where the comparison is called from
     // this is helpful since compare to is called from a whole bunch of tests
     
-    this->sanity_check_Matrix_on_CPU();
-    other.sanity_check_Matrix_on_CPU();
+    // since we only compare on the CPU, we need to make sure that both matrices are on the CPU
+    if(this->row_ptr_d != nullptr or this->col_idx_d != nullptr or this->values_d != nullptr){
+        this->copy_Matrix_toCPU();
+    }
+
+    if(other.get_row_ptr_d() != nullptr or other.get_col_idx_d() != nullptr or other.get_values_d() != nullptr){
+        other.copy_Matrix_toCPU();
+    }
 
     bool same = true;
 
@@ -524,6 +576,8 @@ bool sparse_CSR_Matrix<T>::compare_to(sparse_CSR_Matrix<T>& other, std::string i
 
 template <typename T>
 void sparse_CSR_Matrix<T>::write_to_file()const{
+    // this currently only works if the matrix is on the CPU
+    this->sanity_check_Matrix_on_CPU();
 
     std::string str_nx = std::to_string(this->nx);
     std::string str_ny = std::to_string(this->ny);
@@ -577,6 +631,8 @@ void sparse_CSR_Matrix<T>::write_to_file()const{
 
 template <typename T>
 void sparse_CSR_Matrix<T>::read_from_file(std::string nx, std::string ny, std::string nz, std::string matrix_type){
+    // this currently only works if the matrix is on the CPU
+    this->sanity_check_Matrix_on_CPU();
 
     int int_nx = std::stoi(nx);
     int int_ny = std::stoi(ny);

@@ -24,6 +24,7 @@ void run_cuSparse_3d27p_Dot_benchmark(int nx, int ny, int nz, std::string folder
 
 void run_warp_reduction_3d27p_SPMV_benchmark(int nx, int ny, int nz, std::string folder_path);
 void run_warp_reduction_3d27p_Dot_benchmark(int nx, int ny, int nz, std::string folder_path);
+void run_warp_reduction_3d27p_WAXPBY_benchmark(int nx, int ny, int nz, std::string folder_path);
 void run_warp_reduction_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path);
 
 void run_striped_preprocessed_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path);
@@ -45,16 +46,18 @@ void bench_Implementation(
     CudaTimer& timer,
     sparse_CSR_Matrix<double> & A,
     double * a_d, double * b_d,
-    double * x_d, double * y_d);
+    double * x_d, double * y_d
+);
 
 // this version supports striped matrixes
 void bench_Implementation(
     HPCG_functions<double>& implementation,
     CudaTimer& timer,
-    striped_Matrix<double> & A, // we need to pass the CSR matrix for potential testing
+    striped_Matrix<double> & A, // we need to pass the matrix for potential testing
     double * a_d, double * b_d,
     double * x_d, double * y_d,
-    double * result_d
+    double * result_d,
+    double alpha, double beta
     );
 
 
@@ -87,6 +90,15 @@ void bench_Dot(
     sparse_CSR_Matrix<double> & A,
     double * x_d, double * y_d, double * result_d
     );
+
+void bench_WAXPBY(
+    HPCG_functions<double>& implementation,
+    CudaTimer& timer,
+    striped_Matrix<double> & A,
+    double * x_d, double * y_d, double *w,
+    double alpha, double beta
+    );
+
 
 void bench_SymGS(
     HPCG_functions<double>& implementation,

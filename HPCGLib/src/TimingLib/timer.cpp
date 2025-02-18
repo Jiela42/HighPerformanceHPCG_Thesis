@@ -55,8 +55,9 @@ void CudaTimer::stopTimer(std::string method_name) {
     else if (method_name == "compute_SymGS") SymGS_times.push_back(milliseconds);
     else if (method_name == "compute_SPMV") SPMV_times.push_back(milliseconds);
     else if (method_name == "compute_Dot") Dot_times.push_back(milliseconds);
+    else if (method_name == "compute_WAXPBY") WAXPBY_times.push_back(milliseconds);
     else{
-        std::cerr << "Invalid method name" << method_name << std::endl;
+        std::cerr << "Invalid method name " << method_name << std::endl;
         return;
     }
 }
@@ -118,5 +119,6 @@ void CudaTimer::writeResultsToCsv() {
     writeCSV(base_filename + "SymGS.csv", base_fileheader + "SymGS," + additional_parameters, SymGS_times);
     writeCSV(base_filename + "SPMV.csv", base_fileheader + "SPMV," + additional_parameters, SPMV_times);
     writeCSV(base_filename + "Dot.csv", base_fileheader + "Dot," + additional_parameters, Dot_times);
+    writeCSV(base_filename + "WAXPBY.csv", base_fileheader + "WAXPBY," + additional_parameters, WAXPBY_times);
     
 }

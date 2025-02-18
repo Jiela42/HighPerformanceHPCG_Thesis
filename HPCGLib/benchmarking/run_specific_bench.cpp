@@ -60,16 +60,27 @@ int main() {
     // run_cuSparse_3d27p_Dot_benchmark(256, 128, 128, folder_path);
 
     // std::cout << "Finished cuSparse Benchmark" << std::endl;
-    run_warp_reduction_3d27p_Dot_benchmark(8, 8, 8, folder_path);
-    run_warp_reduction_3d27p_Dot_benchmark(16, 16, 16, folder_path);
-    run_warp_reduction_3d27p_Dot_benchmark(24, 24, 24, folder_path);
-    run_warp_reduction_3d27p_Dot_benchmark(32, 32, 32, folder_path);
-    run_warp_reduction_3d27p_Dot_benchmark(64, 64, 64, folder_path);
-    run_warp_reduction_3d27p_Dot_benchmark(128, 64, 64, folder_path);
-    run_warp_reduction_3d27p_Dot_benchmark(128, 128, 64, folder_path);
-    run_warp_reduction_3d27p_Dot_benchmark(128, 128, 128, folder_path);
+    // run_warp_reduction_3d27p_Dot_benchmark(8, 8, 8, folder_path);
+    // run_warp_reduction_3d27p_Dot_benchmark(16, 16, 16, folder_path);
+    // run_warp_reduction_3d27p_Dot_benchmark(24, 24, 24, folder_path);
+    // run_warp_reduction_3d27p_Dot_benchmark(32, 32, 32, folder_path);
+    // run_warp_reduction_3d27p_Dot_benchmark(64, 64, 64, folder_path);
+    // run_warp_reduction_3d27p_Dot_benchmark(128, 64, 64, folder_path);
+    // run_warp_reduction_3d27p_Dot_benchmark(128, 128, 64, folder_path);
+    // run_warp_reduction_3d27p_Dot_benchmark(128, 128, 128, folder_path);
     // run_warp_reduction_3d27p_Dot_benchmark(256, 128, 128, folder_path);
     // run_warp_reduction_3d27p_Dot_benchmark(256, 256, 128, folder_path);
+    run_warp_reduction_3d27p_WAXPBY_benchmark(8, 8, 8, folder_path);
+    run_warp_reduction_3d27p_WAXPBY_benchmark(16, 16, 16, folder_path);
+    run_warp_reduction_3d27p_WAXPBY_benchmark(24, 24, 24, folder_path);
+    run_warp_reduction_3d27p_WAXPBY_benchmark(32, 32, 32, folder_path);
+    run_warp_reduction_3d27p_WAXPBY_benchmark(64, 64, 64, folder_path);
+    run_warp_reduction_3d27p_WAXPBY_benchmark(128, 64, 64, folder_path);
+    run_warp_reduction_3d27p_WAXPBY_benchmark(128, 128, 64, folder_path);
+    run_warp_reduction_3d27p_WAXPBY_benchmark(128, 128, 128, folder_path);
+    run_warp_reduction_3d27p_WAXPBY_benchmark(256, 128, 128, folder_path);
+    run_warp_reduction_3d27p_WAXPBY_benchmark(256, 256, 128, folder_path);
+    run_warp_reduction_3d27p_WAXPBY_benchmark(256, 256, 256, folder_path);
     // run_warp_reduction_3d27p_SPMV_benchmark(8, 8, 8, folder_path);
     // run_warp_reduction_3d27p_SPMV_benchmark(16, 16, 16, folder_path);
     // run_warp_reduction_3d27p_SPMV_benchmark(24, 24, 24, folder_path);
@@ -108,7 +119,6 @@ int main() {
 
     // run_striped_coloringPrecomputed_3d27p_SymGS_benchmark(8, 8, 8, folder_path);
     // run_striped_coloringPrecomputed_3d27p_SymGS_benchmark(256, 256, 128, folder_path);
-
 
     std::cout << "Finished Benchmark" << std::endl;  
 

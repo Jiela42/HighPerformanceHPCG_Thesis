@@ -54,7 +54,9 @@ striped_Matrix<T>::~striped_Matrix(){
 
 template <typename T>
 void striped_Matrix<T>::striped_Matrix_from_sparse_CSR(sparse_CSR_Matrix<T>& A){
+    // std::cout << "entering striped_Matrix_from_sparse_CSR" << std::endl;
     if(A.get_matrix_type() == MatrixType::Stencil_3D27P and A.get_values_d() != nullptr and A.get_col_idx_d() != nullptr and A.get_row_ptr_d() != nullptr){
+        // std::cout << "matrix is on GPU completely" << std::endl;
         this->striped_3D27P_Matrix_from_CSR_onGPU(A);
     }
     else if (A.get_matrix_type() == MatrixType::Stencil_3D27P) {
@@ -67,6 +69,8 @@ void striped_Matrix<T>::striped_Matrix_from_sparse_CSR(sparse_CSR_Matrix<T>& A){
 
 template <typename T>
 void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T>& A){
+
+    // std::cout << "striped_3D27P_Matrix_from_CSR (on CPU)" << std::endl;
     
     assert(A.get_matrix_type() == MatrixType::Stencil_3D27P);
     this->matrix_type = MatrixType::Stencil_3D27P;
@@ -134,6 +138,8 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T>& A){
 template <typename T>
 void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T>& A){
     
+    // std::cout << "striped_3D27P_Matrix_from_CSR_onGPU" << std::endl;
+
     assert(A.get_matrix_type() == MatrixType::Stencil_3D27P);
 
     // first we make sure that the matrix is on the GPU
@@ -205,8 +211,55 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T>
         this->nx, this->ny, this->nz,
         A.get_row_ptr_d(), A.get_col_idx_d(), A.get_values_d(),
         this->num_stripes, this->j_min_i_d, this->values_d);
+    
+    // std::cout << "counted_nnz: " << counted_nnz << std::endl;
 
     assert(counted_nnz == this->nnz);
+}
+
+template <typename T>
+void striped_Matrix<T>::copy_Matrix_toGPU(){
+
+    //we delete the old data from the GPU
+    this->remove_Matrix_from_GPU();
+    
+    // we copy the j_min_i to the GPU
+    CHECK_CUDA(cudaMalloc(&this->j_min_i_d, this->num_stripes * sizeof(int)));
+    CHECK_CUDA(cudaMemcpy(this->j_min_i_d, this->j_min_i.data(), this->num_stripes * sizeof(int), cudaMemcpyHostToDevice));
+
+    // we copy the values to the GPU
+    CHECK_CUDA(cudaMalloc(&this->values_d, this->num_stripes * this->num_rows * sizeof(T)));
+    CHECK_CUDA(cudaMemcpy(this->values_d, this->values.data(), this->num_stripes * this->num_rows * sizeof(T), cudaMemcpyHostToDevice));
+}
+
+template <typename T>
+void striped_Matrix<T>::copy_Matrix_toCPU(){
+
+    // rezise the vectors
+    this->j_min_i.resize(this->num_stripes);
+    this->values.resize(this->num_stripes * this->num_rows);
+
+    // std::cout << "num_stripes: " << this->num_stripes << std::endl;
+    // std::cout << "num_rows: " << this->num_rows << std::endl;
+
+    // we copy the j_min_i to the CPU
+    CHECK_CUDA(cudaMemcpy(this->j_min_i.data(), this->j_min_i_d, this->num_stripes * sizeof(int), cudaMemcpyDeviceToHost));
+
+    // we copy the values to the CPU
+    CHECK_CUDA(cudaMemcpy(this->values.data(), this->values_d, this->num_stripes * this->num_rows * sizeof(T), cudaMemcpyDeviceToHost));
+}
+
+template <typename T>
+void striped_Matrix<T>::remove_Matrix_from_GPU(){
+    if(this->j_min_i_d != nullptr){
+        CHECK_CUDA(cudaFree(this->j_min_i_d));
+        this->j_min_i_d = nullptr;
+    }
+
+    if(this->values_d != nullptr){
+        CHECK_CUDA(cudaFree(this->values_d));
+        this->values_d = nullptr;
+    }
 }
 
 template <typename T>

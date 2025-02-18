@@ -1,6 +1,6 @@
 #include "testing.hpp"
 
-bool run_stripedBoxColoring_tests_on_Matrix(sparse_CSR_Matrix<double> A){
+bool run_stripedBoxColoring_tests_on_Matrix(sparse_CSR_Matrix<double>& A){
     // the output will be allocated by the test function
     // but any inputs need to be allocated and copied over to the device here
     // and is then passed to the test function

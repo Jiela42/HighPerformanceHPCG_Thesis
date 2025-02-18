@@ -242,11 +242,81 @@ bool test_Dot(
     return test_pass;
 }
 
+bool test_WAXPBY(
+    HPCG_functions<double>& uut,
+    striped_Matrix<double> & A,
+    double * x_d, double * y_d
+){
+    // this one runs a bunch of tests for the WAXPBY function
+
+    srand(RANDOM_SEED);
+
+    double a = (double)rand() / RAND_MAX;
+    double b = (double)rand() / RAND_MAX;
+
+    
+    bool all_pass = test_WAXPBY(uut, A, x_d, y_d, 0.0, 0.0);
+    all_pass = all_pass && test_WAXPBY(uut, A, x_d, y_d, 0.0, 1.0);
+    all_pass = all_pass && test_WAXPBY(uut, A, x_d, y_d, 1.0, 0.0);
+    all_pass = all_pass && test_WAXPBY(uut, A, x_d, y_d, 1.0, 1.0);
+    all_pass = all_pass && test_WAXPBY(uut, A, x_d, y_d, a, 1.0);
+    all_pass = all_pass && test_WAXPBY(uut, A, x_d, y_d, 1.0, b);
+    all_pass = all_pass && test_WAXPBY(uut, A, x_d, y_d, a, 0.0);
+    all_pass = all_pass && test_WAXPBY(uut, A, x_d, y_d, 0.0, b);
+    all_pass = all_pass && test_WAXPBY(uut, A, x_d, y_d, a, b);
+
+    return all_pass;
+
+}
+
+bool test_WAXPBY(
+    HPCG_functions<double>& uut,
+    striped_Matrix<double> & A,
+    double * x_d, double * y_d,
+    double alpha, double beta
+)
+    
+    {
+
+        // x & y should be random vectors, so let's quickly grab them
+        std::vector<double> x_host(A.get_num_rows());
+        std::vector<double> y_host(A.get_num_rows());
+        std::vector<double> w_host(A.get_num_rows());
+        std::vector<double> w_baseline(A.get_num_rows());
+
+
+        // allocate result vector on device
+        double * w_d;
+        CHECK_CUDA(cudaMalloc(&w_d, A.get_num_rows() * sizeof(double)));
+
+        // grab the vectors from the device
+        CHECK_CUDA(cudaMemcpy(x_host.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+        CHECK_CUDA(cudaMemcpy(y_host.data(), y_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+
+        uut.compute_WAXPBY(A, x_d, y_d, w_d, alpha, beta);
+
+        CHECK_CUDA(cudaMemcpy(w_baseline.data(), w_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+
+        for(int i = 0; i < A.get_num_rows(); i++){
+            w_host[i] = alpha * x_host[i] + beta * y_host[i];
+        }
+
+        bool test_pass = vector_compare(w_host, w_baseline);
+        
+        if (not test_pass){
+            std::cout << "WAXPBY test failed for implementation: " << uut.version_name << std::endl;
+        }
+
+        return test_pass;
+    }
+
 bool test_SymGS(
     HPCG_functions<double>&uut,
     sparse_CSR_Matrix<double> & A
     ){
     // This is the mini test for the SymGS function
+
+    // std::cout << "SymGS Mini test" << std::endl;
 
     std::vector<std::vector<double>> A_dense = {
         {1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0.},
@@ -278,6 +348,7 @@ bool test_SymGS(
     int num_rows = A_csr.get_num_rows();
 
     // put A onto gpu
+    std::cout << "Copying A to GPU, you can safely ignore the following warning." << std::endl;
     A_csr.copy_Matrix_toGPU();
 
     // A_csr.print();
@@ -322,6 +393,7 @@ bool test_SymGS(
     )
 
 {
+
     int num_rows = A.get_num_rows();
     // since symGS changes x, we preserve the original x
     std::vector<double> x(num_rows, 0.0);
@@ -387,6 +459,7 @@ bool test_SymGS(
     double * y_d // the vectors x is already on the device
         
 ){
+    // std::cout << "SymGS test 2" << std::endl;
 
     int num_rows = striped_A.get_num_rows();
 
@@ -400,6 +473,7 @@ bool test_SymGS(
     CHECK_CUDA(cudaMalloc(&x_uut_d, num_rows * sizeof(double)));
     CHECK_CUDA(cudaMemset(x_uut_d, 0, num_rows * sizeof(double)));
 
+    // std::cout << "Baseline name = " << baseline.version_name << std::endl;
 
     std::vector<double> x_baseline(num_rows, 0.0);
     std::vector<double> x_uut(num_rows, 0.0);

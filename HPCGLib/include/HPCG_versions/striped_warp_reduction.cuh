@@ -29,8 +29,8 @@ public:
         this->SPMV_implemented = true;
         this->Dot_implemented = true;
         this->SymGS_implemented = true;
+        this->WAXPBY_implemented = true;
         
-
     }
 
     void compute_CG(sparse_CSR_Matrix<T>& A, std::vector<T>& b, std::vector<T>& x) override {
@@ -67,10 +67,19 @@ public:
     }
 
     void compute_WAXPBY(
+        sparse_CSR_Matrix<T>& A, // we pass A for the metadata
         T * x_d, T * y_d, T * w_d, // the vectors x, y and w are already on the device
         T alpha, T beta
         ) override {
-        std::cerr << "Warning: compute_WAXPBY is not implemented in striped warp reduction." << std::endl;
+        std::cerr << "ERROR computeWAXPBY requires a striped Matrix as input in the striped warp reduction Implementation" << std::endl;
+    }
+
+    void compute_WAXPBY(
+        striped_Matrix<T>& A, // we pass A for the metadata
+        T * x_d, T * y_d, T * w_d, // the vectors x, y and w are already on the device
+        T alpha, T beta
+        ) override {
+            striped_warp_reduction_computeWAXPBY(A, x_d, y_d, w_d, alpha, beta);
     }
 
     void compute_Dot(
@@ -112,6 +121,12 @@ private:
     void striped_warp_reduction_computeSymGS(
         striped_Matrix<T> & A,
         T * x_d, T * y_d // the vectors x and y are already on the device
+    );
+
+    void striped_warp_reduction_computeWAXPBY(
+        striped_Matrix<T> & A,
+        T * x_d, T * y_d, T * w_d, // the vectors x, y and w are already on the device
+        T alpha, T beta
     );
 };
 

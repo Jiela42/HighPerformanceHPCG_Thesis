@@ -64,10 +64,18 @@ public:
     }
 
     void compute_WAXPBY(
+        sparse_CSR_Matrix<T>& A, //we only pass A for the metadata
         T * x_d, T * y_d, T * w_d, // the vectors x, y and w are already on the device
         T alpha, T beta
         ) override {
         std::cerr << "Warning: compute_WAXPBY is not implemented in Striped Preprocessed." << std::endl;
+    }
+    void compute_WAXPBY(
+        striped_Matrix<T>& A, //we only pass A for the metadata
+        T * x_d, T * y_d, T * w_d, // the vectors x, y and w are already on the device
+        T alpha, T beta
+        ) override {
+        std::cerr << "Warning: compute_WAXPBY is not implemented in Striped Shared Memory." << std::endl;
     }
 
     void compute_Dot(

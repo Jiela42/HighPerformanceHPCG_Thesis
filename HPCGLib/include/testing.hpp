@@ -66,6 +66,19 @@ bool test_Dot(
     int nx, int ny, int nz
 );
 
+bool test_WAXPBY(
+    HPCG_functions<double>& uut,
+    striped_Matrix<double> & A,
+    double * x_d, double * y_d
+);
+
+bool test_WAXPBY(
+    HPCG_functions<double>& uut,
+    striped_Matrix<double> & A,
+    double * x_d, double * y_d,
+    double a, double b
+);
+
 bool test_SymGS(
     HPCG_functions<double>& uut,
     sparse_CSR_Matrix<double> & A

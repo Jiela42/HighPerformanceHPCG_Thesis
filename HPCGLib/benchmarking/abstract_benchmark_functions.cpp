@@ -164,6 +164,46 @@ void bench_Dot(
     
 }
 
+void bench_WAXPBY(
+    HPCG_functions<double>& implementation,
+    CudaTimer& timer,
+    striped_Matrix<double> & A,
+    double * x_d, double * y_d, double * w_d,
+    double alpha, double beta
+    ){
+
+    int num_iterations = implementation.getNumberOfIterations();
+    
+    // grab original value of w_d
+    std::vector<double> w(A.get_num_rows(), 0.0);
+    CHECK_CUDA(cudaMemcpy(w_d, w.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+
+    if(implementation.test_before_bench){
+
+        bool test_failed = !test_WAXPBY(
+            implementation, A, x_d, y_d, alpha, beta
+        );
+
+        // restore original value of w_d
+        CHECK_CUDA(cudaMemcpy(w_d, w.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+
+        if (test_failed){
+            num_iterations = 0;
+        }
+    }
+    
+    for(int i = 0; i < num_iterations; i++){
+        timer.startTimer();
+        implementation.compute_WAXPBY(
+            A,
+            x_d, y_d, w_d, alpha, beta
+        );
+        timer.stopTimer("compute_WAXPBY");
+
+        // restore original value of w_d
+        CHECK_CUDA(cudaMemcpy(w_d, w.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+    }
+}
 
 void bench_SymGS(
     HPCG_functions<double>& implementation,
@@ -312,7 +352,8 @@ void bench_Implementation(
     striped_Matrix<double> & A, // we need to pass the CSR matrix for metadata and potential testing
     double * a_d, double * b_d, // a & b are random vectors
     double * x_d, double * y_d, // x & y are vectors as used in HPCG
-    double * result_d   // result is used for the dot product (it is a scalar)
+    double * result_d ,  // result is used for the dot product (it is a scalar)
+    double alpha, double beta
     ){
       
     if(implementation.SPMV_implemented){
@@ -324,9 +365,10 @@ void bench_Implementation(
     if(implementation.SymGS_implemented){
         bench_SymGS(implementation, timer, A, x_d, y_d);
     }
-    // bench_SPMV(implementation, timer, A, striped_A_d, num_rows, num_cols, num_stripes, j_min_i_d, x_d, y_d);
-    // bench_Dot(implementation, timer, A, x_d, y_d, result_d);
-    // bench_SymGS(implementation, timer, A, striped_A_d, num_rows, num_cols, num_stripes, j_min_i_d, x_d, y_d);
+    if(implementation.WAXPBY_implemented){
+        bench_WAXPBY(implementation, timer, A, a_d, b_d, y_d, alpha, beta);
+    }
+
     // other functions to be benchmarked
 }
 

@@ -37,7 +37,7 @@ void striped_coloringPrecomputed_Implementation<T>::striped_coloringPrecomputed_
     // the number of blocks is now dependent on the maximum number of rows per color
 
     int max_num_rows_per_color = std::min(nx * ny / 4, std::min(nx * nz / 2, ny * nz));
-    int max_color = nx + 2 * ny + 4 * nz;
+    int max_color = (nx-1) + 2 * (ny-1) + 4 * (nz-1);
 
     int num_blocks = std::min(ceiling_division(max_num_rows_per_color, 1024/WARP_SIZE), MAX_NUM_BLOCKS);
     for(int color = 0; color <= max_color; color++){

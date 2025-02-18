@@ -217,6 +217,7 @@ __global__ void generate_striped_from_CSR_kernel(
                 }
                 if(elem != 0.0){
                     striped_A_d[i* num_stripes + stripe_j] = elem;
+                    // printf("i: %d, j: %d, elem: %f, stripe_j: %d \n", i, j, elem, stripe_j);
                     nnz_i++;
                 }
             }

@@ -48,16 +48,17 @@ bool read_save_test(striped_Matrix<double>& A, std::string info){
 }
 //////////////////////////////////////////////////////////////////////////////////////////////
 // Make sure the parallel generation of the CSR Matrix is correct
-bool parallel_CSR_generation_test(sparse_CSR_Matrix<double>& A){
+bool parallel_CSR_generation_test(sparse_CSR_Matrix<double>& A_copy){
 
-    std::string dim_info = std::to_string(A.get_nx()) + "x" + std::to_string(A.get_ny()) + "x" + std::to_string(A.get_nz());
+    std::string dim_info = std::to_string(A_copy.get_nx()) + "x" + std::to_string(A_copy.get_ny()) + "x" + std::to_string(A_copy.get_nz());
     
-    int nx = A.get_nx();
-    int ny = A.get_ny();
-    int nz = A.get_nz();
+    int nx = A_copy.get_nx();
+    int ny = A_copy.get_ny();
+    int nz = A_copy.get_nz();
 
-    sparse_CSR_Matrix<double> A_copy;
-    A_copy.generateMatrix_onGPU(nx, ny, nz);
+    std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
+    sparse_CSR_Matrix<double> A;
+    A = problem.first;
 
     // copy data from GPU to CPU
     std::vector<int> row_ptr_host(nx*ny*nz + 1, 0);
@@ -88,20 +89,43 @@ bool parallel_CSR_generation_test(sparse_CSR_Matrix<double>& A){
 
 bool parallel_generation_from_CSR_test(sparse_CSR_Matrix<double>& A){
 
+    // this is a redundant test.
+    // we already do this in the parallel crs vs striped test.
+    // but doppelt hält besser
     // first we generate the matrix on the GPU
     int nx = A.get_nx();
     int ny = A.get_ny();
     int nz = A.get_nz();
 
+    std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
+    sparse_CSR_Matrix<double> A_host = problem.first;
+
     striped_Matrix<double> striped_A_host;
     striped_Matrix<double> striped_A;
-    
+
     // if the CSR is on the CPU, the striped matrix is generated on the CPU
-    striped_A_host.striped_Matrix_from_sparse_CSR(A);
+    striped_A_host.striped_Matrix_from_sparse_CSR(A_host);
+
+
+    // std::cout << "striped_A_host generated" << std::endl;
+    // if (striped_A_host.get_values_d() == nullptr){
+    //     std::cout << "striped_A_host values_d is nullptr" << std::endl;
+    // }else{
+    //     std::cout << "striped_A_host values_d is not nullptr" << std::endl;
+    //     std::cout << "this is the address: " << striped_A_host.get_values_d() << std::endl;
+    // }
     
     A.generateMatrix_onGPU(nx, ny, nz);
     // if the CSR is on the GPU, the striped matrix is generated on the GPU
     striped_A.striped_Matrix_from_sparse_CSR(A);
+
+    // if (striped_A.get_values_d() == nullptr){
+    //     std::cout << "striped_A values_d is nullptr" << std::endl;
+    //     std::cout << "parallel generation test is meaningless" << std::endl;
+    // }else{
+    //     std::cout << "striped_A values_d is not nullptr" << std::endl;
+    //     std::cout << "this is the address: " << striped_A.get_values_d() << std::endl;
+    // }
 
     // grab the values from the GPU
     std::vector<int> j_min_i_host(striped_A.get_num_stripes(), 0);
@@ -152,14 +176,14 @@ bool parallel_generation_from_CSR_test(sparse_CSR_Matrix<double>& A){
         test_passed = false;
     }
     
-    for(int i = 0; i < striped_A.get_num_stripes(); i++){
-        if(j_min_i_host[i] != striped_A.get_j_min_i()[i]){
+    for(int i = 0; i < striped_A_host.get_num_stripes(); i++){
+        if(j_min_i_host[i] != striped_A_host.get_j_min_i()[i]){
             std::cerr << "j_min_i mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
             test_passed = false;
         }
     }
 
-    if(not vector_compare(values_host, striped_A.get_values())){
+    if(not vector_compare(values_host, striped_A_host.get_values())){
         std::cerr << "values mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
         test_passed = false;
     }
@@ -203,6 +227,7 @@ bool run_striped_csr_conversion_test(int nx, int ny, int nz){
 
     bool all_pass = true;
 
+    // std::cout << "normal values" << std::endl;
     all_pass = all_pass && striped_csr_conversion_test_on_matrix(A);
     if (not all_pass){
         std::cerr << "striped vs csr conversion test failed for normal HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
@@ -223,12 +248,64 @@ bool run_striped_csr_conversion_test(int nx, int ny, int nz){
     return all_pass;
 }
 
-bool coloring_test(striped_Matrix<double>& A){
+bool striped_csr_parallel_conversion_test_on_matrix(sparse_CSR_Matrix<double>&A){
+
+    striped_Matrix<double> striped_A;
+    sparse_CSR_Matrix<double> back_to_CSR;
+    striped_A.striped_Matrix_from_sparse_CSR(A);
+    back_to_CSR.sparse_CSR_Matrix_from_striped(striped_A);
+
+    // instead of copying it back by hand, we just call the function and then compare the two matrices with the built in function
+
+    back_to_CSR.copy_Matrix_toCPU();
+
+    bool test_passed = A.compare_to(back_to_CSR, "striped vs csr parallel conversion test");
+
+    return test_passed;
+}
+
+bool run_striped_csr_parallel_conversion_test(int nx, int ny, int nz){
+    std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
+    sparse_CSR_Matrix<double> A = problem.first;
 
     bool all_pass = true;
 
+    std::cout << "Copying to GPU on purpose" << std::endl;
+    A.copy_Matrix_toGPU();
+    // std::cout << "normal values" << std::endl;
+    all_pass = all_pass && striped_csr_parallel_conversion_test_on_matrix(A);
+    if (not all_pass){
+        std::cerr << "striped vs csr parallel conversion test failed for normal HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
+    }
+
+    // std::cout << "random values" << std::endl;
+    A.random_values(RANDOM_SEED);
+    std::cout << "Copying to GPU on purpose" << std::endl;
+    A.copy_Matrix_toGPU();
+    all_pass = all_pass && striped_csr_parallel_conversion_test_on_matrix(A);
+    if (not all_pass){
+        std::cerr << "striped vs csr parallel conversion test failed for random values HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
+    }   
+    // std::cout << "iterative values" << std::endl;
+    A.iterative_values();
+    std::cout << "Copying to GPU on purpose" << std::endl;
+    A.copy_Matrix_toGPU();
+    all_pass = all_pass && striped_csr_parallel_conversion_test_on_matrix(A);
+    if (not all_pass){
+        std::cerr << "striped vs csr parallel conversion test failed for iterative values HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
+    }
+    return all_pass;
+}
+
+bool coloring_test(striped_Matrix<double>& A){
+
+    bool all_pass = true;
+    // std::cout << "coloring test" << std::endl;
+
     // first we get the long hand computed colors
     std::vector<int> colors_dynamically = color_for_forward_pass(A);
+
+    // std::cout << "dynamic colors done" << std::endl;
 
     // then we get the colors from the matrix
     std::vector<int> colors_statically (A.get_num_rows(), 0);
@@ -358,8 +435,8 @@ bool run_all_matrixLib_tests(int nx, int ny, int nz){
     std::string dim_info = std::to_string(nx) + "x" + std::to_string(ny) + "x" + std::to_string(nz);
 
     // run tests on standard 3d27p matrices
-    std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
-    sparse_CSR_Matrix<double> A = problem.first;
+    sparse_CSR_Matrix<double> A;
+    A.generateMatrix_onGPU(nx, ny, nz);
 
     striped_Matrix<double> striped_A;
     striped_A.striped_Matrix_from_sparse_CSR(A);
@@ -370,8 +447,13 @@ bool run_all_matrixLib_tests(int nx, int ny, int nz){
     // read_save_test(striped_A, "read_save_test on 3d27p striped Matrix for " + dim_info);
     
     all_pass = all_pass && parallel_CSR_generation_test(A);
+    // std::cout << "parallel CSR generation test passed for " << dim_info << std::endl;
     all_pass = all_pass && run_striped_csr_conversion_test(nx, ny, nz);
+    all_pass = all_pass && run_striped_csr_parallel_conversion_test(nx, ny, nz);
+    // std::cout << "striped vs csr conversion test passed for " << dim_info << std::endl;
+    all_pass = all_pass && parallel_generation_from_CSR_test(A);
     all_pass = all_pass && coloring_test(striped_A);
+    // std::cout << "coloring test passed for " << dim_info << std::endl;
 
     return all_pass;
 }

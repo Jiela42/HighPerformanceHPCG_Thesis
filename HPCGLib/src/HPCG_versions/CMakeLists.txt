@@ -49,8 +49,9 @@ target_sources(HPCGLib PRIVATE
     striped_shared_mem/striped_shared_mem_computeSPMV.cu
 
     striped_warp_reduction/striped_warp_reduction_computeSPMV.cu
-    striped_warp_reduction/striped_warp_reduction_computeDot.cu
     striped_warp_reduction/striped_warp_reduction_computeSymGS.cu
+    striped_warp_reduction/striped_warp_reduction_computeDot.cu
+    striped_warp_reduction/striped_warp_reduction_computeWAXPBY.cu
 
     striped_preprocessed/striped_preprocessed_computeSymGS.cu
 

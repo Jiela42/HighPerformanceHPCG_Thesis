@@ -103,7 +103,7 @@ void run_striped_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::stri
     // we don't want to bench the implementation for the SymGS
     // (yet, because that has a bunch of parameters, specific to that, so we do an extra call to bench_SymGS)
     implementation.SymGS_implemented = false;
-    bench_Implementation(implementation, *timer, striped_A, a_d, b_d, x_d, y_d, result_d);
+    bench_Implementation(implementation, *timer, striped_A, a_d, b_d, x_d, y_d, result_d, 1.0, 1.0);
 
     // free the memory
     cudaFree(a_d);

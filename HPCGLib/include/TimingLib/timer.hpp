@@ -57,6 +57,7 @@ private:
     std::vector<float> SymGS_times;
     std::vector<float> SPMV_times;
     std::vector<float> Dot_times;
+    std::vector<float> WAXPBY_times;
 };
 
 #endif // TIMER_HPP

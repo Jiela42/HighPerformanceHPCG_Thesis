@@ -2,7 +2,7 @@
 
 #include "UtilLib/cuda_utils.hpp"
 
-bool run_striped_colored_tests_on_matrix(sparse_CSR_Matrix<double> A){
+bool run_striped_colored_tests_on_matrix(sparse_CSR_Matrix<double>& A){
     // the output will be allocated by the test function
     // but any inputs need to be allocated and copied over to the device here
     // and is then passed to the test function

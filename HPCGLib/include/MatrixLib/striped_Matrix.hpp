@@ -23,6 +23,11 @@ class striped_Matrix {
 
         void generate_coloring();
 
+        void copy_Matrix_toGPU();
+        void copy_Matrix_toCPU();
+
+        void remove_Matrix_from_GPU();
+
         int *get_color_pointer_d();
         int *get_color_sorted_rows_d();
         std::vector<int> get_color_pointer_vector();

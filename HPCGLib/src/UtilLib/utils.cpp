@@ -42,6 +42,8 @@ bool vector_compare(const std::vector<int>& a, const std::vector<int>& b, std::s
 
 double L2_norm_for_SymGS(sparse_CSR_Matrix<double>& A, std::vector<double> & x_solution, std::vector<double>& true_solution){
 
+    // this thing expects A, to be on the gpu
+
     std::vector<int> row_ptr = A.get_row_ptr();
     std::vector<int> col_idx = A.get_col_idx();
     std::vector<double> values = A.get_values();

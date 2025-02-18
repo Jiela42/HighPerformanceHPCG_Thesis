@@ -11,6 +11,11 @@ void run_striped_warp_reduction_3d27p_benchmarks(int nx, int ny, int nz, std::st
     std::vector<double> a = generate_random_vector(nx*ny*nz, RANDOM_SEED);
     std::vector<double> b = generate_random_vector(nx*ny*nz, RANDOM_SEED);
 
+    srand(RANDOM_SEED);
+
+    double alpha = (double)rand() / RAND_MAX;
+    double beta = (double)rand() / RAND_MAX;
+
 
     striped_Matrix<double> striped_A;
     striped_A.striped_Matrix_from_sparse_CSR(A);
@@ -45,7 +50,7 @@ void run_striped_warp_reduction_3d27p_benchmarks(int nx, int ny, int nz, std::st
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
 
     // run the benchmarks (without the copying back and forth)
-    bench_Implementation(implementation, *timer, striped_A, a_d, b_d, x_d, y_d, result_d);
+    bench_Implementation(implementation, *timer, striped_A, a_d, b_d, x_d, y_d, result_d, alpha, beta);
 
     // free the memory
     cudaFree(a_d);
@@ -58,15 +63,6 @@ void run_striped_warp_reduction_3d27p_benchmarks(int nx, int ny, int nz, std::st
 }
 
 void run_warp_reduction_3d27p_Dot_benchmark(int nx, int ny, int nz, std::string folder_path){
-    
-    striped_warp_reduction_Implementation<double> implementation;
-    std::string implementation_name = implementation.version_name + " (kernel reduction)";
-    std::string additional_params = implementation.additional_parameters;
-    std::string ault_node = implementation.ault_nodes;
-    // the dot product is a dense operation, since we are just working on two vectors
-    int nnz = nx * ny * nz;
-    CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);
-
     // get two random vectors
     std::vector<double> x = generate_random_vector(nx*ny*nz, RANDOM_SEED);
     std::vector<double> y = generate_random_vector(nx*ny*nz, RANDOM_SEED);
@@ -87,15 +83,73 @@ void run_warp_reduction_3d27p_Dot_benchmark(int nx, int ny, int nz, std::string 
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), nx * ny * nz * sizeof(double), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), nx * ny * nz * sizeof(double), cudaMemcpyHostToDevice));
 
-    // run the benchmark
-    bench_Dot(implementation, *timer, A_striped, x_d, y_d, result_d);
+    // for(int i = 8; i <= 8; i=i << 1){
+        // std::cout << "Cooperation number = " << i << std::endl;
 
+        striped_warp_reduction_Implementation<double> implementation;
+        std::string implementation_name = implementation.version_name;
+        // implementation.dot_cooperation_number = i;
+        std::string additional_params = implementation.additional_parameters;
+        std::string ault_node = implementation.ault_nodes;
+        // the dot product is a dense operation, since we are just working on two vectors
+        int nnz = nx * ny * nz;
+        CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);
+    
+        // run the benchmark
+        bench_Dot(implementation, *timer, A_striped, x_d, y_d, result_d);
+
+        delete timer;    
+    // }
+    
     // free the memory
     cudaFree(x_d);
     cudaFree(y_d);
     cudaFree(result_d);
+}
 
-    delete timer;    
+void run_warp_reduction_3d27p_WAXPBY_benchmark(int nx, int ny, int nz, std::string folder_path){
+        // get two random vectors
+        std::vector<double> x = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+        std::vector<double> y = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+    
+        // create the striped matrix
+        striped_Matrix<double> A_striped;
+        A_striped.set_num_rows(nx * ny * nz);
+
+        srand(RANDOM_SEED);
+
+        double alpha = (double)rand() / RAND_MAX;
+        double beta = (double)rand() / RAND_MAX;
+    
+        // allocate x and y on the device
+        double * x_d;
+        double * y_d;
+        double * w_d;
+    
+        CHECK_CUDA(cudaMalloc(&x_d, nx * ny * nz * sizeof(double)));
+        CHECK_CUDA(cudaMalloc(&y_d, nx * ny * nz * sizeof(double)));
+        CHECK_CUDA(cudaMalloc(&w_d, nx * ny * nz * sizeof(double)));
+    
+        CHECK_CUDA(cudaMemcpy(x_d, x.data(), nx * ny * nz * sizeof(double), cudaMemcpyHostToDevice));
+        CHECK_CUDA(cudaMemcpy(y_d, y.data(), nx * ny * nz * sizeof(double), cudaMemcpyHostToDevice));
+
+        striped_warp_reduction_Implementation<double> implementation;
+        std::string implementation_name = implementation.version_name;
+        std::string additional_params = implementation.additional_parameters;
+        std::string ault_node = implementation.ault_nodes;
+        // the WAXBPY product is a dense operation, since we are just working on two vectors
+        int nnz = nx * ny * nz;
+        CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);
+    
+        // run the benchmark
+        bench_WAXPBY(implementation, *timer, A_striped, x_d, y_d, w_d, alpha, beta);
+
+        delete timer;    
+        
+        // free the memory
+        cudaFree(x_d);
+        cudaFree(y_d);
+        cudaFree(w_d);
 }
 
 void run_warp_reduction_3d27p_SPMV_benchmark(int nx, int ny, int nz, std::string folder_path){

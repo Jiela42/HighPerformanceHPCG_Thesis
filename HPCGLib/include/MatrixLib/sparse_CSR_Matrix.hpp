@@ -47,6 +47,7 @@ public:
     T* get_values_d();
 
     void copy_Matrix_toGPU();
+    void copy_Matrix_toCPU();
 
     void remove_Matrix_from_GPU();
 
@@ -60,7 +61,7 @@ public:
 
     T get_element(int i, int j) const;
     void print() const;
-    bool compare_to(sparse_CSR_Matrix<T>& other, std::string info) const;
+    bool compare_to(sparse_CSR_Matrix<T>& other, std::string info);
     void write_to_file() const;
     void read_from_file(std::string nx, std::string ny, std::string nz, std::string matrix_type);
 

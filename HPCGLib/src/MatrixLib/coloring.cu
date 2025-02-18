@@ -249,7 +249,7 @@ __global__ void print_COR_Format_kernel(
     }
 }
 
-std::vector<int> color_for_forward_pass(striped_Matrix <double> A){
+std::vector<int> color_for_forward_pass(striped_Matrix <double>& A){
 
     int num_rows = A.get_num_rows();
     int num_stripes = A.get_num_stripes();
@@ -257,18 +257,18 @@ std::vector<int> color_for_forward_pass(striped_Matrix <double> A){
 
     std::vector<int> colors(num_rows, -1);
 
-    // put everything on the device
+    // put the matrix on the device (if not already there)
+    if (A.get_values_d() == nullptr or A.get_j_min_i_d() == nullptr){
+        A.copy_Matrix_toGPU();
+    }
+    
+    double * A_d = A.get_values_d();
+    int * j_min_i_d = A.get_j_min_i_d();
+
+    // put colors on the device
     int * colors_d;
-    int * j_min_i_d;
-    double * A_d;
-
     CHECK_CUDA(cudaMalloc(&colors_d, num_rows * sizeof(int)));
-    CHECK_CUDA(cudaMalloc(&j_min_i_d, num_rows * sizeof(int)));
-    CHECK_CUDA(cudaMalloc(&A_d, num_stripes * num_rows * sizeof(double)));
-
     CHECK_CUDA(cudaMemset(colors_d, -1, num_rows * sizeof(int)));
-    CHECK_CUDA(cudaMemcpy(j_min_i_d, A.get_j_min_i().data(), num_rows * sizeof(int), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(A_d, A.get_values().data(), num_stripes * num_rows * sizeof(double), cudaMemcpyHostToDevice));
     
 
     int num_threads = 1024;
@@ -281,14 +281,11 @@ std::vector<int> color_for_forward_pass(striped_Matrix <double> A){
     CHECK_CUDA(cudaMemcpy(colors.data(), colors_d, num_rows * sizeof(int), cudaMemcpyDeviceToHost));
 
     CHECK_CUDA(cudaFree(colors_d));
-    CHECK_CUDA(cudaFree(j_min_i_d));
-    CHECK_CUDA(cudaFree(A_d));
-
     return colors;
 
 }
 
-std::vector <int> color_for_backward_pass(striped_Matrix <double> A){
+std::vector <int> color_for_backward_pass(striped_Matrix <double>& A){
 
     int num_rows = A.get_num_rows();
     int num_stripes = A.get_num_stripes();

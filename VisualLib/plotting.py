@@ -13,18 +13,18 @@ methods_to_plot = [
     # "SPMV",
     # "Restriction",
     # "Prolongation",
-    "Dot",
-    # "WAXPBY",
+    # "Dot",
+    "WAXPBY",
 ]
 
 sizes_to_plot =[
     ("8x8x8"),
     ("16x16x16"),
-    # ("24x24x24"),
+    ("24x24x24"),
     ("32x32x32"),
     ("64x64x64"),
-    # ("128x64x64"),
-    # ("128x128x64"),
+    ("128x64x64"),
+    ("128x128x64"),
     ("128x128x128"),
     # ("256x128x128"),
     # ("256x256x128"),
@@ -56,7 +56,7 @@ versions_to_plot = [
     # "CuPy (converging) (gmres)",
     
     # "NaiveStriped CuPy",
-    "CSR-Implementation",
+    # "CSR-Implementation",
     # "AMGX (converging) (non deterministic)",
     # "AMGX",
     # "AMGX non-deterministic",
@@ -76,8 +76,24 @@ versions_to_plot = [
     # "Striped explicit Shared Memory (rows_per_SM pow2 1024 threads)",
     # "Striped explicit Shared Memory (rows_per_SM pow2 1024 threads 2x physical cores)",
     "Striped Warp Reduction",
-    "Striped Warp Reduction (thrust reduction)",
-    "Striped Warp Reduction (kernel reduction)",
+    # "Striped Warp Reduction (thrust reduction)",
+    # "Striped Warp Reduction (kernel reduction)",
+    # "Striped Warp Reduction (kernel reduction - cooperation number = 1)",
+    # "Striped Warp Reduction (kernel reduction - cooperation number = 2)",
+    # "Striped Warp Reduction (kernel reduction - cooperation number = 4)",
+    # "Striped Warp Reduction (kernel reduction - cooperation number = 8)",
+    # "Striped Warp Reduction (kernel reduction - cooperation number = 16)",
+    # "Striped Warp Reduction (1x physical cores occupied)",
+    # "Striped Warp Reduction (2x physical cores occupied)",
+    # "Striped Warp Reduction (3x physical cores occupied)",
+    # "Striped Warp Reduction (4x physical cores occupied)",
+    # "Striped Warp Reduction (256 threads)",
+
+    # "Striped Warp Reduction (8x physical cores occupied)",
+
+
+    # "Striped Warp Reduction (kernel reduction - cooperation number = 32)",
+    # "Striped Warp Reduction (kernel reduction - cooperation number = 64)",
     # "Striped Warp Reduction (pre-compute diag_offset)",
     # "Striped Warp Reduction (cooperation number = 16)",
     # "Striped Warp Reduction (loop body in method)",
@@ -119,12 +135,13 @@ versions_to_plot = [
 
 ]
 plot_percentage_baseline = False
-plot_speedup_vs_baseline = False
+plot_speedup_vs_baseline = True
 
 baseline_implementations = [
     # "CSR-Implementation",
+    "BaseTorch",
     # "BaseCuPy",
-    "AMGX",
+    # "AMGX",
     # "AMGX (converging) (non deterministic)",
     ]
 
@@ -537,7 +554,7 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
 
     nc = get_num_columns(hue_order=hue_order)
     # print(nc, flush=True)
-    nc = 5
+    nc = 2
     box_offset = get_legend_horizontal_offset(num_cols=nc, hue_order=hue_order)
 
     if update_legend_labels:

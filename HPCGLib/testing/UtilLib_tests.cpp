@@ -178,9 +178,9 @@ bool test_rr_norm(
 bool run_all_util_tests(int nx, int ny, int nz){
 
     // make CSR matrix
-    std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
-    sparse_CSR_Matrix<double> A = problem.first;
-    std::vector<double> y = problem.second;
+    sparse_CSR_Matrix<double> A;
+    A.generateMatrix_onGPU(nx, ny, nz);
+    std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
 
     // make striped matrix
     striped_Matrix<double> striped_A;

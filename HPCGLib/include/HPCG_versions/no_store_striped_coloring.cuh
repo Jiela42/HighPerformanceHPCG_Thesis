@@ -64,6 +64,14 @@ public:
     }
 
     void compute_WAXPBY(
+        sparse_CSR_Matrix<T> & A,
+        T * x_d, T * y_d, T * w_d, // the vectors x, y and w are already on the device
+        T alpha, T beta
+        ) override {
+        std::cerr << "Warning: compute_WAXPBY is not implemented in Striped coloring." << std::endl;
+    }
+    void compute_WAXPBY(
+        striped_Matrix<T> & A,
         T * x_d, T * y_d, T * w_d, // the vectors x, y and w are already on the device
         T alpha, T beta
         ) override {

@@ -44,7 +44,7 @@ void run_striped_coloringPrecomputed_3d27p_benchmarks(int nx, int ny, int nz, st
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
 
     // run the benchmarks (without the copying back and forth)
-    bench_Implementation(implementation, *timer, striped_A, a_d, b_d, x_d, y_d, result_d);
+    bench_Implementation(implementation, *timer, striped_A, a_d, b_d, x_d, y_d, result_d, 1.0, 1.0);
 
     // free the memory
     cudaFree(a_d);
