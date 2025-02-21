@@ -29,6 +29,10 @@ public:
 
 
     void generateMatrix_onGPU(int nx, int ny, int nz);
+    void generateMatrix_onCPU(int nx, int ny, int nz);
+
+    void generate_f2c_operator_onGPU();
+    void generate_f2c_operator_onCPU();
 
     void sparse_CSR_Matrix_from_striped(striped_Matrix<T> &A);
 
@@ -57,6 +61,13 @@ public:
     int get_ny() const;
     int get_nz() const;
     int get_nnz() const;
+    int get_num_MG_pre_smooth_steps() const;
+    int get_num_MG_post_smooth_steps() const;
+    sparse_CSR_Matrix<T>* get_coarse_Matrix();
+    int * get_f2c_op_d();
+    std::vector<int> get_f2c_op();
+    void initialize_coarse_Matrix();
+
     MatrixType get_matrix_type() const;
 
     T get_element(int i, int j) const;
@@ -79,6 +90,13 @@ private:
     int * col_idx_d;
     T * values_d;
     MatrixType matrix_type;
+
+    int num_MG_pre_smooth_steps;
+    int num_MG_post_smooth_steps;
+    sparse_CSR_Matrix<T> * coarse_Matrix;
+    int * f2c_op_d;
+    std::vector<int> f2c_op;
+
     void sparse_CSR_Matrix_from_striped_transformation(striped_Matrix<T>&);
     void sparse_CSR_Matrix_from_striped_transformation_CPU(striped_Matrix<T>&);
     void sparse_CSR_Matrix_from_striped_transformation_GPU(striped_Matrix<T>&);

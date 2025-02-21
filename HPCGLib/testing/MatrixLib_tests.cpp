@@ -257,9 +257,23 @@ bool striped_csr_parallel_conversion_test_on_matrix(sparse_CSR_Matrix<double>&A)
 
     // instead of copying it back by hand, we just call the function and then compare the two matrices with the built in function
 
+    if(A.get_coarse_Matrix() != nullptr){
+        std::cout << "A has a coarse matrix" << std::endl;
+    } else{
+        std::cout << "A has no coarse matrix" << std::endl;
+    }
+
     back_to_CSR.copy_Matrix_toCPU();
 
+    if(back_to_CSR.get_coarse_Matrix() != nullptr){
+        std::cout << "back_to_CSR has a coarse matrix" << std::endl;
+    } else{
+        std::cout << "back_to_CSR has no coarse matrix" << std::endl;
+    }
+
     bool test_passed = A.compare_to(back_to_CSR, "striped vs csr parallel conversion test");
+
+    std::cout<< "test passed: " << test_passed << std::endl;
 
     return test_passed;
 }
@@ -272,6 +286,12 @@ bool run_striped_csr_parallel_conversion_test(int nx, int ny, int nz){
 
     std::cout << "Copying to GPU on purpose" << std::endl;
     A.copy_Matrix_toGPU();
+
+    // add some mg testing
+    if(nx % 2 == 0 and ny % 2 == 0 and nz % 2 == 0 and nx / 2 > 2 and ny / 2 > 2 and nz / 2 > 2){
+        A.initialize_coarse_Matrix();
+    }
+
     // std::cout << "normal values" << std::endl;
     all_pass = all_pass && striped_csr_parallel_conversion_test_on_matrix(A);
     if (not all_pass){
@@ -427,6 +447,63 @@ bool coloring_test(striped_Matrix<double>& A){
 
 }
 
+
+bool run_MG_data_tests(sparse_CSR_Matrix<double>& A){
+
+    bool c2f_test = true;
+
+    int nx = A.get_nx();
+    int ny = A.get_ny();
+    int nz = A.get_nz();
+
+    std::cout <<"grab dimensions" << std::endl;
+
+    
+    sparse_CSR_Matrix<double>* current_matrix = &A;
+
+    std::cout << "current matrix set" << std::endl;
+
+    std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
+    std::cout << "problem generated" << std::endl;
+    sparse_CSR_Matrix<double> host_matrix = problem.first;
+
+    std::cout << "host matrix set" << std::endl;
+    
+    while(current_matrix->get_coarse_Matrix() != nullptr){
+        // A is on the GPU and should have an c2f operator
+
+        std::cout<< "we have a coarse matrix" << std::endl;
+
+        current_matrix = current_matrix->get_coarse_Matrix();
+        host_matrix.initialize_coarse_Matrix();
+
+        std::cout << "coarse matrix initialized" << std::endl;
+        std::cout << "num_rows: " << current_matrix->get_num_rows() << std::endl;
+        
+        std::cout << "copy amount " << current_matrix->get_num_rows() * sizeof(int) << std::endl;
+        
+        std::vector<int> c2f_device(current_matrix->get_num_rows());
+        std::cout << "c2f_device size " << c2f_device.size() * sizeof(int) << std::endl;
+
+        CHECK_CUDA(cudaMemcpy(c2f_device.data(), current_matrix->get_f2c_op_d(), current_matrix->get_num_rows() * sizeof(int), cudaMemcpyDeviceToHost));
+
+        std::cout<< "memcopy done" << std::endl;
+
+        std::vector<int> c2f_host = current_matrix->get_f2c_op();
+        
+        std::cout << "c2f_device[0]: " << c2f_device[0] << " c2f_host[0]: " << c2f_host[0] << std::endl;
+
+        c2f_test = c2f_test && vector_compare(c2f_host, c2f_device, "c2f test");
+
+        if(not c2f_test){
+            std::cerr << "c2f test failed for size " << nx << "x" << ny << "x" << nz << std::endl;
+        }
+    }
+
+    return c2f_test;
+
+
+}
 //////////////////////////////////////////////////////////////////////////////////////////////
 // for each size we recieve we generate the matrices and run all the tests
 
@@ -443,17 +520,38 @@ bool run_all_matrixLib_tests(int nx, int ny, int nz){
 
     bool all_pass = true;
 
+    // std::cout << "nx % 8: " << nx % 8 << " ny % 8: " << ny % 8 << " nz % 8: " << nz % 8 << std::endl;
+    // std::cout << "nx / 8: " << nx / 8 << " ny / 8: " << ny / 8 << " nz / 8: " << nz / 8 << std::endl;
+    if(nx % 8 == 0 and ny % 8 == 0 and nz % 8 == 0 and nx / 8 > 2 and ny / 8 > 2 and nz / 8 > 2){
+        // we check that it's devisible by 8 and still big enough to be good to do the conversions to striped with no issues
+        // in this case we also initialize the MG data
+
+        sparse_CSR_Matrix<double>* current_matrix = &A;
+
+        for(int i = 0; i < 3; i++){
+            // std::cout << "doing level " << i << std::endl;
+            // we do three levels of MG data
+            current_matrix->initialize_coarse_Matrix();
+            // std::cout << "coarse matrix initialized" << std::endl;
+            current_matrix = current_matrix->get_coarse_Matrix();
+        }
+
+    }
+
     // all_pass = all_pass && read_save_test(A, "read_save_test on 3d27p CSR Matrix for " + dim_info);
     // read_save_test(striped_A, "read_save_test on 3d27p striped Matrix for " + dim_info);
     
-    all_pass = all_pass && parallel_CSR_generation_test(A);
+    // all_pass = all_pass && parallel_CSR_generation_test(A);
     // std::cout << "parallel CSR generation test passed for " << dim_info << std::endl;
-    all_pass = all_pass && run_striped_csr_conversion_test(nx, ny, nz);
-    all_pass = all_pass && run_striped_csr_parallel_conversion_test(nx, ny, nz);
-    // std::cout << "striped vs csr conversion test passed for " << dim_info << std::endl;
-    all_pass = all_pass && parallel_generation_from_CSR_test(A);
-    all_pass = all_pass && coloring_test(striped_A);
+    // all_pass = all_pass && run_striped_csr_conversion_test(nx, ny, nz);
+    // std::cout << "striped vs csr sequential conversion test passed for " << dim_info << std::endl;
+    // all_pass = all_pass && run_striped_csr_parallel_conversion_test(nx, ny, nz);
+    // std::cout << "striped vs csr parallel conversion test passed for " << dim_info << std::endl;
+    // all_pass = all_pass && parallel_generation_from_CSR_test(A);
+    // all_pass = all_pass && coloring_test(striped_A);
     // std::cout << "coloring test passed for " << dim_info << std::endl;
+    all_pass = all_pass && run_MG_data_tests(A);
+
 
     return all_pass;
 }

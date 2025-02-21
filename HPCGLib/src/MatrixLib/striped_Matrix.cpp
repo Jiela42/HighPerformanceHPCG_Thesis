@@ -20,12 +20,19 @@ striped_Matrix<T>::striped_Matrix() {
     this->num_rows = 0;
     this->num_cols = 0;
     this->num_stripes = 0;
+
+
     this->j_min_i.clear();
     this->values.clear();
     this->j_min_i_d = nullptr;
     this->values_d = nullptr;
+
     this->color_pointer_d = nullptr;
     this->color_sorted_rows_d = nullptr;
+
+    this->num_MG_pre_smooth_steps = 1;
+    this->num_MG_post_smooth_steps = 1;
+    this->coarse_Matrix = nullptr;
 }
 
 template <typename T>
@@ -83,8 +90,10 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T>& A){
     this->num_stripes = 27;
     this->j_min_i = std::vector<int>(this->num_stripes, 0);
     this->values = std::vector<T>(this->num_stripes * this->num_rows, 0);
+
     this->j_min_i_d = nullptr;
     this->values_d = nullptr;
+
     this->color_pointer_d = nullptr;
     this->color_sorted_rows_d = nullptr;
 
@@ -133,6 +142,10 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T>& A){
         }
     }
     assert(elem_ctr == this->nnz);
+    if(A.get_coarse_Matrix() != nullptr){
+        this->coarse_Matrix = new striped_Matrix<T>();
+        this->coarse_Matrix->striped_Matrix_from_sparse_CSR(*(A.get_coarse_Matrix()));
+    }
 }
 
 template <typename T>
@@ -215,6 +228,12 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T>
     // std::cout << "counted_nnz: " << counted_nnz << std::endl;
 
     assert(counted_nnz == this->nnz);
+
+    // if the CSR matrix has a coarse matrix, we also need to generate the coarse matrix for the striped matrix
+    if(A.get_coarse_Matrix() != nullptr){
+        this->coarse_Matrix = new striped_Matrix<T>();
+        this->coarse_Matrix->striped_Matrix_from_sparse_CSR(*(A.get_coarse_Matrix()));
+    }
 }
 
 template <typename T>
@@ -260,6 +279,11 @@ void striped_Matrix<T>::remove_Matrix_from_GPU(){
         CHECK_CUDA(cudaFree(this->values_d));
         this->values_d = nullptr;
     }
+}
+
+template <typename T>
+striped_Matrix<T>* striped_Matrix<T>::get_coarse_Matrix(){
+    return this->coarse_Matrix;
 }
 
 template <typename T>

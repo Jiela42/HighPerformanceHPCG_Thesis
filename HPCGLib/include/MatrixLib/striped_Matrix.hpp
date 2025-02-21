@@ -42,6 +42,7 @@ class striped_Matrix {
         int get_nnz() const;
         int get_diag_index() const;
         MatrixType get_matrix_type() const;
+        striped_Matrix<T> *get_coarse_Matrix();
         T get_element(int i, int j) const;
         std::vector <int>& get_j_min_i();
         std::vector <T>& get_values();
@@ -72,6 +73,10 @@ class striped_Matrix {
         T *values_d;
         int* color_pointer_d;
         int* color_sorted_rows_d;
+
+        int num_MG_pre_smooth_steps;
+        int num_MG_post_smooth_steps;
+        striped_Matrix<T> *coarse_Matrix;
 };
 
 #endif // STRIPED_MATRIX_HPP

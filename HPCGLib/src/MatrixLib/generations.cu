@@ -226,6 +226,31 @@ __global__ void generate_striped_from_CSR_kernel(
     }
 }
 
+__global__ void generate_f2c_operator_kernel(
+    int nxf, int nyf, int nzf,
+    int nxc, int nyc, int nzc,
+    int * f2c_op
+){
+
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+
+    int num_fine_rows = nxf * nyf * nzf;
+    int num_coarse_rows = nxc * nyc * nzc;
+
+    for(int coarse_idx = tid; coarse_idx < num_coarse_rows; coarse_idx += blockDim.x * gridDim.x){
+        int izc = coarse_idx / (nxc * nyc);
+        int iyc = (coarse_idx % (nxc * nyc)) / nxc;
+        int ixc = coarse_idx % nxc;
+
+        int izf = izc * 2;
+        int iyf = iyc * 2;
+        int ixf = ixc * 2;
+
+        int fine_idx = ixf + nxf * iyf + nxf * nyf * izf;
+        f2c_op[coarse_idx] = fine_idx;
+    }
+}
+
 void generateHPCGProblem(
     int nx, int ny, int nz,
     int * row_ptr, int * col_idx, double * values,
@@ -340,7 +365,20 @@ int generate_CSR_from_Striped(
 }
 
 
+void generate_f2c_operator(
+    int nxc, int nyc, int nzc,
+    int nxf, int nyf, int nzf,
+    int * f2c_op
+){
 
+    int num_coarse_rows = nxc * nyc * nzc;
+
+    int num_threads = 1024;
+    int num_blocks = num_threads/num_coarse_rows;
+
+    generate_f2c_operator_kernel<<<num_blocks, num_threads>>>(nxf, nyf, nzf, nxc, nyc, nzc, f2c_op);
+    CHECK_CUDA(cudaDeviceSynchronize());
+}
 
 
 

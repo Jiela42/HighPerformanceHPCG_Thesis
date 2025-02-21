@@ -25,4 +25,10 @@ int generate_CSR_from_Striped(
     int * row_ptr, int * col_idx, double * values
 );
 
+void generate_f2c_operator(
+    int nxf, int nyf, int nzf,
+    int nxc, int nyc, int nzc,
+    int * f2c_operator
+);
+
 #endif // GENERATIONS_CUH

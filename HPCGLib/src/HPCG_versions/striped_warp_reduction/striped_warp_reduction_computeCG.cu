@@ -1,6 +1,5 @@
 #include "HPCG_versions/striped_warp_reduction.cuh"
 #include "UtilLib/cuda_utils.hpp"
-#include "UtilLib/utils.cuh"
 
 
 template <typename T>

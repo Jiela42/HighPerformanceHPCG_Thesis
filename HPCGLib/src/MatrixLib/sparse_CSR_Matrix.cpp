@@ -28,6 +28,12 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix() {
     this->row_ptr_d = nullptr;
     this->col_idx_d = nullptr;
     this->values_d = nullptr;
+
+    this->num_MG_pre_smooth_steps = 1;
+    this->num_MG_post_smooth_steps = 1;
+    this->f2c_op.clear();
+    this->f2c_op_d = nullptr;
+    this->coarse_Matrix = nullptr;
 }
 
 template <typename T>
@@ -46,6 +52,10 @@ sparse_CSR_Matrix<T>::~sparse_CSR_Matrix(){
     if (this->values_d != nullptr) {
         CHECK_CUDA(cudaFree(this->values_d));
         this->values_d = nullptr;
+    }
+    if(this->f2c_op_d != nullptr){
+        CHECK_CUDA(cudaFree(this->f2c_op_d));
+        this->f2c_op_d = nullptr;
     }
 }
 
@@ -69,6 +79,12 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, MatrixT
     this->col_idx_d = nullptr;
     this->values_d = nullptr;
 
+    this->num_MG_pre_smooth_steps = 1;
+    this->num_MG_post_smooth_steps = 1;
+    this->coarse_Matrix = nullptr;
+    this->f2c_op_d = nullptr;
+    this->f2c_op.clear();
+
 }
 
 template <typename T>
@@ -90,6 +106,11 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, MatrixT
     this->row_ptr_d = nullptr;
     this->col_idx_d = nullptr;
     this->values_d = nullptr;
+
+    this->num_MG_pre_smooth_steps = 1;
+    this->num_MG_post_smooth_steps = 1;
+    this->coarse_Matrix = nullptr;
+    this->f2c_op_d = nullptr;
 }
 
 template <typename T>
@@ -136,6 +157,93 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(std::vector<std::vector<T>> dense_matrix
     this->row_ptr_d = nullptr;
     this->col_idx_d = nullptr;
     this->values_d = nullptr;
+
+    this->num_MG_pre_smooth_steps = 1;
+    this->num_MG_post_smooth_steps = 1;
+    this->coarse_Matrix = nullptr;
+    this->f2c_op_d = nullptr;
+
+}
+
+template <typename T>
+void sparse_CSR_Matrix<T>::generateMatrix_onCPU(int nx, int ny, int nz){
+    // currently this only supports 27pt 3D stencils
+    this->matrix_type = MatrixType::Stencil_3D27P;
+    this->nx = nx;
+    this->ny = ny;
+    this->nz = nz;
+    this->num_rows = nx * ny * nz;
+    this->num_cols = nx * ny * nz;
+
+    int num_rows = nx * ny * nz;
+    int num_cols = nx * ny * nz;
+
+    int nnz = 0;
+
+    std::vector<int> nnz_per_row(num_rows);
+
+    std::vector<std::vector<int>> col_idx_per_row(num_rows);
+    std::vector<std::vector<double>> values_per_row(num_rows);
+
+    for(int ix = 0; ix < nx; ix++){
+        for(int iy = 0; iy < ny; iy++){
+            for(int iz = 0; iz < nz; iz++){
+
+                int i = ix + nx * iy + nx * ny * iz;
+                int nnz_i = 0;
+
+                for (int sz = -1; sz < 2; sz++){
+                    if(iz + sz > -1 && iz + sz < nz){
+                        for(int sy = -1; sy < 2; sy++){
+                            if(iy + sy > -1 && iy + sy < ny){
+                                for(int sx = -1; sx < 2; sx++){
+                                    if(ix + sx > -1 && ix + sx < nx){
+                                        int j = ix + sx + nx * (iy + sy) + nx * ny * (iz + sz);
+                                        if(i == j){
+                                            col_idx_per_row[i].push_back(j);
+                                            values_per_row[i].push_back(26.0);
+                                        } else {
+                                            col_idx_per_row[i].push_back(j);
+                                            values_per_row[i].push_back(-1.0);
+                                        }
+                                            nnz_i++;
+                                            nnz++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                nnz_per_row[i] = nnz_i;
+            }
+        }
+    }
+
+    this->row_ptr = std::vector<int>(num_rows + 1, 0);
+    this->col_idx = std::vector<int>(nnz, 0);
+    this->values = std::vector<T>(nnz, 0);
+
+    for (int i = 0; i < num_rows; i++){
+        this->row_ptr[i + 1] = this->row_ptr[i] + nnz_per_row[i];
+
+        for (int j = 0; j < nnz_per_row[i]; j++){
+            this->col_idx.push_back(col_idx_per_row[i][j]);
+            this->values.push_back(values_per_row[i][j]);
+        }
+    }
+
+    this->nnz = nnz;
+
+    this->row_ptr_d = nullptr;
+    this->col_idx_d = nullptr;
+    this->values_d = nullptr;
+
+    this->num_MG_pre_smooth_steps = 1;
+    this->num_MG_post_smooth_steps = 1;
+    this->coarse_Matrix = nullptr;
+    this->f2c_op_d = nullptr;
+    this->f2c_op.clear();
+
 }
 
 template<typename T>
@@ -255,7 +363,12 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation_CPU(str
     // std::cout << "elem_count: " << elem_count << std::endl;
     // std::cout << "nnz: " << this->nnz << std::endl;
     assert(elem_count == this->nnz);
+    if(A.get_coarse_Matrix() != nullptr){
+        this->coarse_Matrix = new sparse_CSR_Matrix<T>();
+        this->coarse_Matrix->sparse_CSR_Matrix_from_striped(*(A.get_coarse_Matrix()));
+    }
 }
+
 template <typename T>
 void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation_GPU(striped_Matrix<T> & A){
 
@@ -277,6 +390,11 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation_GPU(str
     
     assert(new_nnz == this->nnz);
     assert(new_nnz == A.get_nnz());
+
+    if(A.get_coarse_Matrix() != nullptr){
+        this->coarse_Matrix = new sparse_CSR_Matrix<T>();
+        this->coarse_Matrix->sparse_CSR_Matrix_from_striped(*(A.get_coarse_Matrix()));
+    }
 
 }
 
@@ -396,11 +514,18 @@ void sparse_CSR_Matrix<T>::copy_Matrix_toGPU(){
     CHECK_CUDA(cudaMalloc(&this->row_ptr_d, (this->num_rows + 1) * sizeof(int)));
     CHECK_CUDA(cudaMalloc(&this->col_idx_d, this->nnz * sizeof(int)));
     CHECK_CUDA(cudaMalloc(&this->values_d, this->nnz * sizeof(T)));
+    CHECK_CUDA(cudaMalloc(&this->f2c_op_d, this->num_rows * sizeof(int)));
 
     // copy the data to the GPU
     CHECK_CUDA(cudaMemcpy(this->row_ptr_d, this->row_ptr.data(), (this->num_rows + 1) * sizeof(int), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(this->col_idx_d, this->col_idx.data(), this->nnz * sizeof(int), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(this->values_d, this->values.data(), this->nnz * sizeof(T), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(this->f2c_op_d, this->f2c_op.data(), this->num_rows * sizeof(int), cudaMemcpyHostToDevice));
+
+    // we also need to copy the coarse matrix if it exists
+    if(this->coarse_Matrix != nullptr){
+        this->coarse_Matrix->copy_Matrix_toGPU();
+    }
 }
 
 template <typename T>
@@ -410,15 +535,25 @@ void sparse_CSR_Matrix<T>::copy_Matrix_toCPU(){
     assert(this->row_ptr_d != nullptr);
     assert(this->col_idx_d != nullptr);
     assert(this->values_d != nullptr);
+    assert(this->f2c_op_d != nullptr);
 
     // Resize the vectors to the appropriate size
     this->row_ptr.resize(this->num_rows + 1);
     this->col_idx.resize(this->nnz);
     this->values.resize(this->nnz);
+    this->f2c_op.resize(this->num_rows);
+
     // copy the data to the CPU
     CHECK_CUDA(cudaMemcpy(this->row_ptr.data(), this->row_ptr_d, (this->num_rows + 1) * sizeof(int), cudaMemcpyDeviceToHost));
     CHECK_CUDA(cudaMemcpy(this->col_idx.data(), this->col_idx_d, this->nnz * sizeof(int), cudaMemcpyDeviceToHost));
     CHECK_CUDA(cudaMemcpy(this->values.data(), this->values_d, this->nnz * sizeof(T), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(this->f2c_op.data(), this->f2c_op_d, this->num_rows * sizeof(int), cudaMemcpyDeviceToHost));
+
+    // we also need to copy the coarse matrix if it exists
+    if(this->coarse_Matrix != nullptr){
+        // std::cout << "copying coarse matrix to CPU" << std::endl;
+        this->coarse_Matrix->copy_Matrix_toCPU();
+    }
 }
 
 // these functions should not be called lightly by a user.
@@ -442,6 +577,90 @@ void sparse_CSR_Matrix<T>::remove_Matrix_from_GPU(){
     if (this->values_d != nullptr) {
         CHECK_CUDA(cudaFree(this->values_d));
         this->values_d = nullptr;
+    }
+    if(this->f2c_op_d != nullptr){
+        CHECK_CUDA(cudaFree(this->f2c_op_d));
+        this->f2c_op_d = nullptr;
+    }
+}
+
+
+template <typename T>
+void sparse_CSR_Matrix<T>::generate_f2c_operator_onGPU(){
+
+    // allocate space for the device pointers
+    CHECK_CUDA(cudaMalloc(&this->f2c_op_d, this->num_rows * sizeof(int)));
+
+    // set them to zero
+    CHECK_CUDA(cudaMemset(this->f2c_op_d, 0, this->num_rows * sizeof(int)));
+
+    generate_f2c_operator(
+        this->nx, this->ny, this->nz,
+        (this->nx * 2), (this->ny * 2), (this->nz * 2),
+        this->f2c_op_d);
+}
+
+template <typename T>
+void sparse_CSR_Matrix<T>::generate_f2c_operator_onCPU(){
+    
+    int nxf = this->nx * 2;
+    int nyf = this->ny * 2;
+    int nzf = this->nz * 2;
+    
+    int nxc = this->nx;
+    int nyc = this->ny;
+    int nzc = this->nz;
+
+    this->f2c_op = std::vector<int>(nxf*nyf*nzf, 0);
+
+    for (int izc=0; izc<nzc; ++izc) {
+        int izf = 2*izc;
+        for (int iyc=0; iyc<nyc; ++iyc) {
+            int iyf = 2*iyc;
+            for (int ixc=0; ixc<nxc; ++ixc) {
+                int ixf = 2*ixc;
+                int currentCoarseRow = izc*nxc*nyc+iyc*nxc+ixc;
+                int currentFineRow = izf*nxf*nyf+iyf*nxf+ixf;
+                this->f2c_op[currentCoarseRow] = currentFineRow;
+            } // end iy loop
+        } // end even iz if statement
+    } // end iz loop
+
+}
+
+template <typename T>
+void sparse_CSR_Matrix<T>::initialize_coarse_Matrix(){
+    assert(this->nx % 2 == 0);
+    assert(this->ny % 2 == 0);
+    assert(this->nz % 2 == 0);
+    assert(this->coarse_Matrix == nullptr);
+    // currently we only support 3D 27pt stencils
+    assert(this->matrix_type == MatrixType::Stencil_3D27P);
+
+    int nx_c = this->nx / 2;
+    int ny_c = this->ny / 2;
+    int nz_c = this->nz / 2;
+
+    // std::cout << "Initializing coarse matrix with nx: " << nx_c << " ny: " << ny_c << " nz: " << nz_c << std::endl;
+
+    this->coarse_Matrix = new sparse_CSR_Matrix<T>();
+
+    if(this->row_ptr_d != nullptr and this->col_idx_d != nullptr and this->values_d != nullptr){
+        // in case the matrix is on the GPU, we generate the new one on the GPU as well
+        // std::cout << "generating coarse matrix on the GPU" << std::endl;
+        this->coarse_Matrix->generateMatrix_onGPU(nx_c, ny_c, nz_c);
+        this->coarse_Matrix->generate_f2c_operator_onGPU();
+    }
+    if(not this->row_ptr.empty() and not this->col_idx.empty() and not this->values.empty()){
+        // in case the matrix is on the CPU, we generate the new one on the CPU as well
+        // if we already have the data on the GPU, we just copy it to the CPU
+        if(this->coarse_Matrix->get_row_ptr_d() != nullptr or this->coarse_Matrix->get_col_idx_d() != nullptr or this->coarse_Matrix->get_values_d() != nullptr){
+            this->coarse_Matrix->copy_Matrix_toCPU();
+        } else{
+            // std::cout << "generating coarse matrix on the CPU" << std::endl;
+            this->coarse_Matrix->generateMatrix_onCPU(nx_c, ny_c, nz_c);
+            this->coarse_Matrix->generate_f2c_operator_onCPU();
+        }      
     }
 }
 
@@ -481,6 +700,31 @@ int sparse_CSR_Matrix<T>::get_nnz() const{
 }
 
 template <typename T>
+int sparse_CSR_Matrix<T>::get_num_MG_pre_smooth_steps() const{
+    return this->num_MG_pre_smooth_steps;
+}
+
+template <typename T>
+int sparse_CSR_Matrix<T>::get_num_MG_post_smooth_steps() const{
+    return this->num_MG_post_smooth_steps;
+}
+
+template <typename T>
+sparse_CSR_Matrix<T>* sparse_CSR_Matrix<T>::get_coarse_Matrix(){
+    return this->coarse_Matrix;
+}
+
+template <typename T>
+int* sparse_CSR_Matrix<T>::get_f2c_op_d(){
+    return this->f2c_op_d;
+}
+
+template <typename T>
+std::vector<int> sparse_CSR_Matrix<T>::get_f2c_op(){
+    return this->f2c_op;
+}
+
+template <typename T>
 T sparse_CSR_Matrix<T>::get_element(int row, int col) const{
     // this currently only works if the matrix is on the CPU
     this->sanity_check_Matrix_on_CPU();
@@ -498,7 +742,6 @@ T sparse_CSR_Matrix<T>::get_element(int row, int col) const{
     }
     return T();
 }
-
 
 template <typename T>
 void sparse_CSR_Matrix<T>::print() const{
@@ -531,11 +774,15 @@ bool sparse_CSR_Matrix<T>::compare_to(sparse_CSR_Matrix<T>& other, std::string i
     
     // since we only compare on the CPU, we need to make sure that both matrices are on the CPU
     if(this->row_ptr_d != nullptr or this->col_idx_d != nullptr or this->values_d != nullptr){
+        // std::cout << "Copying this matrix to CPU" << std::endl;
         this->copy_Matrix_toCPU();
+        // std::cout << "Finished copying this matrix to CPU" << std::endl;
     }
 
     if(other.get_row_ptr_d() != nullptr or other.get_col_idx_d() != nullptr or other.get_values_d() != nullptr){
+        // std::cout << "Copying other matrix to CPU" << std::endl;
         other.copy_Matrix_toCPU();
+        // std::cout << "Finished copying other matrix to CPU" << std::endl;
     }
 
     bool same = true;
@@ -548,29 +795,48 @@ bool sparse_CSR_Matrix<T>::compare_to(sparse_CSR_Matrix<T>& other, std::string i
         printf("Matrices have different number of cols: this has %d the other %d for %s\n", this->num_cols, other.get_num_cols(), info.c_str());
         same = false;
     }
-    
-    return same;
 
-    for (int i = 0; i < this->num_rows; i++) {
-        int start = this->row_ptr[i];
-        int end = this->row_ptr[i + 1];
-        int other_start = other.get_row_ptr()[i];
-        int other_end = other.get_row_ptr()[i + 1];
-        if (end - start != other_end - other_start) {
-            printf("Row %d has different number of non-zero elements for %s\n", i, info.c_str());
-            // printf("This has %d, other has %d\n", end - start, other_end - other_start);
-            same = false;
-        }
-        for (int j = start; j < end; j++) {
-            if (this->col_idx[j] != other.get_col_idx()[j] || this->values[j] != other.get_values()[j]) {
-                printf("Element at row %d, col %d is different for %s\n", i, this->col_idx[j], info.c_str());
+    std::cout << "only compared meta data" << std::endl;
+    
+    if (same && this->development) {
+        std::cout << "Comparing row by row" << std::endl;
+        for (int i = 0; i < this->num_rows; i++) {
+            int start = this->row_ptr[i];
+            int end = this->row_ptr[i + 1];
+            int other_start = other.get_row_ptr()[i];
+            int other_end = other.get_row_ptr()[i + 1];
+            std::cout << "compared row " << i << std::endl;
+            if (end - start != other_end - other_start) {
+                printf("Row %d has different number of non-zero elements for %s\n", i, info.c_str());
+                // printf("This has %d, other has %d\n", end - start, other_end - other_start);
                 same = false;
             }
+            for (int j = start; j < end; j++) {
+                if (this->col_idx[j] != other.get_col_idx()[j] || this->values[j] != other.get_values()[j]) {
+                    printf("Element at row %d, col %d is different for %s\n", i, this->col_idx[j], info.c_str());
+                    same = false;
+                }
+            }
         }
-    }
-    if (same && this->development) {
+
         printf("Matrices are the same for %s\n", info.c_str());
     }
+
+    if(this->coarse_Matrix != nullptr and other.get_coarse_Matrix() != nullptr){
+        std::cout << "Comparing coarse matrices" << std::endl;
+        same = same and this->coarse_Matrix->compare_to(*other.get_coarse_Matrix(), info);
+    }
+    else if(this->coarse_Matrix != nullptr or other.get_coarse_Matrix() != nullptr){
+        printf("One matrix has a coarse matrix and the other does not for %s\n", info.c_str());
+        same = false;
+    }
+
+    // if(this->coarse_Matrix != nullptr){
+    //     std::cout << "Coarse matrix is not null" << std::endl;
+    // }
+
+    // std::cout << "Returning same" << std::endl;
+
     return same;
 }
 
