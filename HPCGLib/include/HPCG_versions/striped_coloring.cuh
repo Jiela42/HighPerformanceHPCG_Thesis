@@ -30,12 +30,16 @@ public:
         
     }
 
-    void compute_CG(sparse_CSR_Matrix<T>& A, std::vector<T>& b, std::vector<T>& x) override {
+    void compute_CG(
+        striped_Matrix<T> & A,
+        T * b_d, T * x_d,
+        int & n_iters, T& normr, T& normr0
+    ) override {
         std::cerr << "Warning: compute_CG is not implemented in Striped coloring." << std::endl;
     }
     
     void compute_MG(
-        sparse_CSR_Matrix<T> & A,
+        striped_Matrix<T> & A,
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) override {
         std::cerr << "Warning: compute_MG is not implemented in Striped coloring." << std::endl;

@@ -48,6 +48,8 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double>& A){
     CHECK_CUDA(cudaMemcpy(b_d, b.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
 
+    CHECK_CUDA(cudaMemset(x_d, 0, num_cols * sizeof(double)));
+
     // test the SPMV function
     all_pass = all_pass && test_SPMV(
         cuSparse, striped_warp_reduction,
@@ -73,6 +75,12 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double>& A){
         striped_warp_reduction,
         A_striped,
         a_d, b_d
+    );
+
+    all_pass = all_pass && test_CG(
+        striped_warp_reduction,
+        A_striped,
+        y_d, x_d
     );
         
     if(not all_pass){

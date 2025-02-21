@@ -35,6 +35,12 @@ bool read_save_test(striped_Matrix<double>& A, std::string info);
 
 
 // abstract test functions from HPCG_functions
+bool test_CG(
+    HPCG_functions<double>& uut,
+    striped_Matrix<double> & A,
+    double * x_d, double * y_d
+);
+
 bool test_SPMV(
     HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
     sparse_CSR_Matrix<double> & A,

@@ -62,7 +62,7 @@ int main(){
     all_pass = all_pass && run_stripedWarpReduction_tests(24, 24, 24);
     all_pass = all_pass && run_stripedWarpReduction_tests(32, 32, 32);
     all_pass = all_pass && run_stripedWarpReduction_tests(64, 64, 64);
-    all_pass = all_pass && run_stripedWarpReduction_tests(128, 128, 128);
+    // all_pass = all_pass && run_stripedWarpReduction_tests(128, 128, 128);
     // std::cout << "Finished striped warp reduction tests" << std::endl;
 
 

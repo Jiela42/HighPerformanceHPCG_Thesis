@@ -30,15 +30,20 @@ public:
         this->Dot_implemented = true;
         this->SymGS_implemented = true;
         this->WAXPBY_implemented = true;
+        this->CG_implemented = true;
         
     }
 
-    void compute_CG(sparse_CSR_Matrix<T>& A, std::vector<T>& b, std::vector<T>& x) override {
-        std::cerr << "Warning: compute_CG is not implemented in striped warp reduction." << std::endl;
+    void compute_CG(
+        striped_Matrix<T> & A,
+        T * b_d, T * x_d,
+        int & n_iters, T& normr, T& normr0
+    ) override {
+        striped_warp_reduction_computeCG(A, b_d, x_d, n_iters, normr, normr0);
     }
     
     void compute_MG(
-        sparse_CSR_Matrix<T> & A,
+        striped_Matrix<T> & A,
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) override {
         std::cerr << "Warning: compute_MG is not implemented in striped warp reduction." << std::endl;
@@ -107,6 +112,12 @@ public:
     }
 
 private:
+
+    void striped_warp_reduction_computeCG(
+        striped_Matrix<T> & A,
+        T * b_d, T * x_d,
+        int & n_iters, T& normr, T& normr0
+    );
 
     void striped_warp_reduction_computeSPMV(
         striped_Matrix<T>& A,

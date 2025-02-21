@@ -32,16 +32,19 @@ class HPCG_functions {
         bool WAXPBY_implemented = false;
         bool Dot_implemented = false;
 
-    void add_additional_parameters(std::string another_parameter) {
-        additional_parameters += "_" + another_parameter;
-    }
+        void add_additional_parameters(std::string another_parameter) {
+            additional_parameters += "_" + another_parameter;
+        }
 
     // CG starts with having the data on the CPU
-        virtual void compute_CG(sparse_CSR_Matrix<T> & A, std::vector<T> & b, std::vector<T> & x) = 0;
+        virtual void compute_CG(
+            striped_Matrix<T> & A,
+            T * b_d, T * x_d,
+            int & n_iters, T& normr, T& normr0) = 0;
         
     // MG, SymGS, SPMV, WAXPBY and Dot have the data on the GPU already
         virtual void compute_MG(
-            sparse_CSR_Matrix<T> & A,
+            striped_Matrix<T> & A,
             T * x_d, T * y_d // the vectors x and y are already on the device
             ) = 0;
 
@@ -124,11 +127,11 @@ class HPCG_functions {
             } else if (nx == 128 && ny == 128 && nz == 64) {
                 return 0.415239353783707;
             } else if (nx == 128 && ny == 128 && nz == 128) {
-               return 0.4761695919404465;
+                return 0.4761695919404465;
             } else if (nx == 256 && ny == 128 && nz == 128) {
-               return 0.5161210410022423;
+                return 0.5161210410022423;
             }else if (nx == 256 && ny == 256 && nz == 128) {
-               return 0.5649574838245627;
+                return 0.5649574838245627;
             } else {
                 std::cout << "The relative residual norm is not implemented for the size " << nx <<"x"<< ny << "x"<<nz << std::endl;
                 std::cout << "Please add the size run_get_Norm in the testing lib and run it to obtain the relative residual norm" << std::endl;
@@ -182,6 +185,11 @@ class HPCG_functions {
                 return -1.0;
             }
         }
+    protected:
+        bool doPreconditioning = false;
+        int max_CG_iterations = 50;
+        double CG_tolerance = 0.0;
+        
 };
 
 #endif // HPCGLIB_HPP
