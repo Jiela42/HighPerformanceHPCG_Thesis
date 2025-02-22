@@ -234,7 +234,7 @@ __global__ void generate_f2c_operator_kernel(
 
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-    int num_fine_rows = nxf * nyf * nzf;
+    // int num_fine_rows = nxf * nyf * nzf;
     int num_coarse_rows = nxc * nyc * nzc;
 
     for(int coarse_idx = tid; coarse_idx < num_coarse_rows; coarse_idx += blockDim.x * gridDim.x){
@@ -248,6 +248,10 @@ __global__ void generate_f2c_operator_kernel(
 
         int fine_idx = ixf + nxf * iyf + nxf * nyf * izf;
         f2c_op[coarse_idx] = fine_idx;
+
+        // if(coarse_idx < 5){
+        //     printf("coarse_idx: %d, fine_idx: %d\n", coarse_idx, fine_idx);
+        // }
     }
 }
 
@@ -374,7 +378,10 @@ void generate_f2c_operator(
     int num_coarse_rows = nxc * nyc * nzc;
 
     int num_threads = 1024;
-    int num_blocks = num_threads/num_coarse_rows;
+    int num_blocks = num_coarse_rows/num_threads;
+
+    // we need at least 1 block
+    num_blocks = num_blocks == 0 ? 1 : num_blocks;
 
     generate_f2c_operator_kernel<<<num_blocks, num_threads>>>(nxf, nyf, nzf, nxc, nyc, nzc, f2c_op);
     CHECK_CUDA(cudaDeviceSynchronize());

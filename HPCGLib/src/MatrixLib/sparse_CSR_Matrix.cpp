@@ -588,11 +588,13 @@ void sparse_CSR_Matrix<T>::remove_Matrix_from_GPU(){
 template <typename T>
 void sparse_CSR_Matrix<T>::generate_f2c_operator_onGPU(){
 
+    int fine_n_rows = this->nx *2 * this->ny * 2 * this->nz * 2;
+
     // allocate space for the device pointers
-    CHECK_CUDA(cudaMalloc(&this->f2c_op_d, this->num_rows * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&this->f2c_op_d, fine_n_rows * sizeof(int)));
 
     // set them to zero
-    CHECK_CUDA(cudaMemset(this->f2c_op_d, 0, this->num_rows * sizeof(int)));
+    CHECK_CUDA(cudaMemset(this->f2c_op_d, 0, fine_n_rows * sizeof(int)));
 
     generate_f2c_operator(
         this->nx, this->ny, this->nz,
@@ -626,6 +628,8 @@ void sparse_CSR_Matrix<T>::generate_f2c_operator_onCPU(){
         } // end even iz if statement
     } // end iz loop
 
+    // std::cout << "from generate_f2c on cpu f2c_op size: " << this->f2c_op.size() << std::endl;
+
 }
 
 template <typename T>
@@ -650,6 +654,7 @@ void sparse_CSR_Matrix<T>::initialize_coarse_Matrix(){
         // std::cout << "generating coarse matrix on the GPU" << std::endl;
         this->coarse_Matrix->generateMatrix_onGPU(nx_c, ny_c, nz_c);
         this->coarse_Matrix->generate_f2c_operator_onGPU();
+        // std::cout << "coarse matrix generated on the GPU" << std::endl;
     }
     if(not this->row_ptr.empty() and not this->col_idx.empty() and not this->values.empty()){
         // in case the matrix is on the CPU, we generate the new one on the CPU as well
@@ -660,6 +665,7 @@ void sparse_CSR_Matrix<T>::initialize_coarse_Matrix(){
             // std::cout << "generating coarse matrix on the CPU" << std::endl;
             this->coarse_Matrix->generateMatrix_onCPU(nx_c, ny_c, nz_c);
             this->coarse_Matrix->generate_f2c_operator_onCPU();
+            // std::cout << "coarse matrix generated on the CPU" << std::endl;
         }      
     }
 }
@@ -721,6 +727,7 @@ int* sparse_CSR_Matrix<T>::get_f2c_op_d(){
 
 template <typename T>
 std::vector<int> sparse_CSR_Matrix<T>::get_f2c_op(){
+    // std::cout << "from sparse_matrix size of f2c_op: " << this->f2c_op.size() << std::endl;
     return this->f2c_op;
 }
 

@@ -456,42 +456,36 @@ bool run_MG_data_tests(sparse_CSR_Matrix<double>& A){
     int ny = A.get_ny();
     int nz = A.get_nz();
 
-    std::cout <<"grab dimensions" << std::endl;
 
-    
+
     sparse_CSR_Matrix<double>* current_matrix = &A;
 
-    std::cout << "current matrix set" << std::endl;
-
     std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
-    std::cout << "problem generated" << std::endl;
     sparse_CSR_Matrix<double> host_matrix = problem.first;
 
-    std::cout << "host matrix set" << std::endl;
-    
     while(current_matrix->get_coarse_Matrix() != nullptr){
+
+        int coarse_n_rows = current_matrix->get_coarse_Matrix()->get_num_rows();
+        int fine_n_rows = current_matrix->get_num_rows();
         // A is on the GPU and should have an c2f operator
 
-        std::cout<< "we have a coarse matrix" << std::endl;
-
         current_matrix = current_matrix->get_coarse_Matrix();
+
         host_matrix.initialize_coarse_Matrix();
+        host_matrix = *(host_matrix.get_coarse_Matrix());
 
-        std::cout << "coarse matrix initialized" << std::endl;
-        std::cout << "num_rows: " << current_matrix->get_num_rows() << std::endl;
-        
-        std::cout << "copy amount " << current_matrix->get_num_rows() * sizeof(int) << std::endl;
-        
-        std::vector<int> c2f_device(current_matrix->get_num_rows());
-        std::cout << "c2f_device size " << c2f_device.size() * sizeof(int) << std::endl;
+        std::vector<int> c2f_device(fine_n_rows, 0);
 
-        CHECK_CUDA(cudaMemcpy(c2f_device.data(), current_matrix->get_f2c_op_d(), current_matrix->get_num_rows() * sizeof(int), cudaMemcpyDeviceToHost));
+        CHECK_CUDA(cudaMemcpy(c2f_device.data(), current_matrix->get_f2c_op_d(), fine_n_rows * sizeof(int), cudaMemcpyDeviceToHost));
 
-        std::cout<< "memcopy done" << std::endl;
 
-        std::vector<int> c2f_host = current_matrix->get_f2c_op();
-        
-        std::cout << "c2f_device[0]: " << c2f_device[0] << " c2f_host[0]: " << c2f_host[0] << std::endl;
+        std::vector<int> c2f_host = host_matrix.get_f2c_op();
+
+        // std::cout << "device size: " << c2f_device.size() << " host size: " << c2f_host.size() << std::endl;
+        // std::cout << "device[1]: " << c2f_device[1] << " host[1]: " << c2f_host[1] << std::endl;
+        // std::cout << "device[2]: " << c2f_device[2] << " host[2]: " << c2f_host[2] << std::endl;
+        // std::cout << "device[3]: " << c2f_device[3] << " host[3]: " << c2f_host[3] << std::endl;
+
 
         c2f_test = c2f_test && vector_compare(c2f_host, c2f_device, "c2f test");
 
