@@ -182,9 +182,12 @@ bool run_all_util_tests(int nx, int ny, int nz){
     A.generateMatrix_onGPU(nx, ny, nz);
     std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
 
+    // std::cout << "CSR Matrix is generated" << std::endl;
     // make striped matrix
     striped_Matrix<double> striped_A;
     striped_A.striped_Matrix_from_sparse_CSR(A);
+
+    // std::cout << "Striped Matrix is generated" << std::endl;
 
     // make fake solution
     std::vector<double> x_solution = generate_random_vector(A.get_num_rows(), 0.0, 1.0, RANDOM_SEED);
@@ -193,6 +196,8 @@ bool run_all_util_tests(int nx, int ny, int nz){
 
     bool all_pass = true;
     all_pass = all_pass && test_l2_norm(A, x_solution, y);
+
+    // std::cout<< "l2 norm test passed for CSR matrix for size " << nx << "x" << ny << "x" << nz << std::endl;
 
     bool current_pass = test_l2_norm(A, striped_A, x_solution, y);
 

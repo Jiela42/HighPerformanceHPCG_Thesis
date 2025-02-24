@@ -257,23 +257,23 @@ bool striped_csr_parallel_conversion_test_on_matrix(sparse_CSR_Matrix<double>&A)
 
     // instead of copying it back by hand, we just call the function and then compare the two matrices with the built in function
 
-    if(A.get_coarse_Matrix() != nullptr){
-        std::cout << "A has a coarse matrix" << std::endl;
-    } else{
-        std::cout << "A has no coarse matrix" << std::endl;
-    }
+    // if(A.get_coarse_Matrix() != nullptr){
+    //     std::cout << "A has a coarse matrix" << std::endl;
+    // } else{
+    //     std::cout << "A has no coarse matrix" << std::endl;
+    // }
 
     back_to_CSR.copy_Matrix_toCPU();
 
-    if(back_to_CSR.get_coarse_Matrix() != nullptr){
-        std::cout << "back_to_CSR has a coarse matrix" << std::endl;
-    } else{
-        std::cout << "back_to_CSR has no coarse matrix" << std::endl;
-    }
+    // if(back_to_CSR.get_coarse_Matrix() != nullptr){
+    //     std::cout << "back_to_CSR has a coarse matrix" << std::endl;
+    // } else{
+    //     std::cout << "back_to_CSR has no coarse matrix" << std::endl;
+    // }
 
     bool test_passed = A.compare_to(back_to_CSR, "striped vs csr parallel conversion test");
 
-    std::cout<< "test passed: " << test_passed << std::endl;
+    // std::cout<< "test passed: " << test_passed << std::endl;
 
     return test_passed;
 }
@@ -535,14 +535,14 @@ bool run_all_matrixLib_tests(int nx, int ny, int nz){
     // all_pass = all_pass && read_save_test(A, "read_save_test on 3d27p CSR Matrix for " + dim_info);
     // read_save_test(striped_A, "read_save_test on 3d27p striped Matrix for " + dim_info);
     
-    // all_pass = all_pass && parallel_CSR_generation_test(A);
+    all_pass = all_pass && parallel_CSR_generation_test(A);
     // std::cout << "parallel CSR generation test passed for " << dim_info << std::endl;
-    // all_pass = all_pass && run_striped_csr_conversion_test(nx, ny, nz);
+    all_pass = all_pass && run_striped_csr_conversion_test(nx, ny, nz);
     // std::cout << "striped vs csr sequential conversion test passed for " << dim_info << std::endl;
-    // all_pass = all_pass && run_striped_csr_parallel_conversion_test(nx, ny, nz);
+    all_pass = all_pass && run_striped_csr_parallel_conversion_test(nx, ny, nz);
     // std::cout << "striped vs csr parallel conversion test passed for " << dim_info << std::endl;
-    // all_pass = all_pass && parallel_generation_from_CSR_test(A);
-    // all_pass = all_pass && coloring_test(striped_A);
+    all_pass = all_pass && parallel_generation_from_CSR_test(A);
+    all_pass = all_pass && coloring_test(striped_A);
     // std::cout << "coloring test passed for " << dim_info << std::endl;
     all_pass = all_pass && run_MG_data_tests(A);
 

@@ -33,6 +33,8 @@ striped_Matrix<T>::striped_Matrix() {
     this->num_MG_pre_smooth_steps = 1;
     this->num_MG_post_smooth_steps = 1;
     this->coarse_Matrix = nullptr;
+    this->f2c_op_d = nullptr;
+    this->f2c_op.clear();
 }
 
 template <typename T>
@@ -57,6 +59,11 @@ striped_Matrix<T>::~striped_Matrix(){
         CHECK_CUDA(cudaFree(this->color_sorted_rows_d));
         this->color_sorted_rows_d = nullptr;
     }
+
+    if (this->f2c_op_d != nullptr) {
+        CHECK_CUDA(cudaFree(this->f2c_op_d));
+        this->f2c_op_d = nullptr;
+    }
 }
 
 template <typename T>
@@ -67,7 +74,7 @@ void striped_Matrix<T>::striped_Matrix_from_sparse_CSR(sparse_CSR_Matrix<T>& A){
         this->striped_3D27P_Matrix_from_CSR_onGPU(A);
     }
     else if (A.get_matrix_type() == MatrixType::Stencil_3D27P) {
-        this->striped_3D27P_Matrix_from_CSR(A);
+        this->striped_3D27P_Matrix_from_CSR_onCPU(A);
     } else {
         printf("ERROR: Unsupported matrix type for conversion to striped matrix\n");
         exit(1);
@@ -75,7 +82,7 @@ void striped_Matrix<T>::striped_Matrix_from_sparse_CSR(sparse_CSR_Matrix<T>& A){
 }
 
 template <typename T>
-void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T>& A){
+void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onCPU(sparse_CSR_Matrix<T>& A){
 
     // std::cout << "striped_3D27P_Matrix_from_CSR (on CPU)" << std::endl;
     
@@ -87,6 +94,8 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T>& A){
     this->nnz = A.get_nnz();
     this->num_rows = A.get_num_rows();
     this->num_cols = A.get_num_cols();
+    this->num_MG_pre_smooth_steps = A.get_num_MG_pre_smooth_steps();
+    this->num_MG_post_smooth_steps = A.get_num_MG_post_smooth_steps();
     this->num_stripes = 27;
     this->j_min_i = std::vector<int>(this->num_stripes, 0);
     this->values = std::vector<T>(this->num_stripes * this->num_rows, 0);
@@ -96,6 +105,10 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T>& A){
 
     this->color_pointer_d = nullptr;
     this->color_sorted_rows_d = nullptr;
+
+    this->coarse_Matrix = nullptr;
+    this->f2c_op_d = nullptr;
+    
 
     // first we make our mapping for the j_min_i
     // each point has num_stripe neighbours and each is associated with a coordinate relative to the point
@@ -146,6 +159,13 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T>& A){
         this->coarse_Matrix = new striped_Matrix<T>();
         this->coarse_Matrix->striped_Matrix_from_sparse_CSR(*(A.get_coarse_Matrix()));
     }
+    // we also gotta copy the f2c operator
+    if (A.get_f2c_op().size() > 0) {
+        this->f2c_op = A.get_f2c_op();
+    } else {
+        this->f2c_op.clear();
+    }
+    
 }
 
 template <typename T>
@@ -174,6 +194,8 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T>
     this->nnz = A.get_nnz();
     this->num_rows = A.get_num_rows();
     this->num_cols = A.get_num_cols();
+    this->num_MG_pre_smooth_steps = A.get_num_MG_pre_smooth_steps();
+    this->num_MG_post_smooth_steps = A.get_num_MG_post_smooth_steps();
     this->num_stripes = 27;
     this->j_min_i = std::vector<int>(this->num_stripes, 0);
     this->values = std::vector<T>(this->num_stripes * this->num_rows, 0);
@@ -181,6 +203,8 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T>
     this->values_d = nullptr;
     this->color_pointer_d = nullptr;
     this->color_sorted_rows_d = nullptr;
+    this->coarse_Matrix = nullptr;
+    this->f2c_op.clear();
 
     // first we make our mapping for the j_min_i (on the CPU)
     // each point has num_stripe neighbours and each is associated with a coordinate relative to the point
@@ -234,6 +258,16 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T>
         this->coarse_Matrix = new striped_Matrix<T>();
         this->coarse_Matrix->striped_Matrix_from_sparse_CSR(*(A.get_coarse_Matrix()));
     }
+
+    if(A.get_f2c_op_d() != nullptr){
+        
+        CHECK_CUDA(cudaMalloc(&this->f2c_op_d, this->num_rows * sizeof(int)));
+        CHECK_CUDA(cudaMemcpy(this->f2c_op_d, A.get_f2c_op_d(), this->num_rows * sizeof(int), cudaMemcpyDeviceToDevice));
+
+    } else{
+        this->f2c_op_d = nullptr;
+    }
+
 }
 
 template <typename T>
@@ -249,6 +283,16 @@ void striped_Matrix<T>::copy_Matrix_toGPU(){
     // we copy the values to the GPU
     CHECK_CUDA(cudaMalloc(&this->values_d, this->num_stripes * this->num_rows * sizeof(T)));
     CHECK_CUDA(cudaMemcpy(this->values_d, this->values.data(), this->num_stripes * this->num_rows * sizeof(T), cudaMemcpyHostToDevice));
+
+    if(this->coarse_Matrix != nullptr){
+        this->coarse_Matrix->copy_Matrix_toGPU();
+    }
+
+    if(this->f2c_op_d != nullptr){
+        CHECK_CUDA(cudaMalloc(&this->f2c_op_d, this->num_rows * sizeof(int)));
+        CHECK_CUDA(cudaMemcpy(this->f2c_op_d, this->f2c_op.data(), this->num_rows * sizeof(int), cudaMemcpyHostToDevice));
+    }
+
 }
 
 template <typename T>
@@ -266,6 +310,16 @@ void striped_Matrix<T>::copy_Matrix_toCPU(){
 
     // we copy the values to the CPU
     CHECK_CUDA(cudaMemcpy(this->values.data(), this->values_d, this->num_stripes * this->num_rows * sizeof(T), cudaMemcpyDeviceToHost));
+
+    if(this->f2c_op_d != nullptr){
+        this->f2c_op.resize(this->num_rows);
+        CHECK_CUDA(cudaMemcpy(this->f2c_op.data(), this->f2c_op_d, this->num_rows * sizeof(int), cudaMemcpyDeviceToHost));
+    }
+
+    if(this->coarse_Matrix != nullptr){
+        this->coarse_Matrix->copy_Matrix_toCPU();
+    }
+
 }
 
 template <typename T>
@@ -278,6 +332,18 @@ void striped_Matrix<T>::remove_Matrix_from_GPU(){
     if(this->values_d != nullptr){
         CHECK_CUDA(cudaFree(this->values_d));
         this->values_d = nullptr;
+    }
+    if(this->color_pointer_d != nullptr){
+        CHECK_CUDA(cudaFree(this->color_pointer_d));
+        this->color_pointer_d = nullptr;
+    }
+    if(this->color_sorted_rows_d != nullptr){
+        CHECK_CUDA(cudaFree(this->color_sorted_rows_d));
+        this->color_sorted_rows_d = nullptr;
+    }
+    if(this->f2c_op_d != nullptr){
+        CHECK_CUDA(cudaFree(this->f2c_op_d));
+        this->f2c_op_d = nullptr;
     }
 }
 
@@ -368,6 +434,16 @@ int striped_Matrix<T>::get_nnz() const{
 }
 
 template <typename T>
+int striped_Matrix<T>::get_num_MG_pre_smooth_steps() const{
+    return this->num_MG_pre_smooth_steps;
+}
+
+template <typename T>
+int striped_Matrix<T>::get_num_MG_post_smooth_steps() const{
+    return this->num_MG_post_smooth_steps;
+}
+
+template <typename T>
 int striped_Matrix<T>::get_diag_index() const{
     return this->diag_index;
 }
@@ -395,6 +471,16 @@ int * striped_Matrix<T>::get_j_min_i_d(){
 template <typename T>
 T * striped_Matrix<T>::get_values_d(){
     return this->values_d;
+}
+
+template <typename T>
+std::vector<int> striped_Matrix<T>::get_f2c_op(){
+    return this->f2c_op;
+}
+
+template <typename T>
+int * striped_Matrix<T>::get_f2c_op_d(){
+    return this->f2c_op_d;
 }
 
 template <typename T>
@@ -435,6 +521,7 @@ void striped_Matrix<T>::print() const{
         }
         std::cout << std::endl;
     }
+    std::cout<< "printing not implemented for coarse Matrix, if you want that, implement it" << std::endl;
 }
 
 // explicit template instantiation

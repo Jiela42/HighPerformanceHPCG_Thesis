@@ -43,6 +43,10 @@ class striped_Matrix {
         int get_diag_index() const;
         MatrixType get_matrix_type() const;
         striped_Matrix<T> *get_coarse_Matrix();
+        int get_num_MG_pre_smooth_steps() const;
+        int get_num_MG_post_smooth_steps() const;
+        int *get_f2c_op_d();
+        std::vector<int> get_f2c_op();
         T get_element(int i, int j) const;
         std::vector <int>& get_j_min_i();
         std::vector <T>& get_values();
@@ -67,7 +71,7 @@ class striped_Matrix {
         std::vector<int> j_min_i;
         std::vector<T> values;
         MatrixType matrix_type;
-        void striped_3D27P_Matrix_from_CSR(sparse_CSR_Matrix<T> & A);
+        void striped_3D27P_Matrix_from_CSR_onCPU(sparse_CSR_Matrix<T> & A);
         void striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T> & A);
         int *j_min_i_d;
         T *values_d;
@@ -77,6 +81,8 @@ class striped_Matrix {
         int num_MG_pre_smooth_steps;
         int num_MG_post_smooth_steps;
         striped_Matrix<T> *coarse_Matrix;
+        std::vector<int> f2c_op;
+        int *f2c_op_d;
 };
 
 #endif // STRIPED_MATRIX_HPP

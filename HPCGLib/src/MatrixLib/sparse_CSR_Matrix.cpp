@@ -306,6 +306,9 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped(striped_Matrix<T> &A){
     this->nnz = A.get_nnz();
     this->num_rows = A.get_num_rows();
     this->num_cols = A.get_num_cols();
+    this->num_MG_pre_smooth_steps = A.get_num_MG_pre_smooth_steps();
+    this->num_MG_post_smooth_steps = A.get_num_MG_post_smooth_steps();
+
 
     assert(A.get_num_stripes() == A.get_j_min_i().size());
 
@@ -363,6 +366,13 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation_CPU(str
     // std::cout << "elem_count: " << elem_count << std::endl;
     // std::cout << "nnz: " << this->nnz << std::endl;
     assert(elem_count == this->nnz);
+
+    if(A.get_f2c_op().size() > 0){
+        this->f2c_op = A.get_f2c_op();
+    } else{
+        this->f2c_op.clear();
+    }
+
     if(A.get_coarse_Matrix() != nullptr){
         this->coarse_Matrix = new sparse_CSR_Matrix<T>();
         this->coarse_Matrix->sparse_CSR_Matrix_from_striped(*(A.get_coarse_Matrix()));
@@ -390,6 +400,11 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation_GPU(str
     
     assert(new_nnz == this->nnz);
     assert(new_nnz == A.get_nnz());
+
+    if(A.get_f2c_op_d() != nullptr){
+        CHECK_CUDA(cudaMalloc(&this->f2c_op_d, this->num_rows * sizeof(int)));
+        CHECK_CUDA(cudaMemcpy(this->f2c_op_d, A.get_f2c_op_d(), this->num_rows * sizeof(int), cudaMemcpyDeviceToDevice));
+    }
 
     if(A.get_coarse_Matrix() != nullptr){
         this->coarse_Matrix = new sparse_CSR_Matrix<T>();
@@ -514,13 +529,17 @@ void sparse_CSR_Matrix<T>::copy_Matrix_toGPU(){
     CHECK_CUDA(cudaMalloc(&this->row_ptr_d, (this->num_rows + 1) * sizeof(int)));
     CHECK_CUDA(cudaMalloc(&this->col_idx_d, this->nnz * sizeof(int)));
     CHECK_CUDA(cudaMalloc(&this->values_d, this->nnz * sizeof(T)));
-    CHECK_CUDA(cudaMalloc(&this->f2c_op_d, this->num_rows * sizeof(int)));
-
+    
     // copy the data to the GPU
     CHECK_CUDA(cudaMemcpy(this->row_ptr_d, this->row_ptr.data(), (this->num_rows + 1) * sizeof(int), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(this->col_idx_d, this->col_idx.data(), this->nnz * sizeof(int), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(this->values_d, this->values.data(), this->nnz * sizeof(T), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(this->f2c_op_d, this->f2c_op.data(), this->num_rows * sizeof(int), cudaMemcpyHostToDevice));
+    
+    // not every matrix has a f2c operator
+    if(not this->f2c_op.empty()){
+        CHECK_CUDA(cudaMalloc(&this->f2c_op_d, this->num_rows * sizeof(int)));
+        CHECK_CUDA(cudaMemcpy(this->f2c_op_d, this->f2c_op.data(), this->num_rows * sizeof(int), cudaMemcpyHostToDevice));
+    }
 
     // we also need to copy the coarse matrix if it exists
     if(this->coarse_Matrix != nullptr){
@@ -535,19 +554,23 @@ void sparse_CSR_Matrix<T>::copy_Matrix_toCPU(){
     assert(this->row_ptr_d != nullptr);
     assert(this->col_idx_d != nullptr);
     assert(this->values_d != nullptr);
-    assert(this->f2c_op_d != nullptr);
+    
+    // we do not assert this, because not every Matrix has a fine to coarse operator
+    if(this->f2c_op_d != nullptr){
+        this->f2c_op.resize(this->num_rows);
+        CHECK_CUDA(cudaMemcpy(this->f2c_op.data(), this->f2c_op_d, this->num_rows * sizeof(int), cudaMemcpyDeviceToHost));
+    }
 
     // Resize the vectors to the appropriate size
     this->row_ptr.resize(this->num_rows + 1);
     this->col_idx.resize(this->nnz);
     this->values.resize(this->nnz);
-    this->f2c_op.resize(this->num_rows);
-
+    
     // copy the data to the CPU
     CHECK_CUDA(cudaMemcpy(this->row_ptr.data(), this->row_ptr_d, (this->num_rows + 1) * sizeof(int), cudaMemcpyDeviceToHost));
     CHECK_CUDA(cudaMemcpy(this->col_idx.data(), this->col_idx_d, this->nnz * sizeof(int), cudaMemcpyDeviceToHost));
     CHECK_CUDA(cudaMemcpy(this->values.data(), this->values_d, this->nnz * sizeof(T), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(this->f2c_op.data(), this->f2c_op_d, this->num_rows * sizeof(int), cudaMemcpyDeviceToHost));
+    
 
     // we also need to copy the coarse matrix if it exists
     if(this->coarse_Matrix != nullptr){
@@ -828,6 +851,28 @@ bool sparse_CSR_Matrix<T>::compare_to(sparse_CSR_Matrix<T>& other, std::string i
 
         printf("Matrices are the same for %s\n", info.c_str());
     }
+
+    // we also compare the f2c operator
+    if(this->f2c_op.empty() and not other.get_f2c_op().empty() or
+        not this->f2c_op.empty() and other.get_f2c_op().empty()){
+            printf("One matrix has a f2c operator and the other does not for %s\n", info.c_str());
+            same = false;
+    } else if(not this->f2c_op.empty() and not other.get_f2c_op().empty()){
+        std::vector<int> other_f2c = other.get_f2c_op();
+
+        if(not other_f2c.size() == this->f2c_op.size()){
+            printf("f2c operators have different sizes for %s\n", info.c_str());
+            same = false;
+        }
+
+        for(int i = 0; i < other_f2c.size(); i++){
+            if(other_f2c[i] != this->f2c_op[i]){
+                printf("f2c operators are different for %s\n", info.c_str());
+                same = false;
+            }
+        }
+    }
+
 
     if(this->coarse_Matrix != nullptr and other.get_coarse_Matrix() != nullptr){
         std::cout << "Comparing coarse matrices" << std::endl;
