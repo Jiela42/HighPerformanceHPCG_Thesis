@@ -53,6 +53,7 @@ target_sources(HPCGLib PRIVATE
     striped_warp_reduction/striped_warp_reduction_computeDot.cu
     striped_warp_reduction/striped_warp_reduction_computeWAXPBY.cu
     striped_warp_reduction/striped_warp_reduction_computeCG.cu
+    striped_warp_reduction/striped_warp_reduction_computeMG.cu
 
     striped_preprocessed/striped_preprocessed_computeSymGS.cu
 

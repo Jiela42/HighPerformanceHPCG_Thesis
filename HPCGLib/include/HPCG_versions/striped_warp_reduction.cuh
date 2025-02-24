@@ -24,6 +24,8 @@ public:
 
         this->dot_cooperation_number = 8;
 
+        this->doPreconditioning = true;
+
         this->version_name = "Striped Warp Reduction";
         this->implementation_type = Implementation_Type::STRIPED;
         this->SPMV_implemented = true;
@@ -31,6 +33,7 @@ public:
         this->SymGS_implemented = true;
         this->WAXPBY_implemented = true;
         this->CG_implemented = true;
+        this->MG_implemented = true;
         
     }
 
@@ -46,7 +49,7 @@ public:
         striped_Matrix<T> & A,
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) override {
-        std::cerr << "Warning: compute_MG is not implemented in striped warp reduction." << std::endl;
+            striped_warp_reduction_computeMG(A, x_d, y_d);
     }
 
     void compute_SymGS(
@@ -117,6 +120,11 @@ private:
         striped_Matrix<T> & A,
         T * b_d, T * x_d,
         int & n_iters, T& normr, T& normr0
+    );
+
+    void striped_warp_reduction_computeMG(
+        striped_Matrix<T> & A,
+        T * x_d, T * y_d // the vectors x and y are already on the device
     );
 
     void striped_warp_reduction_computeSPMV(

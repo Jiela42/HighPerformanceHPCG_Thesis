@@ -111,6 +111,19 @@ bool run_stripedWarpReduction_tests(int nx, int ny, int nz){
     sparse_CSR_Matrix<double> A;
     A.generateMatrix_onGPU(nx, ny, nz);
 
+    sparse_CSR_Matrix <double>* current_matrix = &A;
+
+    for(int i = 0; i < 3; i++){
+        int current_nx = current_matrix->get_nx();
+        int current_ny = current_matrix->get_ny();
+        int current_nz = current_matrix->get_nz();
+
+        if (current_nx % 2 == 0 and current_ny % 2 == 0 and current_nz % 2 == 0 and current_nx / 2 > 2 and current_ny / 2 > 2 and current_nz / 2 > 2){
+            current_matrix->initialize_coarse_Matrix();
+            current_matrix = current_matrix->get_coarse_Matrix();
+        }
+    }
+
     all_pass = all_pass && run_striped_warp_reduction_tests_on_matrix(A);
 
     if(not all_pass){

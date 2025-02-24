@@ -49,9 +49,6 @@ __global__ void square_vector_kernel(int num_rows, double *y, double *y_squared)
     }
 }
 
-
-// not sure who actually uses this kernel
-// I don't think this repo does
 __global__ void compute_restriction_kernel(
     int num_rows,
     double * Axf,
@@ -66,8 +63,19 @@ __global__ void compute_restriction_kernel(
     }
 }
 
-// Here I would also implement prologation kernel,
-// but since it doesn't seem necessary, I won't
+__global__ void compute_prolongation_kernel(
+    int num_rows,
+    double * xc,
+    double * xf,
+    int * f2c_operator
+){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+
+    for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x) {
+        xf[f2c_operator[row]] += xc[row];
+    }
+}
+
 
 void L2_norm_for_Device_Vector(
     cudaStream_t stream,

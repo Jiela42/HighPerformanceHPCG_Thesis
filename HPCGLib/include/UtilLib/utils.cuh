@@ -16,6 +16,13 @@ __global__ void compute_restriction_kernel(
     int * f2c_operator
 );
 
+__global__ void compute_prolongation_kernel(
+    int num_rows,
+    double * xc,
+    double * x,
+    int * c2f_operator
+);
+
 double L2_norm_for_SymGS(
     sparse_CSR_Matrix<double> & A,
     double * x,

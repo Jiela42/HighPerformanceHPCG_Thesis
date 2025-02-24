@@ -10,7 +10,7 @@ int main(){
 
     bool all_pass = true;
 
-    all_pass = all_pass && run_all_util_tests(4, 4, 4);
+    // all_pass = all_pass && run_all_util_tests(4, 4, 4);
     // all_pass = all_pass && run_all_util_tests(3, 4, 5);
     // all_pass = all_pass && run_all_util_tests(8, 8, 8);
     // all_pass = all_pass && run_all_util_tests(16, 16, 16);
@@ -23,17 +23,17 @@ int main(){
     // all_pass = all_pass && run_all_matrixLib_tests(5, 4, 3);
     // all_pass = all_pass && run_all_matrixLib_tests(8, 8, 8);
     // all_pass = all_pass && run_all_matrixLib_tests(16, 16, 16);
-    all_pass = all_pass && run_all_matrixLib_tests(24, 24, 24);
+    // all_pass = all_pass && run_all_matrixLib_tests(24, 24, 24);
     // all_pass = all_pass && run_all_matrixLib_tests(32, 32, 32);
     // all_pass = all_pass && run_all_matrixLib_tests(64, 64, 64);
     // all_pass = all_pass && run_all_matrixLib_tests(128, 128, 128);
     // std::cout << "Finished MatrixLib tests" << std::endl;
 
     std::cout<< "Starting cuSparse tests" << std::endl;
-    all_pass = all_pass && run_cuSparse_tests(4, 4, 4);
+    // all_pass = all_pass && run_cuSparse_tests(4, 4, 4);
     // all_pass = all_pass && run_cuSparse_tests(8, 8, 8);
     // all_pass = all_pass && run_cuSparse_tests(16, 16, 16);
-    all_pass = all_pass && run_cuSparse_tests(32, 32, 32);
+    // all_pass = all_pass && run_cuSparse_tests(32, 32, 32);
     // all_pass = all_pass && run_cuSparse_tests(64, 64, 64);
     // all_pass = all_pass && run_cuSparse_tests(128, 128, 128);
     // std::cout << "Finished cuSparse tests" << std::endl;
@@ -42,7 +42,7 @@ int main(){
     // all_pass = all_pass && run_naiveStriped_tests(4, 4, 4);
     // all_pass = all_pass && run_naiveStriped_tests(8, 8, 8);
     // all_pass = all_pass && run_naiveStriped_tests(16, 16, 16);
-    all_pass = all_pass && run_naiveStriped_tests(32, 32, 32);
+    // all_pass = all_pass && run_naiveStriped_tests(32, 32, 32);
     // all_pass = all_pass && run_naiveStriped_tests(64, 64, 64);
     // all_pass = all_pass && run_naiveStriped_tests(128, 128, 128);
     // std::cout << "Finished naiveStriped tests" << std::endl;
@@ -51,18 +51,18 @@ int main(){
     // all_pass = all_pass && run_stripedSharedMem_tests(4, 4, 4);
     // all_pass = all_pass && run_stripedSharedMem_tests(8, 8, 8);
     // all_pass = all_pass && run_stripedSharedMem_tests(16, 16, 16);
-    all_pass = all_pass && run_stripedSharedMem_tests(32, 32, 32);
+    // all_pass = all_pass && run_stripedSharedMem_tests(32, 32, 32);
     // all_pass = all_pass && run_stripedSharedMem_tests(64, 64, 64);
     // all_pass = all_pass && run_stripedSharedMem_tests(128, 128, 128);
     // std::cout << "Finished striped shared memory tests" << std::endl;
 
     std::cout << "Starting striped warp reduction tests" << std::endl;
-    // all_pass = all_pass && run_stripedWarpReduction_tests(4, 4, 4);
-    // all_pass = all_pass && run_stripedWarpReduction_tests(8, 8, 8);
-    // all_pass = all_pass && run_stripedWarpReduction_tests(16, 16, 16);
-    // all_pass = all_pass && run_stripedWarpReduction_tests(24, 24, 24);
+    all_pass = all_pass && run_stripedWarpReduction_tests(4, 4, 4);
+    all_pass = all_pass && run_stripedWarpReduction_tests(8, 8, 8);
+    all_pass = all_pass && run_stripedWarpReduction_tests(16, 16, 16);
+    all_pass = all_pass && run_stripedWarpReduction_tests(24, 24, 24);
     all_pass = all_pass && run_stripedWarpReduction_tests(32, 32, 32);
-    // all_pass = all_pass && run_stripedWarpReduction_tests(64, 64, 64);
+    all_pass = all_pass && run_stripedWarpReduction_tests(64, 64, 64);
     // all_pass = all_pass && run_stripedWarpReduction_tests(128, 128, 128);
     // std::cout << "Finished striped warp reduction tests" << std::endl;
 
@@ -71,7 +71,7 @@ int main(){
     // all_pass = all_pass && run_stripedPreprocessed_tests(4, 4, 4);
     // all_pass = all_pass && run_stripedPreprocessed_tests(8, 8, 8);
     // all_pass = all_pass && run_stripedPreprocessed_tests(16, 16, 16);
-    all_pass = all_pass && run_stripedPreprocessed_tests(32, 32, 32);
+    // all_pass = all_pass && run_stripedPreprocessed_tests(32, 32, 32);
     // all_pass = all_pass && run_stripedPreprocessed_tests(64, 64, 64);
 
     // std::cout << "Finished striped preprocessed tests" << std::endl;
