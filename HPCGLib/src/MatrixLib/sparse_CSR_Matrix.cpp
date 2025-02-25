@@ -33,6 +33,9 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix() {
     this->num_MG_post_smooth_steps = 1;
     this->f2c_op.clear();
     this->f2c_op_d = nullptr;
+    this->rc_d = nullptr;
+    this->xc_d = nullptr;
+    this->Axf_d = nullptr;
     this->coarse_Matrix = nullptr;
 }
 
@@ -56,6 +59,18 @@ sparse_CSR_Matrix<T>::~sparse_CSR_Matrix(){
     if(this->f2c_op_d != nullptr){
         CHECK_CUDA(cudaFree(this->f2c_op_d));
         this->f2c_op_d = nullptr;
+    }
+    if(this->rc_d != nullptr){
+        CHECK_CUDA(cudaFree(this->rc_d));
+        this->rc_d = nullptr;
+    }
+    if(this->xc_d != nullptr){
+        CHECK_CUDA(cudaFree(this->xc_d));
+        this->xc_d = nullptr;
+    }
+    if(this->Axf_d != nullptr){
+        CHECK_CUDA(cudaFree(this->Axf_d));
+        this->Axf_d = nullptr;
     }
 }
 
@@ -83,6 +98,9 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, MatrixT
     this->num_MG_post_smooth_steps = 1;
     this->coarse_Matrix = nullptr;
     this->f2c_op_d = nullptr;
+    this->rc_d = nullptr;
+    this->xc_d = nullptr;
+    this->Axf_d = nullptr;
     this->f2c_op.clear();
 
 }
@@ -111,6 +129,9 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, MatrixT
     this->num_MG_post_smooth_steps = 1;
     this->coarse_Matrix = nullptr;
     this->f2c_op_d = nullptr;
+    this->rc_d = nullptr;
+    this->xc_d = nullptr;
+    this->Axf_d = nullptr;
 }
 
 template <typename T>
@@ -161,7 +182,11 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(std::vector<std::vector<T>> dense_matrix
     this->num_MG_pre_smooth_steps = 1;
     this->num_MG_post_smooth_steps = 1;
     this->coarse_Matrix = nullptr;
+    this->f2c_op.clear();
     this->f2c_op_d = nullptr;
+    this->rc_d = nullptr;
+    this->xc_d = nullptr;
+    this->Axf_d = nullptr;
 
 }
 
@@ -243,13 +268,16 @@ void sparse_CSR_Matrix<T>::generateMatrix_onCPU(int nx, int ny, int nz){
     this->coarse_Matrix = nullptr;
     this->f2c_op_d = nullptr;
     this->f2c_op.clear();
-
+    this->rc_d = nullptr;
+    this->xc_d = nullptr;
+    this->Axf_d = nullptr;
 }
 
 template<typename T>
 void sparse_CSR_Matrix<T>::generateMatrix_onGPU(int nx, int ny, int nz)
 {
     // currently this only supports 27pt 3D stencils
+    assert(nx > 2 and ny > 2 and nz > 2);
     this->matrix_type = MatrixType::Stencil_3D27P;
     this->nx = nx;
     this->ny = ny;
@@ -405,6 +433,18 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation_GPU(str
         CHECK_CUDA(cudaMalloc(&this->f2c_op_d, this->num_rows * sizeof(int)));
         CHECK_CUDA(cudaMemcpy(this->f2c_op_d, A.get_f2c_op_d(), this->num_rows * sizeof(int), cudaMemcpyDeviceToDevice));
     }
+    if(A.get_rc_d() != nullptr){
+        CHECK_CUDA(cudaMalloc(&this->rc_d, this->num_rows * sizeof(T)));
+        CHECK_CUDA(cudaMemcpy(this->rc_d, A.get_rc_d(), this->num_rows * sizeof(T), cudaMemcpyDeviceToDevice));
+    }
+    if(A.get_xc_d() != nullptr){
+        CHECK_CUDA(cudaMalloc(&this->xc_d, this->num_rows * sizeof(T)));
+        CHECK_CUDA(cudaMemcpy(this->xc_d, A.get_xc_d(), this->num_rows * sizeof(T), cudaMemcpyDeviceToDevice));
+    }
+    if(A.get_Axf_d() != nullptr){
+        CHECK_CUDA(cudaMalloc(&this->Axf_d, this->num_rows * sizeof(T)));
+        CHECK_CUDA(cudaMemcpy(this->Axf_d, A.get_Axf_d(), this->num_rows * sizeof(T), cudaMemcpyDeviceToDevice));
+    }
 
     if(A.get_coarse_Matrix() != nullptr){
         this->coarse_Matrix = new sparse_CSR_Matrix<T>();
@@ -518,6 +558,21 @@ T* sparse_CSR_Matrix<T>::get_values_d(){
 }
 
 template <typename T>
+T* sparse_CSR_Matrix<T>::get_rc_d(){
+    return this->rc_d;
+}
+
+template <typename T>
+T* sparse_CSR_Matrix<T>::get_xc_d(){
+    return this->xc_d;
+}
+
+template <typename T>
+T* sparse_CSR_Matrix<T>::get_Axf_d(){
+    return this->Axf_d;
+}
+
+template <typename T>
 void sparse_CSR_Matrix<T>::copy_Matrix_toGPU(){
     
     std::cout << "Warning: copying a sparse CSR Matrix to the GPU" << std::endl;
@@ -605,6 +660,18 @@ void sparse_CSR_Matrix<T>::remove_Matrix_from_GPU(){
         CHECK_CUDA(cudaFree(this->f2c_op_d));
         this->f2c_op_d = nullptr;
     }
+    if(this->rc_d != nullptr){
+        CHECK_CUDA(cudaFree(this->rc_d));
+        this->rc_d = nullptr;
+    }
+    if(this->xc_d != nullptr){
+        CHECK_CUDA(cudaFree(this->xc_d));
+        this->xc_d = nullptr;
+    }
+    if(this->Axf_d != nullptr){
+        CHECK_CUDA(cudaFree(this->Axf_d));
+        this->Axf_d = nullptr;
+    }
 }
 
 
@@ -668,6 +735,10 @@ void sparse_CSR_Matrix<T>::initialize_coarse_Matrix(){
     int ny_c = this->ny / 2;
     int nz_c = this->nz / 2;
 
+    int nx_f = this->nx;
+    int ny_f = this->ny;
+    int nz_f = this->nz;
+
     // std::cout << "Initializing coarse matrix with nx: " << nx_c << " ny: " << ny_c << " nz: " << nz_c << std::endl;
 
     this->coarse_Matrix = new sparse_CSR_Matrix<T>();
@@ -677,6 +748,16 @@ void sparse_CSR_Matrix<T>::initialize_coarse_Matrix(){
         // std::cout << "generating coarse matrix on the GPU" << std::endl;
         this->coarse_Matrix->generateMatrix_onGPU(nx_c, ny_c, nz_c);
         this->coarse_Matrix->generate_f2c_operator_onGPU();
+        // initialize the pointers
+        CHECK_CUDA(cudaMalloc(&this->coarse_Matrix->rc_d, nx_c * ny_c * nz_c * sizeof(T)));
+        CHECK_CUDA(cudaMalloc(&this->coarse_Matrix->xc_d, nx_c * ny_c * nz_c * sizeof(T)));
+        CHECK_CUDA(cudaMalloc(&this->coarse_Matrix->Axf_d, nx_f * ny_f * nz_f * sizeof(T)));
+
+        // set them to zero
+        CHECK_CUDA(cudaMemset(this->coarse_Matrix->rc_d, 0, nx_c * ny_c * nz_c * sizeof(T)));
+        CHECK_CUDA(cudaMemset(this->coarse_Matrix->xc_d, 0, nx_c * ny_c * nz_c * sizeof(T)));
+        CHECK_CUDA(cudaMemset(this->coarse_Matrix->Axf_d, 0, nx_f * ny_f * nz_f * sizeof(T)));
+
         // std::cout << "coarse matrix generated on the GPU" << std::endl;
     }
     if(not this->row_ptr.empty() and not this->col_idx.empty() and not this->values.empty()){

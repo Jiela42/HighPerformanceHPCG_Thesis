@@ -19,15 +19,9 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeMG(
             this->compute_SymGS(A, x_d, r_d);
         }
 
-        T* Axf_d;
-        T* rc_d;
-        T* xc_d;
-        CHECK_CUDA(cudaMalloc(&Axf_d, A.get_num_rows() * sizeof(T)));
-        CHECK_CUDA(cudaMalloc(&rc_d, num_coarse_rows * sizeof(T)));
-        CHECK_CUDA(cudaMalloc(&xc_d, num_coarse_rows * sizeof(T)));
-
-        CHECK_CUDA(cudaMemset(rc_d, 0, num_coarse_rows * sizeof(T)));
-        CHECK_CUDA(cudaMemset(xc_d, 0, num_coarse_rows * sizeof(T)));
+        T* Axf_d = A.get_coarse_Matrix()->get_Axf_d();
+        T* rc_d = A.get_coarse_Matrix()->get_rc_d();
+        T* xc_d = A.get_coarse_Matrix()->get_xc_d();
 
         this->compute_SPMV(A, x_d, Axf_d);
 
@@ -58,11 +52,7 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeMG(
         for(int i = 0; i < num_post_smoother_steps; i++){
             this->compute_SymGS(A, x_d, r_d);
         }
-
-        // if we really don't put the stuff into the matrix, we gotta free it here
-        CHECK_CUDA(cudaFree(Axf_d));
-        CHECK_CUDA(cudaFree(rc_d));
-        CHECK_CUDA(cudaFree(xc_d));    
+    
     } else {
         this->compute_SymGS(A, x_d, r_d);
     }

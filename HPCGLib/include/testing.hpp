@@ -35,6 +35,12 @@ bool read_save_test(striped_Matrix<double>& A, std::string info);
 
 
 // abstract test functions from HPCG_functions
+
+bool test_MG(
+    HPCG_functions<double>& implementation,
+    std::string test_folder
+);
+
 bool test_CG(
     HPCG_functions<double>& uut,
     striped_Matrix<double> & A,
@@ -108,6 +114,7 @@ bool run_amgx_tests(int nx, int ny, int nz);
 bool run_naiveStriped_tests(int nx, int ny, int nz);
 bool run_stripedSharedMem_tests(int nx, int ny, int nz);
 bool run_stripedWarpReduction_tests(int nx, int ny, int nz);
+bool run_stripedWarpReduction_filebased_tests();
 bool run_stripedPreprocessed_tests(int nx, int ny, int nz);
 bool run_stripedColored_tests(int nx, int ny, int nz);
 bool run_stripedColoringPrecomputed_tests(int nx, int ny, int nz);

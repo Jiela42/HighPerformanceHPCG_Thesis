@@ -46,7 +46,11 @@ class striped_Matrix {
         int get_num_MG_pre_smooth_steps() const;
         int get_num_MG_post_smooth_steps() const;
         int *get_f2c_op_d();
+        T * get_rc_d();
+        T * get_xc_d();
+        T * get_Axf_d();
         std::vector<int> get_f2c_op();
+
         T get_element(int i, int j) const;
         std::vector <int>& get_j_min_i();
         std::vector <T>& get_values();
@@ -83,6 +87,11 @@ class striped_Matrix {
         striped_Matrix<T> *coarse_Matrix;
         std::vector<int> f2c_op;
         int *f2c_op_d;
+        // since we only have the MG routines run on the GPU, we only have the coarse matrix data (except f2c_op) on the GPU
+        // (they are all vectors)
+        T* rc_d;
+        T* xc_d;
+        T* Axf_d;
 };
 
 #endif // STRIPED_MATRIX_HPP

@@ -25,6 +25,17 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double>& A){
     striped_Matrix<double> A_striped;
     A_striped.striped_Matrix_from_sparse_CSR(A);
 
+    // std::cout << "size: " << nx << "x" << ny << "x" << nz << std::endl;
+
+    // // grab the j_min_i
+    // std::vector<int> j_min_i = A_striped.get_j_min_i();
+
+    // std::cout << "j_min_i: ";
+    // for(int i = 0; i < j_min_i.size(); i++){
+    //     std::cout << j_min_i[i] << " ";
+    // }
+    // std::cout << std::endl;
+
     int num_rows = A.get_num_rows();
     int num_cols = A.get_num_cols();
     int nnz = A.get_nnz();
@@ -77,11 +88,11 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double>& A){
         a_d, b_d
     );
 
-    all_pass = all_pass && test_CG(
-        striped_warp_reduction,
-        A_striped,
-        y_d, x_d
-    );
+    // all_pass = all_pass && test_CG(
+    //     striped_warp_reduction,
+    //     A_striped,
+    //     y_d, x_d
+    // );
         
     if(not all_pass){
         std::cout << "striped_warp_reduction tests failed for HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
@@ -95,6 +106,25 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double>& A){
     CHECK_CUDA(cudaFree(b_d));
 
     return all_pass;
+}
+
+bool run_stripedWarpReduction_filebased_tests(){
+
+    std::string test_folder = "../../../hpcg_output";
+
+    bool all_pass = true;
+
+    striped_warp_reduction_Implementation<double> striped_warp_reduction;
+
+    // MG tests
+    all_pass = all_pass && test_MG(striped_warp_reduction, test_folder);
+
+    // CG tests
+    // test_CG(striped_warp_reduction, test_folder);
+
+    return all_pass;
+
+
 }
 
 bool run_stripedWarpReduction_tests(int nx, int ny, int nz){

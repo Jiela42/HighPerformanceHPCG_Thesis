@@ -8,6 +8,9 @@
 #include "UtilLib/utils.hpp"
 
 #include <iostream>
+#include <filesystem>
+#include <fstream>
+#include <string>
 
 // these functions are really just wrappers to check for correctness
 // hence the only thing the function needs to allcoate is space for the outputs
@@ -32,6 +35,190 @@ bool test_CG(
 
     }
 
+
+// file based tests
+bool test_MG(
+    HPCG_functions<double>& implementation,
+    std::string test_folder)
+{
+    bool all_pass = true;
+
+    // iterate through the test files
+    for (const auto& entry : std::filesystem::directory_iterator(test_folder)) {
+        std::string test_file_path = entry.path().string();
+        std::string test_folder_name = entry.path().filename().string();
+
+        std::ifstream file(test_file_path);
+        if (!file.is_open()) {
+            std::cerr << "Failed to open file: " << test_file_path << std::endl;
+            all_pass = false;
+            continue;
+        }
+
+        // std::cout << "Running test: " << test_file_path << std::endl;
+        // std::cout << "Folder name: " << test_folder_name << std::endl;
+
+        size_t underscore_pos = test_folder_name.find('_');
+        std::string method_name = (underscore_pos != std::string::npos) ? test_folder_name.substr(0, underscore_pos) : test_folder_name;
+
+        // std::cout << "Method name: " << method_name << std::endl;
+
+        if(method_name == "MG"){
+            // the size requirement is because we need to be able to have 3 layers of coarse matrices.
+            std::string dimA_file_path = test_file_path + "/dimA.txt";
+            std::string b_computed_file_path = test_file_path + "/b_computed.txt";
+            std::string x_overlap_file_path = test_file_path + "/x_overlap.txt";
+            std::string x_overlap_after_mg_file_path = test_file_path + "/x_overlap_after_mg.txt";
+
+            int nx; int ny; int nz; int num_rows; int num_cols;
+
+            // open and read the dimensions from dimA.txt
+            std::ifstream dimA_file(dimA_file_path);
+            if (!dimA_file.is_open()) {
+                std::cerr << "Failed to open file: " << dimA_file_path << std::endl;
+                all_pass = false;
+                continue;
+            }
+
+            std::string line;
+            while (std::getline(dimA_file, line)) {
+                if (line.find("Number of Rows:") != std::string::npos) {
+                    num_rows = std::stoi(line.substr(line.find(":") + 1));
+                } else if (line.find("Number of Columns:") != std::string::npos) {
+                    num_cols = std::stoi(line.substr(line.find(":") + 1));
+                } else if (line.find("nx:") != std::string::npos) {
+                    nx = std::stoi(line.substr(line.find(":") + 1));
+                } else if (line.find("ny:") != std::string::npos) {
+                    ny = std::stoi(line.substr(line.find(":") + 1));
+                } else if (line.find("nz:") != std::string::npos) {
+                    nz = std::stoi(line.substr(line.find(":") + 1));
+                }
+            }
+            dimA_file.close();
+
+            if(nx >= 24 and ny >= 24 and nz >= 24){
+                // we need at 3 layers of coarse matrices to be able to compare to an HPCG file and we cannot do 2x2x2 matrices
+
+                // allocate the memory for the host vectors
+                // std::cout << "nx: " << nx << " ny: " << ny << " nz: " << nz << std::endl;
+                // std::cout << "Number of Rows: " << num_rows << std::endl;
+                std::vector<double> b_computed_host(num_rows, 0.0);
+                std::vector<double> x_overlap_host(num_rows, 0.0);
+                std::vector<double> x_overlap_after_mg_host(num_rows, 0.0);
+    
+                // now read the vectors
+                std::ifstream b_computed_file(b_computed_file_path);
+                if (b_computed_file.is_open()) {
+                    for (int i = 0; i < num_rows && b_computed_file >> b_computed_host[i]; ++i);
+                    b_computed_file.close();
+                } else {
+                    std::cerr << "Failed to open file: " << b_computed_file_path << std::endl;
+                    all_pass = false;
+                    continue;
+                }
+    
+                std::ifstream x_overlap_file(x_overlap_file_path);
+                if (x_overlap_file.is_open()) {
+                    for (int i = 0; i < num_rows && x_overlap_file >> x_overlap_host[i]; ++i);
+                    x_overlap_file.close();
+                } else {
+                    std::cerr << "Failed to open file: " << x_overlap_file_path << std::endl;
+                    all_pass = false;
+                    continue;
+                }
+    
+                std::ifstream x_overlap_after_mg_file(x_overlap_after_mg_file_path);
+                if (x_overlap_after_mg_file.is_open()) {
+                    for (int i = 0; i < num_rows && x_overlap_after_mg_file >> x_overlap_after_mg_host[i]; ++i);
+                    x_overlap_after_mg_file.close();
+                } else {
+                    std::cerr << "Failed to open file: " << x_overlap_after_mg_file_path << std::endl;
+                    all_pass = false;
+                    continue;
+                }
+    
+                // // print the first 5 elements of the vectors
+                // std::cout << "b_computed: ";
+                // for (int i = 0; i < 5; i++) {
+                //     std::cout << b_computed_host[i] << " ";
+                // }
+                // std::cout << std::endl;
+                // std::cout << "x_overlap: ";
+                // for (int i = 0; i < 5; i++) {
+                //     std::cout << x_overlap_host[i] << " ";
+                // }
+                // std::cout << std::endl;
+                // std::cout << "x_overlap_after_mg: ";
+                // for (int i = 0; i < 5; i++) {
+                //     std::cout << x_overlap_after_mg_host[i] << " ";
+                // }
+                // std::cout << std::endl;
+    
+                // allocate the memory for the device vectors
+                double * b_computed_d;
+                double * x_overlap_d;
+    
+                CHECK_CUDA(cudaMalloc(&b_computed_d, num_rows * sizeof(double)));
+                CHECK_CUDA(cudaMalloc(&x_overlap_d, num_rows * sizeof(double)));
+    
+                CHECK_CUDA(cudaMemcpy(b_computed_d, b_computed_host.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
+                CHECK_CUDA(cudaMemcpy(x_overlap_d, x_overlap_host.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
+    
+                // make A
+                sparse_CSR_Matrix<double> A;
+                A.generateMatrix_onGPU(nx, ny, nz);
+    
+                // also initialize the MG data
+                sparse_CSR_Matrix<double>* current_matrix = &A;
+    
+                for(int i = 0; i < 3; i++){
+                    current_matrix->initialize_coarse_Matrix();
+                    current_matrix = current_matrix->get_coarse_Matrix();
+                }
+    
+                // if(implementation.implementation_type == Implementation_Type::CSR){
+                    
+                //     implementation.compute_MG(A, b_computed_d, x_overlap_d);
+    
+                // } else
+                if (implementation.implementation_type == Implementation_Type::STRIPED){
+    
+                    striped_Matrix<double> A_striped;
+                    A_striped.striped_Matrix_from_sparse_CSR(A);
+    
+                    // test the MG function
+                    implementation.compute_MG(A_striped, b_computed_d, x_overlap_d);
+                } else{
+                    std::cout << "MG not implemented for this implementation" << std::endl;
+                    all_pass = false;
+                }
+    
+                // now get the result and compare
+                std::vector<double> computed_result(num_rows, 0.0);
+                CHECK_CUDA(cudaMemcpy(computed_result.data(), x_overlap_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+    
+                // compare the results
+                bool test_pass = vector_compare(computed_result, x_overlap_after_mg_host);
+    
+                if(not test_pass){
+                    std::cerr << "MG test failed for size " << nx << "x" << ny << "x" << nz << std::endl;
+                    all_pass = false;
+                }
+                // else {
+                //     // print the first 5 elements of the vectors
+                //     for (int i = 0; i < 5; i++) {
+                //         std::cout << computed_result[i] << " " << x_overlap_after_mg_host[i] << std::endl;
+                //     }
+                // }
+            }
+        }
+        // Process the file (example: read and run tests)
+        // ...
+
+        file.close();
+    }
+    return all_pass;
+}
 
 // in this case both versions require the same inputs 
 bool test_SPMV(

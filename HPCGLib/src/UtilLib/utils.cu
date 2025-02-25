@@ -72,6 +72,18 @@ __global__ void compute_prolongation_kernel(
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
     for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x) {
+
+        // if(f2c_operator[row] < 0){
+
+        //     printf("f2c_operator is the problem for row %d\n", row);
+        //     printf("f2c_operator[%d]: %d\n", row, f2c_operator[row]);
+        //     printf("xc is the problem for row %d\n", row);
+        //     printf("xc[row]: %f\n", xc[row]);
+        //     printf("xf is the problem for row %d\n", row);
+        //     printf("xf[f2c_operator[%d]]: %f\n",row, xf[f2c_operator[row]]);
+        // }
+
+
         xf[f2c_operator[row]] += xc[row];
     }
 }

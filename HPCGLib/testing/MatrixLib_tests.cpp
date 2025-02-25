@@ -481,6 +481,14 @@ bool run_MG_data_tests(sparse_CSR_Matrix<double>& A){
 
         std::vector<int> c2f_host = host_matrix.get_f2c_op();
 
+        // check if any of the c2f values are negative
+        for(int i = 0; i < fine_n_rows; i++){
+            if(c2f_device[i] < 0){
+                std::cerr << "c2f device has negative value at index " << i << std::endl;
+                c2f_test = false;
+            }
+        }
+
         // std::cout << "device size: " << c2f_device.size() << " host size: " << c2f_host.size() << std::endl;
         // std::cout << "device[1]: " << c2f_device[1] << " host[1]: " << c2f_host[1] << std::endl;
         // std::cout << "device[2]: " << c2f_device[2] << " host[2]: " << c2f_host[2] << std::endl;

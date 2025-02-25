@@ -1,0 +1,5 @@
+Number of Rows: 262144
+Number of Columns: 262144
+nx: 32
+ny: 64
+nz: 128

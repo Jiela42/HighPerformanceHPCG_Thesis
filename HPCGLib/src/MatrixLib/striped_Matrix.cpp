@@ -34,6 +34,9 @@ striped_Matrix<T>::striped_Matrix() {
     this->num_MG_post_smooth_steps = 1;
     this->coarse_Matrix = nullptr;
     this->f2c_op_d = nullptr;
+    this->rc_d = nullptr;
+    this->xc_d = nullptr;
+    this->Axf_d = nullptr;
     this->f2c_op.clear();
 }
 
@@ -63,6 +66,18 @@ striped_Matrix<T>::~striped_Matrix(){
     if (this->f2c_op_d != nullptr) {
         CHECK_CUDA(cudaFree(this->f2c_op_d));
         this->f2c_op_d = nullptr;
+    }
+    if (this->rc_d != nullptr) {
+        CHECK_CUDA(cudaFree(this->rc_d));
+        this->rc_d = nullptr;
+    }
+    if(this->xc_d != nullptr){
+        CHECK_CUDA(cudaFree(this->xc_d));
+        this->xc_d = nullptr;
+    }
+    if(this->Axf_d != nullptr){
+        CHECK_CUDA(cudaFree(this->Axf_d));
+        this->Axf_d = nullptr;
     }
 }
 
@@ -107,7 +122,11 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onCPU(sparse_CSR_Matrix<T>
     this->color_sorted_rows_d = nullptr;
 
     this->coarse_Matrix = nullptr;
+    this->f2c_op.clear();
     this->f2c_op_d = nullptr;
+    this->rc_d = nullptr;
+    this->xc_d = nullptr;
+    this->Axf_d = nullptr;
     
 
     // first we make our mapping for the j_min_i
@@ -249,7 +268,11 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T>
         A.get_row_ptr_d(), A.get_col_idx_d(), A.get_values_d(),
         this->num_stripes, this->j_min_i_d, this->values_d);
     
+    // std::cout << "nx: " << this->nx << std::endl;
+    // std::cout << "ny: " << this->ny << std::endl;
+    // std::cout << "nz: " << this->nz << std::endl;
     // std::cout << "counted_nnz: " << counted_nnz << std::endl;
+    // std::cout << "nnz: " << this->nnz << std::endl;
 
     assert(counted_nnz == this->nnz);
 
@@ -260,12 +283,30 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T>
     }
 
     if(A.get_f2c_op_d() != nullptr){
-        
         CHECK_CUDA(cudaMalloc(&this->f2c_op_d, this->num_rows * sizeof(int)));
         CHECK_CUDA(cudaMemcpy(this->f2c_op_d, A.get_f2c_op_d(), this->num_rows * sizeof(int), cudaMemcpyDeviceToDevice));
-
     } else{
         this->f2c_op_d = nullptr;
+    }
+    if(A.get_rc_d() != nullptr){
+        CHECK_CUDA(cudaMalloc(&this->rc_d, this->num_rows * sizeof(T)));
+        CHECK_CUDA(cudaMemcpy(this->rc_d, A.get_rc_d(), this->num_rows * sizeof(T), cudaMemcpyDeviceToDevice));
+    } else{
+        this->rc_d = nullptr;
+    }
+    if(A.get_xc_d() != nullptr){
+        CHECK_CUDA(cudaMalloc(&this->xc_d, this->num_rows * sizeof(T)));
+        CHECK_CUDA(cudaMemcpy(this->xc_d, A.get_xc_d(), this->num_rows * sizeof(T), cudaMemcpyDeviceToDevice));
+    } else{
+        this->xc_d = nullptr;
+    }
+
+    int num_fine_rows = this->nx * 2 * this->ny * 2 * this->nz * 2;
+    if(A.get_Axf_d() != nullptr){
+        CHECK_CUDA(cudaMalloc(&this->Axf_d, num_fine_rows * sizeof(T)));
+        CHECK_CUDA(cudaMemcpy(this->Axf_d, A.get_Axf_d(), num_fine_rows * sizeof(T), cudaMemcpyDeviceToDevice));
+    } else{
+        this->Axf_d = nullptr;
     }
 
 }
@@ -350,6 +391,21 @@ void striped_Matrix<T>::remove_Matrix_from_GPU(){
 template <typename T>
 striped_Matrix<T>* striped_Matrix<T>::get_coarse_Matrix(){
     return this->coarse_Matrix;
+}
+
+template <typename T>
+T* striped_Matrix<T>::get_rc_d(){
+    return this->rc_d;
+}
+
+template <typename T>
+T* striped_Matrix<T>::get_xc_d(){
+    return this->xc_d;
+}
+
+template <typename T>
+T* striped_Matrix<T>::get_Axf_d(){
+    return this->Axf_d;
 }
 
 template <typename T>
