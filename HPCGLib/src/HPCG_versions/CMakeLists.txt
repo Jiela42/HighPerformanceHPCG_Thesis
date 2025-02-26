@@ -13,7 +13,7 @@ include_directories(${CUDAToolkit_INCLUDE_DIRS})
 # set(CMAKE_CUDA_STANDARD 12)
 # set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 
-set(CMAKE_CUDA_ARCHITECTURES 70 86)
+# set(CMAKE_CUDA_ARCHITECTURES 86)
 
 # Set compile options for CUDA
 target_compile_options(HPCGLib PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:

@@ -13,7 +13,7 @@ include_directories(${CUDAToolkit_INCLUDE_DIRS})
 
 
 # Set CUDA architectures
-set(CMAKE_CUDA_ARCHITECTURES 70 86)
+# set(CMAKE_CUDA_ARCHITECTURES 70 86)
 
 enable_language(CUDA)
 
