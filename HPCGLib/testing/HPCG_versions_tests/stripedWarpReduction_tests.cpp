@@ -87,12 +87,6 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double>& A){
         A_striped,
         a_d, b_d
     );
-
-    // all_pass = all_pass && test_CG(
-    //     striped_warp_reduction,
-    //     A_striped,
-    //     y_d, x_d
-    // );
         
     if(not all_pass){
         std::cout << "striped_warp_reduction tests failed for HPCG Matrix and size " << nx << "x" << ny << "x" << nz << std::endl;
@@ -120,7 +114,7 @@ bool run_stripedWarpReduction_filebased_tests(){
     all_pass = all_pass && test_MG(striped_warp_reduction, test_folder);
 
     // CG tests
-    // test_CG(striped_warp_reduction, test_folder);
+    all_pass = all_pass && test_CG(striped_warp_reduction, test_folder);
 
     return all_pass;
 

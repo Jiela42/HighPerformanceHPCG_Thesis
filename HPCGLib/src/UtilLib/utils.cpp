@@ -13,6 +13,10 @@ bool vector_compare(const std::vector<double>& a, const std::vector<double>& b){
         return false;
     }
     for (int i = 0; i < a.size(); i++){
+        if(std::isnan(a[i]) or std::isnan(b[i])){
+            std::cout << "Error at index " << i << " should be " << a[i] << " but was " << b[i] << std::endl;
+            return false;
+        }
         if (not double_compare (a[i], b[i])){
             std::cout << "Error at index " << i << " should be " << a[i] << " but was " << b[i] << std::endl;
             return false;

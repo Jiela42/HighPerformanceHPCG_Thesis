@@ -9,7 +9,7 @@ __global__ void striped_warp_reduction_SPMV_kernel(
         double* x, double* y
     )
 {
-    
+    // printf("striped_warp_reduction_SPMV_kernel\n");
     int cooperation_number = 4;
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     int lane = threadIdx.x % cooperation_number;
@@ -44,6 +44,8 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeSPM
         striped_Matrix<T>& A,
         T * x_d, T * y_d // the vectors x and y are already on the device
     ) {
+
+        // std::cout << "striped_warp_reduction_computeSPMV" << std::endl;
 
         int num_rows = A.get_num_rows();
         int num_stripes = A.get_num_stripes();

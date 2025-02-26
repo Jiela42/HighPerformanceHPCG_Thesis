@@ -6,10 +6,10 @@ project(MatrixLib LANGUAGES CXX CUDA)
 add_library(MatrixLib)
 find_package(CUDAToolkit REQUIRED)
 include_directories(${CUDAToolkit_INCLUDE_DIRS})
-set(CMAKE_CUDA_ARCHITECTURES 86)
+set(CMAKE_CUDA_ARCHITECTURES 86 70)
 target_compile_options(MatrixLib PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:
     # --std=c++12
-    -arch=sm_86
+    # -arch=sm_86
 >)
 
 

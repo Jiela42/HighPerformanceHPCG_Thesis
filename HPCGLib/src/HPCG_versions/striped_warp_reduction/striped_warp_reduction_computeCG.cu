@@ -38,6 +38,9 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeCG(
 
     CHECK_CUDA(cudaMemset(normr_d, 0, sizeof(double)));
 
+    // std::vector<T> looki(5);
+    
+
     // std::cout << "normr_d: " << normr_d << std::endl;
 
     this->compute_WAXPBY(A, x_d, x_d, p_d, 1.0, 0.0); // p = x
@@ -65,7 +68,7 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeCG(
             this->compute_Dot(A, r_d, z_d, rtz_d); // rtz = r'*z
             CHECK_CUDA(cudaMemcpy(&rtz, rtz_d, sizeof(double), cudaMemcpyDeviceToHost));
         } else {
-            rtz = rtz_old;
+            rtz_old = rtz;
             this->compute_Dot(A, r_d, z_d, rtz_d); // rtz = r'*z
             CHECK_CUDA(cudaMemcpy(&rtz, rtz_d, sizeof(double), cudaMemcpyDeviceToHost));
             beta = rtz/rtz_old;
@@ -83,6 +86,17 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeCG(
         normr = sqrt(normr);
         n_iters = k;
     }
+
+    // Free device memory
+    CHECK_CUDA(cudaFree(p_d));
+    CHECK_CUDA(cudaFree(z_d));
+    CHECK_CUDA(cudaFree(Ap_d));
+    CHECK_CUDA(cudaFree(r_d));
+    CHECK_CUDA(cudaFree(normr_d));
+    CHECK_CUDA(cudaFree(pAp_d));
+    CHECK_CUDA(cudaFree(rtz_d));
+
+    // std::cout << "CG converged in " << n_iters << " iterations" << std::endl;
 
 }
 

@@ -16,27 +16,224 @@
 // hence the only thing the function needs to allcoate is space for the outputs
 // depending on the versions they may require different inputs, hence the method overloading
 
-bool test_CG(
-    HPCG_functions<double>& uut,
-    striped_Matrix<double> & A,
-    double * x_d, double * y_d
-    ){
-        // this will be testing against file inputs, but for now we just need to check if the function runs
-        int n_iters;
-        double normr;
-        double normr0;
+// bool test_CG(
+//     HPCG_functions<double>& uut,
+//     striped_Matrix<double> & A,
+//     double * x_d, double * y_d
+//     ){
+//         // this will be testing against file inputs, but for now we just need to check if the function runs
+//         int n_iters;
+//         double normr;
+//         double normr0;
 
-        // x is all zeros
-        // r is y or well b ;)
+//         // x is all zeros
+//         // r is y or well b ;)
 
-        // just call CG
-        uut.compute_CG(A, y_d, x_d, n_iters, normr, normr0);
-        return true;
+//         // just call CG
+//         uut.compute_CG(A, y_d, x_d, n_iters, normr, normr0);
+//         return true;
 
-    }
+//     }
 
 
 // file based tests
+
+bool test_CG(
+    HPCG_functions<double>& implementation,
+    std::string test_folder)
+{
+    bool all_pass = true;
+    // int num_tests = 0;
+    // iterate through the test files
+    for (const auto& entry : std::filesystem::directory_iterator(test_folder)) {
+        std::string test_file_path = entry.path().string();
+        std::string test_folder_name = entry.path().filename().string();
+
+        std::ifstream file(test_file_path);
+        if (!file.is_open()) {
+            std::cerr << "Failed to open file: " << test_file_path << std::endl;
+            all_pass = false;
+            continue;
+        }
+
+        // std::cout << "Running test: " << test_file_path << std::endl;
+        // std::cout << "Folder name: " << test_folder_name << std::endl;
+
+        size_t underscore_pos = test_folder_name.find('_');
+        std::string method_name = (underscore_pos != std::string::npos) ? test_folder_name.substr(0, underscore_pos) : test_folder_name;
+
+        // std::cout << "Method name: " << method_name << std::endl;
+
+
+        if(method_name == "CG"){ // and num_tests < 1){
+            // num_tests++;
+
+            size_t first_underscore_pos = test_folder_name.find('_');
+            size_t second_underscore_pos = test_folder_name.find('_', first_underscore_pos + 1);
+            std::string preconditioning_info = (first_underscore_pos != std::string::npos && second_underscore_pos != std::string::npos) ? test_folder_name.substr(first_underscore_pos + 1, second_underscore_pos - first_underscore_pos - 1) : "";
+
+            // std::cout << "Preconditioning info: " << preconditioning_info << std::endl;
+            // std::cout << "num_tests: " << num_tests << std::endl;
+
+
+            std::string dimA_file_path = test_file_path + "/dimA.txt";
+            std::string b_file_path = test_file_path + "/b.txt";
+            std::string x_beforeCG_file_path = test_file_path + "/x_beforeCG.txt";
+            std::string x_afterCG_file_path = test_file_path + "/x_afterCG.txt";
+
+            int nx; int ny; int nz; int num_rows; int num_cols;
+
+            // open and read the dimensions from dimA.txt
+            std::ifstream dimA_file(dimA_file_path);
+            if (!dimA_file.is_open()) {
+                std::cerr << "Failed to open file: " << dimA_file_path << std::endl;
+                all_pass = false;
+                continue;
+            }
+
+            std::string line;
+            while (std::getline(dimA_file, line)) {
+                if (line.find("Number of Rows:") != std::string::npos) {
+                    num_rows = std::stoi(line.substr(line.find(":") + 1));
+                } else if (line.find("Number of Columns:") != std::string::npos) {
+                    num_cols = std::stoi(line.substr(line.find(":") + 1));
+                } else if (line.find("nx:") != std::string::npos) {
+                    nx = std::stoi(line.substr(line.find(":") + 1));
+                } else if (line.find("ny:") != std::string::npos) {
+                    ny = std::stoi(line.substr(line.find(":") + 1));
+                } else if (line.find("nz:") != std::string::npos) {
+                    nz = std::stoi(line.substr(line.find(":") + 1));
+                }
+            }
+            dimA_file.close();
+
+            std::vector<double> b_host(num_rows, 0.0);
+            std::vector<double> x_beforeCG_host(num_rows, 0.0);
+            std::vector<double> x_afterCG_host(num_rows, 0.0);
+
+            // now read the vectors
+            std::ifstream b_file(b_file_path);
+            if (b_file.is_open()) {
+                for (int i = 0; i < num_rows && b_file >> b_host[i]; ++i);
+                b_file.close();
+            } else {
+                std::cerr << "Failed to open file: " << b_file_path << std::endl;
+                all_pass = false;
+                continue;
+            }
+
+            std::ifstream x_beforeCG_file(x_beforeCG_file_path);
+            if (x_beforeCG_file.is_open()) {
+                for (int i = 0; i < num_rows && x_beforeCG_file >> x_beforeCG_host[i]; ++i);
+                x_beforeCG_file.close();
+            } else {
+                std::cerr << "Failed to open file: " << x_beforeCG_file_path << std::endl;
+                all_pass = false;
+                continue;
+            }
+
+            std::ifstream x_afterCG_file(x_afterCG_file_path);
+            if (x_afterCG_file.is_open()) {
+                for (int i = 0; i < num_rows && x_afterCG_file >> x_afterCG_host[i]; ++i);
+                x_afterCG_file.close();
+            } else {
+                std::cerr << "Failed to open file: " << x_afterCG_file_path << std::endl;
+                all_pass = false;
+                continue;
+            }
+
+            double * b_d;
+            double * x_d;
+
+            CHECK_CUDA(cudaMalloc(&b_d, num_rows * sizeof(double)));
+            CHECK_CUDA(cudaMalloc(&x_d, num_rows * sizeof(double)));
+
+            CHECK_CUDA(cudaMemcpy(b_d, b_host.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
+            CHECK_CUDA(cudaMemcpy(x_d, x_beforeCG_host.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
+
+            // // print the first 5 elements of x
+            // for (int i = 0; i < 5; i++) {
+            //     std::cout << x_beforeCG_host[i] << " ";
+            // }
+            // std::cout << std::endl;
+
+            // make A
+            sparse_CSR_Matrix<double> A;
+            A.generateMatrix_onGPU(nx, ny, nz);
+
+            // preallocate an int and two doubles for the output
+            int n_iters;
+            double normr;
+            double normr0;
+
+            if(preconditioning_info == "noPreconditioning"){
+                implementation.doPreconditioning = false;
+                if (implementation.implementation_type == Implementation_Type::STRIPED){
+                    striped_Matrix<double> A_striped;
+                    A_striped.striped_Matrix_from_sparse_CSR(A);
+                    implementation.compute_CG(A_striped, b_d, x_d, n_iters, normr, normr0);
+                } else{
+                    std::cout << "CG not implemented for this implementation" << std::endl;
+                    all_pass = false;
+                }
+
+            } else if (nx >= 24 and ny >= 24 and nz >= 24 and VERIFY_CG_WITH_PRECONDITIONING){
+                // when we do preconditioning we need at least 3 layers of coarse matrices to be able to compare to an HPCG file and we cannot do 2x2x2 matrices
+                
+                // initialize the coarse matrices to be used when preconditioning
+                sparse_CSR_Matrix<double>* current_matrix = &A;
+    
+                for(int i = 0; i < 3; i++){
+                    current_matrix->initialize_coarse_Matrix();
+                    current_matrix = current_matrix->get_coarse_Matrix();
+                }
+
+                implementation.doPreconditioning = true;
+
+                if (implementation.implementation_type == Implementation_Type::STRIPED){
+                    striped_Matrix<double> A_striped;
+                    A_striped.striped_Matrix_from_sparse_CSR(A);
+                    implementation.compute_CG(A_striped, b_d, x_d, n_iters, normr, normr0);
+                } else{
+                    std::cout << "CG not implemented for this implementation" << std::endl;
+                    all_pass = false;
+                }
+    
+            } else{
+                if(not VERIFY_CG_WITH_PRECONDITIONING){
+                    std::cout << "Skipping preconditioning tests in the interest of time" << std::endl;
+                    continue;
+                }
+                // if we would need to do preconditioning but the matrix is too small we move on
+                std::cerr << "Matrix too small for preconditioning" << std::endl;
+                continue;
+            }
+
+    
+            // now get the result and compare
+            std::vector<double> computed_result(num_rows, 0.0);
+            CHECK_CUDA(cudaMemcpy(computed_result.data(), x_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+
+            // compare the results
+            bool test_pass = vector_compare(x_afterCG_host, computed_result);
+
+            if(not test_pass){
+                std::cerr << "CG test failed for size " << nx << "x" << ny << "x" << nz << " for implementation: " << implementation.version_name << std::endl;
+                all_pass = false;
+                return all_pass;
+            }
+            // else {
+            //     // print the first 5 elements of the vectors
+            //     for (int i = 0; i < 5; i++) {
+            //         std::cout << computed_result[i] << " " << x_afterCG_host[i] << std::endl;
+            //     }
+            // }
+        }
+        file.close();
+    }
+    return all_pass;
+}
+
 bool test_MG(
     HPCG_functions<double>& implementation,
     std::string test_folder)
@@ -64,7 +261,6 @@ bool test_MG(
         // std::cout << "Method name: " << method_name << std::endl;
 
         if(method_name == "MG"){
-            // the size requirement is because we need to be able to have 3 layers of coarse matrices.
             std::string dimA_file_path = test_file_path + "/dimA.txt";
             std::string b_computed_file_path = test_file_path + "/b_computed.txt";
             std::string x_overlap_file_path = test_file_path + "/x_overlap.txt";
@@ -212,8 +408,6 @@ bool test_MG(
                 // }
             }
         }
-        // Process the file (example: read and run tests)
-        // ...
 
         file.close();
     }
@@ -599,7 +793,7 @@ bool test_SymGS(
     double * x_d, double * y_d
     )
 
-{
+{   
 
     int num_rows = A.get_num_rows();
     // since symGS changes x, we preserve the original x
@@ -685,8 +879,13 @@ bool test_SymGS(
     std::vector<double> x_baseline(num_rows, 0.0);
     std::vector<double> x_uut(num_rows, 0.0);
 
+    // std::vector<double> looki(5);
+    // CHECK_CUDA(cudaMemcpy(looki.data(), x_uut_d, 5 * sizeof(double), cudaMemcpyDeviceToHost));
+    // std::cout << "Looki: " << looki[0] << std::endl;
+
     uut.compute_SymGS(striped_A,
                     x_uut_d, y_d);
+
 
     // testing depends on the version it either checks for a relative residual or for the result
 
@@ -730,10 +929,8 @@ bool test_SymGS(
         // we need the x to be all set to zero, otherwise with different initial conditions the results will be different
         CHECK_CUDA(cudaMemset(x_baseline_d, 0, num_rows * sizeof(double)));
 
-        baseline.compute_SymGS(A,
-                            x_baseline_d, y_d);
+        baseline.compute_SymGS(A, x_baseline_d, y_d);
 
-        
         // and now we need to copy the result back and de-allocate the memory
         CHECK_CUDA(cudaMemcpy(x_baseline.data(), x_baseline_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
         CHECK_CUDA(cudaMemcpy(x_uut.data(), x_uut_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
@@ -745,6 +942,7 @@ bool test_SymGS(
         
         if (not test_pass){
             std::cout << "SymGS test failed for uut: " << uut.version_name << std::endl;
+            // std::cout << "I am sad" << std::endl;
         }
         // std::cout << "Baseline: " << x_baseline[0] << std::endl;
         // std::cout << "UUT: " << x_uut[0] << std::endl;

@@ -13,30 +13,14 @@ include_directories(${CUDAToolkit_INCLUDE_DIRS})
 # set(CMAKE_CUDA_STANDARD 12)
 # set(CMAKE_CUDA_STANDARD_REQUIRED ON)
 
-# Set CUDA architectures
-set(CMAKE_CUDA_ARCHITECTURES 86)
-
-# specify CUDA standard
-set(CMAKE_CUDA_STANDARD 12)
-set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+set(CMAKE_CUDA_ARCHITECTURES 70 86)
 
 # Set compile options for CUDA
 target_compile_options(HPCGLib PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:
     # --std=c++12
     # --std=c++11
-    -arch=sm_86
+    # -arch=sm_86
 >)
-
-# Set properties for CUDA compilation
-# set_target_properties(HPCGLib PROPERTIES
-#     CUDA_SEPARABLE_COMPILATION ON
-#     POSITION_INDEPENDENT_CODE ON
-# )
-
-# Set properties for CUDA compilation
-# set_target_properties(HPCGLib PROPERTIES
-#     CUDA_SEPARABLE_COMPILATION ON
-# )
 
 target_sources(HPCGLib PRIVATE
 

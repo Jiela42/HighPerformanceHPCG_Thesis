@@ -52,6 +52,7 @@ __device__ void backward_loop_body(int lane, int i, int num_cols, int num_stripe
         }
         if(i == col){
             shared_diag[0] = val;
+            // printf("row %d\n", i);
         }
     }
 
@@ -177,6 +178,8 @@ void striped_preprocessed_Implementation<T>::striped_preprocessed_computeSymGS(
     T * x_d, T * y_d // the vectors x and y are already on the device
         
 ){
+    std::vector<T> looki(5);
+
     int num_rows = A.get_num_rows();
     int num_cols = A.get_num_cols();
     int num_stripes = A.get_num_stripes();
@@ -228,6 +231,9 @@ void striped_preprocessed_Implementation<T>::striped_preprocessed_computeSymGS(
     // synchronize the device
     CHECK_CUDA(cudaDeviceSynchronize());
 
+    CHECK_CUDA(cudaMemcpy(looki.data(), x_d, 5*sizeof(T), cudaMemcpyDeviceToHost));
+    std::cout << "after forward pass looki[0]: " << looki[0] << std::endl;
+
 
     // backward pass
     // first we do preprocessing and a few rows simultaneously
@@ -251,6 +257,11 @@ void striped_preprocessed_Implementation<T>::striped_preprocessed_computeSymGS(
 
     CHECK_CUDA(cudaDeviceSynchronize());
 
+    CHECK_CUDA(cudaMemcpy(looki.data(), x_d, 5*sizeof(T), cudaMemcpyDeviceToHost));
+    std::cout << "after backward preprocessing pass looki[0]: " << looki[0] << std::endl;
+
+    std::cout << "num_rows_left: " << num_rows_left << std::endl;
+
     // do the bulk of the backward pass
     striped_backward_SymGS<<<num_blocks, num_threads>>>(
         num_rows_left, num_cols,
@@ -261,6 +272,10 @@ void striped_preprocessed_Implementation<T>::striped_preprocessed_computeSymGS(
     );
 
     CHECK_CUDA(cudaDeviceSynchronize());
+
+    CHECK_CUDA(cudaMemcpy(looki.data(), x_d, 5*sizeof(T), cudaMemcpyDeviceToHost));
+
+    std::cout << "at end looki[0]: " << looki[0] << std::endl;
    
 }
 

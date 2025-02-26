@@ -13,14 +13,14 @@ include_directories(${CUDAToolkit_INCLUDE_DIRS})
 
 
 # Set CUDA architectures
-set(CMAKE_CUDA_ARCHITECTURES 86)
+set(CMAKE_CUDA_ARCHITECTURES 70 86)
 
 enable_language(CUDA)
 
 # Set compile options for CUDA
 target_compile_options(HPCGLib PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:
     # --std=c++12
-    -arch=sm_86
+    # -arch=sm_86
 >)
 
 target_sources(UtilLib PRIVATE
