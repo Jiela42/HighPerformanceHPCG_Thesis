@@ -49,10 +49,14 @@ target_link_libraries(run_full_bench
     HPCGLib
     TimingLib
     TestHPCGLib
+    stdc++fs
+
 )
 
 target_link_libraries(run_specific_bench
     HPCGLib
     TimingLib
     TestHPCGLib
+    stdc++fs
+
 )

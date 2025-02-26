@@ -16,26 +16,6 @@
 // hence the only thing the function needs to allcoate is space for the outputs
 // depending on the versions they may require different inputs, hence the method overloading
 
-// bool test_CG(
-//     HPCG_functions<double>& uut,
-//     striped_Matrix<double> & A,
-//     double * x_d, double * y_d
-//     ){
-//         // this will be testing against file inputs, but for now we just need to check if the function runs
-//         int n_iters;
-//         double normr;
-//         double normr0;
-
-//         // x is all zeros
-//         // r is y or well b ;)
-
-//         // just call CG
-//         uut.compute_CG(A, y_d, x_d, n_iters, normr, normr0);
-//         return true;
-
-//     }
-
-
 // file based tests
 
 bool test_CG(
@@ -599,7 +579,7 @@ bool test_Dot(
 
     double result = 0.0;
 
-    // srand(RANDOM_SEED);
+    srand(RANDOM_SEED);
 
     for(int i = 0; i < nx * ny * nz; i++){
         double a = (double)rand() / RAND_MAX;

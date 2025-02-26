@@ -15,6 +15,7 @@
 
 # Running the C implementation of HPCGLib
 1. Create build folder in topmost folder
-2. '''make'''
-3. cd into testing or benchmarking
-4. use one of the run files to run e.g. '''./run_AllTests'''
+2. '''cmake ..'''
+3. '''make'''
+4. cd into testing or benchmarking
+5. use one of the run files to run e.g. '''./run_AllTests'''

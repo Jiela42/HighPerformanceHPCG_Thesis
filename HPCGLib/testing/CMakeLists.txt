@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.10)
 
 project(Testing LANGUAGES CXX CUDA)
 
-# # Set C++ standard to C++17
+# Set C++ standard to C++17
 # set(CMAKE_CXX_STANDARD 17)
+# set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(TestHPCGLib
     HPCG_versions_tests/cuSparse_tests.cpp
@@ -43,6 +44,7 @@ target_link_libraries(run_AllTests
     MatrixLib
     TestHPCGLib
     UtilLib
+    stdc++fs
 )
 
 target_link_libraries(run_coloring
