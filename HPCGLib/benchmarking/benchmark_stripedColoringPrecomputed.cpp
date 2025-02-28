@@ -1,7 +1,7 @@
 #include "benchmark.hpp"
 
 
-void run_striped_coloringPrecomputed_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path){
+void run_striped_coloringPrecomputed_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path, striped_coloringPrecomputed_Implementation<double>& implementation){
 
     sparse_CSR_Matrix<double> A;
     A.generateMatrix_onGPU(nx, ny, nz);
@@ -19,7 +19,6 @@ void run_striped_coloringPrecomputed_3d27p_benchmarks(int nx, int ny, int nz, st
     int nnz = striped_A.get_nnz();
     int num_stripes = striped_A.get_num_stripes();
     
-    striped_coloringPrecomputed_Implementation<double> implementation;
     std::string implementation_name = implementation.version_name;
     std::string additional_params = implementation.additional_parameters;
     std::string ault_node = implementation.ault_nodes;
@@ -56,7 +55,7 @@ void run_striped_coloringPrecomputed_3d27p_benchmarks(int nx, int ny, int nz, st
     delete timer;
 }
 
-void run_striped_coloringPrecomputed_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path){
+void run_striped_coloringPrecomputed_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path, striped_coloringPrecomputed_Implementation<double>& implementation){
     
     sparse_CSR_Matrix<double> A;
     A.generateMatrix_onGPU(nx, ny, nz);
@@ -72,7 +71,6 @@ void run_striped_coloringPrecomputed_3d27p_SymGS_benchmark(int nx, int ny, int n
     int nnz = striped_A.get_nnz();
     int num_stripes = striped_A.get_num_stripes();
 
-    striped_coloringPrecomputed_Implementation<double> implementation;
     std::string implementation_name = implementation.version_name;
     std::string additional_params = implementation.additional_parameters;
     std::string ault_node = implementation.ault_nodes;

@@ -19,10 +19,10 @@
 // file based tests
 
 bool test_CG(
-    HPCG_functions<double>& implementation,
-    std::string test_folder)
+    HPCG_functions<double>& implementation)
 {
     bool all_pass = true;
+    std::string test_folder = HPCG_OUTPUT_TEST_FOLDER;
     // int num_tests = 0;
     // iterate through the test files
     for (const auto& entry : std::filesystem::directory_iterator(test_folder)) {
@@ -151,7 +151,13 @@ bool test_CG(
                 if (implementation.implementation_type == Implementation_Type::STRIPED){
                     striped_Matrix<double> A_striped;
                     A_striped.striped_Matrix_from_sparse_CSR(A);
+
+                    // we might need a coloring precomputed
+                    A_striped.generate_coloring();
+
                     implementation.compute_CG(A_striped, b_d, x_d, n_iters, normr, normr0);
+                    std::cout << "CG took " << n_iters << " iterations for size " << nx << "x" << ny << "x" << nz << " without Preconditioning" << std::endl;
+
                 } else{
                     std::cout << "CG not implemented for this implementation" << std::endl;
                     all_pass = false;
@@ -168,12 +174,19 @@ bool test_CG(
                     current_matrix = current_matrix->get_coarse_Matrix();
                 }
 
+                
                 implementation.doPreconditioning = true;
-
+                
                 if (implementation.implementation_type == Implementation_Type::STRIPED){
-                    striped_Matrix<double> A_striped;
+                    striped_Matrix<double> A_striped;                    
                     A_striped.striped_Matrix_from_sparse_CSR(A);
+                    
+                    // we might need a coloring precomputed
+                    A_striped.generate_coloring();
+
                     implementation.compute_CG(A_striped, b_d, x_d, n_iters, normr, normr0);
+
+                    std::cout << "CG took " << n_iters << " iterations for size " << nx << "x" << ny << "x" << nz << " with Preconditioning" << std::endl;
                 } else{
                     std::cout << "CG not implemented for this implementation" << std::endl;
                     all_pass = false;
@@ -215,10 +228,10 @@ bool test_CG(
 }
 
 bool test_MG(
-    HPCG_functions<double>& implementation,
-    std::string test_folder)
+    HPCG_functions<double>& implementation)
 {
     bool all_pass = true;
+    std::string test_folder = HPCG_OUTPUT_TEST_FOLDER;
 
     // iterate through the test files
     for (const auto& entry : std::filesystem::directory_iterator(test_folder)) {
@@ -271,12 +284,14 @@ bool test_MG(
                 }
             }
             dimA_file.close();
+            // if(not (nx == 64 and ny ==128 and nz == 32))
+            // {continue;}
 
             if(nx >= 24 and ny >= 24 and nz >= 24){
                 // we need at 3 layers of coarse matrices to be able to compare to an HPCG file and we cannot do 2x2x2 matrices
 
                 // allocate the memory for the host vectors
-                // std::cout << "nx: " << nx << " ny: " << ny << " nz: " << nz << std::endl;
+                std::cout << "nx: " << nx << " ny: " << ny << " nz: " << nz << std::endl;
                 // std::cout << "Number of Rows: " << num_rows << std::endl;
                 std::vector<double> b_computed_host(num_rows, 0.0);
                 std::vector<double> x_overlap_host(num_rows, 0.0);
@@ -357,10 +372,14 @@ bool test_MG(
                 //     implementation.compute_MG(A, b_computed_d, x_overlap_d);
     
                 // } else
+
                 if (implementation.implementation_type == Implementation_Type::STRIPED){
-    
+                    
                     striped_Matrix<double> A_striped;
                     A_striped.striped_Matrix_from_sparse_CSR(A);
+
+                    // we might need a coloring precomputed
+                    A_striped.generate_coloring();
     
                     // test the MG function
                     implementation.compute_MG(A_striped, b_computed_d, x_overlap_d);
@@ -374,7 +393,7 @@ bool test_MG(
                 CHECK_CUDA(cudaMemcpy(computed_result.data(), x_overlap_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
     
                 // compare the results
-                bool test_pass = vector_compare(computed_result, x_overlap_after_mg_host);
+                bool test_pass = vector_compare(x_overlap_after_mg_host, computed_result);
     
                 if(not test_pass){
                     std::cerr << "MG test failed for size " << nx << "x" << ny << "x" << nz << std::endl;
@@ -391,6 +410,7 @@ bool test_MG(
 
         file.close();
     }
+    std::cout << "MG tested for implementation: " << implementation.version_name << std::endl;
     return all_pass;
 }
 

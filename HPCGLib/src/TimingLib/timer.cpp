@@ -50,7 +50,8 @@ void CudaTimer::stopTimer(std::string method_name) {
     cudaEventSynchronize(stop);
     cudaEventElapsedTime(&milliseconds, start, stop);
 
-    if (method_name == "compute_CG") CG_times.push_back(milliseconds);
+    if (method_name == "compute_CG_noPreconditioning") CG_noPreconditioning_times.push_back(milliseconds);
+    else if (method_name == "compute_CG") CG_times.push_back(milliseconds);
     else if (method_name == "compute_MG") MG_times.push_back(milliseconds);
     else if (method_name == "compute_SymGS") SymGS_times.push_back(milliseconds);
     else if (method_name == "compute_SPMV") SPMV_times.push_back(milliseconds);
@@ -115,6 +116,7 @@ void CudaTimer::writeResultsToCsv() {
                 + std::to_string(nx) + "," + std::to_string(ny) + "," + std::to_string(nz) + "," + std::to_string(nnz) + ",";
 
     writeCSV(base_filename + "CG.csv", base_fileheader + "CG," + additional_parameters, CG_times);
+    writeCSV(base_filename + "CG_noPreconditioning.csv", base_fileheader + "CG_noPreconditioning," + additional_parameters, CG_noPreconditioning_times);
     writeCSV(base_filename + "MG.csv", base_fileheader + "MG," + additional_parameters, MG_times);
     writeCSV(base_filename + "SymGS.csv", base_fileheader + "SymGS," + additional_parameters, SymGS_times);
     writeCSV(base_filename + "SPMV.csv", base_fileheader + "SPMV," + additional_parameters, SPMV_times);

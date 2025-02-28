@@ -1,7 +1,7 @@
 #include "benchmark.hpp"
 
 
-void run_no_store_striped_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path){
+void run_no_store_striped_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path, no_store_striped_coloring_Implementation<double>& implementation){
 
     sparse_CSR_Matrix<double> A;
     A.generateMatrix_onGPU(nx, ny, nz);
@@ -18,7 +18,6 @@ void run_no_store_striped_coloring_3d27p_benchmarks(int nx, int ny, int nz, std:
     int nnz = striped_A.get_nnz();
     int num_stripes = striped_A.get_num_stripes();
     
-    no_store_striped_coloring_Implementation<double> implementation;
     std::string implementation_name = implementation.version_name;
     std::string additional_params = implementation.additional_parameters;
     std::string ault_node = implementation.ault_nodes;
@@ -55,7 +54,7 @@ void run_no_store_striped_coloring_3d27p_benchmarks(int nx, int ny, int nz, std:
     delete timer;
 }
 
-void run_no_store_striped_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path){
+void run_no_store_striped_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path, no_store_striped_coloring_Implementation<double>& implementation){
     
     sparse_CSR_Matrix<double> A;
     A.generateMatrix_onGPU(nx, ny, nz);
@@ -70,7 +69,6 @@ void run_no_store_striped_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz,
     int nnz = striped_A.get_nnz();
     int num_stripes = striped_A.get_num_stripes();
     
-    no_store_striped_coloring_Implementation<double> implementation;
     std::string implementation_name = implementation.version_name;
     std::string additional_params = implementation.additional_parameters;
     std::string ault_node = implementation.ault_nodes;

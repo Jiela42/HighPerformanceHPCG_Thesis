@@ -25,6 +25,7 @@
 
 #define RANDOM_SEED 42
 #define VERIFY_CG_WITH_PRECONDITIONING 0
+#define HPCG_OUTPUT_TEST_FOLDER "../../../hpcg_output"
 
 bool run_all_util_tests(int nx, int ny, int nz);
 
@@ -37,13 +38,11 @@ bool read_save_test(striped_Matrix<double>& A, std::string info);
 
 // abstract test functions from HPCG_functions
 bool test_CG(
-    HPCG_functions<double>& implementation,
-    std::string test_folder
+    HPCG_functions<double>& implementation
 );
 
 bool test_MG(
-    HPCG_functions<double>& implementation,
-    std::string test_folder
+    HPCG_functions<double>& implementation
 );
 
 // bool test_CG(
@@ -122,7 +121,10 @@ bool run_stripedWarpReduction_tests(int nx, int ny, int nz);
 bool run_stripedWarpReduction_filebased_tests();
 bool run_stripedPreprocessed_tests(int nx, int ny, int nz);
 bool run_stripedColored_tests(int nx, int ny, int nz);
+bool run_stripedColoringPrecomputed_filebased_tests();
 bool run_stripedColoringPrecomputed_tests(int nx, int ny, int nz);
 bool run_stripedBoxColoring_tests(int nx, int ny, int nz);
+bool run_no_store_stripedColoring_tests(int nx, int ny, int nz);
+bool run_no_store_stripedColoring_filebased_tests();
 
 #endif // TESTING_HPP

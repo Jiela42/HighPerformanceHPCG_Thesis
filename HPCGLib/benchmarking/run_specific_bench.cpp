@@ -28,7 +28,7 @@ int main() {
 
     // generate a timestamped folder
     std::string base_path = "../../../timing_results/";
-    // base_path = "../../../dummy_timing_results/";
+    base_path = "../../../dummy_timing_results/";
 
 
     std::string folder_path = createTimestampedFolder(base_path);
@@ -36,89 +36,97 @@ int main() {
 
     std::cout << "Starting Benchmark" << std::endl;
 
-    // run_cuSparse_3d27p_SPMV_benchmark(64, 64, 64, folder_path);
+    cuSparse_Implementation<double> CSR_implementation;
+    run_cuSparse_3d27p_SPMV_benchmark(64, 64, 64, folder_path, CSR_implementation);
 
 
-    // run_cuSparse_3d27p_SymGS_benchmark(8, 8, 8, folder_path);
-    // run_cuSparse_3d27p_SymGS_benchmark(16, 16, 16, folder_path);
-    // run_cuSparse_3d27p_SymGS_benchmark(32, 32, 32, folder_path);
-    // run_cuSparse_3d27p_SymGS_benchmark(64, 64, 64, folder_path);
-    // run_cuSparse_3d27p_SymGS_benchmark(128, 64, 64, folder_path);
-    // run_cuSparse_3d27p_SymGS_benchmark(128, 128, 64, folder_path);
-    // run_cuSparse_3d27p_SymGS_benchmark(128, 128, 128, folder_path);
-    // run_cuSparse_3d27p_SymGS_benchmark(256, 128, 128, folder_path);
-    // run_cuSparse_3d27p_SymGS_benchmark(256, 256, 128, folder_path);
+    run_cuSparse_3d27p_SymGS_benchmark(8, 8, 8, folder_path, CSR_implementation);
+    run_cuSparse_3d27p_SymGS_benchmark(16, 16, 16, folder_path, CSR_implementation);
+    run_cuSparse_3d27p_SymGS_benchmark(32, 32, 32, folder_path, CSR_implementation);
+    run_cuSparse_3d27p_SymGS_benchmark(64, 64, 64, folder_path, CSR_implementation);
+    run_cuSparse_3d27p_SymGS_benchmark(128, 64, 64, folder_path, CSR_implementation);
+    run_cuSparse_3d27p_SymGS_benchmark(128, 128, 64, folder_path, CSR_implementation);
+    // run_cuSparse_3d27p_SymGS_benchmark(128, 128, 128, folder_path, CSR_implementation);
+    // run_cuSparse_3d27p_SymGS_benchmark(256, 128, 128, folder_path, CSR_implementation);
+    // run_cuSparse_3d27p_SymGS_benchmark(256, 256, 128, folder_path, CSR_implementation);
 
-    // run_cuSparse_3d27p_Dot_benchmark(8, 8, 8, folder_path);
-    // run_cuSparse_3d27p_Dot_benchmark(16, 16, 16, folder_path);
-    // run_cuSparse_3d27p_Dot_benchmark(24, 24, 24, folder_path);
-    // run_cuSparse_3d27p_Dot_benchmark(32, 32, 32, folder_path);
-    // run_cuSparse_3d27p_Dot_benchmark(64, 64, 64, folder_path);
-    // run_cuSparse_3d27p_Dot_benchmark(128, 64, 64, folder_path);
-    // run_cuSparse_3d27p_Dot_benchmark(128, 128, 64, folder_path);
-    // run_cuSparse_3d27p_Dot_benchmark(128, 128, 128, folder_path);
-    // run_cuSparse_3d27p_Dot_benchmark(256, 128, 128, folder_path);
+    run_cuSparse_3d27p_Dot_benchmark(8, 8, 8, folder_path, CSR_implementation);
+    run_cuSparse_3d27p_Dot_benchmark(16, 16, 16, folder_path, CSR_implementation);
+    run_cuSparse_3d27p_Dot_benchmark(24, 24, 24, folder_path, CSR_implementation);
+    run_cuSparse_3d27p_Dot_benchmark(32, 32, 32, folder_path, CSR_implementation);
+    run_cuSparse_3d27p_Dot_benchmark(64, 64, 64, folder_path, CSR_implementation);
+    run_cuSparse_3d27p_Dot_benchmark(128, 64, 64, folder_path, CSR_implementation);
+    // run_cuSparse_3d27p_Dot_benchmark(128, 128, 64, folder_path, CSR_implementation);
+    // run_cuSparse_3d27p_Dot_benchmark(128, 128, 128, folder_path, CSR_implementation);
+    // run_cuSparse_3d27p_Dot_benchmark(256, 128, 128, folder_path, CSR_implementation);
+    std::cout << "Finished cuSparse Benchmark" << std::endl;
 
-    // std::cout << "Finished cuSparse Benchmark" << std::endl;
-    // run_warp_reduction_3d27p_Dot_benchmark(8, 8, 8, folder_path);
-    // run_warp_reduction_3d27p_Dot_benchmark(16, 16, 16, folder_path);
-    // run_warp_reduction_3d27p_Dot_benchmark(24, 24, 24, folder_path);
-    // run_warp_reduction_3d27p_Dot_benchmark(32, 32, 32, folder_path);
-    // run_warp_reduction_3d27p_Dot_benchmark(64, 64, 64, folder_path);
-    // run_warp_reduction_3d27p_Dot_benchmark(128, 64, 64, folder_path);
-    // run_warp_reduction_3d27p_Dot_benchmark(128, 128, 64, folder_path);
-    // run_warp_reduction_3d27p_Dot_benchmark(128, 128, 128, folder_path);
-    // run_warp_reduction_3d27p_Dot_benchmark(256, 128, 128, folder_path);
-    // run_warp_reduction_3d27p_Dot_benchmark(256, 256, 128, folder_path);
-    run_warp_reduction_3d27p_WAXPBY_benchmark(8, 8, 8, folder_path);
-    run_warp_reduction_3d27p_WAXPBY_benchmark(16, 16, 16, folder_path);
-    run_warp_reduction_3d27p_WAXPBY_benchmark(24, 24, 24, folder_path);
-    run_warp_reduction_3d27p_WAXPBY_benchmark(32, 32, 32, folder_path);
-    run_warp_reduction_3d27p_WAXPBY_benchmark(64, 64, 64, folder_path);
-    run_warp_reduction_3d27p_WAXPBY_benchmark(128, 64, 64, folder_path);
-    run_warp_reduction_3d27p_WAXPBY_benchmark(128, 128, 64, folder_path);
-    run_warp_reduction_3d27p_WAXPBY_benchmark(128, 128, 128, folder_path);
-    run_warp_reduction_3d27p_WAXPBY_benchmark(256, 128, 128, folder_path);
-    run_warp_reduction_3d27p_WAXPBY_benchmark(256, 256, 128, folder_path);
-    run_warp_reduction_3d27p_WAXPBY_benchmark(256, 256, 256, folder_path);
-    // run_warp_reduction_3d27p_SPMV_benchmark(8, 8, 8, folder_path);
-    // run_warp_reduction_3d27p_SPMV_benchmark(16, 16, 16, folder_path);
-    // run_warp_reduction_3d27p_SPMV_benchmark(24, 24, 24, folder_path);
-    // run_warp_reduction_3d27p_SPMV_benchmark(32, 32, 32, folder_path);
-    // run_warp_reduction_3d27p_SPMV_benchmark(64, 64, 64, folder_path);
-    // run_warp_reduction_3d27p_SPMV_benchmark(128, 64, 64, folder_path);
-    // run_warp_reduction_3d27p_SPMV_benchmark(128, 128, 64, folder_path);
-    // run_warp_reduction_3d27p_SPMV_benchmark(128, 128, 128, folder_path);
-    // run_warp_reduction_3d27p_SPMV_benchmark(256, 128, 128, folder_path);
-    // run_warp_reduction_3d27p_SPMV_benchmark(256, 256, 128, folder_path);
+    striped_warp_reduction_Implementation<double> SWR_implementation;
+    run_warp_reduction_3d27p_Dot_benchmark(8, 8, 8, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_Dot_benchmark(16, 16, 16, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_Dot_benchmark(24, 24, 24, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_Dot_benchmark(32, 32, 32, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_Dot_benchmark(64, 64, 64, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_Dot_benchmark(128, 64, 64, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_Dot_benchmark(128, 128, 64, folder_path, SWR_implementation);
+    // run_warp_reduction_3d27p_Dot_benchmark(128, 128, 128, folder_path, SWR_implementation);
+    // run_warp_reduction_3d27p_Dot_benchmark(256, 128, 128, folder_path, SWR_implementation);
+    // run_warp_reduction_3d27p_Dot_benchmark(256, 256, 128, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_WAXPBY_benchmark(8, 8, 8, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_WAXPBY_benchmark(16, 16, 16, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_WAXPBY_benchmark(24, 24, 24, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_WAXPBY_benchmark(32, 32, 32, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_WAXPBY_benchmark(64, 64, 64, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_WAXPBY_benchmark(128, 64, 64, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_WAXPBY_benchmark(128, 128, 64, folder_path, SWR_implementation);
+    // run_warp_reduction_3d27p_WAXPBY_benchmark(128, 128, 128, folder_path, SWR_implementation);
+    // run_warp_reduction_3d27p_WAXPBY_benchmark(256, 128, 128, folder_path, SWR_implementation);
+    // run_warp_reduction_3d27p_WAXPBY_benchmark(256, 256, 128, folder_path, SWR_implementation);
+    // run_warp_reduction_3d27p_WAXPBY_benchmark(256, 256, 256, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_SPMV_benchmark(8, 8, 8, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_SPMV_benchmark(16, 16, 16, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_SPMV_benchmark(24, 24, 24, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_SPMV_benchmark(32, 32, 32, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_SPMV_benchmark(64, 64, 64, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_SPMV_benchmark(128, 64, 64, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_SPMV_benchmark(128, 128, 64, folder_path, SWR_implementation);
+    // run_warp_reduction_3d27p_SPMV_benchmark(128, 128, 128, folder_path, SWR_implementation);
+    // run_warp_reduction_3d27p_SPMV_benchmark(256, 128, 128, folder_path, SWR_implementation);
+    // run_warp_reduction_3d27p_SPMV_benchmark(256, 256, 128, folder_path, SWR_implementation);
 
-    // run_warp_reduction_3d27p_SymGS_benchmark(8, 8, 8, folder_path);
-    // run_warp_reduction_3d27p_SymGS_benchmark(16, 16, 16, folder_path);
-    // run_warp_reduction_3d27p_SymGS_benchmark(32, 32, 32, folder_path);
-    // run_warp_reduction_3d27p_SymGS_benchmark(64, 64, 64, folder_path);
-    // run_warp_reduction_3d27p_SymGS_benchmark(128, 64, 64, folder_path);
-    // run_warp_reduction_3d27p_SymGS_benchmark(128, 128, 64, folder_path);
-    // run_warp_reduction_3d27p_SymGS_benchmark(128, 128, 128, folder_path);
-    // run_warp_reduction_3d27p_SymGS_benchmark(256, 128, 128, folder_path);
-    // run_warp_reduction_3d27p_SymGS_benchmark(256, 256, 128, folder_path);
+    run_warp_reduction_3d27p_SymGS_benchmark(8, 8, 8, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_SymGS_benchmark(16, 16, 16, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_SymGS_benchmark(32, 32, 32, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_SymGS_benchmark(64, 64, 64, folder_path, SWR_implementation);
+    run_warp_reduction_3d27p_SymGS_benchmark(128, 64, 64, folder_path, SWR_implementation);
+    // run_warp_reduction_3d27p_SymGS_benchmark(128, 128, 64, folder_path, SWR_implementation);
+    // run_warp_reduction_3d27p_SymGS_benchmark(128, 128, 128, folder_path, SWR_implementation);
+    // run_warp_reduction_3d27p_SymGS_benchmark(256, 128, 128, folder_path, SWR_implementation);
+    // run_warp_reduction_3d27p_SymGS_benchmark(256, 256, 128, folder_path, SWR_implementation);
 
-    // run_striped_preprocessed_3d27p_SymGS_benchmark(8, 8, 8, folder_path);
-    // run_striped_preprocessed_3d27p_SymGS_benchmark(16, 16, 16, folder_path);
-    // run_striped_preprocessed_3d27p_SymGS_benchmark(32, 32, 32, folder_path);
-    // run_striped_preprocessed_3d27p_SymGS_benchmark(64, 64, 64, folder_path);
-    // run_striped_preprocessed_3d27p_SymGS_benchmark(128, 64, 64, folder_path);
-    // run_striped_preprocessed_3d27p_SymGS_benchmark(128, 128, 64, folder_path);
-    // run_striped_preprocessed_3d27p_SymGS_benchmark(128, 128, 128, folder_path);
-    // run_striped_preprocessed_3d27p_SymGS_benchmark(256, 128, 128, folder_path);
-    // run_striped_preprocessed_3d27p_SymGS_benchmark(256, 256, 128, folder_path);
+    // this version has issues, so we never run it and we also don't plan on fixing it because we are benches
+    // std::cout << "Starting Striped Preprocessed 3d27p Benchmarks" << std::endl;
+    // striped_preprocessed_Implementation<double> SPP_implementation;
+    // run_striped_preprocessed_3d27p_SymGS_benchmark(8, 8, 8, folder_path, SPP_implementation);
+    // run_striped_preprocessed_3d27p_SymGS_benchmark(16, 16, 16, folder_path, SPP_implementation);
+    // run_striped_preprocessed_3d27p_SymGS_benchmark(32, 32, 32, folder_path, SPP_implementation);
+    // run_striped_preprocessed_3d27p_SymGS_benchmark(64, 64, 64, folder_path, SPP_implementation);
+    // run_striped_preprocessed_3d27p_SymGS_benchmark(128, 64, 64, folder_path, SPP_implementation);
+    // run_striped_preprocessed_3d27p_SymGS_benchmark(128, 128, 64, folder_path, SPP_implementation);
+    // run_striped_preprocessed_3d27p_SymGS_benchmark(128, 128, 128, folder_path, SPP_implementation);
+    // run_striped_preprocessed_3d27p_SymGS_benchmark(256, 128, 128, folder_path, SPP_implementation);
+    // run_striped_preprocessed_3d27p_SymGS_benchmark(256, 256, 128, folder_path, SPP_implementation);
 
-    // run_striped_coloring_3d27p_SymGS_benchmark(8, 8, 8, folder_path);
-    // run_striped_coloring_3d27p_SymGS_benchmark(64, 64, 64, folder_path);
+    striped_coloring_Implementation<double> SC_implementation;
+    run_striped_coloring_3d27p_SymGS_benchmark(8, 8, 8, folder_path, SC_implementation);
+    run_striped_coloring_3d27p_SymGS_benchmark(64, 64, 64, folder_path, SC_implementation);
 
-    // run_no_store_striped_coloring_3d27p_SymGS_benchmark(8, 8, 8, folder_path);
+    no_store_striped_coloring_Implementation<double> NC_SC_implementation;
+    run_no_store_striped_coloring_3d27p_SymGS_benchmark(8, 8, 8, folder_path, NC_SC_implementation);
 
-    // run_striped_coloringPrecomputed_3d27p_SymGS_benchmark(8, 8, 8, folder_path);
-    // run_striped_coloringPrecomputed_3d27p_SymGS_benchmark(256, 256, 128, folder_path);
+    striped_coloringPrecomputed_Implementation<double> SCP_implementation;
+    run_striped_coloringPrecomputed_3d27p_SymGS_benchmark(8, 8, 8, folder_path, SCP_implementation);
+    // run_striped_coloringPrecomputed_3d27p_SymGS_benchmark(256, 256, 128, folder_path, SCP_implementation);
 
     std::cout << "Finished Benchmark" << std::endl;  
 

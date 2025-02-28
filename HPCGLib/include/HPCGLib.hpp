@@ -6,7 +6,7 @@
 #include <string>
 
 // define number of iterations we want to have
-#define num_bench_iter 10
+#define num_bench_iter 1
 
 enum class Implementation_Type {
     STRIPED,
@@ -33,6 +33,9 @@ class HPCG_functions {
         bool SPMV_implemented = false;
         bool WAXPBY_implemented = false;
         bool Dot_implemented = false;
+
+        bool CG_file_based_tests_passed = false;
+        bool MG_file_based_tests_passed = false;
 
         void add_additional_parameters(std::string another_parameter) {
             additional_parameters += "_" + another_parameter;

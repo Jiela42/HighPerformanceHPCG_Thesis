@@ -1,7 +1,7 @@
 #include "benchmark.hpp"
 
 
-void run_striped_box_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path){
+void run_striped_box_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path, striped_box_coloring_Implementation<double>& implementation){
     
     sparse_CSR_Matrix<double> A;
     A.generateMatrix_onGPU(nx, ny, nz);
@@ -28,8 +28,6 @@ void run_striped_box_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std:
 
     for(int i = 3; i <= 3; i ++){
         
-        striped_box_coloring_Implementation<double> implementation;
-
         implementation.bx = i;
         implementation.by = i;
         implementation.bz = i;
@@ -56,7 +54,7 @@ void run_striped_box_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std:
 
 }
 
-void run_striped_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path){
+void run_striped_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path, striped_box_coloring_Implementation<double>& implementation){
 
     sparse_CSR_Matrix<double> A;
     A.generateMatrix_onGPU(nx, ny, nz);
@@ -73,7 +71,6 @@ void run_striped_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::stri
     int nnz = striped_A.get_nnz();
     int num_stripes = striped_A.get_num_stripes();
     
-    striped_box_coloring_Implementation<double> implementation;
     // std::string box_dims = std::to_string(implementation.bx) + "x" + std::to_string(implementation.by) + "x" + std::to_string(implementation.bz);
     // std::string implementation_name = implementation.version_name + "_box: " + box_dims;
     std::string implementation_name = implementation.version_name;
@@ -115,5 +112,5 @@ void run_striped_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::stri
     delete timer;
 
     // run the SymGS benchmark
-    run_striped_box_coloring_3d27p_SymGS_benchmark(nx, ny, nz, folder_path);
+    run_striped_box_coloring_3d27p_SymGS_benchmark(nx, ny, nz, folder_path, implementation);
 }

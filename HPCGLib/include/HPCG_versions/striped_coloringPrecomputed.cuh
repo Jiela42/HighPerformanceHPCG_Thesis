@@ -5,6 +5,7 @@
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
 #include "MatrixLib/striped_Matrix.hpp"
 #include "UtilLib/cuda_utils.hpp"
+#include "HPCG_versions/striped_warp_reduction.cuh"
 
 #include <vector>
 #include <iostream>
@@ -14,7 +15,7 @@
 #include <cuda_runtime.h>
 
 template <typename T>
-class striped_coloringPrecomputed_Implementation : public HPCG_functions<T> {
+class striped_coloringPrecomputed_Implementation : public striped_warp_reduction_Implementation<T> {
 public:
 
     striped_coloringPrecomputed_Implementation(){
@@ -27,29 +28,12 @@ public:
         this->implementation_type = Implementation_Type::STRIPED;
 
         this->SymGS_implemented = true;
+        this->MG_implemented = true;
+        this->CG_implemented = true;
+        this->WAXPBY_implemented = false;
+        this->Dot_implemented = false;
+        this->SPMV_implemented = false;
         
-    }
-
-    void compute_CG(
-        striped_Matrix<T> & A,
-        T * b_d, T * x_d,
-        int & n_iters, T& normr, T& normr0
-    ) override {
-        std::cerr << "Warning: compute_CG is not implemented in Striped coloring." << std::endl;
-    }
-    
-    void compute_MG(
-        striped_Matrix<T> & A,
-        T * x_d, T * y_d // the vectors x and y are already on the device
-        ) override {
-        std::cerr << "Warning: compute_MG is not implemented in Striped coloring." << std::endl;
-    }
-
-    void compute_SymGS(
-        sparse_CSR_Matrix<T> & A,
-        T * x_d, T * y_d // the vectors x and y are already on the device
-        ) override {
-        std::cerr << "Warning: compute_SymGS requires different arguments in Striped coloring." << std::endl;
     }
 
     void compute_SymGS(
@@ -60,53 +44,11 @@ public:
         striped_coloringPrecomputed_computeSymGS(A, x_d, y_d);
     }
 
-    void compute_SPMV(
-        sparse_CSR_Matrix<T> & A,
-        T * x_d, T * y_d // the vectors x and y are already on the device
-        ) override {
-        throw std::runtime_error("ERROR: compute_SPMV requires a striped Matrix as input in the Striped coloring Implementation.");
-    }
-
-    void compute_WAXPBY(
-        sparse_CSR_Matrix<T> & A, // we pass A for the metadata
-        T * x_d, T * y_d, T * w_d, // the vectors x, y and w are already on the device
-        T alpha, T beta
-        ) override {
-        std::cerr << "Warning: compute_WAXPBY is not implemented in Striped coloring." << std::endl;
-    }
-    void compute_WAXPBY(
-        striped_Matrix<T> & A, // we pass A for the metadata
-        T * x_d, T * y_d, T * w_d, // the vectors x, y and w are already on the device
-        T alpha, T beta
-        ) override {
-        std::cerr << "Warning: compute_WAXPBY is not implemented in Striped coloring." << std::endl;
-    }
-
-    void compute_Dot(
-        sparse_CSR_Matrix<T> & A, // we pass A for the metadata
-        T * x_d, T * y_d, T * result_d // again: the vectors x, y and result are already on the device
-        ) override {
-        std::cerr << "Warning: compute_Dot is not implemented using the sparse_CSR Matrix in Striped coloring." << std::endl;
-    }
-
-    void compute_Dot(
-        striped_Matrix<T> & A, // we pass A for the metadata
-        T * x_d, T * y_d, T * result_d // again: the vectors x, y and result are already on the device
-        ) override {
-        std::cerr << "Warning: compute_Dot is not implemented using the striped Matrix in Striped coloring." << std::endl;
-    }
-
-
-    // Striped matrices need a special SPMV implementations because they have special arguments
-    // we have some aliasing going on depending on the input parameters.
-    void compute_SPMV(
-        striped_Matrix<T>& A,
-        T * x_d, T * y_d // the vectors x and y are already on the device
-        ) override {
-        std::cerr << "Warning: compute_SPMV requires different arguments in Striped coloring." << std::endl;
-    }
 
 private:
+
+    // we use the CG and MG implementations from warp reduction
+    // striped_warp_reduction_Implementation<T> striped_warp_reduction_implementation;
 
     void striped_coloringPrecomputed_computeSymGS(
         striped_Matrix<T> & A,

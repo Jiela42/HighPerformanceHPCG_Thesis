@@ -418,6 +418,11 @@ void striped_Matrix<T>::generate_coloring(){
     CHECK_CUDA(cudaMalloc(&this->color_sorted_rows_d, this->num_rows * sizeof(int)));
 
     get_color_row_mapping(this->nx, this->ny, this->nz, this->color_pointer_d, this->color_sorted_rows_d);
+
+    // also generate the coloring for any coarse matrices
+    if(this->coarse_Matrix != nullptr){
+        this->coarse_Matrix->generate_coloring();
+    }
 }
 
 template <typename T>

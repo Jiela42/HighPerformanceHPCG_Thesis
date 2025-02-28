@@ -68,6 +68,24 @@ bool run_striped_coloringPrecomputed_tests_on_matrix(sparse_CSR_Matrix<double>& 
     return all_pass;
 }
 
+bool run_stripedColoringPrecomputed_filebased_tests(){
+
+    bool all_pass = true;
+
+    striped_coloringPrecomputed_Implementation<double> striped_coloringPrecomputed;
+
+    // MG tests
+    all_pass = all_pass && test_MG(striped_coloringPrecomputed);
+
+    std::cout << "Finished MG tests" << std::endl;
+    
+    // CG tests
+    all_pass = all_pass && test_CG(striped_coloringPrecomputed);
+
+    return all_pass;
+
+}
+
 bool run_stripedColoringPrecomputed_tests(int nx, int ny, int nz){
 
     bool all_pass = true;

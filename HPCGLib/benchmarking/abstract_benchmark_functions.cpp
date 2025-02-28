@@ -1,10 +1,103 @@
 #include "benchmark.hpp"
 #include <sstream>
-// #include "TimingLib/timer.hpp"
 
 // these function calls the abstract function the required number of times and records the time
-
 // again we have method overloading for different matrix types
+
+void bench_CG(
+    HPCG_functions<double>& implementation,
+    CudaTimer& timer,
+    striped_Matrix<double> & A,
+    double * x_d, double * y_d
+    )
+{
+    int num_iterations = implementation.getNumberOfIterations();
+    
+    // grab original data to store it
+    std::vector<double> x_original(A.get_num_rows(), 0.0);
+    CHECK_CUDA(cudaMemcpy(x_original.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+
+    if(implementation.test_before_bench and not implementation.CG_file_based_tests_passed){
+        // we do not have a baseline for CG
+        // therefore we run the filebased tests
+        bool test_passed = test_CG(implementation);
+        implementation.CG_file_based_tests_passed = test_passed;
+
+        std::cout << "CG tested for implementation " << implementation.version_name << std::endl;
+
+        if (not test_passed){
+            num_iterations = 0;
+        }
+    }
+
+    // we need a few more parameters for the CG function
+    int n_iters;
+    double normr;
+    double normr0;
+
+    // we do both with and withotu preconditioning
+    implementation.doPreconditioning = true;
+    for(int i = 0; i < num_iterations; i++){
+        timer.startTimer();
+        implementation.compute_CG(
+            A,
+            y_d, x_d,
+            n_iters, normr, normr0
+        );
+        timer.stopTimer("compute_CG");
+        // restore original x
+        CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+    }
+
+    // now without preconditioning
+    implementation.doPreconditioning = false;
+    for(int i = 0; i < num_iterations; i++){
+        timer.startTimer();
+        implementation.compute_CG(
+            A,
+            y_d, x_d,
+            n_iters, normr, normr0
+        );
+        timer.stopTimer("compute_CG_noPreconditioning");
+        // restore original x
+        CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+    }
+}
+
+void bench_MG(
+    HPCG_functions<double>& implementation,
+    CudaTimer& timer,
+    striped_Matrix<double> & A,
+    double * x_d, double * y_d
+    )
+{
+    int num_iterations = implementation.getNumberOfIterations();
+
+    // obtain the original x vector
+    std::vector<double> x_original(A.get_num_rows(), 0.0);
+    CHECK_CUDA(cudaMemcpy(x_original.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+
+    if (implementation.test_before_bench and not implementation.MG_file_based_tests_passed){
+        
+        // there is no MG baseline so we test against the filebased tests
+        bool test_passed = test_MG(implementation);
+        implementation.MG_file_based_tests_passed = test_passed;
+
+        if (not test_passed){
+            num_iterations = 0;
+        }
+    }
+
+    for(int i = 0; i < num_iterations; i++){
+        timer.startTimer();
+        implementation.compute_MG(
+            A,
+            y_d, x_d
+        );
+        timer.stopTimer("compute_MG");
+    }
+}
+
 
 // this SPMV supports CSR matrixes
 void bench_SPMV(
@@ -367,6 +460,12 @@ void bench_Implementation(
     }
     if(implementation.WAXPBY_implemented){
         bench_WAXPBY(implementation, timer, A, a_d, b_d, y_d, alpha, beta);
+    }
+    if(implementation.CG_implemented){
+        bench_CG(implementation, timer, A, x_d, y_d);
+    }
+    if(implementation.MG_implemented){
+        bench_MG(implementation, timer, A, x_d, y_d);
     }
 
     // other functions to be benchmarked

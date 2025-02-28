@@ -20,13 +20,13 @@ __global__ void no_store_striped_coloring_half_SymGS_kernel(
     int num_warps = blockDim.x * gridDim.x / WARP_SIZE;
 
     for(int xy = 0 + warp_id; xy < nx*ny; xy += num_warps){
-        int xi = xy % ny;
-        int yi = xy / ny;
+        int xi = xy / ny;
+        int yi = xy % ny;
 
         int enumerator = color - xi - 2*yi;
 
         if(enumerator < 0){
-            break;
+            continue;
         }
         if(enumerator % 4 != 0){
             continue;
@@ -34,9 +34,10 @@ __global__ void no_store_striped_coloring_half_SymGS_kernel(
         int zi = enumerator / 4;
 
         if (zi < nz){
-            int row = xi * ny * nz + yi * nz + zi;
+            int row = xi + yi * nx + zi * nx * ny;
             double my_sum = 0.0;
             for(int stripe = lane_id; stripe < num_stripes; stripe += WARP_SIZE){
+
                 int col = j_min_i[stripe] + row;
                 double val = striped_A[row * num_stripes + stripe];
                 if(col < num_cols && col >= 0){
@@ -53,12 +54,13 @@ __global__ void no_store_striped_coloring_half_SymGS_kernel(
             if (lane_id == 0){
                 double diag = striped_A[row * num_stripes + diag_offset];
                 double sum = diag * x[row] + y[row] + my_sum;
-                x[row] = sum / diag;           
+                if (row == 147512){
+                    printf("sum: %f, diag: %f, x: %f, y: %f\n", sum, diag, x[row], y[row]);
+                }           
+                x[row] = sum / diag;
             }
             __syncthreads();
 
-        } else {
-            break;
         }
     }
 }
@@ -84,15 +86,22 @@ void no_store_striped_coloring_Implementation<T>::no_store_striped_coloring_comp
     int ny = A.get_ny();
     int nz = A.get_nz();
 
+    std::cout << "nx: " << nx << ", ny: " << ny << ", nz: " << nz << std::endl;
+
+    // double looki_1082 = 0.0;
+    // CHECK_CUDA(cudaMemcpy(&looki_1082, &x_d[1082], sizeof(double), cudaMemcpyDeviceToHost));
+
+    // std::cout << "beginning of symgs: " << looki_1082 << std::endl;
 
     // the number of blocks is now dependent on the maximum number of rows per color
 
     int max_num_rows_per_color = std::min(nx * ny / 4, std::min(nx * nz / 2, ny * nz));
-    int max_color = nx + 2 * ny + 4 * nz;
+    int max_color = (nx-1) + 2 * (ny-1) + 4 * (nz-1);
 
     int num_blocks = std::min(ceiling_division(max_num_rows_per_color, 1024/WARP_SIZE), MAX_NUM_BLOCKS);
     for(int color = 0; color <= max_color; color++){
         // we need to do a forward pass
+        // std::cout << "color: " << color << std::endl;
         no_store_striped_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
         color,
         nx, ny, nz,
@@ -121,6 +130,9 @@ void no_store_striped_coloring_Implementation<T>::no_store_striped_coloring_comp
         );
         CHECK_CUDA(cudaDeviceSynchronize());
     }
+
+    // CHECK_CUDA(cudaMemcpy(&looki_1082, &x_d[1082], sizeof(double), cudaMemcpyDeviceToHost));
+    // std::cout << "end of symgs: " << looki_1082 << std::endl;
     
 }
 

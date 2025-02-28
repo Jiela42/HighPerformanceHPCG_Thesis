@@ -80,7 +80,7 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeSym
     );
 
     CHECK_CUDA(cudaDeviceSynchronize());
-   
+
 }
 
 // Explicit instantiation of the template

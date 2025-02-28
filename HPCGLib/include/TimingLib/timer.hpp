@@ -53,6 +53,7 @@ private:
     std::string additional_parameters;
 
     std::vector<float> CG_times;
+    std::vector<float> CG_noPreconditioning_times;
     std::vector<float> MG_times;
     std::vector<float> SymGS_times;
     std::vector<float> SPMV_times;

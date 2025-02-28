@@ -1,6 +1,6 @@
 #include "benchmark.hpp"
 
-void run_cuSparse_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path){
+void run_cuSparse_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path, cuSparse_Implementation<double>& implementation){
 
     sparse_CSR_Matrix<double> A;
     A.generateMatrix_onGPU(nx, ny, nz);
@@ -13,7 +13,6 @@ void run_cuSparse_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_pa
     int num_cols = A.get_num_cols();
     int nnz = A.get_nnz();
     
-    cuSparse_Implementation<double> implementation;
     std::string implementation_name = implementation.version_name;
     std::string additional_params = implementation.additional_parameters;
     std::string ault_node = implementation.ault_nodes;
@@ -47,7 +46,7 @@ void run_cuSparse_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_pa
     delete timer;
 }
 
-void run_cuSparse_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path){
+void run_cuSparse_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path, cuSparse_Implementation<double>& implementation){
 
     sparse_CSR_Matrix<double> A;
     A.generateMatrix_onGPU(nx, ny, nz);
@@ -59,7 +58,6 @@ void run_cuSparse_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string fold
     int num_cols = A.get_num_cols();
     int nnz = A.get_nnz();
     
-    cuSparse_Implementation<double> implementation;
     std::string implementation_name = implementation.version_name;
     std::string additional_params = implementation.additional_parameters;
     std::string ault_node = implementation.ault_nodes;
@@ -84,7 +82,7 @@ void run_cuSparse_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string fold
     delete timer;
 }
 
-void run_cuSparse_3d27p_SPMV_benchmark(int nx, int ny, int nz, std::string folder_path){
+void run_cuSparse_3d27p_SPMV_benchmark(int nx, int ny, int nz, std::string folder_path, cuSparse_Implementation<double>& implementation){
 
     sparse_CSR_Matrix<double> A;
     A.generateMatrix_onGPU(nx, ny, nz);
@@ -96,7 +94,6 @@ void run_cuSparse_3d27p_SPMV_benchmark(int nx, int ny, int nz, std::string folde
     int num_cols = A.get_num_cols();
     int nnz = A.get_nnz();
     
-    cuSparse_Implementation<double> implementation;
     std::string implementation_name = implementation.version_name;
     std::string additional_params = implementation.additional_parameters;
     std::string ault_node = implementation.ault_nodes;
@@ -122,7 +119,7 @@ void run_cuSparse_3d27p_SPMV_benchmark(int nx, int ny, int nz, std::string folde
     delete timer;
 }
 
-void run_cuSparse_3d27p_Dot_benchmark(int nx, int ny, int nz, std::string folder_path){
+void run_cuSparse_3d27p_Dot_benchmark(int nx, int ny, int nz, std::string folder_path, cuSparse_Implementation<double>& implementation){
 
     // generate matrix
     sparse_CSR_Matrix<double> A;
@@ -132,7 +129,6 @@ void run_cuSparse_3d27p_Dot_benchmark(int nx, int ny, int nz, std::string folder
     std::vector<double> x = generate_random_vector(nx*ny*nz, RANDOM_SEED);
     std::vector<double> y = generate_random_vector(nx*ny*nz, RANDOM_SEED);
 
-    cuSparse_Implementation<double> implementation;
     std::string implementation_name = implementation.version_name;
     std::string additional_params = implementation.additional_parameters;
     std::string ault_node = implementation.ault_nodes;

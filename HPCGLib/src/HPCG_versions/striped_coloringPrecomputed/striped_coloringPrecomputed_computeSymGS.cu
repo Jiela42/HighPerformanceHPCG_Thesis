@@ -68,7 +68,6 @@ void striped_coloringPrecomputed_Implementation<T>::striped_coloringPrecomputed_
         );
         CHECK_CUDA(cudaDeviceSynchronize());
     }
-    
 }
 
 // explicit template instantiation

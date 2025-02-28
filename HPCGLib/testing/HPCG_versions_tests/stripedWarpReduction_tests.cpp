@@ -104,17 +104,15 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double>& A){
 
 bool run_stripedWarpReduction_filebased_tests(){
 
-    std::string test_folder = "../../../hpcg_output";
-
     bool all_pass = true;
 
     striped_warp_reduction_Implementation<double> striped_warp_reduction;
 
     // MG tests
-    all_pass = all_pass && test_MG(striped_warp_reduction, test_folder);
+    all_pass = all_pass && test_MG(striped_warp_reduction);
 
     // CG tests
-    all_pass = all_pass && test_CG(striped_warp_reduction, test_folder);
+    all_pass = all_pass && test_CG(striped_warp_reduction);
 
     return all_pass;
 
