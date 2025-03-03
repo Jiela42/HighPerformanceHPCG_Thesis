@@ -24,6 +24,8 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix() {
     this->row_ptr.clear();
     this->col_idx.clear();
     this->values.clear();
+
+    this->Striped = nullptr;
     // std::cout << "sparse_CSR_Matrix created, setting device ptrs to null" << std::endl;
     this->row_ptr_d = nullptr;
     this->col_idx_d = nullptr;
@@ -41,6 +43,7 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix() {
 
 template <typename T>
 sparse_CSR_Matrix<T>::~sparse_CSR_Matrix(){
+
     if (this->row_ptr_d != nullptr) {
         // std::cout << row_ptr_d << std::endl;
         // std::cout << "Freeing row_ptr_d" << std::endl;
@@ -72,6 +75,10 @@ sparse_CSR_Matrix<T>::~sparse_CSR_Matrix(){
         CHECK_CUDA(cudaFree(this->Axf_d));
         this->Axf_d = nullptr;
     }
+    if(this->coarse_Matrix != nullptr){
+        delete this->coarse_Matrix;
+        this->coarse_Matrix = nullptr;
+    }
 }
 
 template <typename T>
@@ -102,6 +109,7 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, MatrixT
     this->xc_d = nullptr;
     this->Axf_d = nullptr;
     this->f2c_op.clear();
+    this->Striped = nullptr;
 
 }
 
@@ -124,6 +132,8 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, MatrixT
     this->row_ptr_d = nullptr;
     this->col_idx_d = nullptr;
     this->values_d = nullptr;
+
+    this->Striped = nullptr;
 
     this->num_MG_pre_smooth_steps = 1;
     this->num_MG_post_smooth_steps = 1;
@@ -179,6 +189,8 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(std::vector<std::vector<T>> dense_matrix
     this->col_idx_d = nullptr;
     this->values_d = nullptr;
 
+    this->Striped = nullptr;
+
     this->num_MG_pre_smooth_steps = 1;
     this->num_MG_post_smooth_steps = 1;
     this->coarse_Matrix = nullptr;
@@ -188,6 +200,20 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(std::vector<std::vector<T>> dense_matrix
     this->xc_d = nullptr;
     this->Axf_d = nullptr;
 
+}
+
+template <typename T>
+void sparse_CSR_Matrix<T>::set_Striped(striped_Matrix<T>* A){
+    this->Striped = A;
+}
+
+template <typename T>
+striped_Matrix<T>* sparse_CSR_Matrix<T>::get_Striped(){
+    if(this->Striped == nullptr){
+        striped_Matrix <T>* A = new striped_Matrix<T>();
+        A->striped_Matrix_from_sparse_CSR(*this);
+    }
+    return this->Striped;
 }
 
 template <typename T>
@@ -313,6 +339,8 @@ void sparse_CSR_Matrix<T>::generateMatrix_onGPU(int nx, int ny, int nz)
     CHECK_CUDA(cudaMemset(this->col_idx_d, 0, nnz * sizeof(int)));
     CHECK_CUDA(cudaMemset(this->values_d, 0, nnz * sizeof(T)));
 
+    std::cout << "generating CSR Matrix on GPU" << std::endl;
+
     // now we generate the matrix
     generateHPCGMatrix(nx, ny, nz, this->row_ptr_d, this->col_idx_d, this->values_d);
 
@@ -320,6 +348,8 @@ void sparse_CSR_Matrix<T>::generateMatrix_onGPU(int nx, int ny, int nz)
 
 template <typename T>
 void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped(striped_Matrix<T> &A){
+
+    std::cout << "sparse_CSR_Matrix_from_striped" << std::endl;
 
     if(A.get_matrix_type() == MatrixType::Stencil_3D27P){
         assert(A.get_num_stripes() == 27);
@@ -337,22 +367,28 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped(striped_Matrix<T> &A){
     this->num_MG_pre_smooth_steps = A.get_num_MG_pre_smooth_steps();
     this->num_MG_post_smooth_steps = A.get_num_MG_post_smooth_steps();
 
+    this->Striped = &A;
+    A.set_CSR(this);
 
     assert(A.get_num_stripes() == A.get_j_min_i().size());
 
     // check if A is on the GPU
     if(A.get_values_d() != nullptr and A.get_j_min_i_d() != nullptr){
-        // std::cout << "A is on the GPU" << std::endl;
+        std::cout << "A is on the GPU" << std::endl;
         this->sparse_CSR_Matrix_from_striped_transformation_GPU(A);
     }
     else{
-        // std::cout << "A is on the CPU" << std::endl;
+        std::cout << "A is on the CPU" << std::endl;
         this->sparse_CSR_Matrix_from_striped_transformation_CPU(A);
     }
 }
 
 template <typename T>
 void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation_CPU(striped_Matrix<T> & A){
+    
+    this->Striped = &A;
+    A.set_CSR(this);
+    
     this->row_ptr = std::vector<int>(this->num_rows + 1, 0);
     this->col_idx = std::vector<int>(this->nnz, 0);
     this->values = std::vector<T>(this->nnz, 0);

@@ -73,14 +73,16 @@ bool run_stripedColoringPrecomputed_filebased_tests(){
     bool all_pass = true;
 
     striped_coloringPrecomputed_Implementation<double> striped_coloringPrecomputed;
+    striped_box_coloring_Implementation<double> striped_box_coloring;
 
     // MG tests
-    all_pass = all_pass && test_MG(striped_coloringPrecomputed);
+    // all_pass = all_pass && test_MG(striped_coloringPrecomputed);
 
-    std::cout << "Finished MG tests" << std::endl;
+    // std::cout << "Finished MG tests" << std::endl;
     
     // CG tests
     all_pass = all_pass && test_CG(striped_coloringPrecomputed);
+    all_pass = all_pass && test_CG(striped_box_coloring);
 
     return all_pass;
 

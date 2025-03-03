@@ -53,10 +53,7 @@ __global__ void no_store_striped_coloring_half_SymGS_kernel(
             __syncthreads();
             if (lane_id == 0){
                 double diag = striped_A[row * num_stripes + diag_offset];
-                double sum = diag * x[row] + y[row] + my_sum;
-                if (row == 147512){
-                    printf("sum: %f, diag: %f, x: %f, y: %f\n", sum, diag, x[row], y[row]);
-                }           
+                double sum = diag * x[row] + y[row] + my_sum;          
                 x[row] = sum / diag;
             }
             __syncthreads();
@@ -86,7 +83,7 @@ void no_store_striped_coloring_Implementation<T>::no_store_striped_coloring_comp
     int ny = A.get_ny();
     int nz = A.get_nz();
 
-    std::cout << "nx: " << nx << ", ny: " << ny << ", nz: " << nz << std::endl;
+    // std::cout << "nx: " << nx << ", ny: " << ny << ", nz: " << nz << std::endl;
 
     // double looki_1082 = 0.0;
     // CHECK_CUDA(cudaMemcpy(&looki_1082, &x_d[1082], sizeof(double), cudaMemcpyDeviceToHost));

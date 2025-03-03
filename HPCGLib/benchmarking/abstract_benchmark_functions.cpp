@@ -23,7 +23,7 @@ void bench_CG(
         bool test_passed = test_CG(implementation);
         implementation.CG_file_based_tests_passed = test_passed;
 
-        std::cout << "CG tested for implementation " << implementation.version_name << std::endl;
+        // std::cout << "CG tested for implementation " << implementation.version_name << std::endl;
 
         if (not test_passed){
             num_iterations = 0;
@@ -35,21 +35,33 @@ void bench_CG(
     double normr;
     double normr0;
 
-    // we do both with and withotu preconditioning
-    implementation.doPreconditioning = true;
-    for(int i = 0; i < num_iterations; i++){
-        timer.startTimer();
-        implementation.compute_CG(
-            A,
-            y_d, x_d,
-            n_iters, normr, normr0
-        );
-        timer.stopTimer("compute_CG");
-        // restore original x
-        CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+    // we do both with and without preconditioning
+
+    if( // the MG preconditioner can only be applied for matrices divisible by 8 and the result needs to be bigger than 2
+        A.get_nx() % 8 == 0 and
+        A.get_ny() % 8 == 0 and
+        A.get_nz() % 8 == 0 and
+        A.get_nx() / 8 > 2 and
+        A.get_ny() / 8 > 2 and
+        A.get_nz() / 8 > 2
+    ){
+        implementation.doPreconditioning = true;
+        for(int i = 0; i < num_iterations; i++){
+            timer.startTimer();
+            implementation.compute_CG(
+                A,
+                y_d, x_d,
+                n_iters, normr, normr0
+            );
+            timer.stopTimer("compute_CG");
+            // restore original x
+            CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+        }
+    } else{
+        std::cout << "Skipping CG Preconditioned bench for matrix with dimensions " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz() << " not divisible by 8 or too small for MG" << std::endl;
     }
 
-    // now without preconditioning
+    // now without preconditioning (can always be done)
     implementation.doPreconditioning = false;
     for(int i = 0; i < num_iterations; i++){
         timer.startTimer();
@@ -72,6 +84,20 @@ void bench_MG(
     )
 {
     int num_iterations = implementation.getNumberOfIterations();
+
+    // we can only bench MG if the matrix dimensions are divisible by 8 and the result is bigger than 2
+
+    if(
+        A.get_nx() % 8 != 0 or
+        A.get_ny() % 8 != 0 or
+        A.get_nz() % 8 != 0 or
+        A.get_nx() / 8 < 3 or
+        A.get_ny() / 8 < 3 or
+        A.get_nz() / 8 < 3
+    ){
+        std::cout << "Skipping MG bench for matrix with dimensions " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz() << " not divisible by 8 or too small for MG" << std::endl;
+        return;
+    }
 
     // obtain the original x vector
     std::vector<double> x_original(A.get_num_rows(), 0.0);
@@ -158,12 +184,6 @@ void bench_SPMV(
     if (implementation.test_before_bench){
     // we always test against cusparse
         cuSparse_Implementation<double> baseline;
-        sparse_CSR_Matrix<double> sparse_CSR_A;
-        sparse_CSR_A.sparse_CSR_Matrix_from_striped(A); 
-
-        int num_rows = sparse_CSR_A.get_num_rows();
-        int num_cols = sparse_CSR_A.get_num_cols();
-        int nnz = sparse_CSR_A.get_nnz();
     
         // test the SPMV function
         bool test_failed = !test_SPMV(
@@ -198,6 +218,12 @@ void bench_Dot(
     double * x_d, double * y_d, double * result_d
     ){
     int num_iterations = implementation.getNumberOfIterations();
+
+    sparse_CSR_Matrix<double>* A_CSR = A.get_CSR();
+
+    std::cout << "A CSR " << A_CSR << std::endl;
+
+    std::cout << "a_csr num rows: " << A_CSR->get_num_rows() << std::endl;
 
     if (implementation.test_before_bench){
         // note that for the dot product the cuSparse implementation is an instanciation of warp reduction. ehem.
@@ -368,16 +394,15 @@ void bench_SymGS(
 
     CHECK_CUDA(cudaMemcpy(x.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
 
+    // for normbased implementations we need to make sure the maximum number of iterations performed by symGS is enough
+    int original_max_symgs_iterations = implementation.get_maxSymGSIters();
+    if(implementation.norm_based){
+        implementation.set_maxSymGSIters(500);
+    }
+
     if(implementation.test_before_bench){
-        sparse_CSR_Matrix<double> A_csr;
-        A_csr.sparse_CSR_Matrix_from_striped(A);
 
-        cuSparse_Implementation<double> baseline;
-
-        int num_rows = A_csr.get_num_rows();
-        int num_cols = A_csr.get_num_cols();
-        int nnz = A_csr.get_nnz();
-            
+        cuSparse_Implementation<double> baseline;           
 
         bool test_failed = !test_SymGS(
             baseline, implementation,
@@ -412,6 +437,10 @@ void bench_SymGS(
 
     // copy the original vector back
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+    // store the original number of iterations
+    if(implementation.norm_based){
+        implementation.set_maxSymGSIters(original_max_symgs_iterations);
+    }
 }
 
 // this function allows us to run the whole abstract benchmark
@@ -448,22 +477,57 @@ void bench_Implementation(
     double * result_d ,  // result is used for the dot product (it is a scalar)
     double alpha, double beta
     ){
-      
+
+    sparse_CSR_Matrix<double> *A_CSR = A.get_CSR();
+
+    // check that col idx is not null
+    if(A_CSR->get_col_idx_d() == nullptr){
+        std::cout << "A col idx is nullptr" << std::endl;
+    } else{
+        std::cout << "A col idx is not nullptr" << std::endl;
+    }
+    
+    std::cout << "Bench SPMV" << std::endl;
     if(implementation.SPMV_implemented){
         bench_SPMV(implementation, timer, A, a_d, y_d);
     }
+
+    A_CSR = A.get_CSR();
+
+    // check that col idx is not null
+    if(A_CSR->get_col_idx_d() == nullptr){
+        std::cout << "A col idx is nullptr" << std::endl;
+    } else{
+        std::cout << "A col idx is not nullptr" << std::endl;
+    }
+
+    std::cout << "Bench Dot" << std::endl;
     if(implementation.Dot_implemented){
         bench_Dot(implementation, timer, A, a_d, b_d, result_d);
     }
+    
+    A_CSR = A.get_CSR();
+
+    // check that col idx is not null
+    if(A_CSR->get_col_idx_d() == nullptr){
+        std::cout << "A col idx is nullptr" << std::endl;
+    } else{
+        std::cout << "A col idx is not nullptr" << std::endl;
+    }
+
+    std::cout << "Bench SymGS" << std::endl;
     if(implementation.SymGS_implemented){
         bench_SymGS(implementation, timer, A, x_d, y_d);
     }
+    std::cout << "Bench WAXPBY" << std::endl;
     if(implementation.WAXPBY_implemented){
         bench_WAXPBY(implementation, timer, A, a_d, b_d, y_d, alpha, beta);
     }
+    std::cout << "Bench CG" << std::endl;
     if(implementation.CG_implemented){
         bench_CG(implementation, timer, A, x_d, y_d);
     }
+    std::cout << "Bench MG" << std::endl;
     if(implementation.MG_implemented){
         bench_MG(implementation, timer, A, x_d, y_d);
     }

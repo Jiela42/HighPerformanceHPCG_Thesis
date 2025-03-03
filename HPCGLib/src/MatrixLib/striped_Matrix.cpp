@@ -17,6 +17,7 @@ striped_Matrix<T>::striped_Matrix() {
     this->nnz = 0;
     this->diag_index = -1;
     this->matrix_type = MatrixType::UNKNOWN;
+
     this->num_rows = 0;
     this->num_cols = 0;
     this->num_stripes = 0;
@@ -38,6 +39,7 @@ striped_Matrix<T>::striped_Matrix() {
     this->xc_d = nullptr;
     this->Axf_d = nullptr;
     this->f2c_op.clear();
+
 }
 
 template <typename T>
@@ -79,11 +81,33 @@ striped_Matrix<T>::~striped_Matrix(){
         CHECK_CUDA(cudaFree(this->Axf_d));
         this->Axf_d = nullptr;
     }
+    if(this->coarse_Matrix != nullptr){
+        delete this->coarse_Matrix;
+        this->coarse_Matrix = nullptr;
+    }
+}
+
+template <typename T>
+void striped_Matrix<T>::set_CSR(sparse_CSR_Matrix<T> *A){
+    std::cout << "set_CSR: setting CSR matrix" << std::endl;
+    this->CSR = A;
+}
+
+template <typename T>
+sparse_CSR_Matrix<T>* striped_Matrix<T>::get_CSR(){
+    if(this->CSR == nullptr){
+        std::cout << "get_CSR: creating new CSR matrix" << std::endl;
+        sparse_CSR_Matrix<T> *A = new sparse_CSR_Matrix<T>();
+        A->sparse_CSR_Matrix_from_striped(*this);
+    }
+    return this->CSR;
 }
 
 template <typename T>
 void striped_Matrix<T>::striped_Matrix_from_sparse_CSR(sparse_CSR_Matrix<T>& A){
     // std::cout << "entering striped_Matrix_from_sparse_CSR" << std::endl;
+    this->CSR = &A;
+    A.set_Striped(this);
     if(A.get_matrix_type() == MatrixType::Stencil_3D27P and A.get_values_d() != nullptr and A.get_col_idx_d() != nullptr and A.get_row_ptr_d() != nullptr){
         // std::cout << "matrix is on GPU completely" << std::endl;
         this->striped_3D27P_Matrix_from_CSR_onGPU(A);

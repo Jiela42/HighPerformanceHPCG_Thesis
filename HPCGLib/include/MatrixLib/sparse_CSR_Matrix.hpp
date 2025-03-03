@@ -63,6 +63,8 @@ public:
     int get_nnz() const;
     int get_num_MG_pre_smooth_steps() const;
     int get_num_MG_post_smooth_steps() const;
+    striped_Matrix<T>* get_Striped();
+    void set_Striped(striped_Matrix<T>* A);
     sparse_CSR_Matrix<T>* get_coarse_Matrix();
     int * get_f2c_op_d();
     T * get_rc_d();
@@ -93,6 +95,8 @@ private:
     int * col_idx_d;
     T * values_d;
     MatrixType matrix_type;
+
+    striped_Matrix<T>* Striped;
 
     int num_MG_pre_smooth_steps;
     int num_MG_post_smooth_steps;

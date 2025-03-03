@@ -41,6 +41,27 @@ class HPCG_functions {
             additional_parameters += "_" + another_parameter;
         }
 
+        double get_CGTolerance() const {
+            return CG_tolerance;
+        }
+        void set_CGTolerance(double new_tolerance) {
+            CG_tolerance = new_tolerance;
+        }
+
+        int get_maxCGIters() const {
+            return max_CG_iterations;
+        }
+        void set_maxCGIters(int new_max_iters) {
+            max_CG_iterations = new_max_iters;
+        }
+        void set_maxSymGSIters(int new_max_iters) {
+            max_SymGS_iterations = new_max_iters;
+        }
+        int get_maxSymGSIters() const {
+            return max_SymGS_iterations;
+        }
+
+
     // CG starts with having the data on the CPU
         virtual void compute_CG(
             striped_Matrix<T> & A,
@@ -191,9 +212,9 @@ class HPCG_functions {
             }
         }
     protected:
-        int max_CG_iterations = 50;
-        double CG_tolerance = 0.0;
-        
+        int max_CG_iterations = 500;
+        double CG_tolerance = 1e-12;
+        int max_SymGS_iterations = 1;
 };
 
 #endif // HPCGLIB_HPP

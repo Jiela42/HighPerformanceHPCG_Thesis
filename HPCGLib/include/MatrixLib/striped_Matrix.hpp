@@ -42,6 +42,10 @@ class striped_Matrix {
         int get_nnz() const;
         int get_diag_index() const;
         MatrixType get_matrix_type() const;
+
+        sparse_CSR_Matrix<T> *get_CSR();
+        void set_CSR(sparse_CSR_Matrix<T> *A);
+
         striped_Matrix<T> *get_coarse_Matrix();
         int get_num_MG_pre_smooth_steps() const;
         int get_num_MG_post_smooth_steps() const;
@@ -81,6 +85,8 @@ class striped_Matrix {
         T *values_d;
         int* color_pointer_d;
         int* color_sorted_rows_d;
+
+        sparse_CSR_Matrix<T> *CSR;
 
         int num_MG_pre_smooth_steps;
         int num_MG_post_smooth_steps;

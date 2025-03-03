@@ -6,6 +6,8 @@ void run_striped_warp_reduction_3d27p_benchmarks(int nx, int ny, int nz, std::st
     sparse_CSR_Matrix<double> A;
     A.generateMatrix_onGPU(nx, ny, nz);
 
+    
+
     std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
     std::vector<double> x (nx*ny*nz, 0.0);
     std::vector<double> a = generate_random_vector(nx*ny*nz, RANDOM_SEED);
@@ -16,14 +18,31 @@ void run_striped_warp_reduction_3d27p_benchmarks(int nx, int ny, int nz, std::st
     double alpha = (double)rand() / RAND_MAX;
     double beta = (double)rand() / RAND_MAX;
 
+    std::cout << "make A striped" << std::endl;
 
-    striped_Matrix<double> striped_A;
-    striped_A.striped_Matrix_from_sparse_CSR(A);
+    std::cout << "A num_rows: " << A.get_num_rows() << std::endl;
 
-    int num_rows = striped_A.get_num_rows();
-    int num_cols = striped_A.get_num_cols();
-    int nnz = striped_A.get_nnz();
-    int num_stripes = striped_A.get_num_stripes();
+    striped_Matrix<double> * striped_A = A.get_Striped();
+    // striped_A.striped_Matrix_from_sparse_CSR(A);
+
+    std::cout << "A is striped" << std::endl;
+
+    sparse_CSR_Matrix<double>* A_csr = striped_A->get_CSR();
+
+    std::cout << "A CSR " << A_csr << std::endl;
+
+
+    // check that col idx is not null
+    if(A.get_col_idx_d() == nullptr){
+        std::cout << "A col idx is nullptr" << std::endl;
+    } else{
+        std::cout << "A col idx is not nullptr" << std::endl;
+    }
+
+    int num_rows = striped_A->get_num_rows();
+    int num_cols = striped_A->get_num_cols();
+    int nnz = striped_A->get_nnz();
+    int num_stripes = striped_A->get_num_stripes();
     
     std::string implementation_name = implementation.version_name;
     std::string additional_params = implementation.additional_parameters;
@@ -49,7 +68,7 @@ void run_striped_warp_reduction_3d27p_benchmarks(int nx, int ny, int nz, std::st
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
 
     // run the benchmarks (without the copying back and forth)
-    bench_Implementation(implementation, *timer, striped_A, a_d, b_d, x_d, y_d, result_d, alpha, beta);
+    bench_Implementation(implementation, *timer, *striped_A, a_d, b_d, x_d, y_d, result_d, alpha, beta);
 
     // free the memory
     cudaFree(a_d);

@@ -80,6 +80,16 @@ void cuSparse_Implementation<T>::cusparse_computeSymGS(
     int * A_row_ptr_d = A.get_row_ptr_d();
     int * A_col_idx_d = A.get_col_idx_d();
     T * A_values_d = A.get_values_d();
+
+    if(A_row_ptr_d == nullptr || A_col_idx_d == nullptr || A_values_d == nullptr){
+        throw std::runtime_error("The matrix is not allocated on the device");
+    }
+
+    if(x_d == nullptr || y_d == nullptr){
+        throw std::runtime_error("The vectors are not allocated on the device");
+    }
+
+    std::cout << "num_rows = " << num_rows << std::endl;
      
     
     // because this is sequential, we only spawn one warp

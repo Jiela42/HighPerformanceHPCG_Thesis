@@ -18,6 +18,10 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeCG(
 
     int nrows = A.get_num_rows();
 
+    // // print tolerance and max iterations for sanity check
+    // std::cout << "CG tolerance: " << this->CG_tolerance << std::endl;
+    // std::cout << "Max CG iterations: " << this->max_CG_iterations << std::endl;
+
     // allocate device memory for p, z, Ap,
     // we also need a device copy of normr, pAp, rtz because the dot product is done on the device and writes the result to the device
     T * p_d;

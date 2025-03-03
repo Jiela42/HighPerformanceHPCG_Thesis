@@ -108,14 +108,21 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
     int ny = A.get_ny();
     int nz = A.get_nz();
 
-    double threshold_rr_Norm = this->getSymGS_rrNorm_zero_init(nx, ny, nz);
-    assert(threshold_rr_Norm >= 0.0);
+    int max_iterations = this->max_SymGS_iterations;
+    double threshold_rr_Norm = 1.0;
+
+    if(this->norm_based and max_iterations > 1){
+        threshold_rr_Norm = this->getSymGS_rrNorm_zero_init(nx, ny, nz);
+        assert(threshold_rr_Norm >= 0.0);
+    }
+
 
     int cooperation_number = this->SymGS_cooperation_number;
 
     // the number of blocks is now dependent on the maximum number of rows per color
     int num_colors = bx * by * bz;
-    int max_color =  num_colors + 1;
+    int max_color =  num_colors - 1;
+    // std::cout << "max_color: " << max_color << std::endl;
     int max_num_rows_per_color = ceiling_division(nx, bx) * ceiling_division(ny, by) * ceiling_division(nz, bz);
 
     int num_blocks = std::min(ceiling_division(max_num_rows_per_color, 1024/cooperation_number), MAX_NUM_BLOCKS);
@@ -171,9 +178,10 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
 
     int iter = 1;
 
-    // threshold_rr_Norm = 0.16;
 
-    while (iter < 500 and rr_norm > threshold_rr_Norm){
+    // this while loop only kicks in if we are benchmarking or testing SymGS itself
+    // as a part of MG or CG we will not use this loop since in this case SymGS is only executed once
+    while (iter < max_iterations and rr_norm > threshold_rr_Norm){
 
         for(int color = 0; color <= max_color; color++){
             // we need to do a forward pass
@@ -215,7 +223,7 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
         iter ++;
     }
 
-    std::cout << "SymGS for size " << nx << "x" << ny << "x" << nz << " took " << iter << " iterations." << std::endl;
+    // std::cout << "SymGS for size " << nx << "x" << ny << "x" << nz << " took " << iter << " iterations." << std::endl;
     // std::cout << "RR norm after " << iter << " iterations: " << rr_norm << std::endl;
     // std::cout << "Threshold RR norm: " << threshold_rr_Norm << std::endl;
 }
