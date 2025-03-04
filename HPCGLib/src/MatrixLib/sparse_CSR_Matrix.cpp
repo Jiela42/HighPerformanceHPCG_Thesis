@@ -76,14 +76,22 @@ sparse_CSR_Matrix<T>::~sparse_CSR_Matrix(){
         CHECK_CUDA(cudaFree(this->Axf_d));
         this->Axf_d = nullptr;
     }
+    
+    if(this->Striped != nullptr){
+
+        // this deletion causes a deadlock (because CSR points to Striped and vice versa)
+        striped_Matrix<T> *temp = this->Striped;
+        this->Striped = nullptr;
+        // we also have to set this matrix to null in our sibling matrix
+        temp->CSR = nullptr;
+        // when we delete the matrix, we also delete any coarse matrices, so we have to set that to null_ptr as well
+        temp->coarse_Matrix = nullptr;
+        delete temp;
+    }
     if(this->coarse_Matrix != nullptr){
         delete this->coarse_Matrix;
         this->coarse_Matrix = nullptr;
     }
-    // if(this->Striped != nullptr){
-    //     delete this->Striped;
-    //     this->Striped = nullptr;
-    // }
 }
 
 template <typename T>

@@ -4,7 +4,7 @@
 #include <cmath>
 
 bool double_compare(double a, double b){
-    return abs(a - b) < error_tolerance;
+    return std::abs(a - b) < error_tolerance;
 }
 
 bool vector_compare(const std::vector<double>& a, const std::vector<double>& b){
@@ -12,6 +12,7 @@ bool vector_compare(const std::vector<double>& a, const std::vector<double>& b){
         std::cout << "Vector sizes do not match" << std::endl;
         return false;
     }
+    int error_ctr = 0;
     for (int i = 0; i < a.size(); i++){
         if(std::isnan(a[i]) or std::isnan(b[i])){
             std::cout << "Error at index " << i << " should be " << a[i] << " but was " << b[i] << std::endl;

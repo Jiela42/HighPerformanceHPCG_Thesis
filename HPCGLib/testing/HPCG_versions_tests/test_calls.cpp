@@ -171,8 +171,6 @@ bool test_CG(
                 implementation.doPreconditioning = false;
                 if (implementation.implementation_type == Implementation_Type::STRIPED){
                     striped_Matrix<double>* A_striped = A.get_Striped();
-                    std::cout << "getting striped matrix" << std::endl;
-                    // A_striped.striped_Matrix_from_sparse_CSR(A);
 
                     // we might need a coloring precomputed for some SymGS implementations
                     A_striped->generate_coloring();
@@ -201,9 +199,6 @@ bool test_CG(
                 
                 if (implementation.implementation_type == Implementation_Type::STRIPED){
                     striped_Matrix<double>* A_striped = A.get_Striped();
-                    std::cout << "getting striped matrix" << std::endl;
-
-                    // A_striped.striped_Matrix_from_sparse_CSR(A);
                     
                     // we might need a coloring precomputed
                     A_striped->generate_coloring();
@@ -418,9 +413,6 @@ bool test_MG(
                 if (implementation.implementation_type == Implementation_Type::STRIPED){
 
                     striped_Matrix<double>* A_striped = A.get_Striped();
-                    std::cout << "getting striped matrix" << std::endl;
-
-                    // A_striped.striped_Matrix_from_sparse_CSR(A);
 
                     // we might need a coloring precomputed
                     A_striped->generate_coloring();
@@ -447,6 +439,7 @@ bool test_MG(
                 //     // print the first 5 elements of the vectors
                 //     for (int i = 0; i < 5; i++) {
                 //         std::cout << computed_result[i] << " " << x_overlap_after_mg_host[i] << std::endl;
+                //         std::cout << (abs(computed_result[i] - x_overlap_after_mg_host[i]) < error_tolerance) << std::endl;
                 //     }
                 // }
             }

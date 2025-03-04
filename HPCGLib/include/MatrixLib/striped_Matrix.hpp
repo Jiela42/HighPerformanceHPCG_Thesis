@@ -9,7 +9,6 @@
 #include <iostream>
 #include <string>
 #include <cassert>
-#include <memory>
 
 // Forward declaration of sparse_CSR_Matrix
 template <typename T>
@@ -89,7 +88,7 @@ class striped_Matrix {
         int* color_pointer_d;
         int* color_sorted_rows_d;
 
-        std::shared_ptr<sparse_CSR_Matrix<T>> CSR;
+        sparse_CSR_Matrix<T> *CSR;
 
         int num_MG_pre_smooth_steps;
         int num_MG_post_smooth_steps;

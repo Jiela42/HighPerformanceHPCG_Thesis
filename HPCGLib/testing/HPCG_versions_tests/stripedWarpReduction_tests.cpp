@@ -23,9 +23,6 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double>& A){
     std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
 
     striped_Matrix<double>* A_striped = A.get_Striped();
-    // A_striped.striped_Matrix_from_sparse_CSR(A);
-
-    std::cout << "getting striped matrix" << std::endl;
 
     // std::cout << "size: " << nx << "x" << ny << "x" << nz << std::endl;
 
@@ -117,7 +114,6 @@ bool run_stripedWarpReduction_filebased_tests(){
     all_pass = all_pass && test_CG(striped_warp_reduction);
 
     return all_pass;
-
 
 }
 

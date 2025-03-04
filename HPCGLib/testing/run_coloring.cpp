@@ -13,12 +13,13 @@ void print_COR_Format(int nx, int ny, int nz){
     std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
     sparse_CSR_Matrix<double> A_csr = problem.first;
 
-    striped_Matrix<double> A_striped;
-    A_striped.striped_Matrix_from_sparse_CSR(A_csr);
+    striped_Matrix<double>* A_striped = A_csr.get_Striped();
+    std::cout << "getting striped matrix" << std::endl;
+    // A_striped.striped_Matrix_from_sparse_CSR(A_csr);
 
     // make coloring
-    A_striped.generate_coloring();
-    A_striped.print_COR_Format();
+    A_striped->generate_coloring();
+    A_striped->print_COR_Format();
 
 }
 
@@ -47,11 +48,13 @@ void print_coloring(int nx, int ny, int nz){
     std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
     sparse_CSR_Matrix<double> A_csr = problem.first;
     
-    striped_Matrix<double> A_striped;
-    A_striped.striped_Matrix_from_sparse_CSR(A_csr);   
+    striped_Matrix<double>* A_striped = A_csr.get_Striped();
+    std::cout << "getting striped matrix" << std::endl;
+
+    // A_striped.striped_Matrix_from_sparse_CSR(A_csr);   
 
     // pass matrix to coloring
-    std::vector<int> colors = color_for_forward_pass(A_striped);
+    std::vector<int> colors = color_for_forward_pass(*A_striped);
 
 
     // print colors
@@ -72,12 +75,13 @@ void compare_backward_forward_coloring(int nx, int ny, int nz){
     std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
     sparse_CSR_Matrix<double> A_csr = problem.first;
     
-    striped_Matrix<double> A_striped;
-    A_striped.striped_Matrix_from_sparse_CSR(A_csr);   
+    striped_Matrix<double>* A_striped = A_csr.get_Striped();
+    std::cout << "getting striped matrix" << std::endl;
+    // A_striped.striped_Matrix_from_sparse_CSR(A_csr);   
 
     // pass matrix to coloring
-    std::vector<int> forward_colors = color_for_forward_pass(A_striped);
-    std::vector<int> backward_colors = color_for_backward_pass(A_striped);
+    std::vector<int> forward_colors = color_for_forward_pass(*A_striped);
+    std::vector<int> backward_colors = color_for_backward_pass(*A_striped);
 
     for(int i = 0; i < forward_colors.size(); i++){
         int forward_color = forward_colors[i];

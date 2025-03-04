@@ -83,14 +83,22 @@ striped_Matrix<T>::~striped_Matrix(){
         CHECK_CUDA(cudaFree(this->Axf_d));
         this->Axf_d = nullptr;
     }
+    
+    if(this->CSR != nullptr){
+        // this deletion causes a deadlock (because CSR points to Striped and vice versa)
+        sparse_CSR_Matrix<T> *temp = this->CSR;
+        this->CSR = nullptr;
+        // we also have to set this matrix to null in our sibling matrix
+        temp->Striped = nullptr;
+        // when we delete the matrix, we also delete any coarse matrices, so we have to set that to null_ptr as well
+        temp->coarse_Matrix = nullptr;
+        delete temp;
+    }
     if(this->coarse_Matrix != nullptr){
         delete this->coarse_Matrix;
         this->coarse_Matrix = nullptr;
     }
-    // if(this->CSR != nullptr){
-    //     delete this->CSR;
-    //     this->CSR = nullptr;
-    // }
+
 }
 
 template <typename T>
@@ -111,7 +119,7 @@ sparse_CSR_Matrix<T>* striped_Matrix<T>::get_CSR(){
 
 template <typename T>
 void striped_Matrix<T>::striped_Matrix_from_sparse_CSR(sparse_CSR_Matrix<T>& A){
-    std::cout << "entering striped_Matrix_from_sparse_CSR" << std::endl;
+    // std::cout << "entering striped_Matrix_from_sparse_CSR for size " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz() << std::endl;
     this->CSR = &A;
     A.set_Striped(this);
     if(A.get_matrix_type() == MatrixType::Stencil_3D27P and A.get_values_d() != nullptr and A.get_col_idx_d() != nullptr and A.get_row_ptr_d() != nullptr){
