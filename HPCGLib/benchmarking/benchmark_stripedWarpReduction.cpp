@@ -6,7 +6,6 @@ void run_striped_warp_reduction_3d27p_benchmarks(int nx, int ny, int nz, std::st
     sparse_CSR_Matrix<double> A;
     A.generateMatrix_onGPU(nx, ny, nz);
 
-    
 
     std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
     std::vector<double> x (nx*ny*nz, 0.0);
@@ -18,26 +17,11 @@ void run_striped_warp_reduction_3d27p_benchmarks(int nx, int ny, int nz, std::st
     double alpha = (double)rand() / RAND_MAX;
     double beta = (double)rand() / RAND_MAX;
 
-    std::cout << "make A striped" << std::endl;
-
-    std::cout << "A num_rows: " << A.get_num_rows() << std::endl;
-
     striped_Matrix<double> * striped_A = A.get_Striped();
     // striped_A.striped_Matrix_from_sparse_CSR(A);
 
-    std::cout << "A is striped" << std::endl;
 
     sparse_CSR_Matrix<double>* A_csr = striped_A->get_CSR();
-
-    std::cout << "A CSR " << A_csr << std::endl;
-
-
-    // check that col idx is not null
-    if(A.get_col_idx_d() == nullptr){
-        std::cout << "A col idx is nullptr" << std::endl;
-    } else{
-        std::cout << "A col idx is not nullptr" << std::endl;
-    }
 
     int num_rows = striped_A->get_num_rows();
     int num_cols = striped_A->get_num_cols();
@@ -78,6 +62,7 @@ void run_striped_warp_reduction_3d27p_benchmarks(int nx, int ny, int nz, std::st
     cudaFree(result_d);
 
     delete timer;
+    // delete striped_A;
 }
 
 void run_warp_reduction_3d27p_Dot_benchmark(int nx, int ny, int nz, std::string folder_path, striped_warp_reduction_Implementation<double>& implementation){
@@ -174,13 +159,14 @@ void run_warp_reduction_3d27p_SPMV_benchmark(int nx, int ny, int nz, std::string
     A.generateMatrix_onGPU(nx, ny, nz);
     std::vector<double> x = generate_random_vector(nx*ny*nz, RANDOM_SEED);
 
-    striped_Matrix<double> striped_A;
-    striped_A.striped_Matrix_from_sparse_CSR(A);
+    striped_Matrix<double>* striped_A = A.get_Striped();
+    std::cout << "getting striped matrix" << std::endl;
+    // striped_A.striped_Matrix_from_sparse_CSR(A);
 
-    int num_rows = striped_A.get_num_rows();
-    int num_cols = striped_A.get_num_cols();
-    int nnz = striped_A.get_nnz();
-    int num_stripes = striped_A.get_num_stripes();
+    int num_rows = striped_A->get_num_rows();
+    int num_cols = striped_A->get_num_cols();
+    int nnz = striped_A->get_nnz();
+    int num_stripes = striped_A->get_num_stripes();
     
     std::string implementation_name = implementation.version_name;
     std::string additional_params = implementation.additional_parameters;
@@ -198,7 +184,7 @@ void run_warp_reduction_3d27p_SPMV_benchmark(int nx, int ny, int nz, std::string
 
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
 
-    bench_SPMV(implementation, *timer, striped_A, x_d, y_d);
+    bench_SPMV(implementation, *timer, *striped_A, x_d, y_d);
     
     // free the memory
     cudaFree(x_d);
@@ -215,13 +201,15 @@ void run_warp_reduction_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::strin
     std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
     std::vector<double> x(nx*ny*nz, 0.0);
 
-    striped_Matrix<double> striped_A;
-    striped_A.striped_Matrix_from_sparse_CSR(A);
+    striped_Matrix<double>* striped_A = A.get_Striped();
+    std::cout << "getting striped matrix" << std::endl;
 
-    int num_rows = striped_A.get_num_rows();
-    int num_cols = striped_A.get_num_cols();
-    int nnz = striped_A.get_nnz();
-    int num_stripes = striped_A.get_num_stripes();
+    // striped_A.striped_Matrix_from_sparse_CSR(A);
+
+    int num_rows = striped_A->get_num_rows();
+    int num_cols = striped_A->get_num_cols();
+    int nnz = striped_A->get_nnz();
+    int num_stripes = striped_A->get_num_stripes();
     
     std::string implementation_name = implementation.version_name;
     std::string additional_params = implementation.additional_parameters;
@@ -238,7 +226,7 @@ void run_warp_reduction_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::strin
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
 
-    bench_SymGS(implementation, *timer, striped_A, x_d, y_d);
+    bench_SymGS(implementation, *timer, *striped_A, x_d, y_d);
 
     // free the memory
     CHECK_CUDA(cudaFree(x_d));

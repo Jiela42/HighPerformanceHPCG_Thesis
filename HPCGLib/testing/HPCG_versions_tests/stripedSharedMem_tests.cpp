@@ -23,8 +23,10 @@ bool run_stripedSharedMem_tests_on_matrix(sparse_CSR_Matrix<double>& A){
     //     x[i] = i%10;
     // }
 
-    striped_Matrix<double> A_striped;
-    A_striped.striped_Matrix_from_sparse_CSR(A);
+    striped_Matrix<double>* A_striped = A.get_Striped();
+    std::cout << "getting striped matrix" << std::endl;
+
+    // A_striped.striped_Matrix_from_sparse_CSR(A);
 
     // for(int i =0; i < A_striped.get_num_stripes(); i++){
     //     double val = A_striped.get_values()[i];
@@ -39,7 +41,7 @@ bool run_stripedSharedMem_tests_on_matrix(sparse_CSR_Matrix<double>& A){
     int num_cols = A.get_num_cols();
     int nnz = A.get_nnz();
 
-    int num_stripes = A_striped.get_num_stripes();
+    int num_stripes = A_striped->get_num_stripes();
 
     double * x_d;
 
@@ -53,7 +55,7 @@ bool run_stripedSharedMem_tests_on_matrix(sparse_CSR_Matrix<double>& A){
     // test the SPMV function
     all_pass = all_pass && test_SPMV(
         cuSparse, stripedSharedMem,
-        A_striped,
+        *A_striped,
         
         x_d
         );

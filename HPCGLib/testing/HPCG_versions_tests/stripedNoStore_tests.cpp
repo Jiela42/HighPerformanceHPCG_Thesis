@@ -18,14 +18,15 @@ bool run_no_store_stripedColoring_tests_onMatrix(sparse_CSR_Matrix<double>& A){
     std::vector<double> b = generate_random_vector(nx*ny*nz, RANDOM_SEED);
     std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
 
-    striped_Matrix<double> A_striped;
-    A_striped.striped_Matrix_from_sparse_CSR(A);
+    striped_Matrix<double>* A_striped = A.get_Striped();
+    // A_striped.striped_Matrix_from_sparse_CSR(A);
+    std::cout << "getting striped matrix" << std::endl;
 
     int num_rows = A.get_num_rows();
     int num_cols = A.get_num_cols();
     int nnz = A.get_nnz();
 
-    int num_stripes = A_striped.get_num_stripes();
+    int num_stripes = A_striped->get_num_stripes();
 
     double * a_d;
     double * b_d;
@@ -46,7 +47,7 @@ bool run_no_store_stripedColoring_tests_onMatrix(sparse_CSR_Matrix<double>& A){
     // test the SymGS function (minitest, does not work with striped matrices)
     all_pass = all_pass && test_SymGS(
         cuSparse, no_store_implementation,
-        A_striped,
+        *A_striped,
 
         y_d
         );

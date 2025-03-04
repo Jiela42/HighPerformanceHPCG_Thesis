@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <stdio.h>
 #include <string>
+// #include <memory>
 
 
 template <typename T>
@@ -79,6 +80,10 @@ sparse_CSR_Matrix<T>::~sparse_CSR_Matrix(){
         delete this->coarse_Matrix;
         this->coarse_Matrix = nullptr;
     }
+    // if(this->Striped != nullptr){
+    //     delete this->Striped;
+    //     this->Striped = nullptr;
+    // }
 }
 
 template <typename T>
@@ -339,7 +344,7 @@ void sparse_CSR_Matrix<T>::generateMatrix_onGPU(int nx, int ny, int nz)
     CHECK_CUDA(cudaMemset(this->col_idx_d, 0, nnz * sizeof(int)));
     CHECK_CUDA(cudaMemset(this->values_d, 0, nnz * sizeof(T)));
 
-    std::cout << "generating CSR Matrix on GPU" << std::endl;
+    // std::cout << "generating CSR Matrix on GPU" << std::endl;
 
     // now we generate the matrix
     generateHPCGMatrix(nx, ny, nz, this->row_ptr_d, this->col_idx_d, this->values_d);
@@ -349,7 +354,7 @@ void sparse_CSR_Matrix<T>::generateMatrix_onGPU(int nx, int ny, int nz)
 template <typename T>
 void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped(striped_Matrix<T> &A){
 
-    std::cout << "sparse_CSR_Matrix_from_striped" << std::endl;
+    // std::cout << "sparse_CSR_Matrix_from_striped" << std::endl;
 
     if(A.get_matrix_type() == MatrixType::Stencil_3D27P){
         assert(A.get_num_stripes() == 27);
@@ -374,11 +379,11 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped(striped_Matrix<T> &A){
 
     // check if A is on the GPU
     if(A.get_values_d() != nullptr and A.get_j_min_i_d() != nullptr){
-        std::cout << "A is on the GPU" << std::endl;
+        // std::cout << "A is on the GPU" << std::endl;
         this->sparse_CSR_Matrix_from_striped_transformation_GPU(A);
     }
     else{
-        std::cout << "A is on the CPU" << std::endl;
+        // std::cout << "A is on the CPU" << std::endl;
         this->sparse_CSR_Matrix_from_striped_transformation_CPU(A);
     }
 }

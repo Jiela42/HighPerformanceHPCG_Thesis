@@ -22,8 +22,10 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double>& A){
     std::vector<double> b = generate_random_vector(nx*ny*nz, RANDOM_SEED);
     std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
 
-    striped_Matrix<double> A_striped;
-    A_striped.striped_Matrix_from_sparse_CSR(A);
+    striped_Matrix<double>* A_striped = A.get_Striped();
+    // A_striped.striped_Matrix_from_sparse_CSR(A);
+
+    std::cout << "getting striped matrix" << std::endl;
 
     // std::cout << "size: " << nx << "x" << ny << "x" << nz << std::endl;
 
@@ -40,7 +42,7 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double>& A){
     int num_cols = A.get_num_cols();
     int nnz = A.get_nnz();
 
-    int num_stripes = A_striped.get_num_stripes();
+    int num_stripes = A_striped->get_num_stripes();
 
     double * a_d;
     double * b_d;
@@ -64,27 +66,27 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double>& A){
     // test the SPMV function
     all_pass = all_pass && test_SPMV(
         cuSparse, striped_warp_reduction,
-        A_striped,
+        *A_striped,
         a_d
         );
 
     // test the Dot function
     all_pass = all_pass && test_Dot(
         striped_warp_reduction,
-        A_striped.get_nx(), A_striped.get_ny(), A_striped.get_nz()
+        A_striped->get_nx(), A_striped->get_ny(), A_striped->get_nz()
         );
 
         
     // test the SymGS function (minitest, does not work with striped matrices)
     all_pass = all_pass && test_SymGS(
         cuSparse, striped_warp_reduction,
-        A_striped,
+        *A_striped,
         y_d
     );
 
     all_pass = all_pass && test_WAXPBY(
         striped_warp_reduction,
-        A_striped,
+        *A_striped,
         a_d, b_d
     );
         

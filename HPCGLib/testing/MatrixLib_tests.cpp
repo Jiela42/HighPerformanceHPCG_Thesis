@@ -100,24 +100,28 @@ bool parallel_generation_from_CSR_test(sparse_CSR_Matrix<double>& A){
     std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
     sparse_CSR_Matrix<double> A_host = problem.first;
 
-    striped_Matrix<double> striped_A_host;
-    striped_Matrix<double> striped_A;
-
+    striped_Matrix<double>* striped_A_host = A_host.get_Striped();
+    std::cout << "getting striped matrix" << std::endl;
+    
     // if the CSR is on the CPU, the striped matrix is generated on the CPU
-    striped_A_host.striped_Matrix_from_sparse_CSR(A_host);
+    // striped_A_host.striped_Matrix_from_sparse_CSR(A_host);
 
 
     // std::cout << "striped_A_host generated" << std::endl;
     // if (striped_A_host.get_values_d() == nullptr){
-    //     std::cout << "striped_A_host values_d is nullptr" << std::endl;
-    // }else{
-    //     std::cout << "striped_A_host values_d is not nullptr" << std::endl;
-    //     std::cout << "this is the address: " << striped_A_host.get_values_d() << std::endl;
-    // }
-    
+        //     std::cout << "striped_A_host values_d is nullptr" << std::endl;
+        // }else{
+            //     std::cout << "striped_A_host values_d is not nullptr" << std::endl;
+            //     std::cout << "this is the address: " << striped_A_host.get_values_d() << std::endl;
+            // }
+            
     A.generateMatrix_onGPU(nx, ny, nz);
     // if the CSR is on the GPU, the striped matrix is generated on the GPU
-    striped_A.striped_Matrix_from_sparse_CSR(A);
+    striped_Matrix<double>* striped_A = A.get_Striped();
+    std::cout << "getting striped matrix" << std::endl;
+    
+    // striped_A.striped_Matrix_from_sparse_CSR(A);
+
 
     // if (striped_A.get_values_d() == nullptr){
     //     std::cout << "striped_A values_d is nullptr" << std::endl;
@@ -128,62 +132,62 @@ bool parallel_generation_from_CSR_test(sparse_CSR_Matrix<double>& A){
     // }
 
     // grab the values from the GPU
-    std::vector<int> j_min_i_host(striped_A.get_num_stripes(), 0);
-    std::vector<double> values_host(striped_A.get_num_stripes() * nx * ny * nz, 0);
+    std::vector<int> j_min_i_host(striped_A->get_num_stripes(), 0);
+    std::vector<double> values_host(striped_A->get_num_stripes() * nx * ny * nz, 0);
 
-    CHECK_CUDA(cudaMemcpy(j_min_i_host.data(), striped_A.get_j_min_i_d(), striped_A.get_num_stripes() * sizeof(int), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(values_host.data(), striped_A.get_values_d(), striped_A.get_num_stripes() * nx * ny * nz * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(j_min_i_host.data(), striped_A->get_j_min_i_d(), striped_A->get_num_stripes() * sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(values_host.data(), striped_A->get_values_d(), striped_A->get_num_stripes() * nx * ny * nz * sizeof(double), cudaMemcpyDeviceToHost));
 
     // since we cannot just generate from j_min_i and values we do the comparison manually
 
     // first we check all the single values and make sure they are equal
     bool test_passed = true;
 
-    if(striped_A.get_num_stripes() != striped_A_host.get_num_stripes()){
+    if(striped_A->get_num_stripes() != striped_A_host->get_num_stripes()){
         std::cerr << "num stripes mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
         test_passed = false;
     }
-    if(striped_A.get_num_rows() != striped_A_host.get_num_rows()){
+    if(striped_A->get_num_rows() != striped_A_host->get_num_rows()){
         std::cerr << "num rows mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
         test_passed = false;
     }
-    if(striped_A.get_num_cols() != striped_A_host.get_num_cols()){
+    if(striped_A->get_num_cols() != striped_A_host->get_num_cols()){
         std::cerr << "num cols mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
         test_passed = false;
     }
-    if(striped_A.get_nx() != striped_A_host.get_nx()){
+    if(striped_A->get_nx() != striped_A_host->get_nx()){
         std::cerr << "nx mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
         test_passed = false;
     }
-    if(striped_A.get_ny() != striped_A_host.get_ny()){
+    if(striped_A->get_ny() != striped_A_host->get_ny()){
         std::cerr << "ny mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
         test_passed = false;
     }
-    if(striped_A.get_nz() != striped_A_host.get_nz()){
+    if(striped_A->get_nz() != striped_A_host->get_nz()){
         std::cerr << "nz mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
         test_passed = false;
     }
-    if(striped_A.get_nnz() != striped_A_host.get_nnz()){
+    if(striped_A->get_nnz() != striped_A_host->get_nnz()){
         std::cerr << "nnz mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
         test_passed = false;
     }
-    if(striped_A.get_diag_index() != striped_A_host.get_diag_index()){
+    if(striped_A->get_diag_index() != striped_A_host->get_diag_index()){
         std::cerr << "diag index mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
         test_passed = false;
     }
-    if(striped_A.get_matrix_type() != striped_A_host.get_matrix_type()){
+    if(striped_A->get_matrix_type() != striped_A_host->get_matrix_type()){
         std::cerr << "matrix type mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
         test_passed = false;
     }
     
-    for(int i = 0; i < striped_A_host.get_num_stripes(); i++){
-        if(j_min_i_host[i] != striped_A_host.get_j_min_i()[i]){
+    for(int i = 0; i < striped_A_host->get_num_stripes(); i++){
+        if(j_min_i_host[i] != striped_A_host->get_j_min_i()[i]){
             std::cerr << "j_min_i mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
             test_passed = false;
         }
     }
 
-    if(not vector_compare(values_host, striped_A_host.get_values())){
+    if(not vector_compare(values_host, striped_A_host->get_values())){
         std::cerr << "values mismatch for generate_striped_Matrix_from_CSR test" << std::endl;
         test_passed = false;
     }
@@ -195,8 +199,11 @@ bool parallel_generation_from_CSR_test(sparse_CSR_Matrix<double>& A){
 //////////////////////////////////////////////////////////////////////////////////////////////
 // striped vs csr tests
 bool striped_csr_conversion_test_on_matrix(sparse_CSR_Matrix<double>& A){
-    striped_Matrix<double> striped_A;
-    striped_A.striped_Matrix_from_sparse_CSR(A);
+    striped_Matrix<double>* striped_A = A.get_Striped();
+    std::cout << "getting striped matrix" << std::endl;
+
+    // striped_A.striped_Matrix_from_sparse_CSR(A);
+
     // for(int i = 0; i < striped_A.get_num_rows(); i++){
     //     for(int j = 0; j < striped_A.get_num_cols(); j++){
     //         double elem = A.get_element(i, j);
@@ -212,11 +219,12 @@ bool striped_csr_conversion_test_on_matrix(sparse_CSR_Matrix<double>& A){
     //     double val = striped_A.get_values()[i];
     //     std::cout << "in test val: " << val << std::endl;
     // }
-    sparse_CSR_Matrix<double> back_to_CSR;
+    sparse_CSR_Matrix<double>* back_to_CSR = striped_A->get_CSR();
+    std::cout << "getting CSR Matrix" << std::endl;
     // std::cout << "in test striped A nnz: " << striped_A.get_nnz() << std::endl;
-    back_to_CSR.sparse_CSR_Matrix_from_striped(striped_A);
+    // back_to_CSR.sparse_CSR_Matrix_from_striped(striped_A);
 
-    bool test_passed = A.compare_to(back_to_CSR, "striped vs csr conversion test");
+    bool test_passed = A.compare_to(*back_to_CSR, "striped vs csr conversion test");
 
     return test_passed;
 }
@@ -250,10 +258,12 @@ bool run_striped_csr_conversion_test(int nx, int ny, int nz){
 
 bool striped_csr_parallel_conversion_test_on_matrix(sparse_CSR_Matrix<double>&A){
 
-    striped_Matrix<double> striped_A;
-    sparse_CSR_Matrix<double> back_to_CSR;
-    striped_A.striped_Matrix_from_sparse_CSR(A);
-    back_to_CSR.sparse_CSR_Matrix_from_striped(striped_A);
+    striped_Matrix<double>* striped_A = A.get_Striped();
+    std::cout << "getting striped matrix" << std::endl;
+    sparse_CSR_Matrix<double>* back_to_CSR = striped_A->get_CSR();
+    std::cout << "getting CSR Matrix" << std::endl;
+    // striped_A.striped_Matrix_from_sparse_CSR(A);
+    // back_to_CSR.sparse_CSR_Matrix_from_striped(striped_A);
 
     // instead of copying it back by hand, we just call the function and then compare the two matrices with the built in function
 
@@ -263,7 +273,7 @@ bool striped_csr_parallel_conversion_test_on_matrix(sparse_CSR_Matrix<double>&A)
     //     std::cout << "A has no coarse matrix" << std::endl;
     // }
 
-    back_to_CSR.copy_Matrix_toCPU();
+    back_to_CSR->copy_Matrix_toCPU();
 
     // if(back_to_CSR.get_coarse_Matrix() != nullptr){
     //     std::cout << "back_to_CSR has a coarse matrix" << std::endl;
@@ -271,7 +281,7 @@ bool striped_csr_parallel_conversion_test_on_matrix(sparse_CSR_Matrix<double>&A)
     //     std::cout << "back_to_CSR has no coarse matrix" << std::endl;
     // }
 
-    bool test_passed = A.compare_to(back_to_CSR, "striped vs csr parallel conversion test");
+    bool test_passed = A.compare_to(*back_to_CSR, "striped vs csr parallel conversion test");
 
     // std::cout<< "test passed: " << test_passed << std::endl;
 
@@ -517,8 +527,9 @@ bool run_all_matrixLib_tests(int nx, int ny, int nz){
     sparse_CSR_Matrix<double> A;
     A.generateMatrix_onGPU(nx, ny, nz);
 
-    striped_Matrix<double> striped_A;
-    striped_A.striped_Matrix_from_sparse_CSR(A);
+    striped_Matrix<double>* striped_A = A.get_Striped();
+    std::cout << "getting striped matrix" << std::endl;
+    // striped_A.striped_Matrix_from_sparse_CSR(A);
 
     bool all_pass = true;
 
@@ -550,7 +561,7 @@ bool run_all_matrixLib_tests(int nx, int ny, int nz){
     all_pass = all_pass && run_striped_csr_parallel_conversion_test(nx, ny, nz);
     // std::cout << "striped vs csr parallel conversion test passed for " << dim_info << std::endl;
     all_pass = all_pass && parallel_generation_from_CSR_test(A);
-    all_pass = all_pass && coloring_test(striped_A);
+    all_pass = all_pass && coloring_test(*striped_A);
     // std::cout << "coloring test passed for " << dim_info << std::endl;
     all_pass = all_pass && run_MG_data_tests(A);
 

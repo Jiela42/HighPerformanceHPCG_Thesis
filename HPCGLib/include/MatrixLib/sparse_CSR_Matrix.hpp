@@ -34,8 +34,7 @@ public:
     void generate_f2c_operator_onGPU();
     void generate_f2c_operator_onCPU();
 
-    void sparse_CSR_Matrix_from_striped(striped_Matrix<T> &A);
-
+    
     void sanity_check_3D27P();
     void sanity_check_Matrix_on_CPU() const;
 
@@ -49,12 +48,12 @@ public:
     int* get_row_ptr_d();
     int* get_col_idx_d();
     T* get_values_d();
-
+    
     void copy_Matrix_toGPU();
     void copy_Matrix_toCPU();
-
+    
     void remove_Matrix_from_GPU();
-
+    
     int get_num_rows() const;
     int get_num_cols() const;
     int get_nx() const;
@@ -82,6 +81,7 @@ public:
     void read_from_file(std::string nx, std::string ny, std::string nz, std::string matrix_type);
 
 private:
+    friend class striped_Matrix<T>;
     int nx;
     int ny;
     int nz;
@@ -95,9 +95,9 @@ private:
     int * col_idx_d;
     T * values_d;
     MatrixType matrix_type;
-
+    
     striped_Matrix<T>* Striped;
-
+    
     int num_MG_pre_smooth_steps;
     int num_MG_post_smooth_steps;
     sparse_CSR_Matrix<T> * coarse_Matrix;
@@ -109,7 +109,9 @@ private:
     T* Axf_d;
 
     std::vector<int> f2c_op;
-
+    
+    // friend void striped_Matrix<T>::striped_Matrix_from_sparse_CSR(sparse_CSR_Matrix<T>& A);
+    void sparse_CSR_Matrix_from_striped(striped_Matrix<T> &A);
     void sparse_CSR_Matrix_from_striped_transformation(striped_Matrix<T>&);
     void sparse_CSR_Matrix_from_striped_transformation_CPU(striped_Matrix<T>&);
     void sparse_CSR_Matrix_from_striped_transformation_GPU(striped_Matrix<T>&);

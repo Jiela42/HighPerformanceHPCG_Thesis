@@ -219,12 +219,6 @@ void bench_Dot(
     ){
     int num_iterations = implementation.getNumberOfIterations();
 
-    sparse_CSR_Matrix<double>* A_CSR = A.get_CSR();
-
-    std::cout << "A CSR " << A_CSR << std::endl;
-
-    std::cout << "a_csr num rows: " << A_CSR->get_num_rows() << std::endl;
-
     if (implementation.test_before_bench){
         // note that for the dot product the cuSparse implementation is an instanciation of warp reduction. ehem.
         cuSparse_Implementation<double> baseline;
@@ -479,55 +473,28 @@ void bench_Implementation(
     ){
 
     sparse_CSR_Matrix<double> *A_CSR = A.get_CSR();
-
-    // check that col idx is not null
-    if(A_CSR->get_col_idx_d() == nullptr){
-        std::cout << "A col idx is nullptr" << std::endl;
-    } else{
-        std::cout << "A col idx is not nullptr" << std::endl;
-    }
     
-    std::cout << "Bench SPMV" << std::endl;
+    // std::cout << "Bench SPMV" << std::endl;
     if(implementation.SPMV_implemented){
         bench_SPMV(implementation, timer, A, a_d, y_d);
     }
-
-    A_CSR = A.get_CSR();
-
-    // check that col idx is not null
-    if(A_CSR->get_col_idx_d() == nullptr){
-        std::cout << "A col idx is nullptr" << std::endl;
-    } else{
-        std::cout << "A col idx is not nullptr" << std::endl;
-    }
-
-    std::cout << "Bench Dot" << std::endl;
+    // std::cout << "Bench Dot" << std::endl;
     if(implementation.Dot_implemented){
         bench_Dot(implementation, timer, A, a_d, b_d, result_d);
     }
-    
-    A_CSR = A.get_CSR();
-
-    // check that col idx is not null
-    if(A_CSR->get_col_idx_d() == nullptr){
-        std::cout << "A col idx is nullptr" << std::endl;
-    } else{
-        std::cout << "A col idx is not nullptr" << std::endl;
-    }
-
-    std::cout << "Bench SymGS" << std::endl;
+    // std::cout << "Bench SymGS" << std::endl;
     if(implementation.SymGS_implemented){
         bench_SymGS(implementation, timer, A, x_d, y_d);
     }
-    std::cout << "Bench WAXPBY" << std::endl;
+    // std::cout << "Bench WAXPBY" << std::endl;
     if(implementation.WAXPBY_implemented){
         bench_WAXPBY(implementation, timer, A, a_d, b_d, y_d, alpha, beta);
     }
-    std::cout << "Bench CG" << std::endl;
+    // std::cout << "Bench CG" << std::endl;
     if(implementation.CG_implemented){
         bench_CG(implementation, timer, A, x_d, y_d);
     }
-    std::cout << "Bench MG" << std::endl;
+    // std::cout << "Bench MG" << std::endl;
     if(implementation.MG_implemented){
         bench_MG(implementation, timer, A, x_d, y_d);
     }

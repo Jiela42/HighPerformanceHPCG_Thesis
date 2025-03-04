@@ -9,6 +9,7 @@
 #include <iostream>
 #include <string>
 #include <cassert>
+#include <memory>
 
 // Forward declaration of sparse_CSR_Matrix
 template <typename T>
@@ -19,15 +20,14 @@ class striped_Matrix {
     public:
         striped_Matrix();
         ~striped_Matrix();
-        void striped_Matrix_from_sparse_CSR(sparse_CSR_Matrix<T> & A);
-
+        
         void generate_coloring();
-
+        
         void copy_Matrix_toGPU();
         void copy_Matrix_toCPU();
 
         void remove_Matrix_from_GPU();
-
+        
         int *get_color_pointer_d();
         int *get_color_sorted_rows_d();
         std::vector<int> get_color_pointer_vector();
@@ -65,9 +65,10 @@ class striped_Matrix {
         void print() const;
         // void compare_to(striped_Matrix<T>& other) const;
         // void write_to_file() const;
-
-
-    private:
+        
+        
+        private:
+        friend class sparse_CSR_Matrix<T>;
         int nx;
         int ny;
         int nz;
@@ -79,6 +80,8 @@ class striped_Matrix {
         std::vector<int> j_min_i;
         std::vector<T> values;
         MatrixType matrix_type;
+        // friend void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped(striped_Matrix<T> & A);
+        void striped_Matrix_from_sparse_CSR(sparse_CSR_Matrix<T> & A);
         void striped_3D27P_Matrix_from_CSR_onCPU(sparse_CSR_Matrix<T> & A);
         void striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T> & A);
         int *j_min_i_d;
@@ -86,7 +89,7 @@ class striped_Matrix {
         int* color_pointer_d;
         int* color_sorted_rows_d;
 
-        sparse_CSR_Matrix<T> *CSR;
+        std::shared_ptr<sparse_CSR_Matrix<T>> CSR;
 
         int num_MG_pre_smooth_steps;
         int num_MG_post_smooth_steps;
@@ -98,6 +101,7 @@ class striped_Matrix {
         T* rc_d;
         T* xc_d;
         T* Axf_d;
+
 };
 
 #endif // STRIPED_MATRIX_HPP

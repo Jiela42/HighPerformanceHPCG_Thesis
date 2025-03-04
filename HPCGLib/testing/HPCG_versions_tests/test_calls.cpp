@@ -170,13 +170,14 @@ bool test_CG(
 
                 implementation.doPreconditioning = false;
                 if (implementation.implementation_type == Implementation_Type::STRIPED){
-                    striped_Matrix<double> A_striped;
-                    A_striped.striped_Matrix_from_sparse_CSR(A);
+                    striped_Matrix<double>* A_striped = A.get_Striped();
+                    std::cout << "getting striped matrix" << std::endl;
+                    // A_striped.striped_Matrix_from_sparse_CSR(A);
 
-                    // we might need a coloring precomputed
-                    A_striped.generate_coloring();
+                    // we might need a coloring precomputed for some SymGS implementations
+                    A_striped->generate_coloring();
 
-                    implementation.compute_CG(A_striped, b_d, x_d, n_iters, normr, normr0);
+                    implementation.compute_CG(*A_striped, b_d, x_d, n_iters, normr, normr0);
                     std::cout << "CG took " << n_iters << " iterations for size " << nx << "x" << ny << "x" << nz << " without Preconditioning, with a normr/normr0 of " << normr/normr0 << std::endl;
 
                 } else{
@@ -199,13 +200,15 @@ bool test_CG(
                 implementation.doPreconditioning = true;
                 
                 if (implementation.implementation_type == Implementation_Type::STRIPED){
-                    striped_Matrix<double> A_striped;                    
-                    A_striped.striped_Matrix_from_sparse_CSR(A);
+                    striped_Matrix<double>* A_striped = A.get_Striped();
+                    std::cout << "getting striped matrix" << std::endl;
+
+                    // A_striped.striped_Matrix_from_sparse_CSR(A);
                     
                     // we might need a coloring precomputed
-                    A_striped.generate_coloring();
+                    A_striped->generate_coloring();
 
-                    implementation.compute_CG(A_striped, b_d, x_d, n_iters, normr, normr0);
+                    implementation.compute_CG(*A_striped, b_d, x_d, n_iters, normr, normr0);
 
                     std::cout << "CG took " << n_iters << " iterations for size " << nx << "x" << ny << "x" << nz << " with Preconditioning, with a normr/normr0 of " << normr/normr0 << std::endl;
                 } else{
@@ -414,14 +417,16 @@ bool test_MG(
 
                 if (implementation.implementation_type == Implementation_Type::STRIPED){
 
-                    striped_Matrix<double> A_striped;
-                    A_striped.striped_Matrix_from_sparse_CSR(A);
+                    striped_Matrix<double>* A_striped = A.get_Striped();
+                    std::cout << "getting striped matrix" << std::endl;
+
+                    // A_striped.striped_Matrix_from_sparse_CSR(A);
 
                     // we might need a coloring precomputed
-                    A_striped.generate_coloring();
+                    A_striped->generate_coloring();
     
                     // test the MG function
-                    implementation.compute_MG(A_striped, b_computed_d, x_overlap_d);
+                    implementation.compute_MG(*A_striped, b_computed_d, x_overlap_d);
                 } else{
                     std::cout << "MG not implemented for this implementation" << std::endl;
                     all_pass = false;
@@ -908,25 +913,6 @@ bool test_SymGS(
 
     int num_rows_baseline = A->get_num_rows();
 
-    if(A->get_row_ptr_d() == nullptr){
-        std::cout << "A row ptr is nullptr" << std::endl;
-    } else{
-        std::cout << "A row ptr is not nullptr" << std::endl;
-    }
-    if(A->get_col_idx_d() == nullptr){
-        std::cout << "A col idx is nullptr" << std::endl;
-    } else{
-        std::cout << "A col idx is not nullptr" << std::endl;
-    }
-    if(A->get_values_d() == nullptr){
-        std::cout << "A values is nullptr" << std::endl;
-    } else{
-        std::cout << "A values is not nullptr" << std::endl;
-    }
-
-    std::cout << "Num rows: " << num_rows << std::endl;
-
-
     double * x_uut_d;
     CHECK_CUDA(cudaMalloc(&x_uut_d, num_rows * sizeof(double)));
     CHECK_CUDA(cudaMemset(x_uut_d, 0, num_rows * sizeof(double)));
@@ -985,12 +971,6 @@ bool test_SymGS(
 
         // we need the x to be all set to zero, otherwise with different initial conditions the results will be different
         CHECK_CUDA(cudaMemset(x_baseline_d, 0, num_rows * sizeof(double)));
-
-        if(A == nullptr){
-            std::cout << "A is nullptr" << std::endl;
-        }
-
-        std::cout << "acsr num rows: " << A->get_num_rows() << std::endl;
 
         baseline.compute_SymGS(*A, x_baseline_d, y_d);
 

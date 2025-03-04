@@ -7,6 +7,8 @@
 #include <iostream>
 #include <string>
 
+#include <memory>
+
 // #include <stdio.h>
 
 template <typename T>
@@ -85,6 +87,10 @@ striped_Matrix<T>::~striped_Matrix(){
         delete this->coarse_Matrix;
         this->coarse_Matrix = nullptr;
     }
+    // if(this->CSR != nullptr){
+    //     delete this->CSR;
+    //     this->CSR = nullptr;
+    // }
 }
 
 template <typename T>
@@ -105,7 +111,7 @@ sparse_CSR_Matrix<T>* striped_Matrix<T>::get_CSR(){
 
 template <typename T>
 void striped_Matrix<T>::striped_Matrix_from_sparse_CSR(sparse_CSR_Matrix<T>& A){
-    // std::cout << "entering striped_Matrix_from_sparse_CSR" << std::endl;
+    std::cout << "entering striped_Matrix_from_sparse_CSR" << std::endl;
     this->CSR = &A;
     A.set_Striped(this);
     if(A.get_matrix_type() == MatrixType::Stencil_3D27P and A.get_values_d() != nullptr and A.get_col_idx_d() != nullptr and A.get_row_ptr_d() != nullptr){

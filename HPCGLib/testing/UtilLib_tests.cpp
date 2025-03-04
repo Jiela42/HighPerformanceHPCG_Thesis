@@ -184,8 +184,9 @@ bool run_all_util_tests(int nx, int ny, int nz){
 
     // std::cout << "CSR Matrix is generated" << std::endl;
     // make striped matrix
-    striped_Matrix<double> striped_A;
-    striped_A.striped_Matrix_from_sparse_CSR(A);
+    std::cout << "getting striped matrix" << std::endl;
+    striped_Matrix<double>* striped_A = A.get_Striped();
+    // striped_A.striped_Matrix_from_sparse_CSR(A);
 
     // std::cout << "Striped Matrix is generated" << std::endl;
 
@@ -199,7 +200,7 @@ bool run_all_util_tests(int nx, int ny, int nz){
 
     // std::cout<< "l2 norm test passed for CSR matrix for size " << nx << "x" << ny << "x" << nz << std::endl;
 
-    bool current_pass = test_l2_norm(A, striped_A, x_solution, y);
+    bool current_pass = test_l2_norm(A, *striped_A, x_solution, y);
 
     if(!current_pass){
         std::cout << "l2 norm test failed for striped matrix for size " << nx << "x" << ny << "x" << nz << std::endl;
@@ -215,7 +216,7 @@ bool run_all_util_tests(int nx, int ny, int nz){
         all_pass = false;
     }
 
-    current_pass = test_rr_norm(A, striped_A, x_solution, y);
+    current_pass = test_rr_norm(A, *striped_A, x_solution, y);
 
     return all_pass;
 }
