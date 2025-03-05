@@ -91,6 +91,12 @@ striped_Matrix<T>::~striped_Matrix(){
         // we also have to set this matrix to null in our sibling matrix
         temp->Striped = nullptr;
         // when we delete the matrix, we also delete any coarse matrices, so we have to set that to null_ptr as well
+        // we will delete the cooarse matrix of the corresponding CSR matrix, when we delete the coarse striped matrix
+
+        // I don't like this. I'd rather cut the connection between this->coarse_Matrix and its CSR Matrix
+        // however we do need to verify that these are all the same
+        // which is done partially when we create the striped from the CSR,
+        // however if coarse matrices are created later, the corresponding matrix, would not contain them
         temp->coarse_Matrix = nullptr;
         delete temp;
     }
@@ -103,14 +109,14 @@ striped_Matrix<T>::~striped_Matrix(){
 
 template <typename T>
 void striped_Matrix<T>::set_CSR(sparse_CSR_Matrix<T> *A){
-    std::cout << "set_CSR: setting CSR matrix" << std::endl;
+    // std::cout << "set_CSR: setting CSR matrix" << std::endl;
     this->CSR = A;
 }
 
 template <typename T>
 sparse_CSR_Matrix<T>* striped_Matrix<T>::get_CSR(){
     if(this->CSR == nullptr){
-        std::cout << "get_CSR: creating new CSR matrix" << std::endl;
+        // std::cout << "get_CSR: creating new CSR matrix" << std::endl;
         sparse_CSR_Matrix<T> *A = new sparse_CSR_Matrix<T>();
         A->sparse_CSR_Matrix_from_striped(*this);
     }
