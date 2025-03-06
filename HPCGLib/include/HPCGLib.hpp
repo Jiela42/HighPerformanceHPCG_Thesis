@@ -85,6 +85,7 @@ class HPCG_functions {
             ) = 0;
 
         // this version supports CSR
+        // Ax = y
         virtual void compute_SPMV(
             sparse_CSR_Matrix<T> & A,
             T * x_d, T * y_d // the vectors x and y are already on the device

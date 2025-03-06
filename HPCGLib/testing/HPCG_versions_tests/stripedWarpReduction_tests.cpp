@@ -39,8 +39,6 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double>& A){
     int num_cols = A.get_num_cols();
     int nnz = A.get_nnz();
 
-    int num_stripes = A_striped->get_num_stripes();
-
     double * a_d;
     double * b_d;
     double * x_d;

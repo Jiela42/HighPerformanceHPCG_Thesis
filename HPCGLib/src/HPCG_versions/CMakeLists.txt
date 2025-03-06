@@ -63,6 +63,4 @@ target_link_libraries(
     CUDA::cusparse
     CUDA::cublas
     CUDA::cudart
-    # ${AMGX_LIB}
-    # Thrust
 )

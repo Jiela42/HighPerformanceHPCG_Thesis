@@ -34,6 +34,10 @@ add_executable(run_get_Norm
     run_get_Norm.cpp
 )
 
+add_executable(run_example
+    run_example.cpp
+)
+
 target_link_libraries(TestHPCGLib
     HPCGLib
     MatrixLib
@@ -57,4 +61,9 @@ target_link_libraries(run_get_Norm
     HPCGLib
     MatrixLib
     UtilLib
+)
+
+target_link_libraries(run_example
+    HPCGLib
+    MatrixLib
 )

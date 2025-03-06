@@ -19,3 +19,4 @@
 3. '''make'''
 4. cd into testing or benchmarking
 5. use one of the run files to run e.g. '''./run_AllTests'''
+6. There is an example called "run_example" in the testing folder that shows you how to run the functions
