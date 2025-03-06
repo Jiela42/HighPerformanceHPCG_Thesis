@@ -821,6 +821,15 @@ void sparse_CSR_Matrix<T>::initialize_coarse_Matrix(){
             // std::cout << "coarse matrix generated on the CPU" << std::endl;
         }      
     }
+
+    // we need to make sure that our striped sibling has the same coarse matrix, too
+    if(this->Striped != nullptr){
+        // unfortunately we don't have a nice initialization (yet)
+        // so this hacky code will have to do for now
+        this->Striped->coarse_Matrix = new striped_Matrix<T>();
+        // this will also set the sibling pointers. So yay
+        this->Striped->coarse_Matrix->striped_Matrix_from_sparse_CSR(*(this->coarse_Matrix));
+    }
 }
 
 template <typename T>
