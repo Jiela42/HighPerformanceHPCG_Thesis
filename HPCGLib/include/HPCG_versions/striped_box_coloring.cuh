@@ -33,6 +33,8 @@ public:
         this->implementation_type = Implementation_Type::STRIPED;
 
         this->SymGS_implemented = true;
+        this->MG_implemented = true;
+        this->CG_implemented = true;
 
         // default box size for coloring
         this->bx = 3;

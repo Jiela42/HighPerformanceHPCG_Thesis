@@ -336,7 +336,6 @@ void bench_SymGS(
 
     CHECK_CUDA(cudaMemcpy(x.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
 
-
     if (implementation.test_before_bench){
         cuSparse_Implementation<double> baseline;
 
@@ -347,6 +346,11 @@ void bench_SymGS(
             num_iterations = 0;
         }
     }
+
+    // in case it is a norm based SymGS (we do more than one iteration)
+    // we need to store and adjust the number of max iterations
+    int original_max_iter = implementation.get_maxSymGSIters();
+    implementation.set_maxSymGSIters(500);
 
     for(int i = 0; i < num_iterations; i++){
         // always write the original x back into x_d
@@ -371,6 +375,10 @@ void bench_SymGS(
 
     // copy the original vector back
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+    
+    // store the original number of iterations
+    implementation.set_maxSymGSIters(original_max_iter);
+
 }
 
 void bench_SymGS(
@@ -386,13 +394,7 @@ void bench_SymGS(
     // x_d is the output vector, hence we need to store the original and write the original back after the benchmarking
     std::vector<double> x(A.get_num_rows(), 0.0);
 
-    CHECK_CUDA(cudaMemcpy(x.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
-
-    // for normbased implementations we need to make sure the maximum number of iterations performed by symGS is enough
-    int original_max_symgs_iterations = implementation.get_maxSymGSIters();
-    if(implementation.norm_based){
-        implementation.set_maxSymGSIters(500);
-    }
+    CHECK_CUDA(cudaMemcpy(x.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));   
 
     if(implementation.test_before_bench){
 
@@ -407,6 +409,12 @@ void bench_SymGS(
             num_iterations = 0;
         }
     }
+
+     // for normbased implementations we need to make sure the maximum number of iterations performed by symGS is enough
+     int original_max_symgs_iterations = implementation.get_maxSymGSIters();
+     if(implementation.norm_based){
+         implementation.set_maxSymGSIters(500);
+     }
         
     for (int i = 0; i < num_iterations; i++){
         // std::cout<< "Iteration: " << i << std::endl;
@@ -435,6 +443,9 @@ void bench_SymGS(
     if(implementation.norm_based){
         implementation.set_maxSymGSIters(original_max_symgs_iterations);
     }
+
+    // restore the original number of iterations
+    implementation.set_maxSymGSIters(original_max_symgs_iterations);
 }
 
 // this function allows us to run the whole abstract benchmark

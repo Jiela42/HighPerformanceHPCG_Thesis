@@ -6,7 +6,7 @@
 #include <string>
 
 // define number of iterations we want to have
-#define num_bench_iter 1
+#define num_bench_iter 10
 
 enum class Implementation_Type {
     STRIPED,
@@ -189,6 +189,8 @@ class HPCG_functions {
                 return 0.1878644061539017;
             } else if(nx == 16 and ny == 16 and nz == 16){
                 return 0.1868789912880421;
+            } else if(nx == 24 and ny == 24 and nz == 24){
+                return 0.2098583236701958;
             } else if(nx == 32 and ny == 32 and nz == 32){
                 return 0.2386720453340627;
             } else if(nx == 64 and ny == 64 and nz == 64){

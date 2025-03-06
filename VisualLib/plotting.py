@@ -198,6 +198,13 @@ y_L2_Norms = defaultdict(lambda: 1.0, {
     "256x128x128": 3828.4398911305893
 })
 
+#################################################################################################################
+# Set the Memory Bandwidth for Roofline Plots
+memory_bandwidth_GBs = {
+    # ault nodes 41-44 have RTX3090s
+    "41-44": 936,
+}
+
 
 #################################################################################################################
 # Suppress all FutureWarnings
@@ -207,6 +214,28 @@ pd.set_option('display.max_rows', None)  # Show all rows
 pd.set_option('display.max_columns', None)  # Show all columns
 pd.set_option('display.width', 1000)  # Set the display width
 pd.set_option('display.max_colwidth', None)  # Set the max column width
+
+#################################################################################################################
+# Set the theoretical number of bytes to read
+#################################################################################################################
+# this assumes 3D27pt matrices
+
+def get_theoretical_bytes_read(nx, ny, nz, nnz, method):
+    case = method
+    if case == "SymGS":
+        # First the matrix
+        num_doubles = 27 * nx * ny * nz
+        num_ints = 27
+
+        # take into account the two vectors
+        num_doubles += 2 * nx * ny * nz
+
+        # double both because we have two loops
+        num_doubles *= 2
+        num_ints *= 2
+
+
+
 #################################################################################################################
 # read the data
 #################################################################################################################

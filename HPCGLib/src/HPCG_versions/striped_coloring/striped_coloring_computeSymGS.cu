@@ -169,6 +169,10 @@ void striped_coloring_Implementation<T>::striped_coloring_computeSymGS(
         );
         CHECK_CUDA(cudaDeviceSynchronize());
     }
+
+    // free the memory
+    CHECK_CUDA(cudaFree(color_pointer_d));
+    CHECK_CUDA(cudaFree(color_sorted_rows_d));
     
 }
 

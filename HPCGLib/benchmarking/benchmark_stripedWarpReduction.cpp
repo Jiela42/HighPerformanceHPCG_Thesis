@@ -17,11 +17,17 @@ void run_striped_warp_reduction_3d27p_benchmarks(int nx, int ny, int nz, std::st
     double alpha = (double)rand() / RAND_MAX;
     double beta = (double)rand() / RAND_MAX;
 
+
+    if(nx % 8 == 0 && ny % 8 == 0 && nz % 8 == 0 && nx / 8 > 2 && ny / 8 > 2 && nz / 8 > 2){
+        // initialize the MG data
+        sparse_CSR_Matrix <double>* current_matrix = &A;
+        for(int i = 0; i < 3; i++){
+            current_matrix->initialize_coarse_Matrix();
+            current_matrix = current_matrix->get_coarse_Matrix();
+        }
+    } 
+
     striped_Matrix<double> * striped_A = A.get_Striped();
-    // striped_A.striped_Matrix_from_sparse_CSR(A);
-
-
-    sparse_CSR_Matrix<double>* A_csr = striped_A->get_CSR();
 
     int num_rows = striped_A->get_num_rows();
     int num_cols = striped_A->get_num_cols();
