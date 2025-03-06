@@ -284,8 +284,8 @@ void sparse_CSR_Matrix<T>::generateMatrix_onCPU(int nx, int ny, int nz){
     }
 
     this->row_ptr = std::vector<int>(num_rows + 1, 0);
-    this->col_idx = std::vector<int>(nnz, 0);
-    this->values = std::vector<T>(nnz, 0);
+    this->col_idx = std::vector<int>();
+    this->values = std::vector<T>();
 
     for (int i = 0; i < num_rows; i++){
         this->row_ptr[i + 1] = this->row_ptr[i] + nnz_per_row[i];
