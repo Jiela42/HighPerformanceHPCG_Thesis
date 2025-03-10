@@ -43,6 +43,10 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeCG(
     CHECK_CUDA(cudaMemset(normr_d, 0, sizeof(double)));
 
     // std::vector<T> looki(5);
+    // CHECK_CUDA(cudaMemcpy(looki.data(), b_d, 5*sizeof(T), cudaMemcpyDeviceToHost));
+    // for(int i = 0; i < 5; i++){
+    //     std::cout << "y[" << i << "]: " << looki[i] << std::endl;
+    // }
     
 
     // std::cout << "normr_d: " << normr_d << std::endl;
@@ -57,6 +61,8 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeCG(
 
     // Record initial residual for convergence testing
     normr0 = normr;
+
+    // std::cout << "norm quotient: " << normr/normr0 << std::endl;
 
     // Start iterations
     for(int k = 1; k <= this->max_CG_iterations && normr/normr0 > this->CG_tolerance; k++){

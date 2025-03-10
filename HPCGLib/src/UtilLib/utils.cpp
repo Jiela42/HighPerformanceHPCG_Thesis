@@ -1,4 +1,5 @@
 #include "UtilLib/utils.hpp"
+#include "UtilLib/cuda_utils.hpp"
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
 
 #include <cmath>
@@ -100,4 +101,22 @@ double relative_residual_norm_for_SymGS(sparse_CSR_Matrix<double>& A, std::vecto
 
     // Return the relative residual norm
     return L2_norm / L2_norm_true;
+}
+
+void sanity_check_vector(std::vector<double>& a, std::vector<double>& b){
+    assert(a.size() == b.size());
+    for (int i = 0; i < a.size(); i++){
+        assert(double_compare(a[i], b[i]));
+    }
+}
+
+void sanity_check_vectors(std::vector<double *>& device, std::vector<std::vector<double>>& original){
+    assert(device.size() == original.size());
+
+    for(int i = 0; i < device.size(); i++){
+        // std::cout << "checking vector " << i << std::endl;
+        std::vector<double> host(original[i].size());
+        CHECK_CUDA(cudaMemcpy(host.data(), device[i], original[i].size() * sizeof(double), cudaMemcpyDeviceToHost));
+        sanity_check_vector(host, original[i]);
+    }
 }

@@ -57,6 +57,19 @@ void run_striped_warp_reduction_3d27p_benchmarks(int nx, int ny, int nz, std::st
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
 
+    // lets look at y_d
+    // std::vector<double> y_host(5);
+    // CHECK_CUDA(cudaMemcpy(y_host.data(), y_d, 5 * sizeof(double), cudaMemcpyDeviceToHost));
+
+    // // print it
+    // for(int i = 0; i < 5; i++){
+    //     std::cout << y_host[i] << " ";
+    // }
+
+    // std::cout << std::endl;
+    // print the address of y_d
+    // std::cout << "address of y_d: " << y_d << std::endl;
+
     // run the benchmarks (without the copying back and forth)
     bench_Implementation(implementation, *timer, *striped_A, a_d, b_d, x_d, y_d, result_d, alpha, beta);
 
