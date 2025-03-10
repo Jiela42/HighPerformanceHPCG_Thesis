@@ -6,6 +6,9 @@ project(Testing LANGUAGES CXX CUDA)
 # set(CMAKE_CXX_STANDARD 17)
 # set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Find MPI and make sure it's available
+find_package(MPI REQUIRED)
+
 add_library(TestHPCGLib
     HPCG_versions_tests/cuSparse_tests.cpp
     HPCG_versions_tests/naiveStriped_tests.cpp
@@ -38,6 +41,10 @@ add_executable(run_example
     run_example.cpp
 )
 
+add_executable(run_multi_GPU
+    run_multi_GPU.cpp
+)
+
 target_link_libraries(TestHPCGLib
     HPCGLib
     MatrixLib
@@ -66,4 +73,11 @@ target_link_libraries(run_get_Norm
 target_link_libraries(run_example
     HPCGLib
     MatrixLib
+)
+
+target_link_libraries(run_multi_GPU
+    HPCGLib
+    MatrixLib
+    UtilLib
+    MPI::MPI_CXX
 )
