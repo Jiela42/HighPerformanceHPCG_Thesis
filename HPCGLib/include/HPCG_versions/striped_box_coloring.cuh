@@ -35,9 +35,9 @@ public:
         this->SymGS_implemented = true;
         this->MG_implemented = true;
         this->CG_implemented = true;
-        this->Dot_implemented = false;
         this->WAXPBY_implemented = false;
-        this->SpMV_implemented = false;
+        this->Dot_implemented = false;
+        this->SPMV_implemented = false;
 
 
         // default box size for coloring

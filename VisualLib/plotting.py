@@ -202,6 +202,17 @@ y_L2_Norms = defaultdict(lambda: 1.0, {
     "256x128x128": 3828.4398911305893
 })
 
+original_CG_num_iterations = defaultdict(lambda: 0, {
+    "24x24x24": 23,
+    "32x32x32": 29,
+    "64x64x64": 55,
+    "128x64x64": 71,
+    "128x128x64": 85,
+    "128x128x128": 104,
+    "256x128x128": 137,
+    "256x256x128": 165
+})
+
 #################################################################################################################
 # Set the Memory Bandwidth for Roofline Plots
 memory_bandwidth_GBs = {
@@ -281,7 +292,8 @@ def get_theoretical_bytes_read(nx, ny, nz, method):
         total_byte += 3 * get_theoretical_bytes_read(nx, ny, nz, "Dot")
         total_byte += 3 * get_theoretical_bytes_read(nx, ny, nz, "WAXPBY")
 
-        return total_byte
+        num_iterations = original_CG_num_iterations[f"{nx}x{ny}x{nz}"]
+        return num_iterations * total_byte
     
     else :
         print(f"Method {method} not found for theoretical bytes", flush=True)

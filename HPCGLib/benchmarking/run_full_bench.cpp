@@ -31,7 +31,7 @@ int main() {
 
     // generate a timestamped folder
     std::string base_path = "../../../timing_results/";
-    // base_path = "../../../dummy_timing_results/";
+    base_path = "../../../dummy_timing_results/";
 
     std::string folder_path = createTimestampedFolder(base_path);
     folder_path += "/";
@@ -105,7 +105,7 @@ int main() {
     // run_striped_warp_reduction_3d27p_benchmarks(128, 64, 64, folder_path, SWR_implementation);
     // run_striped_warp_reduction_3d27p_benchmarks(128, 128, 64, folder_path, SWR_implementation);
     // run_striped_warp_reduction_3d27p_benchmarks(128, 128, 128, folder_path, SWR_implementation);
-    run_striped_warp_reduction_3d27p_benchmarks(256, 128, 128, folder_path, SWR_implementation);
+    // run_striped_warp_reduction_3d27p_benchmarks(256, 128, 128, folder_path, SWR_implementation);
     // run_striped_warp_reduction_3d27p_benchmarks(256, 256, 128, folder_path, SWR_implementation);
     end = std::chrono::high_resolution_clock::now();
     elapsed_seconds = end-start;
@@ -131,14 +131,14 @@ int main() {
     striped_coloring_Implementation<double> SC_implementation;
     // run_striped_coloring_3d27p_benchmarks(8, 8, 8, folder_path, SC_implementation);
     // run_striped_coloring_3d27p_benchmarks(16, 16, 16, folder_path, SC_implementation);
-    // run_striped_coloring_3d27p_benchmarks(24, 24, 24, folder_path, SC_implementation);
-    // run_striped_coloring_3d27p_benchmarks(32, 32, 32, folder_path, SC_implementation);
-    // run_striped_coloring_3d27p_benchmarks(64, 64, 64, folder_path, SC_implementation);
-    // run_striped_coloring_3d27p_benchmarks(128, 64, 64, folder_path, SC_implementation);
-    // run_striped_coloring_3d27p_benchmarks(128, 128, 64, folder_path, SC_implementation);
-    // run_striped_coloring_3d27p_benchmarks(128, 128, 128, folder_path, SC_implementation);
-    // run_striped_coloring_3d27p_benchmarks(256, 128, 128, folder_path, SC_implementation);
-    // run_striped_coloring_3d27p_benchmarks(256, 256, 128, folder_path, SC_implementation);
+    run_striped_coloring_3d27p_benchmarks(24, 24, 24, folder_path, SC_implementation);
+    run_striped_coloring_3d27p_benchmarks(32, 32, 32, folder_path, SC_implementation);
+    run_striped_coloring_3d27p_benchmarks(64, 64, 64, folder_path, SC_implementation);
+    run_striped_coloring_3d27p_benchmarks(128, 64, 64, folder_path, SC_implementation);
+    run_striped_coloring_3d27p_benchmarks(128, 128, 64, folder_path, SC_implementation);
+    run_striped_coloring_3d27p_benchmarks(128, 128, 128, folder_path, SC_implementation);
+    run_striped_coloring_3d27p_benchmarks(256, 128, 128, folder_path, SC_implementation);
+    run_striped_coloring_3d27p_benchmarks(256, 256, 128, folder_path, SC_implementation);
     end = std::chrono::high_resolution_clock::now();
     elapsed_seconds = end-start;
     minutes = static_cast<int>(elapsed_seconds.count()) / 60;

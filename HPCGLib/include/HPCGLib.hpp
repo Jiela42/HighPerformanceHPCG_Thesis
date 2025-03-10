@@ -6,7 +6,7 @@
 #include <string>
 
 // define number of iterations we want to have
-#define num_bench_iter 10
+#define num_bench_iter 1
 
 enum class Implementation_Type {
     STRIPED,
