@@ -1,4 +1,5 @@
-#include "hpcg_mpi_utils.cuh"
+#include "UtilLib/hpcg_mpi_utils.cuh"
+#include "UtilLib/cuda_utils.hpp"
 
 #include <cuda_runtime.h>
 #include <mpi.h>
@@ -61,7 +62,7 @@ void InitGPU(Problem *problem){
     CHECK_CUDA(cudaGetDeviceCount(&deviceCount));
     assert(deviceCount > 0);
     CHECK_CUDA(cudaSetDevice(problem->rank % deviceCount));
-    printf("Rank=%d set my device to device=%d, available=%d.\n", problem->rank, problem->rank % deviceCount, deviceCount);
+    printf("Rank=%d:\t Set my device to device=%d, available=%d.\n", problem->rank, problem->rank % deviceCount, deviceCount);
 }
 
 //copies to host and back to device, no device-to-device copy
@@ -456,3 +457,4 @@ void inject_edge_Z_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int
         x_h ++;
     }
 }
+

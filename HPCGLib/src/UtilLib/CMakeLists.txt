@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 add_library(UtilLib)
 
 find_package(CUDAToolkit REQUIRED)
+find_package(MPI REQUIRED)
 # Include CUDA directories
 include_directories(${CUDAToolkit_INCLUDE_DIRS})
 
@@ -27,6 +28,7 @@ target_compile_options(HPCGLib PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:
 >)
 
 target_sources(UtilLib PRIVATE
+hpcg_mpi_utils.cu
 utils.cu
 utils.cpp
 )
@@ -36,4 +38,5 @@ target_link_libraries(UtilLib
     CUDA::cusparse
     CUDA::cublas
     CUDA::cudart
+    MPI::MPI_CXX
 )

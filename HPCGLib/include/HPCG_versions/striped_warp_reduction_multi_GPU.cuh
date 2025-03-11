@@ -5,6 +5,8 @@
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
 #include "MatrixLib/striped_Matrix.hpp"
 #include "UtilLib/cuda_utils.hpp"
+#include "UtilLib/cuda_utils.hpp"
+#include "UtilLib/hpcg_mpi_utils.cuh"
 
 #include <vector>
 #include <iostream>
@@ -111,7 +113,15 @@ public:
         striped_Matrix<T>& A,
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) override {
-        striped_warp_reduction_multi_GPU_computeSPMV(A, x_d, y_d);
+            std::cerr << "Warning: compute_SPMV is not implemented using the multi GPU implementation. Need Problem_STRUCT as argument." << std::endl;
+    }
+
+    void compute_SPMV(
+        striped_Matrix<T>& A,
+        T * x_d, T * y_d, // the vectors x and y are already on the device
+        Problem *problem
+        ) {
+        striped_warp_reduction_multi_GPU_computeSPMV(A, x_d, y_d, problem);
     }
 
 private:
@@ -130,6 +140,12 @@ private:
     void striped_warp_reduction_multi_GPU_computeSPMV(
         striped_Matrix<T>& A,
         T * x_d, T * y_d // the vectors x and y are already on the device
+    );
+
+    void striped_warp_reduction_multi_GPU_computeSPMV(
+        striped_Matrix<T>& A,
+        T * x_d, T * y_d, // the vectors x and y are already on the device
+        Problem *problem
     );
 
     void striped_warp_reduction_multi_GPU_computeDot(
