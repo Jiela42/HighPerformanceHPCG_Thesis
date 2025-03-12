@@ -4,6 +4,16 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 from HighPerformanceHPCG_Thesis.VisualLib.visualize_coloring import create_animation
 
+def print_dense_version_of_striped_matrix(num_rows, j_min_i):
+    num_stripes = len(j_min_i)
+    matrix = [[0 for i in range(num_rows)] for j in range(num_rows)]
+    for i in range(num_rows):
+        for j in range(num_stripes):
+            neighbor = i + j_min_i[j]
+            if neighbor < num_rows and neighbor >= 0:
+                matrix[i][neighbor] = 1
+    for i in range(num_stripes):
+        print(matrix[i])
 
 def generate_box_coloring(nx, ny, nz, bx, by, bz):
 
@@ -113,24 +123,164 @@ def analyze_box_coloring(nx, ny, nz, bx, by, bz):
                 print(f"Node ({calculated_x}, {calculated_y}, {calculated_z}) with color {c} not found")
                 assert False, "Node not found in single loop"
 
+def analyze_general_box_coloring(num_rows, j_min_i, colors):
 
+    num_stripes = len(j_min_i)
+    print(f"stripes: {j_min_i}")
+
+    # confirm that no neighbor is colored the same
+    for i in range(num_rows):
+        for j in range(num_stripes):
+            neighbor = i + j_min_i[j]
+            if neighbor < num_rows and neighbor >= 0 and neighbor != i:
+                assert colors[i] != colors[neighbor], f"Neighbor {neighbor} of node {i} has the same color {colors[i]}"
+
+    print("analisys passed for general box coloring")
+
+def general_striped_box_coloring(num_rows, j_min_i):
+
+    print_dense_version_of_striped_matrix(num_rows, j_min_i)
+
+    num_stripes = len(j_min_i)
+    colors = [-1] * num_rows
+    # adapting the starting rows ensures that row zero gets colored
+    starting_rows = [x - j_min_i[0] for x in j_min_i]
+
+    num_patterns = 1
+    # this stores the pattern of the stripes, i.e. the length and the starting color
+    patterns = [(1,0)]
+
+    for i in range(1, num_stripes):
+        # every time the new j_min_i is increased by more than just 1 we get a new pattern
+        if j_min_i[i] - 1 != j_min_i[i-1]:
+            num_patterns += 1
+            patterns.append((1, i))
+        else:
+            patterns[-1] = (patterns[-1][0] + 1, patterns[-1][1])
+    
+
+    # first we set the initial colors
+    for i in range(num_stripes):
+        colors[starting_rows[i]] = i
+
+    # how do we know what the end of the last pattern is?
+    # in the box coloring for the stencil we repeat the pattern 3 times, because
+    # its a 2D pattern and we have 3 dimensions,
+    # we need to repeat 3x because that's how many rows we are depending on or how many rows it takes to fill a face of the box
+    # how do we know how many times to repeat the pattern in the general case?
+    # i can check my neighbour to see if it's the same color, if it is then i know i'm at the end of the pattern
+    # I really don't like this iterative dependency on previous colors, but let's see
+
+    print(f"colors after initial coloring: {colors}")
+
+    # then we set the colors for the rest of the rows (row zero is already colored)
+    for i in range(1, num_rows):
+        # if the row isn't colored
+        if colors[i] == -1:
+            # find the pattern this row is in
+            prev_row_color = colors[i-1]
+            for pattern in range(len(patterns)):
+                pattern_len, pattern_start = patterns[pattern]
+                if prev_row_color >= pattern_start and prev_row_color < pattern_start + pattern_len:
+                   
+                    # we apply the next color in the pattern
+                    color = prev_row_color + 1 if prev_row_color + 1 < pattern_start + pattern_len else pattern_start
+            
+                    if(color == 3):
+                        print(f"i: {i}, prev_row_color: {prev_row_color}, pattern: {pattern}, pattern_len: {pattern_len}, pattern_start: {pattern_start}")
+                        # print(f"colors: {colors}")
+
+                    # check if one of the neighbors has the same color
+                    for j in range(num_stripes):
+                        neighbor = i + j_min_i[j]
+                        if i== 3:
+                            print(f"neighbor: {neighbor}, color: {color}, colors[neighbor]: {colors[neighbor]}")
+                        if neighbor < num_rows and neighbor >= 0 and colors[neighbor] == color:
+                            # if the neighbor has the same color, we know we are at the end of the pattern and we need to start a new one
+                            if pattern < len(patterns) - 1:
+                                next_pattern_len, next_pattern_start = patterns[pattern+1]
+                                color = next_pattern_start
+                            else:
+                                # print("we are at the last pattern")
+                                # print(f"pattern: {pattern}, patterns: {patterns}, pattern_len: {pattern_len}, pattern_start: {pattern_start}")
+                                
+                                # if we are at the last pattern, we need to start over
+                                color = 0
+                            break
+                    colors[i] = color
+                    break
+
+    
+    print(f"patterns: {patterns}")
+    print(f"colors: {colors}")
+    return colors             
+
+
+def general_striped_box_coloring_for_3D27pt(nx):
+
+    # first we generate the stripes
+    num_stripes = 27
+    j_min_i = []
+    neighbour_offsets =[
+        (-1, -1, -1), (0, -1, -1), (1, -1, -1),
+        (-1, 0, -1), (0, 0, -1), (1, 0, -1),
+        (-1, 1, -1), (0, 1, -1), (1, 1, -1),
+        (-1, -1, 0), (0, -1, 0), (1, -1, 0),
+        (-1, 0, 0), (0, 0, 0), (1, 0, 0),
+        (-1, 1, 0), (0, 1, 0), (1, 1, 0),
+        (-1, -1, 1), (0, -1, 1), (1, -1, 1),
+        (-1, 0, 1), (0, 0, 1), (1, 0, 1),
+        (-1, 1, 1), (0, 1, 1), (1, 1, 1)
+    ]
+
+    for i in range(num_stripes):
+        off_x, off_y, off_z = neighbour_offsets[i]
+        j_min_i.append(off_x + nx*off_y + nx*nx*off_z)
+
+    colors = general_striped_box_coloring(nx*nx*nx, j_min_i)
+    resorted_colors = []
+
+    ny = nx
+    nz = nx
+
+    x = []
+    y = []
+    z = []
+
+    for inx in range(nx):
+        for iny in range(ny):
+            for inz in range(nz):
+
+                x.append(inx)
+                y.append(iny)
+                z.append(inz)
+
+                i = inx + nx*iny + nx*nx*inz
+                resorted_colors.append(colors[i])
+    
+    dims = f"{nx}x{ny}x{nz}" + "_general_striped_box_coloring_for_3D27pt"
+    create_animation(x, y, z, resorted_colors, dims)
+    analyze_general_box_coloring(nx*nx*nx, j_min_i, colors)
+    
 
 
 def main():
 
-    bx = 4
+    bx = 3
     by = 3
-    bz = 7
+    bz = 3
 
     # generate_box_coloring(4, 4, 4, bx, by, bz)
 
-    analyze_box_coloring(3, 3, 3, bx, by, bz)
-    analyze_box_coloring(4, 4, 4, bx, by, bz)
-    analyze_box_coloring(4,5,6, bx, by, bz)
-    analyze_box_coloring(6,5,4, bx, by, bz)
-    analyze_box_coloring(5,4,6, bx, by, bz)
-    analyze_box_coloring(8, 8, 8, bx, by, bz)
-    analyze_box_coloring(16, 16, 16, bx, by, bz)
+    # analyze_box_coloring(3, 3, 3, bx, by, bz)
+    # analyze_box_coloring(4, 4, 4, bx, by, bz)
+    # analyze_box_coloring(4,5,6, bx, by, bz)
+    # analyze_box_coloring(6,5,4, bx, by, bz)
+    # analyze_box_coloring(5,4,6, bx, by, bz)
+    # analyze_box_coloring(8, 8, 8, bx, by, bz)
+    # analyze_box_coloring(16, 16, 16, bx, by, bz)
+
+    general_striped_box_coloring_for_3D27pt(4)
 
 
 if __name__ == "__main__":

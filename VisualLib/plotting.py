@@ -59,7 +59,7 @@ versions_to_plot = [
     # "NaiveStriped CuPy",
     # "CSR-Implementation",
     # "AMGX (converging) (non deterministic)",
-    # "AMGX",
+    "AMGX",
     # "AMGX non-deterministic",
     # "AMGX 2 iterations",
     # "AMGX 2 iterations non-deterministic",
@@ -138,14 +138,14 @@ versions_to_plot = [
 
 ]
 plot_percentage_baseline = False
-plot_speedup_vs_baseline = False
+plot_speedup_vs_baseline = True
 plot_memory_roofline = True
 
 baseline_implementations = [
     # "CSR-Implementation",
     "BaseTorch",
     # "BaseCuPy",
-    # "AMGX",
+    "AMGX",
     # "AMGX (converging) (non deterministic)",
     ]
 
