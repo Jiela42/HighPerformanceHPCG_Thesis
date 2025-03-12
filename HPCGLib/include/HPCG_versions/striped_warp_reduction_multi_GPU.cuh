@@ -68,7 +68,7 @@ public:
     ) override {
         striped_warp_reduction_multi_GPU_computeSymGS(A, x_d, y_d);
     }
-
+    
     void compute_SPMV(
         sparse_CSR_Matrix<T> & A,
         T * x_d, T * y_d // the vectors x and y are already on the device
@@ -116,7 +116,7 @@ public:
             std::cerr << "Warning: compute_SPMV is not implemented using the multi GPU implementation. Need Problem_STRUCT as argument." << std::endl;
     }
 
-    void compute_SPMV(
+    void compute_SPMV_multi_GPU(
         striped_Matrix<T>& A,
         T * x_d, T * y_d, // the vectors x and y are already on the device
         Problem *problem

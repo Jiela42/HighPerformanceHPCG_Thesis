@@ -1,5 +1,6 @@
 #include "UtilLib/hpcg_mpi_utils.cuh"
 #include "UtilLib/cuda_utils.hpp"
+#include <testing.hpp>
 
 #include <cuda_runtime.h>
 #include <mpi.h>
@@ -53,6 +54,30 @@ void SetHaloZeroGPU(Halo *halo){
     CHECK_CUDA(cudaMemset(halo->x_d, 0, halo->dimx * halo->dimy * halo->dimz * sizeof(DataType)));
 }
 
+//correctness verified
+void SetHaloGlobalIndexGPU(Halo *halo, Problem *problem){
+    DataType *x_h = (DataType*) malloc(halo->dimx * halo->dimy * halo->dimz * sizeof(DataType));
+    for(int i=0; i<halo->dimx * halo->dimy * halo->dimz; i++){
+        x_h[i] = 0;
+    }
+    DataType *write_addr = x_h+ halo->dimx * halo->dimy + halo->dimx + 1;
+    int gi = problem->gi0;
+    for(int i = 0; i<halo->nz; i++){
+        for(int j = 0; j<halo->ny; j++){
+            for(int l = 0; l<halo->nx; l++){
+                *write_addr = 1.0/(gi+1.0);
+                gi++;
+                write_addr++;
+            }
+            write_addr += 2;
+            gi = gi - halo->nx + problem->gnx;
+        }
+        write_addr += 2 * halo->dimx;
+        gi = problem->gi0 + (i + 1) * problem->gnx * problem->gny;
+    }
+    CHECK_CUDA(cudaMemcpy(halo->x_d, x_h, halo->dimx * halo->dimy * halo->dimz * sizeof(DataType), cudaMemcpyHostToDevice));
+}
+
 void FreeHaloGPU(Halo *halo){
     CHECK_CUDA(cudaFree(halo->x_d));
 }
@@ -62,7 +87,7 @@ void InitGPU(Problem *problem){
     CHECK_CUDA(cudaGetDeviceCount(&deviceCount));
     assert(deviceCount > 0);
     CHECK_CUDA(cudaSetDevice(problem->rank % deviceCount));
-    printf("Rank=%d:\t Set my device to device=%d, available=%d.\n", problem->rank, problem->rank % deviceCount, deviceCount);
+    //printf("Rank=%d:\t\t Set my device to device=%d, available=%d.\n", problem->rank, problem->rank % deviceCount, deviceCount);
 }
 
 //copies to host and back to device, no device-to-device copy
@@ -458,3 +483,131 @@ void inject_edge_Z_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int
     }
 }
 
+//correctness verified
+void SendResult(int rank_recv, Halo *x_d, Problem *problem){
+    DataType *send_addr_d = x_d->interior;
+    DataType *send_buf_h = (DataType*) malloc(problem->nx * sizeof(DataType));
+    for(int i = 0; i < problem->nz; i++){
+        for(int j = 0; j<problem->ny; j++){
+            CHECK_CUDA(cudaMemcpy(send_buf_h, send_addr_d, problem->nx * sizeof(DataType), cudaMemcpyDeviceToHost));
+            MPI_Send(send_buf_h, problem->nx, MPIDataType, rank_recv, 0, MPI_COMM_WORLD);
+            send_addr_d += x_d->dimx;
+        }
+        send_addr_d += 2 * x_d->dimx;
+    }
+    free(send_buf_h);
+}
+
+//correctness verified
+void GatherResult(Halo *x_d, Problem *problem, DataType *result_h){
+    DataType *own_data_d = x_d->interior;
+    local_int_t data_paket = 0;
+    for(int i = 0; i<problem->gnz; i++){ // go through all gnz layers
+        int pz_recv = i / problem->nz;
+        for(int j = 0; j<problem->gny; j++){ // go through all gny rows
+            int py_recv = j / problem->ny;
+            for(int l = 0; l<problem->npx; l++){ // go thorugh all nx columns
+                int px_recv = l;
+                int rank_recv = pz_recv * problem->npx * problem->npy + py_recv * problem->npx + px_recv;
+                if(px_recv == problem->px && py_recv == problem->py && pz_recv == problem->pz){ //gathering rank holds the data
+                    CHECK_CUDA(cudaMemcpy(result_h, own_data_d, problem->nx * sizeof(DataType), cudaMemcpyDeviceToHost));
+                    own_data_d += x_d->dimx;
+                }else{
+                    MPI_Recv(result_h, problem->nx, MPIDataType, rank_recv, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+                }
+                result_h += problem->nx;
+            }
+        }
+        if(pz_recv == problem->pz){
+            own_data_d += 2 * x_d->dimx;
+        }
+    }
+}
+
+void PrintHalo(Halo *x_d){
+    DataType *x_h = (DataType*) malloc(x_d->dimx * x_d->dimy * x_d->dimz * sizeof(DataType));
+    CHECK_CUDA(cudaMemcpy(x_h, x_d->x_d, x_d->dimx * x_d->dimy * x_d->dimz * sizeof(DataType), cudaMemcpyDeviceToHost));
+    for(int i = 0; i < x_d->dimz; i++){
+        for(int j = 0; j < x_d->dimy; j++){
+            for(int k = 0; k < x_d->dimx; k++){
+                if(k == x_d->dimx - 1){
+                    printf("\t");
+                }
+                printf("%f ", x_h[i*x_d->dimy*x_d->dimx + j*x_d->dimx + k]);
+                if(k == 0){
+                    printf("\t");
+                }
+            }
+            if(j==0 || j == x_d->dimy - 2){
+                printf("\n");
+            }
+            printf("\n");
+        }
+        printf("---\n");
+    }
+    free(x_h);
+}
+
+void GenerateStripedPartialMatrix(Problem *problem, DataType *A){
+    int nx = problem->nx;
+    int ny = problem->ny;
+    int nz = problem->nz;
+    global_int_t gnx = problem->gnx; //global number of points in x
+    global_int_t gny = problem->gny; //global number of points in y
+    global_int_t gnz = problem->gnz; //global number of points in z
+    global_int_t gi0 = problem->gi0; //global index of local (0,0,0)
+    
+    local_int_t num_rows = nx * ny * nz;
+    local_int_t num_cols = nx * ny * nz;
+    
+    for(int iz = 0; iz < nz; iz++){
+        for(int iy = 0; iy < ny; iy++){
+            for(int ix = 0; ix < nx; ix++){
+
+                int i = ix + nx * iy + nx * ny * iz;
+
+                int gx = problem->gx0 + ix; //global x index
+                int gy = problem->gy0 + iy; //global y index
+                int gz = problem->gz0 + iz; //global z index
+                
+                for (int sz = -1; sz < 2; sz++){
+                    for(int sy = -1; sy < 2; sy++){
+                        for(int sx = -1; sx < 2; sx++){
+
+                            if(gx + sx < 0 || gx + sx >= gnx ||
+                                gy + sy < 0 || gy + sy >= gny ||
+                                gz + sz < 0 || gz + sz >= gnz) {
+                                    *A = 0.0;
+                                    A++;
+                                } else {
+                                    if(sx == 0 && sy == 0 && sz == 0){
+                                        *A = 26.0;
+                                        A++;
+                                    } else {
+                                        *A = -1.0;
+                                        A++;
+                                    }
+                                }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+bool VerifyPartialMatrix(DataType *striped_A_local_h, DataType *striped_A_global_h, int num_stripes, Problem *problem){
+    for(int i = 0; i<problem->nz; i++){
+        int gi0 = problem->gi0 + i * problem->gnx * problem->gny;
+        for(int j = 0; j<problem->ny; j++){
+            for(int k = 0; k<problem->nx; k++){
+                for(int l = 0; l<num_stripes; l++){
+                    if(striped_A_local_h[(k + j*problem->nx + i*problem->nx*problem->ny)*num_stripes + l] != striped_A_global_h[(gi0 + j*problem->gnx + k)*num_stripes + l]){
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}

@@ -1,4 +1,4 @@
-#include "HPCG_versions/striped_warp_reduction_multi_GPU.cuh"
+#include "HPCG_versions/striped_warp_reduction.cuh"
 #include "UtilLib/utils.cuh"
 #include "UtilLib/hpcg_mpi_utils.cuh"
 #include <cuda_runtime.h>
@@ -12,7 +12,7 @@ __inline__ __device__ global_int_t local_i_to_global_i(
     {
         int local_i_x = i % nx;
         int local_i_y = (i % (nx * ny)) / nx;
-        int local_i_z = i / (nx * nz);
+        int local_i_z = i / (nx * ny);
         return gi0 + local_i_x + local_i_y * gnx + local_i_z * (gnx * gny);
 }
 
@@ -27,9 +27,9 @@ __inline__ __device__ local_int_t global_i_to_halo_i(
         local_int_t global_j_x = i % gnx;
         local_int_t global_j_y = (i % (gnx * gny)) / gnx;
         local_int_t global_j_z = i / (gnx * gny);
-        int halo_j_x = global_j_x - px * nx - 1;
-        int halo_j_y = global_j_y - py * ny - 1;
-        int halo_j_z = global_j_z - pz * nz - 1;
+        int halo_j_x = global_j_x - px * nx + 1;
+        int halo_j_y = global_j_y - py * ny + 1;
+        int halo_j_z = global_j_z - pz * nz + 1;
         return halo_j_x + halo_j_y * (nx+2) + halo_j_z * ((nx+2) * (ny+2));
 }
 
@@ -79,27 +79,27 @@ __global__ void striped_warp_reduction_multi_GPU_SPMV_kernel(
 }
 
 template <typename T>
-void striped_warp_reduction_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_computeSPMV(
+void striped_warp_reduction_Implementation<T>::striped_warp_reduction_multi_GPU_computeSPMV(
         striped_Matrix<T>& A,
         T * x_d, T * y_d, // the vectors x and y are already on the device
-        Problem *problem
+        Problem *problem,
+        int *j_min_i_d
     ) {
 
-        std::cout << "Rank="<< problem->rank <<"\t striped_warp_reduction_computeSPMV" << std::endl;
+        //std::cout << "Rank="<< problem->rank <<"\t striped_warp_reduction_computeSPMV" << std::endl;
 
         int num_rows = A.get_num_rows();
         int num_stripes = A.get_num_stripes();
-        int * j_min_i = A.get_j_min_i_d();
+        //int * j_min_i = A.get_j_min_i_d();
         T * striped_A_d = A.get_values_d();
 
         // since every thread is working on one or more rows we need to base the number of threads on that
         int num_threads = 1024;
-        int rows_per_block = num_threads / 4;
-        int num_blocks = std::min(MAX_NUM_BLOCKS, ceiling_division(num_rows, rows_per_block));
+        int num_blocks = (problem->nx * problem->ny * problem->nz + num_threads - 1) / num_threads;
 
         // call the kernel
         striped_warp_reduction_multi_GPU_SPMV_kernel<<<num_blocks, num_threads>>>(
-            striped_A_d, num_rows, num_stripes, j_min_i, x_d, y_d, problem->nx, problem->ny, problem->nz,
+            striped_A_d, num_rows, num_stripes, j_min_i_d, x_d, y_d, problem->nx, problem->ny, problem->nz,
             problem->gnx, problem->gny, problem->gnz, problem->gi0, problem->px, problem->py, problem->pz
         );
 
@@ -111,4 +111,4 @@ void striped_warp_reduction_multi_GPU_Implementation<T>::striped_warp_reduction_
     }
 
 // explicit template instantiation
-template class striped_warp_reduction_multi_GPU_Implementation<double>;
+template class striped_warp_reduction_Implementation<double>;
