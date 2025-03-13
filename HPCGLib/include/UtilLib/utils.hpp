@@ -25,4 +25,7 @@ double L2_norm_for_SymGS(sparse_CSR_Matrix<double>& A, std::vector<double> & x_s
 
 double relative_residual_norm_for_SymGS(sparse_CSR_Matrix<double>& A, std::vector<double> & x_solution, std::vector<double>& true_solution);
 
+void sanity_check_vector( std::vector<double>& a, std::vector<double>& b);
+void sanity_check_vectors(std::vector<double *>&device, std::vector<std::vector<double>>& original);
+
 #endif // UTILS_HPP

@@ -9,8 +9,6 @@ void run_striped_box_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std:
     std::vector<double> x (nx*ny*nz, 0.0);
 
     striped_Matrix<double>* striped_A = A.get_Striped();
-    std::cout << "getting striped matrix" << std::endl;
-    // striped_A.striped_Matrix_from_sparse_CSR(A);
 
     int num_rows = striped_A->get_num_rows();
     int num_cols = striped_A->get_num_cols();
@@ -35,9 +33,8 @@ void run_striped_box_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std:
 
         std::string box_dims = std::to_string(implementation.bx) + "x" + std::to_string(implementation.by) + "x" + std::to_string(implementation.bz);
         std::string coop_num_string = std::to_string(implementation.SymGS_cooperation_number);
-        implementation.version_name = implementation.version_name + " (coloringBox: " + box_dims + ")" + " (coop_num: " + coop_num_string + ")";
-
-        std::string implementation_name = implementation.version_name;
+        
+        std::string implementation_name = implementation.version_name + " (coloringBox " + box_dims + ")" + " (coop_num " + coop_num_string + ")";
         std::string additional_params = implementation.additional_parameters;
         std::string ault_node = implementation.ault_nodes;
         CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);
@@ -64,9 +61,16 @@ void run_striped_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::stri
     std::vector<double> a = generate_random_vector(nx*ny*nz, RANDOM_SEED);
     std::vector<double> b = generate_random_vector(nx*ny*nz, RANDOM_SEED);
 
+    if(nx % 8 == 0 && ny % 8 == 0 && nz % 8 == 0 && nx / 8 > 2 && ny / 8 > 2 && nz / 8 > 2){
+        // initialize the MG data
+        sparse_CSR_Matrix <double>* current_matrix = &A;
+        for(int i = 0; i < 3; i++){
+            current_matrix->initialize_coarse_Matrix();
+            current_matrix = current_matrix->get_coarse_Matrix();
+        }
+    } 
+
     striped_Matrix<double>* striped_A = A.get_Striped();
-    std::cout << "getting striped matrix" << std::endl;
-    // striped_A.striped_Matrix_from_sparse_CSR(A);
 
     int num_rows = striped_A->get_num_rows();
     int num_cols = striped_A->get_num_cols();

@@ -285,8 +285,8 @@ void sparse_CSR_Matrix<T>::generateMatrix_onCPU(int nx, int ny, int nz){
     }
 
     this->row_ptr = std::vector<int>(num_rows + 1, 0);
-    this->col_idx = std::vector<int>(nnz, 0);
-    this->values = std::vector<T>(nnz, 0);
+    this->col_idx = std::vector<int>();
+    this->values = std::vector<T>();
 
     for (int i = 0; i < num_rows; i++){
         this->row_ptr[i + 1] = this->row_ptr[i] + nnz_per_row[i];
@@ -933,6 +933,15 @@ void sparse_CSR_Matrix<T>::initialize_coarse_Matrix(){
             this->coarse_Matrix->generate_f2c_operator_onCPU();
             // std::cout << "coarse matrix generated on the CPU" << std::endl;
         }      
+    }
+
+    // we need to make sure that our striped sibling has the same coarse matrix, too
+    if(this->Striped != nullptr){
+        // unfortunately we don't have a nice initialization (yet)
+        // so this hacky code will have to do for now
+        this->Striped->coarse_Matrix = new striped_Matrix<T>();
+        // this will also set the sibling pointers. So yay
+        this->Striped->coarse_Matrix->striped_Matrix_from_sparse_CSR(*(this->coarse_Matrix));
     }
 }
 

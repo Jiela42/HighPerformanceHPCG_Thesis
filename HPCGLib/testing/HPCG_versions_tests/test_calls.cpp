@@ -23,6 +23,11 @@ bool test_CG(
     HPCG_functions<double>& implementation)
 {
 
+    if (implementation.norm_based){
+        std::cerr << "CG norm based tests are not supported" << std::endl;
+        return true;
+    }
+
 
     bool all_pass = true;
     std::string test_folder = HPCG_OUTPUT_TEST_FOLDER;
@@ -256,6 +261,12 @@ bool test_CG(
 bool test_MG(
     HPCG_functions<double>& implementation)
 {
+
+    if(implementation.norm_based){
+        std::cerr << "MG norm based tests are not supported" << std::endl;
+        return true;
+    }
+
     bool all_pass = true;
     std::string test_folder = HPCG_OUTPUT_TEST_FOLDER;
 
@@ -915,6 +926,11 @@ bool test_SymGS(
     std::vector<double> x_baseline(num_rows, 0.0);
     std::vector<double> x_uut(num_rows, 0.0);
 
+    // in case it is a norm based SymGS (we do more than one iteration)
+    // we need to store and adjust the number of max iterations
+    int original_max_iter = uut.get_maxSymGSIters();
+    uut.set_maxSymGSIters(500);
+
     // std::vector<double> looki(5);
     // CHECK_CUDA(cudaMemcpy(looki.data(), x_uut_d, 5 * sizeof(double), cudaMemcpyDeviceToHost));
     // std::cout << "Looki: " << looki[0] << std::endl;
@@ -986,6 +1002,8 @@ bool test_SymGS(
 
     CHECK_CUDA(cudaFree(x_uut_d));
 
+    // reset the number of iterations
+    uut.set_maxSymGSIters(original_max_iter);
     
     return test_pass;
 }

@@ -31,7 +31,7 @@ void bench_CG(
     }
 
     // we need a few more parameters for the CG function
-    int n_iters;
+    int n_iters = 0;
     double normr;
     double normr0;
 
@@ -54,6 +54,7 @@ void bench_CG(
                 n_iters, normr, normr0
             );
             timer.stopTimer("compute_CG");
+            std::cout << "CG took " << n_iters << " iterations for size " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz()<< " and implementation " << implementation.version_name << std::endl;
             // restore original x
             CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
         }
@@ -122,6 +123,9 @@ void bench_MG(
         );
         timer.stopTimer("compute_MG");
     }
+
+    // restore the original x vector
+    CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
 }
 
 
@@ -177,7 +181,7 @@ void bench_SPMV(
     // y_d is the output vector, hence we need to store the original and write the original back after the benchmarking
     std::vector<double> y(A.get_num_rows(), 0.0);
 
-    CHECK_CUDA(cudaMemcpy(y_d, y.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y.data(), y_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
 
     int num_iterations = implementation.getNumberOfIterations();
 
@@ -208,7 +212,7 @@ void bench_SPMV(
     }
 
     // copy the original vector back
-    CHECK_CUDA(cudaMemcpy(y.data(), y_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
 }
 
 void bench_Dot(
@@ -289,7 +293,7 @@ void bench_WAXPBY(
     
     // grab original value of w_d
     std::vector<double> w(A.get_num_rows(), 0.0);
-    CHECK_CUDA(cudaMemcpy(w_d, w.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(w.data(), w_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
 
     if(implementation.test_before_bench){
 
@@ -336,7 +340,6 @@ void bench_SymGS(
 
     CHECK_CUDA(cudaMemcpy(x.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
 
-
     if (implementation.test_before_bench){
         cuSparse_Implementation<double> baseline;
 
@@ -347,6 +350,11 @@ void bench_SymGS(
             num_iterations = 0;
         }
     }
+
+    // in case it is a norm based SymGS (we do more than one iteration)
+    // we need to store and adjust the number of max iterations
+    int original_max_iter = implementation.get_maxSymGSIters();
+    implementation.set_maxSymGSIters(500);
 
     for(int i = 0; i < num_iterations; i++){
         // always write the original x back into x_d
@@ -371,6 +379,10 @@ void bench_SymGS(
 
     // copy the original vector back
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+    
+    // store the original number of iterations
+    implementation.set_maxSymGSIters(original_max_iter);
+
 }
 
 void bench_SymGS(
@@ -381,18 +393,13 @@ void bench_SymGS(
     )
 {   
     int num_iterations = implementation.getNumberOfIterations();
+
     // std::cout << "benching symgs for " << num_iterations << " iterations" << std::endl;
 
     // x_d is the output vector, hence we need to store the original and write the original back after the benchmarking
     std::vector<double> x(A.get_num_rows(), 0.0);
 
-    CHECK_CUDA(cudaMemcpy(x.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
-
-    // for normbased implementations we need to make sure the maximum number of iterations performed by symGS is enough
-    int original_max_symgs_iterations = implementation.get_maxSymGSIters();
-    if(implementation.norm_based){
-        implementation.set_maxSymGSIters(500);
-    }
+    CHECK_CUDA(cudaMemcpy(x.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));   
 
     if(implementation.test_before_bench){
 
@@ -407,7 +414,13 @@ void bench_SymGS(
             num_iterations = 0;
         }
     }
-        
+
+     // for normbased implementations we need to make sure the maximum number of iterations performed by symGS is enough
+     int original_max_symgs_iterations = implementation.get_maxSymGSIters();
+     if(implementation.norm_based){
+         implementation.set_maxSymGSIters(500);
+     }
+
     for (int i = 0; i < num_iterations; i++){
         // std::cout<< "Iteration: " << i << std::endl;
         // std::cout<< "Num iterations: " << num_iterations << std::endl;
@@ -435,6 +448,9 @@ void bench_SymGS(
     if(implementation.norm_based){
         implementation.set_maxSymGSIters(original_max_symgs_iterations);
     }
+
+    // restore the original number of iterations
+    implementation.set_maxSymGSIters(original_max_symgs_iterations);
 }
 
 // this function allows us to run the whole abstract benchmark
@@ -470,35 +486,58 @@ void bench_Implementation(
     double * x_d, double * y_d, // x & y are vectors as used in HPCG
     double * result_d ,  // result is used for the dot product (it is a scalar)
     double alpha, double beta
-    ){
+){
+   
+    // we want to make sure the vectors are not changed, so we grab the first 100 elements
+    int num_sanity_elements = 100;
+    std::vector<double> a_original(num_sanity_elements);
+    std::vector<double> b_original(num_sanity_elements);
+    std::vector<double> x_original(num_sanity_elements);
+    std::vector<double> y_original(num_sanity_elements);
 
-    sparse_CSR_Matrix<double> *A_CSR = A.get_CSR();
+    // copy the first 100 elements of the vectors
+    CHECK_CUDA(cudaMemcpy(a_original.data(), a_d, num_sanity_elements * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(b_original.data(), b_d, num_sanity_elements * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(x_original.data(), x_d, num_sanity_elements * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(y_original.data(), y_d, num_sanity_elements * sizeof(double), cudaMemcpyDeviceToHost));
     
-    // std::cout << "Bench SPMV" << std::endl;
+    // make a vector of vectors
+    std::vector<std::vector<double>> original_vectors = {a_original, b_original, x_original, y_original};
+    std::vector<double*> vectors_d = {a_d, b_d, x_d, y_d};
+    
+    // we do one sanity check prior to the benchmarking (just for my sanity and to make debugging easier)
+    sanity_check_vectors(vectors_d, original_vectors);
+
+    std::cout << "Bench SPMV" << std::endl;
     if(implementation.SPMV_implemented){
         bench_SPMV(implementation, timer, A, a_d, y_d);
-    }
-    // std::cout << "Bench Dot" << std::endl;
-    if(implementation.Dot_implemented){
-        bench_Dot(implementation, timer, A, a_d, b_d, result_d);
-    }
-    // std::cout << "Bench SymGS" << std::endl;
-    if(implementation.SymGS_implemented){
-        bench_SymGS(implementation, timer, A, x_d, y_d);
-    }
-    // std::cout << "Bench WAXPBY" << std::endl;
-    if(implementation.WAXPBY_implemented){
-        bench_WAXPBY(implementation, timer, A, a_d, b_d, y_d, alpha, beta);
-    }
-    // std::cout << "Bench CG" << std::endl;
-    if(implementation.CG_implemented){
-        bench_CG(implementation, timer, A, x_d, y_d);
-    }
-    // std::cout << "Bench MG" << std::endl;
-    if(implementation.MG_implemented){
-        bench_MG(implementation, timer, A, x_d, y_d);
+        sanity_check_vectors(vectors_d, original_vectors);
     }
 
-    // other functions to be benchmarked
+    std::cout << "Bench Dot" << std::endl;
+    if(implementation.Dot_implemented){
+        bench_Dot(implementation, timer, A, a_d, b_d, result_d);
+        sanity_check_vectors(vectors_d, original_vectors);
+    }
+    std::cout << "Bench SymGS" << std::endl;
+    if(implementation.SymGS_implemented){
+        bench_SymGS(implementation, timer, A, x_d, y_d);
+        sanity_check_vectors(vectors_d, original_vectors);
+    }
+    std::cout << "Bench WAXPBY" << std::endl;
+    if(implementation.WAXPBY_implemented){
+        bench_WAXPBY(implementation, timer, A, a_d, b_d, y_d, alpha, beta);
+        sanity_check_vectors(vectors_d, original_vectors);
+    }
+    std::cout << "Bench CG" << std::endl;
+    if(implementation.CG_implemented){
+        bench_CG(implementation, timer, A, x_d, y_d);
+        sanity_check_vectors(vectors_d, original_vectors);
+    }
+    std::cout << "Bench MG" << std::endl;
+    if(implementation.MG_implemented){
+        bench_MG(implementation, timer, A, x_d, y_d);
+        sanity_check_vectors(vectors_d, original_vectors);
+    }
 }
 

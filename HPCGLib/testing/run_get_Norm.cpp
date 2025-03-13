@@ -76,7 +76,7 @@ void print_rrNorm(int nx, int ny, int nz){
 int main(){
 
     std::cout << "Getting the relative residual norm" << std::endl;
-    print_rrNorm(2, 2, 2);
+    // print_rrNorm(2, 2, 2);
     print_rrNorm(4, 4, 4);
     print_rrNorm(8, 8, 8);
     print_rrNorm(16, 16, 16);

@@ -7,31 +7,32 @@ data_path = "../timing_results/"
 plot_path = "plots/"
 
 methods_to_plot = [
-    # "CG",
+    "CG",
+    # "CG_noPreconditioning",
     # "MG",
     # "SymGS",
     # "SPMV",
     # "Restriction",
     # "Prolongation",
     # "Dot",
-    "WAXPBY",
+    # "WAXPBY",
 ]
 
 sizes_to_plot =[
-    ("8x8x8"),
-    ("16x16x16"),
-    ("24x24x24"),
+    # ("8x8x8"),
+    # ("16x16x16"),
+    # ("24x24x24"),
     ("32x32x32"),
     ("64x64x64"),
     ("128x64x64"),
     ("128x128x64"),
     ("128x128x128"),
-    # ("256x128x128"),
+    ("256x128x128"),
     # ("256x256x128"),
 ]
 
 versions_to_plot = [
-    "BaseTorch",
+    # "BaseTorch",
     # "MatlabReference",
     # "BaseCuPy",
     # "CuPy (no copy)",
@@ -75,7 +76,7 @@ versions_to_plot = [
     # "Striped explicit Shared Memory (rows_per_SM pow2)",
     # "Striped explicit Shared Memory (rows_per_SM pow2 1024 threads)",
     # "Striped explicit Shared Memory (rows_per_SM pow2 1024 threads 2x physical cores)",
-    "Striped Warp Reduction",
+    # "Striped Warp Reduction",
     # "Striped Warp Reduction (thrust reduction)",
     # "Striped Warp Reduction (kernel reduction)",
     # "Striped Warp Reduction (kernel reduction - cooperation number = 1)",
@@ -118,9 +119,11 @@ versions_to_plot = [
     # "Striped Preprocessed (x=random)",
     # "Striped coloring (storing nothing)",
     # "Striped coloring (pre-computing COR Format)",
-    # "Striped coloring (COR Format already stored on the GPU)",
+    "Striped coloring (COR Format already stored on the GPU)",
     
-    # "Striped Box coloring (coloringBox: 3x3x3) (coop_num: 4)",
+    "Striped Box coloring (coloringBox 3x3x3) (coop_num 4)",
+    "Striped Box coloring",
+
 
     # "Striped Box coloring (coloringBox: 4x4x4) (coop_num: 4)",
     # "Striped Box coloring (coloringBox: 5x5x5) (coop_num: 4)",
@@ -135,7 +138,8 @@ versions_to_plot = [
 
 ]
 plot_percentage_baseline = False
-plot_speedup_vs_baseline = True
+plot_speedup_vs_baseline = False
+plot_memory_roofline = True
 
 baseline_implementations = [
     # "CSR-Implementation",
@@ -157,7 +161,7 @@ y_axis_config_to_plot = [
 
 
 # Developer options
-update_legend_labels = True
+update_legend_labels = False
 
 #################################################################################################################
 # import necessary libraries
@@ -198,6 +202,24 @@ y_L2_Norms = defaultdict(lambda: 1.0, {
     "256x128x128": 3828.4398911305893
 })
 
+original_CG_num_iterations = defaultdict(lambda: 0, {
+    "24x24x24": 23,
+    "32x32x32": 29,
+    "64x64x64": 55,
+    "128x64x64": 71,
+    "128x128x64": 85,
+    "128x128x128": 104,
+    "256x128x128": 137,
+    "256x256x128": 165
+})
+
+#################################################################################################################
+# Set the Memory Bandwidth for Roofline Plots
+memory_bandwidth_GBs = {
+    # ault nodes 41-44 have RTX3090s
+    "41-44": 936,
+}
+
 
 #################################################################################################################
 # Suppress all FutureWarnings
@@ -207,6 +229,78 @@ pd.set_option('display.max_rows', None)  # Show all rows
 pd.set_option('display.max_columns', None)  # Show all columns
 pd.set_option('display.width', 1000)  # Set the display width
 pd.set_option('display.max_colwidth', None)  # Set the max column width
+
+#################################################################################################################
+# Set the theoretical number of bytes to read
+#################################################################################################################
+# this assumes 3D27pt matrices
+
+def get_theoretical_bytes_read(nx, ny, nz, method):
+    case = method
+    if case == "SymGS":
+        # First the matrix
+        num_doubles = 27 * nx * ny * nz
+        num_ints = 27
+
+        # take into account the two vectors
+        num_doubles += 2 * nx * ny * nz
+
+        # double both because we have two loops
+        num_doubles *= 2
+        num_ints *= 2
+
+        return num_doubles * 8 + num_ints * 4
+    
+    if case == "SPMV":
+         # First the matrix
+        num_doubles = 27 * nx * ny * nz
+        num_ints = 27
+
+        # take into account the two vectors
+        num_doubles += 2 * nx * ny * nz
+
+        return num_doubles * 8 + num_ints * 4
+    
+    if case == "Dot":
+        # we have two vectors
+        num_doubles = 2*(nx * ny * nz)
+        return num_doubles * 8
+    
+    if case == "WAXPBY":
+        # we have three vectors
+        num_doubles = 3*(nx * ny * nz)
+        return num_doubles * 8
+
+    if case == "MG":
+
+        total_byte = 0
+
+        for depth in range(3):
+            total_byte += 2 * get_theoretical_bytes_read(nx, ny, nz, "SymGS")
+            total_byte += get_theoretical_bytes_read(nx, ny, nz, "SPMV")
+
+            # adjust nx, ny, nz for the next depth
+            nx = nx // 2
+            ny = ny // 2
+            nz = nz // 2
+
+        return total_byte
+    
+    if case == "CG":
+        total_byte = get_theoretical_bytes_read(nx, ny, nz, "MG")
+        total_byte += get_theoretical_bytes_read(nx, ny, nz, "SPMV")
+        total_byte += 3 * get_theoretical_bytes_read(nx, ny, nz, "Dot")
+        total_byte += 3 * get_theoretical_bytes_read(nx, ny, nz, "WAXPBY")
+
+        num_iterations = original_CG_num_iterations[f"{nx}x{ny}x{nz}"]
+        return num_iterations * total_byte
+    
+    else :
+        print(f"Method {method} not found for theoretical bytes", flush=True)
+        return 1
+
+
+
 #################################################################################################################
 # read the data
 #################################################################################################################
@@ -266,12 +360,21 @@ def read_data():
 
         if rr_norm_match:
             rr_norm = float(rr_norm_match.group(1))
+            # if rr_norm == 0.2323997:
+            #     # print the file name
+            #     print("WE FOUND THE RR NORM")
+            #     print(file, flush=True)
+            #     exit()
         else:
 
         # assert y_L2_Norms[f"{nx}x{ny}x{nz}"] != 0, f"y_L2_Norms[{nx}x{ny}x{nz}] is 0"
 
 
             rr_norm = l2_norm / y_L2_Norms[f"{nx}x{ny}x{nz}"]
+            # if(rr_norm == 0.23239969865485122):
+                # print("We calculated the rr norm")
+                # print(file, flush=True)
+                # exit()
         # rr_norm = l2_norm / (nx * ny * nz)
 
         data = pd.read_csv(StringIO("\n".join(lines[1:])), header=None, names=['Time (ms)'])
@@ -300,6 +403,10 @@ def read_data():
         # Append the data to the full_data DataFrame
         full_data = pd.concat([full_data, data], ignore_index=True)
     
+    # print all versions
+    # print(full_data['Version'].unique(), flush=True)
+    # print(full_data['Method'].unique(), flush=True)
+
     return full_data
 
 #################################################################################################################
@@ -371,6 +478,29 @@ def get_speedup_vs_baseline_data(full_data):
 
     return full_data
 
+def get_percentage_of_memBW_data(full_data):
+
+    col_name = "Percentage of Memory Bandwidth"
+    y_axis_to_plot.append(col_name)
+
+    # Calculate theoretical bytes read for each row
+    theoretical_bytes_read_B = full_data.apply(lambda row: get_theoretical_bytes_read(row['nx'], row['ny'], row['nz'], row['Method']), axis=1)
+
+    # Get memory bandwidth for each row
+    memory_bandwidth = full_data['Ault Node'].map(memory_bandwidth_GBs)
+
+    # Calculate method bandwidth in bytes per millisecond
+    method_Bms = theoretical_bytes_read_B / full_data['Time (ms)']
+
+    # Convert memory bandwidth to bytes per millisecond
+    memory_bandwithd_Bms = memory_bandwidth * 1e6
+
+    # Calculate percentage of memory bandwidth used
+    full_data[col_name] = (method_Bms / memory_bandwithd_Bms) * 100
+
+    return full_data
+
+
 def preprocess_data(full_data):
     global dense_ops_to_plot, sparse_ops_to_plot, cpp_implementation_to_plot, python_implementation_to_plot
     # print(full_data, flush=True)
@@ -401,6 +531,7 @@ def preprocess_data(full_data):
         "SPMV",
         "MG",
         "CG",
+        "CG_noPreconditioning",
         ]
 
     all_dense_ops = [
@@ -441,6 +572,9 @@ def preprocess_data(full_data):
 
     if plot_speedup_vs_baseline:
         full_data = get_speedup_vs_baseline_data(full_data)
+    
+    if plot_memory_roofline:
+        full_data = get_percentage_of_memBW_data(full_data)
 
     # for showing we remove nx,ny,nz, NNZ, Density of A
     show_data = full_data.drop(columns=['nx', 'ny', 'nz', 'NNZ', 'Density of A', 'Matrix Type', 'Ault Node', 'Matrix Dimensions, # Rows, Matrix Density'])
@@ -503,43 +637,44 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
     # Initialize bar counter
     bar_ctr = 0
 
-    text_size = 20
+    text_size = 16
 
 
     # Iterate over x_order and hue_order to annotate bars
-    for hue_value in hue_order:
-        for x_value in x_order:
-            # Get the group corresponding to the current x_value and hue_value
-            group_key = (x_value, hue_value)
-            if group_key in grouped_data.groups:
-                group_data = grouped_data.get_group(group_key)
-                l2_norms = np.unique(group_data['L2 Norm'].values)
-                rr_norms = np.unique(group_data['rr_norm'].values)
-                v_name = group_data['Version'].values[0]
-                assert len(rr_norms) <= 1, f"More than one rr norm found for a group, this could be because of old data that doesn't contain an rr norm mixed with new data that does, version: {v_name}"
-                assert len(l2_norms) <= 1, f"More than one L2 norm found for a group, this could be because of old data that doesn't contain an L2 norm mixed with new data that does, version: {v_name}"
-                l2_norm = group_data['L2 Norm'].values[0]  # Assuming one L2 norm per group
-                rr_norm = group_data['rr_norm'].values[0]  # Assuming one rr norm per group
-                
-                # Annotate the current bar with the L2 norm
-                bar = ax.patches[bar_ctr]
-                height = bar.get_height()
-                bar_x = bar.get_x()
-                bar_width = bar.get_width()
-                # print(f"Bar {bar_ctr} coordinates: x={bar_x}, width={bar_width}, height={height}", flush=True)
-                # print(f"Annotating Bar {bar_ctr} with L2 Norm: {l2_norm}", flush=True)
-                # print(f"Group Key: {group_key}", flush=True)
-                
-                if not np.isnan(rr_norm):
-                    ax.annotate(f'{round(rr_norm, 3)}',
-                                xy=(bar_x + bar_width / 2, height),
-                                xytext=(0, 3),  # 3 points vertical offset
-                                textcoords="offset points",
-                                ha='center', va='bottom',
-                                fontsize=text_size-4)
-                
-                # Increment the bar counter
-                bar_ctr += 1
+    if y != "Percentage of Memory Bandwidth":
+        for hue_value in hue_order:
+            for x_value in x_order:
+                # Get the group corresponding to the current x_value and hue_value
+                group_key = (x_value, hue_value)
+                if group_key in grouped_data.groups:
+                    group_data = grouped_data.get_group(group_key)
+                    l2_norms = np.unique(group_data['L2 Norm'].values)
+                    rr_norms = np.unique(group_data['rr_norm'].values)
+                    v_name = group_data['Version'].values[0]
+                    assert len(rr_norms) <= 1, f"More than one rr norm found for a group, this could be because of old data that doesn't contain an rr norm mixed with new data that does, version: {v_name}, group_key: {group_key}, rr_norms: {rr_norms}"
+                    assert len(l2_norms) <= 1, f"More than one L2 norm found for a group, this could be because of old data that doesn't contain an L2 norm mixed with new data that does, version: {v_name}, group_key: {group_key},  l2_norms: {l2_norms}"
+                    l2_norm = group_data['L2 Norm'].values[0]  # Assuming one L2 norm per group
+                    rr_norm = group_data['rr_norm'].values[0]  # Assuming one rr norm per group
+                    
+                    # Annotate the current bar with the L2 norm
+                    bar = ax.patches[bar_ctr]
+                    height = bar.get_height()
+                    bar_x = bar.get_x()
+                    bar_width = bar.get_width()
+                    # print(f"Bar {bar_ctr} coordinates: x={bar_x}, width={bar_width}, height={height}", flush=True)
+                    # print(f"Annotating Bar {bar_ctr} with L2 Norm: {l2_norm}", flush=True)
+                    # print(f"Group Key: {group_key}", flush=True)
+                    
+                    if not np.isnan(rr_norm):
+                        ax.annotate(f'{round(rr_norm, 3)}',
+                                    xy=(bar_x + bar_width / 2, height),
+                                    xytext=(0, 3),  # 3 points vertical offset
+                                    textcoords="offset points",
+                                    ha='center', va='bottom',
+                                    fontsize=text_size-4)
+                    
+                    # Increment the bar counter
+                    bar_ctr += 1
 
 
     ax.set_title(title, fontsize=text_size+4)

@@ -17,11 +17,17 @@ void run_striped_warp_reduction_3d27p_benchmarks(int nx, int ny, int nz, std::st
     double alpha = (double)rand() / RAND_MAX;
     double beta = (double)rand() / RAND_MAX;
 
+
+    if(nx % 8 == 0 && ny % 8 == 0 && nz % 8 == 0 && nx / 8 > 2 && ny / 8 > 2 && nz / 8 > 2){
+        // initialize the MG data
+        sparse_CSR_Matrix <double>* current_matrix = &A;
+        for(int i = 0; i < 3; i++){
+            current_matrix->initialize_coarse_Matrix();
+            current_matrix = current_matrix->get_coarse_Matrix();
+        }
+    } 
+
     striped_Matrix<double> * striped_A = A.get_Striped();
-    // striped_A.striped_Matrix_from_sparse_CSR(A);
-
-
-    sparse_CSR_Matrix<double>* A_csr = striped_A->get_CSR();
 
     int num_rows = striped_A->get_num_rows();
     int num_cols = striped_A->get_num_cols();
@@ -50,6 +56,19 @@ void run_striped_warp_reduction_3d27p_benchmarks(int nx, int ny, int nz, std::st
     CHECK_CUDA(cudaMemcpy(b_d, b.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
+
+    // lets look at y_d
+    // std::vector<double> y_host(5);
+    // CHECK_CUDA(cudaMemcpy(y_host.data(), y_d, 5 * sizeof(double), cudaMemcpyDeviceToHost));
+
+    // // print it
+    // for(int i = 0; i < 5; i++){
+    //     std::cout << y_host[i] << " ";
+    // }
+
+    // std::cout << std::endl;
+    // print the address of y_d
+    // std::cout << "address of y_d: " << y_d << std::endl;
 
     // run the benchmarks (without the copying back and forth)
     bench_Implementation(implementation, *timer, *striped_A, a_d, b_d, x_d, y_d, result_d, alpha, beta);
