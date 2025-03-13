@@ -67,7 +67,7 @@ public:
     ) override {
         striped_warp_reduction_computeSymGS(A, x_d, y_d);
     }
-
+    
     void compute_SPMV(
         sparse_CSR_Matrix<T> & A,
         T * x_d, T * y_d // the vectors x and y are already on the device
@@ -115,14 +115,6 @@ public:
         striped_warp_reduction_computeSPMV(A, x_d, y_d);
     }
 
-    void compute_SPMV_multi_GPU(
-        striped_Matrix<T>& A,
-        T * x_d, T * y_d, // the vectors x and y are already on the device
-        Problem *problem,
-        int *j_min_i_d
-        ) {
-        striped_warp_reduction_multi_GPU_computeSPMV(A, x_d, y_d, problem, j_min_i_d);
-    }
 
 private:
 
@@ -140,13 +132,6 @@ private:
     void striped_warp_reduction_computeSPMV(
         striped_Matrix<T>& A,
         T * x_d, T * y_d // the vectors x and y are already on the device
-    );
-
-    void striped_warp_reduction_multi_GPU_computeSPMV(
-        striped_Matrix<T>& A,
-        T * x_d, T * y_d, // the vectors x and y are already on the device
-        Problem *problem,
-        int* j_min_i_d
     );
 
     void striped_warp_reduction_computeDot(

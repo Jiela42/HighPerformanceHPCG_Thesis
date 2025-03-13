@@ -1,9 +1,9 @@
 // wv[i] = alpha * xv[i] + beta * yv[i]
-#include "HPCG_versions/striped_warp_reduction_multi_GPU.cuh"
+#include "HPCG_versions/striped_multi_GPU.cuh"
 #include "UtilLib/cuda_utils.hpp"
 #include "UtilLib/utils.cuh"
 
-__global__ void scalar_vector_mult_kernel(
+__global__ void scalar_vector_multi_GPU_kernel(
     int num_rows,
     double alpha,
     double * x_d,
@@ -18,7 +18,7 @@ __global__ void scalar_vector_mult_kernel(
 }
 
 
-__global__ void waxpb1y_kernel(
+__global__ void waxpb1y_multi_GPU_kernel(
     int num_rows,
     double alpha,
     double * x_d,
@@ -33,7 +33,7 @@ __global__ void waxpb1y_kernel(
     }
 }
 
-__global__ void w1xpb1y_kernel(
+__global__ void w1xpb1y_multi_GPU_kernel(
     int num_rows,
     double * x_d,
     double * y_d,
@@ -47,7 +47,7 @@ __global__ void w1xpb1y_kernel(
     }
 }
 
-__global__ void waxpby_kernel(
+__global__ void waxpby_multi_GPU_kernel(
     int num_rows,
     double alpha,
     double * x_d,
@@ -64,7 +64,7 @@ __global__ void waxpby_kernel(
 }
 
 template <typename T>
-void striped_warp_reduction_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_computeWAXPBY(
+void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_computeWAXPBY(
     striped_Matrix<T>& A, //we only pass A for the metadata
     T * x_d,
     T * y_d,
@@ -81,26 +81,26 @@ void striped_warp_reduction_multi_GPU_Implementation<T>::striped_warp_reduction_
     }
 
     else if(alpha == 0.0){
-        scalar_vector_mult_kernel<<<num_blocks, num_threads>>>(num_rows, beta, y_d, w_d);
+        scalar_vector_multi_GPU_kernel<<<num_blocks, num_threads>>>(num_rows, beta, y_d, w_d);
     }
     else if(beta == 0.0){
-        scalar_vector_mult_kernel<<<num_blocks, num_threads>>>(num_rows, alpha, x_d, w_d);
+        scalar_vector_multi_GPU_kernel<<<num_blocks, num_threads>>>(num_rows, alpha, x_d, w_d);
     }
     else if(alpha == 1.0 and beta == 1.0){
-        w1xpb1y_kernel<<<num_blocks, num_threads>>>(num_rows, x_d, y_d, w_d);
+        w1xpb1y_multi_GPU_kernel<<<num_blocks, num_threads>>>(num_rows, x_d, y_d, w_d);
     }
     else if(alpha == 1.0){
-        waxpb1y_kernel<<<num_blocks, num_threads>>>(num_rows, beta, y_d, x_d, w_d);
+        waxpb1y_multi_GPU_kernel<<<num_blocks, num_threads>>>(num_rows, beta, y_d, x_d, w_d);
     }
     else if(beta == 1.0){
-        waxpb1y_kernel<<<num_blocks, num_threads>>>(num_rows, alpha, x_d, y_d, w_d);
+        waxpb1y_multi_GPU_kernel<<<num_blocks, num_threads>>>(num_rows, alpha, x_d, y_d, w_d);
     }
     else{
-        waxpby_kernel<<<num_blocks, num_threads>>>(num_rows, alpha, x_d, beta, y_d, w_d);
+        waxpby_multi_GPU_kernel<<<num_blocks, num_threads>>>(num_rows, alpha, x_d, beta, y_d, w_d);
     }
 
     CHECK_CUDA(cudaDeviceSynchronize());
 
 }
 
-template class striped_warp_reduction_multi_GPU_Implementation<double>;
+template class striped_multi_GPU_Implementation<DataType>;

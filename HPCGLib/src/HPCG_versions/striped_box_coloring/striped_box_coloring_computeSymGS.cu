@@ -42,16 +42,17 @@ __global__ void striped_box_coloring_half_SymGS_kernel(
     for (int i = coop_group_id; i < num_nodes_with_color; i += num_coop_groups){
         
         // find out the position of the node (only considering faces, cols and rows that actually have that color)
-        int ix = (i / num_color_faces) % num_color_cols;
-        int iy = i / (num_color_cols * num_color_faces);
-        int iz = i % num_color_faces;
+        int ix = i % num_color_cols;
+        int iy = ((i % (num_color_cols * num_color_rows))) / num_color_rows;
+        int iz = i / (num_color_cols * num_color_rows);
         
         // adjust the counter to the correct position when all nodes are considered
         ix = ix * bx + color_offs_x;
         iy = iy * by + color_offs_y;
         iz = iz * bz + color_offs_z;
 
-        int row = ix * ny * nz + iy * nz + iz;
+        int row = ix + iy * nx + iz * nx * ny;
+
         double my_sum = 0.0;
         for(int stripe = lane; stripe < num_stripes; stripe += cooperation_number){
             int col = j_min_i[stripe] + row;
@@ -60,12 +61,12 @@ __global__ void striped_box_coloring_half_SymGS_kernel(
                 my_sum -= val * x[col];
             }
         }
-
+        
         // reduce the my_sum using warp reduction
         for (int offset = cooperation_number/2; offset > 0; offset /= 2){
             my_sum += __shfl_down_sync(0xFFFFFFFF, my_sum, offset);
         }
-
+        
         __syncthreads();
         if (lane == 0){
             double diag = striped_A[row * num_stripes + diag_offset];
@@ -107,7 +108,7 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
     int nx = A.get_nx();
     int ny = A.get_ny();
     int nz = A.get_nz();
-
+    
     int max_iterations = this->max_SymGS_iterations;
     double threshold_rr_Norm = 1.0;
 
@@ -115,7 +116,7 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
         threshold_rr_Norm = this->getSymGS_rrNorm_zero_init(nx, ny, nz);
         assert(threshold_rr_Norm >= 0.0);
     }
-
+    
 
     int cooperation_number = this->SymGS_cooperation_number;
 
@@ -124,9 +125,9 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
     int max_color =  num_colors - 1;
     // std::cout << "max_color: " << max_color << std::endl;
     int max_num_rows_per_color = ceiling_division(nx, bx) * ceiling_division(ny, by) * ceiling_division(nz, bz);
-
+    
     int num_blocks = std::min(ceiling_division(max_num_rows_per_color, 1024/cooperation_number), MAX_NUM_BLOCKS);
-
+    
     double L2_norm_y;
 
     cudaStream_t y_Norm_stream;
@@ -135,7 +136,7 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
     L2_norm_for_Device_Vector(y_Norm_stream, num_rows, y_d, &L2_norm_y);
     
     // to do the L2 norm asynchroneously we do the first iteration outside of the loop
-    for(int color = 0; color <= max_color; color++){
+    for(int color = 0; color < max_color; color++){
             // we need to do a forward pass
             striped_box_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
             cooperation_number,
@@ -150,29 +151,29 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
             CHECK_CUDA(cudaDeviceSynchronize());
         }
 
-        // we need to do a backward pass,
-        // the colors for this are the same just in reverse order
-        
-        for(int color = max_color; color  >= 0; color--){
+    // we need to do a backward pass,
+    // the colors for this are the same just in reverse order
+    
+    for(int color = max_color; color  >= 0; color--){
 
-            striped_box_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
-            cooperation_number,
-            color, bx, by, bz,
-            nx, ny, nz,
-            num_rows, num_cols,
-            num_stripes, diag_offset,
-            j_min_i,
-            striped_A_d,
-            x_d, y_d
-            );
-            CHECK_CUDA(cudaDeviceSynchronize());
-        }
+        striped_box_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
+        cooperation_number,
+        color, bx, by, bz,
+        nx, ny, nz,
+        num_rows, num_cols,
+        num_stripes, diag_offset,
+        j_min_i,
+        striped_A_d,
+        x_d, y_d
+        );
+        CHECK_CUDA(cudaDeviceSynchronize());
+    }
+    
+    double L2_norm = L2_norm_for_SymGS(A, x_d, y_d);
+    CHECK_CUDA(cudaStreamSynchronize(y_Norm_stream));
+    CHECK_CUDA(cudaStreamDestroy(y_Norm_stream));
 
-        double L2_norm = L2_norm_for_SymGS(A, x_d, y_d);
-        CHECK_CUDA(cudaStreamSynchronize(y_Norm_stream));
-        CHECK_CUDA(cudaStreamDestroy(y_Norm_stream));
-   
-        double rr_norm = L2_norm / L2_norm_y;
+    double rr_norm = L2_norm / L2_norm_y;
 
     // std::cout << "rr_norm after one iteration: " << rr_norm << std::endl;
 

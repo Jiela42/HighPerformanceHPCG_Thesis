@@ -65,7 +65,7 @@ void SetHaloGlobalIndexGPU(Halo *halo, Problem *problem){
     for(int i = 0; i<halo->nz; i++){
         for(int j = 0; j<halo->ny; j++){
             for(int l = 0; l<halo->nx; l++){
-                *write_addr = 1.0/(gi+1.0);
+                *write_addr = gi;
                 gi++;
                 write_addr++;
             }
@@ -511,6 +511,8 @@ void GatherResult(Halo *x_d, Problem *problem, DataType *result_h){
                 int rank_recv = pz_recv * problem->npx * problem->npy + py_recv * problem->npx + px_recv;
                 if(px_recv == problem->px && py_recv == problem->py && pz_recv == problem->pz){ //gathering rank holds the data
                     CHECK_CUDA(cudaMemcpy(result_h, own_data_d, problem->nx * sizeof(DataType), cudaMemcpyDeviceToHost));
+                    for(int k = 0; k<problem->nx; k++){
+                    }
                     own_data_d += x_d->dimx;
                 }else{
                     MPI_Recv(result_h, problem->nx, MPIDataType, rank_recv, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);

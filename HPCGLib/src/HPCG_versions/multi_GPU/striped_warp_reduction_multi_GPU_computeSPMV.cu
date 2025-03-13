@@ -1,4 +1,4 @@
-#include "HPCG_versions/striped_warp_reduction.cuh"
+#include "HPCG_versions/striped_multi_GPU.cuh"
 #include "UtilLib/utils.cuh"
 #include "UtilLib/hpcg_mpi_utils.cuh"
 #include <cuda_runtime.h>
@@ -10,10 +10,12 @@ __inline__ __device__ global_int_t local_i_to_global_i(
     global_int_t gi0
     )
     {
+        /*
         int local_i_x = i % nx;
         int local_i_y = (i % (nx * ny)) / nx;
         int local_i_z = i / (nx * ny);
-        return gi0 + local_i_x + local_i_y * gnx + local_i_z * (gnx * gny);
+        return gi0 + local_i_x + local_i_y * gnx + local_i_z * (gnx * gny);*/
+        return gi0 + (i % nx) + (((i / nx) % ny) * gnx) + ((i / (nx * ny)) * (gnx * gny)); //should be equivalent to the above
 }
 
 __inline__ __device__ local_int_t global_i_to_halo_i(
@@ -24,13 +26,17 @@ __inline__ __device__ local_int_t global_i_to_halo_i(
     int px, int py, int pz
     )
     {
+        /*
         local_int_t global_j_x = i % gnx;
         local_int_t global_j_y = (i % (gnx * gny)) / gnx;
         local_int_t global_j_z = i / (gnx * gny);
         int halo_j_x = global_j_x - px * nx + 1;
         int halo_j_y = global_j_y - py * ny + 1;
         int halo_j_z = global_j_z - pz * nz + 1;
-        return halo_j_x + halo_j_y * (nx+2) + halo_j_z * ((nx+2) * (ny+2));
+        return halo_j_x + halo_j_y * (nx+2) + halo_j_z * ((nx+2) * (ny+2));*/
+        return ((i % gnx) - px * nx + 1) +
+            ((((i / gnx) % gny) - py * ny + 1) * (nx + 2)) +
+            (((i / (gnx * gny)) - pz * nz + 1) * ((nx + 2) * (ny + 2))); //should be equivalent to the above
 }
 
 __global__ void striped_warp_reduction_multi_GPU_SPMV_kernel(
@@ -79,9 +85,9 @@ __global__ void striped_warp_reduction_multi_GPU_SPMV_kernel(
 }
 
 template <typename T>
-void striped_warp_reduction_Implementation<T>::striped_warp_reduction_multi_GPU_computeSPMV(
+void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_computeSPMV(
         striped_Matrix<T>& A,
-        T * x_d, T * y_d, // the vectors x and y are already on the device
+        Halo *x_d, Halo *y_d, // the vectors x and y are already on the device
         Problem *problem,
         int *j_min_i_d
     ) {
@@ -99,7 +105,7 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_multi_GPU_
 
         // call the kernel
         striped_warp_reduction_multi_GPU_SPMV_kernel<<<num_blocks, num_threads>>>(
-            striped_A_d, num_rows, num_stripes, j_min_i_d, x_d, y_d, problem->nx, problem->ny, problem->nz,
+            striped_A_d, num_rows, num_stripes, j_min_i_d, x_d->x_d, y_d->x_d, problem->nx, problem->ny, problem->nz,
             problem->gnx, problem->gny, problem->gnz, problem->gi0, problem->px, problem->py, problem->pz
         );
 
@@ -111,4 +117,4 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_multi_GPU_
     }
 
 // explicit template instantiation
-template class striped_warp_reduction_Implementation<double>;
+template class striped_multi_GPU_Implementation<DataType>;

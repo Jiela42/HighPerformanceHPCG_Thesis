@@ -1,10 +1,10 @@
-#include "HPCG_versions/striped_warp_reduction_multi_GPU.cuh"
+#include "HPCG_versions/striped_multi_GPU.cuh"
 #include "UtilLib/cuda_utils.hpp"
 #include "UtilLib/utils.cuh"
 // #include <cuda_runtime.h>
 
 template <typename T>
-void striped_warp_reduction_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_computeMG(
+void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_computeMG(
     striped_Matrix<T> & A,
     T * r_d, T * x_d
 ){
@@ -60,4 +60,4 @@ void striped_warp_reduction_multi_GPU_Implementation<T>::striped_warp_reduction_
 }
 
 // template instanciation
-template class striped_warp_reduction_multi_GPU_Implementation<double>;
+template class striped_multi_GPU_Implementation<DataType>;

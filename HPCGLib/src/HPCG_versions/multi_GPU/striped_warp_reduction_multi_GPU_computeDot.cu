@@ -1,11 +1,8 @@
-
-
-
-#include "HPCG_versions/striped_warp_reduction_multi_GPU.cuh"
+#include "HPCG_versions/striped_multi_GPU.cuh"
 #include "UtilLib/cuda_utils.hpp"
 #include <iostream>
 
-__global__ void reduce_sums(double * array, int num_elements, double * result_d){
+__global__ void reduce_sums_multi_GPU(double * array, int num_elements, double * result_d){
 
     __shared__ double intermediate_sums[32];
     
@@ -45,7 +42,7 @@ __global__ void reduce_sums(double * array, int num_elements, double * result_d)
     }
 }
 
-__global__ void striped_warp_reduction_dot_kernel(
+__global__ void striped_warp_reduction_multi_GPU_dot_kernel(
     int num_rows,
     double * x_d,
     double * y_d,
@@ -132,7 +129,7 @@ __global__ void striped_warp_reduction_dot_kernel(
 }
 
 template <typename T>
-void striped_warp_reduction_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_computeDot(
+void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_computeDot(
     striped_Matrix<T>& A, //we only pass A for the metadata
     T * x_d,
     T * y_d,
@@ -166,7 +163,7 @@ void striped_warp_reduction_multi_GPU_Implementation<T>::striped_warp_reduction_
 
     // std::cout << "num_rows = " << num_rows << std::endl;
 
-    striped_warp_reduction_dot_kernel<<<num_blocks, num_threads>>>(
+    striped_warp_reduction_multi_GPU_dot_kernel<<<num_blocks, num_threads>>>(
         num_rows, x_d, y_d, intermediate_sums_d
     );
 
@@ -184,9 +181,9 @@ void striped_warp_reduction_multi_GPU_Implementation<T>::striped_warp_reduction_
         num_blocks = max(num_blocks, 1);
 
         if(num_blocks == 1){
-            reduce_sums<<<1, num_threads>>>(intermediate_sums_d, num_inter_results, result_d);
+            reduce_sums_multi_GPU<<<1, num_threads>>>(intermediate_sums_d, num_inter_results, result_d);
         } else {
-            reduce_sums<<<num_blocks, num_threads>>>(intermediate_sums_d, num_inter_results, intermediate_sums_d);
+            reduce_sums_multi_GPU<<<num_blocks, num_threads>>>(intermediate_sums_d, num_inter_results, intermediate_sums_d);
         }
 
 
@@ -209,4 +206,4 @@ void striped_warp_reduction_multi_GPU_Implementation<T>::striped_warp_reduction_
 
 }
 
-template class striped_warp_reduction_multi_GPU_Implementation<double>;
+template class striped_multi_GPU_Implementation<DataType>;
