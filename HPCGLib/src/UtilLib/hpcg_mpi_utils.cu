@@ -613,3 +613,35 @@ bool VerifyPartialMatrix(DataType *striped_A_local_h, DataType *striped_A_global
     }
     return true;
 }
+
+bool IsHaloZero(Halo *x_d){
+    DataType *x_h = (DataType*) malloc(x_d->dimx * x_d->dimy * x_d->dimz * sizeof(DataType));
+    CHECK_CUDA(cudaMemcpy(x_h, x_d->x_d, x_d->dimx * x_d->dimy * x_d->dimz * sizeof(DataType), cudaMemcpyDeviceToHost));
+    //check front and back
+    for(int i = 0; i < x_d->dimx * x_d->dimy; i++){
+        if(x_h[i] != 0.0 || x_h[i + x_d->dimx * x_d->dimy * (x_d->dimz - 1)] != 0.0){
+            return false;
+        }
+    }
+    //check middle part
+    x_h += x_d->dimx * x_d->dimy;
+    for(int iz = 0; iz < x_d->dimz-2; iz++){
+        for(int iy = 0; iy < x_d->dimy; iy++){
+            for(int ix = 0; ix < x_d->dimx; ix++){
+                if(ix == 0 || ix == x_d->dimx - 1){
+                    if(x_h[ix + iy * x_d->dimx + iz * x_d->dimx * x_d->dimy] != 0.0){
+                        printf("ix = %d, iy = %d, iz = %d dimx=%d, dimy=%d, dimz=%d\n", ix, iy, iz, x_d->dimx, x_d->dimy, x_d->dimz);
+                        return false;
+                    }
+                }
+                if(iy == 0 || iy == x_d->dimy - 1){
+                    if(x_h[ix + iy * x_d->dimx + iz * x_d->dimx * x_d->dimy] != 0.0){
+                        printf("ix = %d, iy = %d, iz = %d dimx=%d, dimy=%d, dimz=%d\n", ix, iy, iz, x_d->dimx, x_d->dimy, x_d->dimz);
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}

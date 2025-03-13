@@ -73,6 +73,7 @@ void GatherResult(Halo *x_d, Problem *problem, DataType *result_h);
 void PrintHalo(Halo *x_d);
 void GenerateStripedPartialMatrix(Problem *problem, DataType *A);
 bool VerifyPartialMatrix(DataType *striped_A_local_h, DataType *striped_A_global_h, int num_stripes, Problem *problem);
+bool IsHaloZero(Halo *x_d);
 
 void extract_horizontal_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Z, int dimx, int dimy, int dimz);
 void extract_vertical_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Y, int length_Z, int dimx, int dimy, int dimz);

@@ -97,9 +97,6 @@ __global__ void striped_box_coloring_half_SymGS_kernel(
                 //convert gj to halo coordinate hj which is the memory location of gj in the halo struct
                 local_int_t hj =  global_i_to_halo_i(gj, nx, ny, nz, gnx, gny, gnz, gi0, px, py, pz);
                 my_sum -= striped_A[li * num_stripes + stripe] * x[hj];
-                if(gi == 3){
-                    printf("gj=%d, x[%d]=%f, striped_A[li * num_stripes + stripe]=%f\n", gj, hj, x[hj], striped_A[li * num_stripes + stripe]);
-                }
             }
         }
 

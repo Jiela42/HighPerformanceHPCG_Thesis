@@ -35,7 +35,7 @@ public:
         this->SPMV_implemented = true;
         this->Dot_implemented = false;
         this->SymGS_implemented = true;
-        this->WAXPBY_implemented = false;
+        this->WAXPBY_implemented = true;
         this->CG_implemented = false;
         this->MG_implemented = false;
         this->norm_based = true;
@@ -116,7 +116,7 @@ public:
         T * x_d, T * y_d, T * w_d, // the vectors x, y and w are already on the device
         T alpha, T beta
         ) override {
-        std::cerr << "ERROR computeWAXPBY requires a striped Matrix as input in the striped warp reduction Implementation" << std::endl;
+        std::cerr << "ERROR computeWAXPBY requires different arguments as input for multi GPU Implementation." << std::endl;
     }
 
     void compute_WAXPBY(
@@ -124,7 +124,16 @@ public:
         T * x_d, T * y_d, T * w_d, // the vectors x, y and w are already on the device
         T alpha, T beta
         ) override {
-        striped_warp_reduction_multi_GPU_computeWAXPBY(A, x_d, y_d, w_d, alpha, beta);
+        std::cerr << "ERROR computeWAXPBY requires different arguments as input for multi GPU Implementation." << std::endl;
+    }
+
+    void compute_WAXPBY(
+        Halo * x_d, Halo * y_d, Halo * w_d, // the vectors x, y and w are already on the device
+        T alpha, T beta,
+        Problem *problem,
+        bool updateHalo
+        ) {
+        striped_warp_reduction_multi_GPU_computeWAXPBY(x_d, y_d, w_d, alpha, beta, problem, updateHalo);
     }
 
     void compute_Dot(
@@ -180,9 +189,10 @@ private:
     );
 
     void striped_warp_reduction_multi_GPU_computeWAXPBY(
-        striped_Matrix<T> & A,
-        T * x_d, T * y_d, T * w_d, // the vectors x, y and w are already on the device
-        T alpha, T beta
+        Halo * x_d, Halo * y_d, Halo * w_d, // the vectors x, y and w are already on the device
+        T alpha, T beta,
+        Problem *problem,
+        bool updateHalo
     );
 };
 
