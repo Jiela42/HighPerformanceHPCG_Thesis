@@ -1,5 +1,5 @@
-#ifndef HPCG_MPI_UTILS_CUH
-#define HPCG_MPI_UTILS_CUH
+#ifndef HPCG_multiGPU_UTILS_CUH
+#define HPCG_multiGPU_UTILS_CUH
 
 typedef int local_int_t;
 typedef int global_int_t;
@@ -63,11 +63,11 @@ enum MPI_Tags {
 
 void GenerateProblem(int npx, int npy, int npz, local_int_t nx, local_int_t ny, local_int_t nz, int size, int rank, Problem *problem);
 void InitHaloMemGPU(Halo *halo, int nx, int ny, int nz);
+void InjectDataToHalo(Halo *halo, DataType *data);
 void SetHaloZeroGPU(Halo *halo);
 void SetHaloGlobalIndexGPU(Halo *halo, Problem *problem);
 void FreeHaloGPU(Halo *halo);
 void InitGPU(Problem *problem);
-void ExchangeHalo(Halo *halo, Problem *problem);
 void SendResult(int rank_recv, Halo *x_d, Problem *problem);
 void GatherResult(Halo *x_d, Problem *problem, DataType *result_h);
 void PrintHalo(Halo *x_d);

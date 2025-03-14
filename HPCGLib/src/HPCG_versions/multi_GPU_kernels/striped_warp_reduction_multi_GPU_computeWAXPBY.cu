@@ -30,7 +30,6 @@ __global__ void scalar_vector_multi_GPU_kernel(
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
     for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x){
-        if(row <0 || row >= num_rows) continue;
         local_int_t hi = local_i_to_halo_i(row, nx, ny, nz, dimx, dimy);
         w_d[hi] = alpha * x_d[hi];
     }
@@ -50,7 +49,6 @@ __global__ void waxpb1y_multi_GPU_kernel(
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
     for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x){
-        if(row <0 || row >= num_rows) continue;
         local_int_t hi = local_i_to_halo_i(row, nx, ny, nz, dimx, dimy);
         w_d[hi] = alpha * x_d[hi] + y_d[hi];
     }
@@ -68,7 +66,6 @@ __global__ void w1xpb1y_multi_GPU_kernel(
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
     for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x){
-        if(row <0 || row >= num_rows) continue;
         local_int_t hi = local_i_to_halo_i(row, nx, ny, nz, dimx, dimy);
         w_d[hi] = x_d[hi] + y_d[hi];
     }
@@ -88,7 +85,6 @@ __global__ void waxpby_multi_GPU_kernel(
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
     for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x){
-        if(row <0 || row >= num_rows) continue;
         local_int_t hi = local_i_to_halo_i(row, nx, ny, nz, dimx, dimy);
         w_d[hi] = alpha * x_d[hi] + beta * y_d[hi];
     }
@@ -149,7 +145,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     CHECK_CUDA(cudaDeviceSynchronize());
     
     if(updateHalo){
-        ExchangeHalo(w_d, problem);
+        this->ExchangeHalo(w_d, problem);
     }
 }
 

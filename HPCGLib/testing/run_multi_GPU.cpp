@@ -1,23 +1,24 @@
 #include <testing.hpp>
 #include "UtilLib/cuda_utils.hpp"
-#include "UtilLib/hpcg_mpi_utils.cuh"
+#include "UtilLib/hpcg_multi_GPU_utils.cuh"
+#include "HPCG_versions/striped_multi_GPU.cuh"
+#include "HPCG_versions/blocking_mpi_halo_exchange.cuh"
 
 #include <mpi.h>
 #include <cuda_runtime.h>
-#include <typeinfo>
 
 #include <time.h>
 
 using DataType = double;
 
 //number of processes in x, y, z
-#define NPX 2
-#define NPY 2
-#define NPZ 1
+#define NPX 3
+#define NPY 3
+#define NPZ 3
 //each process gets assigned problem size of NX x NY x NZ
-#define NX 4
-#define NY 4
-#define NZ 4
+#define NX 6
+#define NY 6
+#define NZ 6
 
 #define MPIDataType MPI_DOUBLE
 
@@ -36,14 +37,14 @@ void test_matrix_distribution(int num_stripes_local, int num_stripes_global, int
     }
 }
 
-void test_SPMV(striped_multi_GPU_Implementation<DataType> implementation_multi_GPU, striped_Matrix<DataType>* A_local_striped, striped_Matrix<DataType>* A_global_striped, Halo *halo_p_d, Halo *halo_Ap_d, Problem *problem, int *j_min_i_d){
+void test_SPMV(striped_multi_GPU_Implementation<DataType>& implementation_multi_GPU, striped_Matrix<DataType>* A_local_striped, striped_Matrix<DataType>* A_global_striped, Halo *halo_p_d, Halo *halo_Ap_d, Problem *problem, int *j_min_i_d){
     //make sure that we work on clean data
     SetHaloGlobalIndexGPU(halo_p_d, problem);
     SetHaloZeroGPU(halo_Ap_d);
 
     clock_t start_halo_exchange, end_halo_exchange;
     start_halo_exchange = clock();
-    ExchangeHalo(halo_p_d, problem);
+    implementation_multi_GPU.ExchangeHalo(halo_p_d, problem);
     end_halo_exchange = clock();
     double time_halo_exchange = ((double) (end_halo_exchange - start_halo_exchange)) / CLOCKS_PER_SEC;
 
@@ -142,19 +143,19 @@ void test_SPMV(striped_multi_GPU_Implementation<DataType> implementation_multi_G
 
 }
 
-void test_SymGS(striped_multi_GPU_Implementation<DataType> implementation_multi_GPU, striped_Matrix<DataType>* A_local_striped, striped_Matrix<DataType>* A_global_striped, Halo *halo_p_d, Halo *halo_Ap_d, Problem *problem, int *j_min_i_d){
+void test_SymGS(striped_multi_GPU_Implementation<DataType>& implementation_multi_GPU, striped_Matrix<DataType>* A_local_striped, striped_Matrix<DataType>* A_global_striped, Halo *halo_p_d, Halo *halo_Ap_d, Problem *problem, int *j_min_i_d){
     //make sure that we work on clean data
     SetHaloGlobalIndexGPU(halo_p_d, problem);
     SetHaloGlobalIndexGPU(halo_Ap_d, problem);
 
     //exchange halo
-    ExchangeHalo(halo_p_d, problem);
-    ExchangeHalo(halo_Ap_d, problem);
+    implementation_multi_GPU.ExchangeHalo(halo_p_d, problem);
+    implementation_multi_GPU.ExchangeHalo(halo_Ap_d, problem);
 
     //run SymGS on multi GPU
     clock_t start_multi_GPU, end_multi_GPU;
     start_multi_GPU = clock();
-    //implementation_multi_GPU.compute_SymGS(*A_local_striped, halo_p_d, halo_Ap_d, problem, j_min_i_d); //1st * 2nd = 3rd argument
+    implementation_multi_GPU.compute_SymGS(*A_local_striped, halo_p_d, halo_Ap_d, problem, j_min_i_d); //1st * 2nd = 3rd argument
     end_multi_GPU = clock();
     double time_multi_GPU = ((double) (end_multi_GPU - start_multi_GPU)) / CLOCKS_PER_SEC;
     MPI_Barrier(MPI_COMM_WORLD);
@@ -220,18 +221,18 @@ void test_SymGS(striped_multi_GPU_Implementation<DataType> implementation_multi_
                 count++;
             }
         }
-        for(int iz = 0; iz<NPZ*NZ; iz++){
-            printf("\n");
-            printf("iz=%d\n", iz);
-            printf("\n");
-            for(int iy = 0; iy < NPY * NY; iy++){
-                printf("\n");
-                for(int ix = 0; ix < NPX * NX; ix++){
-                    int i = iz*NPX*NX*NPY*NY + iy*NPX*NX + ix;
-                    printf("%f \t", result_single_GPU_h[i]);
-                }
-            }
-        }
+        // for(int iz = 0; iz<NPZ*NZ; iz++){
+        //     printf("\n");
+        //     printf("iz=%d\n", iz);
+        //     printf("\n");
+        //     for(int iy = 0; iy < NPY * NY; iy++){
+        //         printf("\n");
+        //         for(int ix = 0; ix < NPX * NX; ix++){
+        //             int i = iz*NPX*NX*NPY*NY + iy*NPX*NX + ix;
+        //             printf("%f \t", result_single_GPU_h[i]);
+        //         }
+        //     }
+        // }
         if(correct){
             printf("++++++\n");
             printf("SymGS is correct for multi GPU\n");
@@ -257,7 +258,7 @@ void test_SymGS(striped_multi_GPU_Implementation<DataType> implementation_multi_
 
 }
 
-void test_WAXPBY(striped_multi_GPU_Implementation<DataType> implementation_multi_GPU, striped_Matrix<DataType>* A_global_striped, Halo *halo_w_local_d, Halo *halo_x_local_d, Halo *halo_y_local_d, Problem *problem){
+void test_WAXPBY(striped_multi_GPU_Implementation<DataType>& implementation_multi_GPU, striped_Matrix<DataType>* A_global_striped, Halo *halo_w_local_d, Halo *halo_x_local_d, Halo *halo_y_local_d, Problem *problem){
     bool all_passed = true;
     for(DataType alpha = -1.0; alpha <= 1.0; alpha += 0.5){
         for(DataType beta = -1.0; beta<= 1.0; beta += 0.5){
@@ -373,7 +374,7 @@ void test_WAXPBY(striped_multi_GPU_Implementation<DataType> implementation_multi
     }
 }
 
-void test_Dot(striped_multi_GPU_Implementation<DataType> implementation_multi_GPU, striped_Matrix<DataType>* A_global_striped, Halo *halo_x_local_d, Halo *halo_y_local_d, Problem *problem){
+void test_Dot(striped_multi_GPU_Implementation<DataType>& implementation_multi_GPU, striped_Matrix<DataType>* A_global_striped, Halo *halo_x_local_d, Halo *halo_y_local_d, Problem *problem){
     bool all_passed = true;
 
     //make sure that we work on clean data
@@ -468,6 +469,227 @@ void test_Dot(striped_multi_GPU_Implementation<DataType> implementation_multi_GP
     }
 }
 
+void test_CG(striped_multi_GPU_Implementation<DataType>& implementation_multi_GPU, striped_Matrix<DataType>* A_local_striped, striped_Matrix<DataType>* A_global_striped, Halo *halo_b_local_d, Halo *halo_x_local_d, Problem *problem, int *j_min_i_d){
+    //make sure that we work on clean data
+    SetHaloGlobalIndexGPU(halo_b_local_d, problem);
+    SetHaloZeroGPU(halo_x_local_d);
+
+    //exchange halos so each process starts with the correct data
+    implementation_multi_GPU.ExchangeHalo(halo_b_local_d, problem);
+    implementation_multi_GPU.ExchangeHalo(halo_x_local_d, problem);
+
+    //run SPMV on multi GPU
+    int n_iters_local;
+    DataType normr_local;
+    DataType normr0_local;
+    implementation_multi_GPU.compute_CG(*A_local_striped, halo_b_local_d, halo_x_local_d, n_iters_local, normr_local, normr0_local, problem, j_min_i_d); //1st * 2nd = 3rd argument
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    //if(problem->rank == 0)printf("Rank=%d:\t SPMV Result for multiGPU computed.\n", problem->rank);
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    //verify the multi GPU result
+    if(problem->rank == 0){
+
+        //gather result
+        DataType *result_multi_GPU_h = (DataType*) malloc(NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType));
+        for(int i=0; i<NPX*NX*NPY*NY*NPZ*NZ; i++){
+            result_multi_GPU_h[i] = 0;
+        }
+        GatherResult(halo_x_local_d, problem, result_multi_GPU_h);
+        MPI_Barrier(MPI_COMM_WORLD);
+        //if(problem->rank == 0) printf("Rank=%d:\t SPMV Result gathered.\n", problem->rank);
+        MPI_Barrier(MPI_COMM_WORLD);
+        
+        //compute verification result on single GPU
+        DataType *result_single_GPU_h = (DataType*) malloc(NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType));
+        for(int i = 0; i < NPX*NX*NPY*NY*NPZ*NZ; i++){
+            result_single_GPU_h[i] = 0;
+        }
+        
+        //create b_global_h
+        DataType *b_global_h = (DataType*) malloc(NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType));
+        for(int i=0; i<NPX*NX*NPY*NY*NPZ*NZ; i++){
+            b_global_h[i] = i;
+        }
+        DataType *b_global_d;
+        CHECK_CUDA(cudaMalloc(&b_global_d, NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType)));
+        CHECK_CUDA(cudaMemcpy(b_global_d, b_global_h, NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType), cudaMemcpyHostToDevice));
+
+        //create x_global_h
+        DataType *x_global_h = (DataType*) malloc(NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType));
+        for(int i=0; i<NPX*NX*NPY*NY*NPZ*NZ; i++){
+            x_global_h[i] = 0;
+        }
+        DataType *x_global_d;
+        CHECK_CUDA(cudaMalloc(&x_global_d, NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType)));
+        CHECK_CUDA(cudaMemcpy(x_global_d, x_global_h, NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType), cudaMemcpyHostToDevice));
+
+        //declare variables for CG
+        int n_iters_global;
+        DataType normr_global;
+        DataType normr0_global;
+
+        //run CG on single GPU
+        striped_warp_reduction_Implementation<DataType> implementation_single_GPU;
+        //if(problem->rank == 0) printf("Rank=%d:\t CG About to do single GPU computation.\n", problem->rank);
+        implementation_single_GPU.compute_CG(*A_global_striped, b_global_d, x_global_d, n_iters_global, normr_global, normr0_global);
+
+        //copy result to CPU
+        CHECK_CUDA(cudaMemcpy(result_single_GPU_h, x_global_d, NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType), cudaMemcpyDeviceToHost));
+        
+        //compare multiGPU result with single GPU result
+        bool correct = true;
+        int count = 0;
+        DataType max_diff = 0.0;
+        for(int i = 0; i < NPX*NX*NPY*NY*NPZ*NZ; i++){
+            if(std::abs(result_multi_GPU_h[i] - result_single_GPU_h[i]) > 1e-10){
+                DataType diff = result_single_GPU_h[i] - result_multi_GPU_h[i];
+                if(diff > max_diff){
+                    max_diff = diff;
+                }
+                if(count<10)
+                    printf("Error: CG result_multi_GPU_h != result_single_GPU_h.\t index=%d,\t result_single_GPU_h[i]=%f,\t result_multi_GPU_h[i]=%f,\t difference=%20ef\n", i, result_single_GPU_h[i], result_multi_GPU_h[i], result_single_GPU_h[i] - result_multi_GPU_h[i]);
+                correct = false;
+                count++;
+            }
+        }
+        
+        if(correct){
+            printf("++++++\n");
+            printf("CG is correct for multi GPU\n");
+            printf("++++++\n");
+            //printf("Time for multi GPU CG: %f\n", time_multi_GPU);
+            //printf("Time for single GPU CG: %f\n", time_single_GPU);
+            //printf("Halo Exchange Time: %f\n", time_halo_exchange);
+        }else{
+            printf("!!!!!CG Result is NOT correct!!!!!\n");
+            double gn = NPX*NX*NPY*NY*NPZ*NZ;
+            printf("CG: %f of %f wrong values which is %f percent\n", count, gn, count/(gn)*100.0);
+            printf("CG Multi GPU:\t n_iters_local=%d,\t normr_local=%f,\t normr0_local=%f\n", n_iters_local, normr_local, normr0_local);
+            printf("CG Single GPU:\t n_iters_global=%d,\t normr_global=%20f,\t normr0_global=%.20f\n", n_iters_global, normr_global, normr0_global);
+            printf("Difference normr_global - normr_local = %.20f\n", normr_global - normr_local);
+            printf("Difference normr0_global - normr0_local = %.20f\n", normr0_global - normr0_local);
+            printf("Max difference: %20ef\n", max_diff);
+        }
+        free(result_single_GPU_h);
+        free(result_multi_GPU_h);
+        free(b_global_h);
+        free(x_global_h);
+        CHECK_CUDA(cudaFree(b_global_d));
+        CHECK_CUDA(cudaFree(x_global_d));
+    }else{
+        SendResult(0, halo_x_local_d, problem);
+        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
+
+}
+
+void test_MG(striped_multi_GPU_Implementation<DataType>& implementation_multi_GPU, striped_Matrix<DataType>* A_local_striped, striped_Matrix<DataType>* A_global_striped, Halo *halo_r_local_d, Halo *halo_x_local_d, Problem *problem, int *j_min_i_d){
+    //make sure that we work on clean data
+    SetHaloGlobalIndexGPU(halo_r_local_d, problem);
+    SetHaloZeroGPU(halo_x_local_d);
+
+    //exchange halos so each process starts with the correct data
+    implementation_multi_GPU.ExchangeHalo(halo_r_local_d, problem);
+    implementation_multi_GPU.ExchangeHalo(halo_x_local_d, problem);
+
+    //run MG on multi GPU
+    //implementation_multi_GPU.compute_CG(*A_local_striped, halo_r_local_d, halo_x_local_d, problem, j_min_i_d); //1st * 2nd = 3rd argument
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    //if(problem->rank == 0)printf("Rank=%d:\t SPMV Result for multiGPU computed.\n", problem->rank);
+    MPI_Barrier(MPI_COMM_WORLD);
+
+    //verify the multi GPU result
+    if(problem->rank == 0){
+
+        //gather result
+        DataType *result_multi_GPU_h = (DataType*) malloc(NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType));
+        for(int i=0; i<NPX*NX*NPY*NY*NPZ*NZ; i++){
+            result_multi_GPU_h[i] = 0;
+        }
+        GatherResult(halo_x_local_d, problem, result_multi_GPU_h);
+        MPI_Barrier(MPI_COMM_WORLD);
+        //if(problem->rank == 0) printf("Rank=%d:\t SPMV Result gathered.\n", problem->rank);
+        MPI_Barrier(MPI_COMM_WORLD);
+        
+        //compute verification result on single GPU
+        DataType *result_single_GPU_h = (DataType*) malloc(NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType));
+        for(int i = 0; i < NPX*NX*NPY*NY*NPZ*NZ; i++){
+            result_single_GPU_h[i] = 0;
+        }
+        
+        //create b_global_h
+        DataType *r_global_h = (DataType*) malloc(NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType));
+        for(int i=0; i<NPX*NX*NPY*NY*NPZ*NZ; i++){
+            r_global_h[i] = i;
+        }
+        DataType *r_global_d;
+        CHECK_CUDA(cudaMalloc(&r_global_d, NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType)));
+        CHECK_CUDA(cudaMemcpy(r_global_d, r_global_h, NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType), cudaMemcpyHostToDevice));
+
+        //create x_global_h
+        DataType *x_global_h = (DataType*) malloc(NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType));
+        for(int i=0; i<NPX*NX*NPY*NY*NPZ*NZ; i++){
+            x_global_h[i] = 0;
+        }
+        DataType *x_global_d;
+        CHECK_CUDA(cudaMalloc(&x_global_d, NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType)));
+        CHECK_CUDA(cudaMemcpy(x_global_d, x_global_h, NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType), cudaMemcpyHostToDevice));
+
+        //run MG on single GPU
+        striped_warp_reduction_Implementation<DataType> implementation_single_GPU;
+        //if(problem->rank == 0) printf("Rank=%d:\t MG About to do single GPU computation.\n", problem->rank);
+        implementation_single_GPU.compute_MG(*A_global_striped, r_global_d, x_global_d);
+
+        //copy result to CPU
+        CHECK_CUDA(cudaMemcpy(result_single_GPU_h, x_global_d, NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType), cudaMemcpyDeviceToHost));
+        
+        //compare multiGPU result with single GPU result
+        bool correct = true;
+        int count = 0;
+        DataType max_diff = 0.0;
+        for(int i = 0; i < NPX*NX*NPY*NY*NPZ*NZ; i++){
+            if(std::abs(result_multi_GPU_h[i] - result_single_GPU_h[i]) > 1e-10){
+                DataType diff = result_single_GPU_h[i] - result_multi_GPU_h[i];
+                if(diff > max_diff){
+                    max_diff = diff;
+                }
+                if(count<10)
+                    printf("Error: MG result_multi_GPU_h != result_single_GPU_h.\t index=%d,\t result_single_GPU_h[i]=%f,\t result_multi_GPU_h[i]=%f,\t difference=%20ef\n", i, result_single_GPU_h[i], result_multi_GPU_h[i], result_single_GPU_h[i] - result_multi_GPU_h[i]);
+                correct = false;
+                count++;
+            }
+        }
+        
+        if(correct){
+            printf("++++++\n");
+            printf("MG is correct for multi GPU\n");
+            printf("++++++\n");
+            //printf("Time for multi GPU MG: %f\n", time_multi_GPU);
+            //printf("Time for single GPU MG: %f\n", time_single_GPU);
+            //printf("Halo Exchange Time: %f\n", time_halo_exchange);
+        }else{
+            printf("!!!!!MG Result is NOT correct!!!!!\n");
+            double gn = NPX*NX*NPY*NY*NPZ*NZ;
+            printf("MG: %f of %f wrong values which is %f percent\n", count, gn, count/(gn)*100.0);
+            printf("Max difference: %20ef\n", max_diff);
+        }
+        free(result_single_GPU_h);
+        free(result_multi_GPU_h);
+        free(r_global_h);
+        free(x_global_h);
+        CHECK_CUDA(cudaFree(r_global_d));
+        CHECK_CUDA(cudaFree(x_global_d));
+    }else{
+        SendResult(0, halo_x_local_d, problem);
+        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier(MPI_COMM_WORLD);
+    }
+
+}
 
 int main(int argc, char *argv[]){
     // this is supposed to show you how to run aNY of the functions the HPCG Library provides
@@ -524,7 +746,7 @@ int main(int argc, char *argv[]){
     InitHaloMemGPU(&halo_Ap_d, NX, NY, NZ);
     SetHaloZeroGPU(&halo_Ap_d);
 
-    //initialize w, x and y
+    //initialize b, w, x and y
     Halo halo_w_d;
     InitHaloMemGPU(&halo_w_d, NX, NY, NZ);
     SetHaloZeroGPU(&halo_w_d);
@@ -537,23 +759,30 @@ int main(int argc, char *argv[]){
     InitHaloMemGPU(&halo_y_d, NX, NY, NZ);
     SetHaloGlobalIndexGPU(&halo_y_d, &problem);
 
+    Halo halo_b_d;
+    InitHaloMemGPU(&halo_b_d, NX, NY, NZ);
+    SetHaloGlobalIndexGPU(&halo_b_d, &problem);
+
     // create an instance of the version to run the functions on
-    striped_multi_GPU_Implementation<DataType> implementation_multi_GPU;
+    blocking_mpi_Implementation<DataType> implementation_multi_GPU;
 
     //test matrix distribution
-    //test_matrix_distribution(num_stripes_local, num_stripes_global, num_rows_local, num_rows_global, striped_A_local_h, striped_A_global_h, &problem);
+    test_matrix_distribution(num_stripes_local, num_stripes_global, num_rows_local, num_rows_global, striped_A_local_h, striped_A_global_h, &problem);
 
     //test SPMV
-    //test_SPMV(implementation_multi_GPU, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
+    test_SPMV(implementation_multi_GPU, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
     
     //test SymGS
     test_SymGS(implementation_multi_GPU, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
 
     //test WAXPBY
-    //test_WAXPBY(implementation_multi_GPU, A_global_striped, &halo_w_d, &halo_x_d, &halo_y_d, &problem);
+    test_WAXPBY(implementation_multi_GPU, A_global_striped, &halo_w_d, &halo_x_d, &halo_y_d, &problem);
 
     //test Dot
-    //test_Dot(implementation_multi_GPU, A_global_striped, &halo_x_d, &halo_y_d, &problem);
+    test_Dot(implementation_multi_GPU, A_global_striped, &halo_x_d, &halo_y_d, &problem);
+
+    //test CG
+    test_CG(implementation_multi_GPU, A_local_striped, A_global_striped, &halo_b_d, &halo_x_d, &problem, j_min_i_d);
 
     // free the memory
     FreeHaloGPU(&halo_Ap_d);

@@ -60,7 +60,7 @@ int main(){
 
     std::cout << "Starting striped warp reduction tests" << std::endl;
     // all_pass = all_pass && run_stripedWarpReduction_filebased_tests();
-    // all_pass = all_pass && run_stripedWarpReduction_tests(4, 4, 4);
+    all_pass = all_pass && run_stripedWarpReduction_tests(4, 4, 4);
     // all_pass = all_pass && run_stripedWarpReduction_tests(8, 8, 8);
     // all_pass = all_pass && run_stripedWarpReduction_tests(7, 8, 9);
     // all_pass = all_pass && run_stripedWarpReduction_tests(8, 7, 9);

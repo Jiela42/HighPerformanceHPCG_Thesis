@@ -6,7 +6,7 @@
 ##SBATCH --partition=amdrtx
 #SBATCH --time 00:30:00
 #SBATCH --nodes=1
-#SBATCH --ntasks=1
+#SBATCH --ntasks=27
 #SBATCH --gres=gpu:4
 #SBATCH --distribution=cyclic
 ##SBATCH --partition=amdv100
@@ -24,4 +24,4 @@ module load cmake/3.21.3
 cd /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/build/testing
 
 ##Run
-srun /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/build/testing/run_AllTests
+srun /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/build/testing/run_multi_GPU

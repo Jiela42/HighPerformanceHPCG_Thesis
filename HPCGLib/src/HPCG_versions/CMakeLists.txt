@@ -43,12 +43,14 @@ target_sources(HPCGLib PRIVATE
     striped_warp_reduction/striped_warp_reduction_computeCG.cu
     striped_warp_reduction/striped_warp_reduction_computeMG.cu
 
-    multi_GPU/striped_box_coloring_multi_GPU_computeSymGS.cu
-    multi_GPU/striped_warp_reduction_multi_GPU_computeCG.cu
-    multi_GPU/striped_warp_reduction_multi_GPU_computeDot.cu
-    multi_GPU/striped_warp_reduction_multi_GPU_computeMG.cu
-    multi_GPU/striped_warp_reduction_multi_GPU_computeSPMV.cu
-    multi_GPU/striped_warp_reduction_multi_GPU_computeWAXPBY.cu
+    multi_GPU_kernels/striped_box_coloring_multi_GPU_computeSymGS.cu
+    multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeCG.cu
+    multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeDot.cu
+    multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeMG.cu
+    multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeSPMV.cu
+    multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeWAXPBY.cu
+
+    multi_GPU_halo_exchange/blocking_mpi_halo_exchange.cu
 
     striped_preprocessed/striped_preprocessed_computeSymGS.cu
 
