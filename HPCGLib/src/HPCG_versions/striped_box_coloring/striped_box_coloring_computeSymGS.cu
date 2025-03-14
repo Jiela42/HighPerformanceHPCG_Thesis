@@ -1,6 +1,7 @@
 #include "HPCG_versions/striped_box_coloring.cuh"
 #include "UtilLib/cuda_utils.hpp"
 #include "UtilLib/utils.cuh"
+
 // #include "MatrixLib/coloring.cuh"
 // #include <iostream>
 // #include <cuda_runtime.h>
@@ -43,7 +44,7 @@ __global__ void striped_box_coloring_half_SymGS_kernel(
         
         // find out the position of the node (only considering faces, cols and rows that actually have that color)
         int ix = i % num_color_cols;
-        int iy = ((i % (num_color_cols * num_color_rows))) / num_color_rows;
+        int iy = (i % (num_color_cols * num_color_rows)) / num_color_cols;
         int iz = i / (num_color_cols * num_color_rows);
         
         // adjust the counter to the correct position when all nodes are considered
@@ -136,7 +137,7 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
     L2_norm_for_Device_Vector(y_Norm_stream, num_rows, y_d, &L2_norm_y);
     
     // to do the L2 norm asynchroneously we do the first iteration outside of the loop
-    for(int color = 0; color < max_color; color++){
+    for(int color = 0; color < num_colors; color++){
             // we need to do a forward pass
             striped_box_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
             cooperation_number,
@@ -150,7 +151,7 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
             );
             CHECK_CUDA(cudaDeviceSynchronize());
         }
-
+    
     // we need to do a backward pass,
     // the colors for this are the same just in reverse order
     

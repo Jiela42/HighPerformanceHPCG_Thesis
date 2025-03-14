@@ -11,13 +11,13 @@
 using DataType = double;
 
 //number of processes in x, y, z
-#define NPX 3
-#define NPY 3
-#define NPZ 3
+#define NPX 2
+#define NPY 2
+#define NPZ 1
 //each process gets assigned problem size of NX x NY x NZ
-#define NX 18
-#define NY 18
-#define NZ 18
+#define NX 4
+#define NY 4
+#define NZ 4
 
 #define MPIDataType MPI_DOUBLE
 
@@ -154,7 +154,7 @@ void test_SymGS(striped_multi_GPU_Implementation<DataType> implementation_multi_
     //run SymGS on multi GPU
     clock_t start_multi_GPU, end_multi_GPU;
     start_multi_GPU = clock();
-    implementation_multi_GPU.compute_SymGS(*A_local_striped, halo_p_d, halo_Ap_d, problem, j_min_i_d); //1st * 2nd = 3rd argument
+    //implementation_multi_GPU.compute_SymGS(*A_local_striped, halo_p_d, halo_Ap_d, problem, j_min_i_d); //1st * 2nd = 3rd argument
     end_multi_GPU = clock();
     double time_multi_GPU = ((double) (end_multi_GPU - start_multi_GPU)) / CLOCKS_PER_SEC;
     MPI_Barrier(MPI_COMM_WORLD);
@@ -218,6 +218,18 @@ void test_SymGS(striped_multi_GPU_Implementation<DataType> implementation_multi_
                     printf("Error: SymGS result_multi_GPU_h != result_single_GPU_h.\t index=%d,\t result_single_GPU_h[i]=%f,\t result_multi_GPU_h[i]%f\n", i, result_single_GPU_h[i], result_multi_GPU_h[i]);
                 correct = false;
                 count++;
+            }
+        }
+        for(int iz = 0; iz<NPZ*NZ; iz++){
+            printf("\n");
+            printf("iz=%d\n", iz);
+            printf("\n");
+            for(int iy = 0; iy < NPY * NY; iy++){
+                printf("\n");
+                for(int ix = 0; ix < NPX * NX; ix++){
+                    int i = iz*NPX*NX*NPY*NY + iy*NPX*NX + ix;
+                    printf("%f \t", result_single_GPU_h[i]);
+                }
             }
         }
         if(correct){
@@ -529,19 +541,19 @@ int main(int argc, char *argv[]){
     striped_multi_GPU_Implementation<DataType> implementation_multi_GPU;
 
     //test matrix distribution
-    test_matrix_distribution(num_stripes_local, num_stripes_global, num_rows_local, num_rows_global, striped_A_local_h, striped_A_global_h, &problem);
+    //test_matrix_distribution(num_stripes_local, num_stripes_global, num_rows_local, num_rows_global, striped_A_local_h, striped_A_global_h, &problem);
 
     //test SPMV
-    test_SPMV(implementation_multi_GPU, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
+    //test_SPMV(implementation_multi_GPU, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
     
     //test SymGS
     test_SymGS(implementation_multi_GPU, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
 
     //test WAXPBY
-    test_WAXPBY(implementation_multi_GPU, A_global_striped, &halo_w_d, &halo_x_d, &halo_y_d, &problem);
+    //test_WAXPBY(implementation_multi_GPU, A_global_striped, &halo_w_d, &halo_x_d, &halo_y_d, &problem);
 
     //test Dot
-    test_Dot(implementation_multi_GPU, A_global_striped, &halo_x_d, &halo_y_d, &problem);
+    //test_Dot(implementation_multi_GPU, A_global_striped, &halo_x_d, &halo_y_d, &problem);
 
     // free the memory
     FreeHaloGPU(&halo_Ap_d);
