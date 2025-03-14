@@ -127,12 +127,16 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
 
     int num_blocks = std::min(ceiling_division(max_num_rows_per_color, 1024/cooperation_number), MAX_NUM_BLOCKS);
 
+    double rr_norm = 1.0;
+
     double L2_norm_y;
 
     cudaStream_t y_Norm_stream;
     CHECK_CUDA(cudaStreamCreate(&y_Norm_stream));
-
-    L2_norm_for_Device_Vector(y_Norm_stream, num_rows, y_d, &L2_norm_y);
+    if(max_iterations > 1){
+    
+        L2_norm_for_Device_Vector(y_Norm_stream, num_rows, y_d, &L2_norm_y);
+    }
     
     // to do the L2 norm asynchroneously we do the first iteration outside of the loop
     for(int color = 0; color <= max_color; color++){
@@ -168,11 +172,15 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
             CHECK_CUDA(cudaDeviceSynchronize());
         }
 
-        double L2_norm = L2_norm_for_SymGS(A, x_d, y_d);
-        CHECK_CUDA(cudaStreamSynchronize(y_Norm_stream));
+        if(max_iterations > 1){
+
+            double L2_norm = this->L2_norm_for_SymGS(A, x_d, y_d);
+            CHECK_CUDA(cudaStreamSynchronize(y_Norm_stream));
+            
+            rr_norm = L2_norm / L2_norm_y;
+        }
         CHECK_CUDA(cudaStreamDestroy(y_Norm_stream));
-   
-        double rr_norm = L2_norm / L2_norm_y;
+
 
     // std::cout << "rr_norm after one iteration: " << rr_norm << std::endl;
 
@@ -216,7 +224,7 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
             CHECK_CUDA(cudaDeviceSynchronize());
         }
 
-        double L2_norm = L2_norm_for_SymGS(A, x_d, y_d);
+        double L2_norm = this->L2_norm_for_SymGS(A, x_d, y_d);
    
         rr_norm = L2_norm / L2_norm_y;
 

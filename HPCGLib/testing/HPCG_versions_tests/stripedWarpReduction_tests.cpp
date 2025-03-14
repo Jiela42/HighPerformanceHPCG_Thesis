@@ -65,13 +65,14 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double>& A){
         a_d
         );
 
+
     // test the Dot function
     all_pass = all_pass && test_Dot(
         striped_warp_reduction,
         A_striped->get_nx(), A_striped->get_ny(), A_striped->get_nz()
         );
 
-        
+    
     // test the SymGS function (minitest, does not work with striped matrices)
     all_pass = all_pass && test_SymGS(
         cuSparse, striped_warp_reduction,
@@ -141,6 +142,7 @@ bool run_stripedWarpReduction_tests(int nx, int ny, int nz){
             current_matrix = current_matrix->get_coarse_Matrix();
         }
     }
+    // std::cout << "we run the tests" << std::endl;
 
     all_pass = all_pass && run_striped_warp_reduction_tests_on_matrix(A);
 

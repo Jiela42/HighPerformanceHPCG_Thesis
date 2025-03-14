@@ -59,7 +59,7 @@ int main(){
     // std::cout << "Finished striped shared memory tests" << std::endl;
 
     std::cout << "Starting striped warp reduction tests" << std::endl;
-    all_pass = all_pass && run_stripedWarpReduction_filebased_tests();
+    // all_pass = all_pass && run_stripedWarpReduction_filebased_tests();
     // all_pass = all_pass && run_stripedWarpReduction_tests(4, 4, 4);
     // all_pass = all_pass && run_stripedWarpReduction_tests(8, 8, 8);
     // all_pass = all_pass && run_stripedWarpReduction_tests(7, 8, 9);
@@ -67,7 +67,7 @@ int main(){
     // all_pass = all_pass && run_stripedWarpReduction_tests(8, 9, 7);
     // all_pass = all_pass && run_stripedWarpReduction_tests(16, 16, 16);
     // all_pass = all_pass && run_stripedWarpReduction_tests(24, 24, 24);
-    // all_pass = all_pass && run_stripedWarpReduction_tests(32, 32, 32);
+    all_pass = all_pass && run_stripedWarpReduction_tests(32, 32, 32);
     // all_pass = all_pass && run_stripedWarpReduction_tests(64, 64, 64);
     // all_pass = all_pass && run_stripedWarpReduction_tests(128, 128, 128);
     // std::cout << "Finished striped warp reduction tests" << std::endl;
@@ -86,7 +86,7 @@ int main(){
     // all_pass = all_pass && run_stripedColored_tests(4, 4, 4);
     // all_pass = all_pass && run_stripedColored_tests(8, 8, 8);
     // all_pass = all_pass && run_stripedColored_tests(16, 16, 16);
-    // all_pass = all_pass && run_stripedColored_tests(32, 32, 32);
+    all_pass = all_pass && run_stripedColored_tests(32, 32, 32);
     // all_pass = all_pass && run_stripedColored_tests(64, 64, 64);
     // all_pass = all_pass && run_stripedColored_tests(128, 128, 128);
 
@@ -95,7 +95,7 @@ int main(){
     // all_pass = all_pass && run_stripedColoringPrecomputed_tests(4, 4, 4);
     // all_pass = all_pass && run_stripedColoringPrecomputed_tests(8, 8, 8);
     // all_pass = all_pass && run_stripedColoringPrecomputed_tests(16, 16, 16);
-    // all_pass = all_pass && run_stripedColoringPrecomputed_tests(32, 32, 32);
+    all_pass = all_pass && run_stripedColoringPrecomputed_tests(32, 32, 32);
     // all_pass = all_pass && run_stripedColoringPrecomputed_tests(64, 64, 64);
     // all_pass = all_pass && run_stripedColoringPrecomputed_tests(128, 128, 128);
     // all_pass = all_pass && run_stripedColoringPrecomputed_tests(256, 256, 256);
@@ -104,7 +104,7 @@ int main(){
     // all_pass = all_pass && run_stripedBoxColoring_tests(4, 4, 4);
     // all_pass = all_pass && run_stripedBoxColoring_tests(8, 8, 8);
     // all_pass = all_pass && run_stripedBoxColoring_tests(16, 16, 16);
-    // all_pass = all_pass && run_stripedBoxColoring_tests(32, 32, 32);
+    all_pass = all_pass && run_stripedBoxColoring_tests(32, 32, 32);
     // all_pass = all_pass && run_stripedBoxColoring_tests(64, 64, 64);
     // all_pass = all_pass && run_stripedBoxColoring_tests(128, 128, 128);
 

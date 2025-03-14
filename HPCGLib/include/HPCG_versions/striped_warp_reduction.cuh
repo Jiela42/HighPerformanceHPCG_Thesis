@@ -32,8 +32,8 @@ public:
         this->Dot_implemented = true;
         this->SymGS_implemented = true;
         this->WAXPBY_implemented = true;
-        this->CG_implemented = true;
-        this->MG_implemented = true;
+        this->CG_implemented = false;
+        this->MG_implemented = false;
         
     }
 
@@ -159,6 +159,11 @@ __global__ void striped_warp_reduction_dot_kernel(
     int num_rows,
     double * x_d,
     double * y_d,
+    double * result_d
+);
+__global__ void reduce_sums(
+    double * intermediate_sums_d,
+    int num_inter_results,
     double * result_d
 );
 

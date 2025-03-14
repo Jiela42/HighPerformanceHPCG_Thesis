@@ -398,7 +398,7 @@ def run_AMGX_benchmark(nx: int, ny: int, nz: int, save_folder):
 
 
     print(f"Running AMGX benchmark for {nx}x{ny}x{nz}", flush=True)
-    # bench_AMGX_SymGS(nx, ny, nz, A_csr_scipy, x, y, matrix_timer)
+    bench_AMGX_SymGS(nx, ny, nz, A_csr_scipy, x, y, matrix_timer)
     bench_AMGX_CG(A_csr_scipy, x, y, matrix_timer)
 
     matrix_timer.destroy_timer()

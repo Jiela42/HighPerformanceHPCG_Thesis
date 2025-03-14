@@ -5,7 +5,22 @@
 #include <cmath>
 
 bool double_compare(double a, double b){
+
+    if(std::isnan(a) or std::isnan(b)){
+        std::cout << "One of the numbers is nan" << std::endl;
+        return false;
+    }
+    if(std::abs(a - b) > error_tolerance){
+        std::cout << "Error: " << a << " != " << b << std::endl;
+        std::cout << "Difference: " << std::abs(a - b) << std::endl;
+    }
+
     return std::abs(a - b) < error_tolerance;
+}
+
+bool relaxed_double_compare(double a, double b, double tolerance){
+    // this function is for handling small issues like the kind that arise from exploiting commutativity on floats
+    return std::abs(a - b) < tolerance;
 }
 
 bool vector_compare(const std::vector<double>& a, const std::vector<double>& b){
