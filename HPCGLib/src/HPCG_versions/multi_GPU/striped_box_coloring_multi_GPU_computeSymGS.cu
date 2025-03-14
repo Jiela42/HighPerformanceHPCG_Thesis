@@ -78,7 +78,7 @@ __global__ void striped_box_coloring_half_SymGS_kernel(
         
         // find out the position of the node (only considering faces, cols and rows that actually have that color)
         int ix = i % num_color_cols;
-        int iy = ((i % (num_color_cols * num_color_rows))) / num_color_rows;
+        int iy = ((i % (num_color_cols * num_color_rows))) / num_color_cols;
         int iz = i / (num_color_cols * num_color_rows);
         
         // adjust the counter to the correct position when all nodes are considered
