@@ -645,3 +645,52 @@ bool IsHaloZero(Halo *x_d){
     }
     return true;
 }
+
+void GenerateStripedPartialMatrix_GPU(Problem *problem, double *A_d) {
+    int nx = problem->nx;
+    int ny = problem->ny;
+    int nz = problem->nz;
+    local_int_t num_rows = nx * ny * nz;
+
+    int block_size = 256;
+    int num_blocks = (num_rows + block_size - 1) / block_size;
+
+    GenerateStripedPartialMatrix_kernel<<<block_size, num_blocks>>>(problem->nx, problem->ny, problem->nz, problem->gnx, problem->gny, problem->gnz, problem->gx0, problem->gy0, problem->gz0, A_d);
+}
+__global__ void GenerateStripedPartialMatrix_kernel(int nx, int ny, int nz, int gnx, int gny, int gnz, int offset_x, int offset_y, int offset_z, double *A_d){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    local_int_t num_rows = nx * ny * nz;
+    local_int_t num_cols = nx * ny * nz;
+    
+    for (int i=tid; i<num_rows; i += blockDim.x * gridDim.x) {
+        int gx = i % nx + offset_x;
+        int gy = (i / nx) % ny + offset_y;
+        int gz = i / (nx * ny) + offset_z;
+
+        for (int sz = -1; sz < 2; sz++){
+            for(int sy = -1; sy < 2; sy++){
+                for(int sx = -1; sx < 2; sx++){
+
+                    if(gx + sx < 0 || gx + sx >= gnx ||
+                        gy + sy < 0 || gy + sy >= gny ||
+                        gz + sz < 0 || gz + sz >= gnz) {
+                            *A = 0.0;
+                            A++;
+                        } else {
+                            if(sx == 0 && sy == 0 && sz == 0){
+                                *A = 26.0;
+                                A++;
+                            } else {
+                                *A = -1.0;
+                                A++;
+                            }
+                        }
+                }
+            }
+        }
+
+
+
+    }
+}
