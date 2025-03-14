@@ -128,6 +128,9 @@ __global__ void striped_warp_reduction_dot_kernel(
 
 }
 
+/*
+uses MPI_Allreduce to sum up across all ranks
+*/
 template <typename T>
 void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeDot(
     striped_Matrix<T>& A, //we only pass A for the metadata
@@ -190,6 +193,8 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeDot
         CHECK_CUDA(cudaDeviceSynchronize());
         num_inter_results = num_blocks;
     }
+
+    //use MPI to sum the results from all the blocks
 
     // std::cout<< "after the loop"<< std::endl;
     // use a kernel to reduce the intermediate sums

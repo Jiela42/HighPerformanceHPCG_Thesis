@@ -33,12 +33,12 @@ public:
         this->version_name = "Striped Multi GPU";
         this->implementation_type = Implementation_Type::STRIPED;
         this->SPMV_implemented = true;
-        this->Dot_implemented = false;
+        this->Dot_implemented = true;
         this->SymGS_implemented = true;
         this->WAXPBY_implemented = true;
         this->CG_implemented = false;
         this->MG_implemented = false;
-        this->norm_based = true;
+        this->norm_based = false;
 
         // default box size for coloring
         this->bx = 3;
@@ -140,14 +140,20 @@ public:
         sparse_CSR_Matrix<T> & A, // we pass A for the metadata
         T * x_d, T * y_d, T * result_d // again: the vectors x, y and result are already on the device
         ) override {
-        std::cerr << "Warning: compute_Dot is not implemented using the sparse_CSR Matrix in striped warp reduction." << std::endl;
+        std::cerr << "ERROR computeDot requires different arguments as input for multi GPU Implementation." << std::endl;
     }
 
     void compute_Dot(
         striped_Matrix<T> & A, // we pass A for the metadata
         T * x_d, T * y_d, T * result_d // again: the vectors x, y and result are already on the device
         ) override {
-        striped_warp_reduction_multi_GPU_computeDot(A, x_d, y_d, result_d);
+            std::cerr << "ERROR computeDot requires different arguments as input for multi GPU Implementation." << std::endl;
+    }
+
+    void compute_Dot(
+        Halo * x_d, Halo * y_d, T * result_d // again: the vectors x, y and result are already on the device
+        ) {
+        striped_warp_reduction_multi_GPU_computeDot(x_d, y_d, result_d);
     }
 
     void set_box_size(int bx, int by, int bz){
@@ -177,8 +183,7 @@ private:
     );
 
     void striped_warp_reduction_multi_GPU_computeDot(
-        striped_Matrix<T>& A, //we only pass A for the metadata
-        T * x_d, T * y_d, T * result_d
+        Halo * x_d, Halo * y_d, T * result_d
     );
 
     void striped_box_coloring_multi_GPU_computeSymGS(
@@ -209,7 +214,9 @@ __global__ void striped_warp_reduction_multi_GPU_dot_kernel(
     int num_rows,
     double * x_d,
     double * y_d,
-    double * result_d
+    double * result_d,
+    int nx, int ny, int nz,
+    local_int_t dimx, local_int_t dimy
 );
 
 

@@ -1,6 +1,21 @@
 #include "HPCG_versions/striped_multi_GPU.cuh"
 #include "UtilLib/cuda_utils.hpp"
 #include <iostream>
+#include <mpi.h>
+
+__inline__ __device__ global_int_t local_i_to_halo_i(
+    int i, 
+    int nx, int ny, int nz,
+    local_int_t dimx, local_int_t dimy
+    )
+    {
+        /*
+        int local_i_x = i % nx;
+        int local_i_y = (i % (nx * ny)) / nx;
+        int local_i_z = i / (nx * ny);
+        return (dimx * dimy) + dimx + 1 + local_i_x + local_i_y * dimx + local_i_z * (dimx * dimy);*/
+        return dimx*(dimy+1) + 1 + (i % nx) + dimx*((i % (nx*ny)) / nx) + (dimx*dimy)*(i / (nx*ny));
+}
 
 __global__ void reduce_sums_multi_GPU(double * array, int num_elements, double * result_d){
 
@@ -46,7 +61,9 @@ __global__ void striped_warp_reduction_multi_GPU_dot_kernel(
     int num_rows,
     double * x_d,
     double * y_d,
-    double * result_d
+    double * result_d,
+    int nx, int ny, int nz,
+    local_int_t dimx, local_int_t dimy
 ){
 
     __shared__ double intermediate_sums[32];
@@ -63,7 +80,8 @@ __global__ void striped_warp_reduction_multi_GPU_dot_kernel(
         // if (y_d[i] != 0.0){
         //     printf("y_d[%d] = %f\n", i, y_d[i]);
         // }
-        my_sum += x_d[i] * y_d[i];
+        local_int_t hi = local_i_to_halo_i(i, nx, ny, nz, dimx, dimy);
+        my_sum += x_d[hi] * y_d[hi];
         // printf("i = %d, x_d[i] = %f, y_d[i] = %f\n", i, x_d[i], y_d[i]);
     }
 
@@ -130,17 +148,24 @@ __global__ void striped_warp_reduction_multi_GPU_dot_kernel(
 
 template <typename T>
 void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_computeDot(
-    striped_Matrix<T>& A, //we only pass A for the metadata
-    T * x_d,
-    T * y_d,
+    Halo * x_d,
+    Halo * y_d,
     T * result_d
     ){
+
+    assert(x_d->dimx == y_d->dimx);
+    assert(x_d->dimy == y_d->dimy);
+    assert(x_d->dimz == y_d->dimz);
+    assert(x_d->nx == y_d->nx);
+    assert(x_d->ny == y_d->ny);
+    assert(x_d->nz == y_d->nz);
+
     
     int coop_num = this->dot_cooperation_number;
     // std::cout << "Running dot product with striped warp reduction" << std::endl;
     // we compute z = xy
 
-    int num_rows = A.get_num_rows();
+    int num_rows = x_d->nx * x_d->ny * x_d->nz;
     int num_threads = 1024;
     int max_threads = NUM_PHYSICAL_CORES;
     int max_blocks = 4 * max_threads / num_threads + 1;
@@ -164,7 +189,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     // std::cout << "num_rows = " << num_rows << std::endl;
 
     striped_warp_reduction_multi_GPU_dot_kernel<<<num_blocks, num_threads>>>(
-        num_rows, x_d, y_d, intermediate_sums_d
+        num_rows, x_d->x_d, y_d->x_d, intermediate_sums_d, x_d->nx, x_d->ny, x_d->nz, x_d->dimx, x_d->dimy
     );
 
     int num_inter_results = num_blocks;
@@ -190,6 +215,12 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
         CHECK_CUDA(cudaDeviceSynchronize());
         num_inter_results = num_blocks;
     }
+
+    DataType my_result;
+    CHECK_CUDA(cudaMemcpy(&my_result, result_d, sizeof(DataType), cudaMemcpyDeviceToHost));
+    DataType result_h;
+    MPI_Allreduce(&my_result, &result_h, 1, MPIDataType, MPI_SUM, MPI_COMM_WORLD);
+    CHECK_CUDA(cudaMemcpy(result_d, &result_h, sizeof(DataType), cudaMemcpyHostToDevice));
 
     // std::cout<< "after the loop"<< std::endl;
     // use a kernel to reduce the intermediate sums
