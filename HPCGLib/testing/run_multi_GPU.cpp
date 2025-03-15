@@ -740,27 +740,33 @@ int main(int argc, char *argv[]){
     //initialize p and Ap
     Halo halo_p_d;
     InitHaloMemGPU(&halo_p_d, NX, NY, NZ);
+    InitHaloMemCPU(&halo_p_d, NX, NY, NZ);
     SetHaloGlobalIndexGPU(&halo_p_d, &problem);
 
     Halo halo_Ap_d;
     InitHaloMemGPU(&halo_Ap_d, NX, NY, NZ);
+    InitHaloMemCPU(&halo_Ap_d, NX, NY, NZ);
     SetHaloZeroGPU(&halo_Ap_d);
 
     //initialize b, w, x and y
     Halo halo_w_d;
     InitHaloMemGPU(&halo_w_d, NX, NY, NZ);
+    InitHaloMemCPU(&halo_w_d, NX, NY, NZ);
     SetHaloZeroGPU(&halo_w_d);
 
     Halo halo_x_d;
     InitHaloMemGPU(&halo_x_d, NX, NY, NZ);
+    InitHaloMemCPU(&halo_x_d, NX, NY, NZ);
     SetHaloGlobalIndexGPU(&halo_x_d, &problem);
 
     Halo halo_y_d;
     InitHaloMemGPU(&halo_y_d, NX, NY, NZ);
+    InitHaloMemCPU(&halo_y_d, NX, NY, NZ);
     SetHaloGlobalIndexGPU(&halo_y_d, &problem);
 
     Halo halo_b_d;
     InitHaloMemGPU(&halo_b_d, NX, NY, NZ);
+    InitHaloMemCPU(&halo_b_d, NX, NY, NZ);
     SetHaloGlobalIndexGPU(&halo_b_d, &problem);
 
     // create an instance of the version to run the functions on
@@ -786,10 +792,15 @@ int main(int argc, char *argv[]){
 
     // free the memory
     FreeHaloGPU(&halo_Ap_d);
+    FreeHaloCPU(&halo_Ap_d);
     FreeHaloGPU(&halo_p_d);
+    FreeHaloCPU(&halo_p_d);
     FreeHaloGPU(&halo_w_d);
+    FreeHaloCPU(&halo_w_d);
     FreeHaloGPU(&halo_x_d);
+    FreeHaloCPU(&halo_x_d);
     FreeHaloGPU(&halo_y_d);
+    FreeHaloCPU(&halo_y_d);
     free(striped_A_local_h);
     free(striped_A_global_h);
 

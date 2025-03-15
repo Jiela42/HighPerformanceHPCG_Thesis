@@ -68,6 +68,45 @@ void InitHaloMemGPU(Halo *halo, int nx, int ny, int nz){
     halo->interior = interior;
 }
 
+void InitHaloMemCPU(Halo *halo, int nx, int ny, int nz){
+    halo->north_send_buff_h = (DataType*) malloc(nx * nz * sizeof(DataType));
+    halo->north_recv_buff_h = (DataType*) malloc(nx * nz * sizeof(DataType));
+    halo->east_send_buff_h = (DataType*) malloc(ny * nz * sizeof(DataType));
+    halo->east_recv_buff_h = (DataType*) malloc(ny * nz * sizeof(DataType));
+    halo->south_send_buff_h = (DataType*) malloc(nx * nz * sizeof(DataType));
+    halo->south_recv_buff_h = (DataType*) malloc(nx * nz * sizeof(DataType));
+    halo->west_send_buff_h = (DataType*) malloc(ny * nz * sizeof(DataType));
+    halo->west_recv_buff_h = (DataType*) malloc(ny * nz * sizeof(DataType));
+    halo->ne_send_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    halo->ne_recv_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    halo->se_send_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    halo->se_recv_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    halo->sw_send_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    halo->sw_recv_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    halo->nw_send_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    halo->nw_recv_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    halo->front_send_buff_h = (DataType*) malloc(nx * ny * sizeof(DataType));
+    halo->front_recv_buff_h = (DataType*) malloc(nx * ny * sizeof(DataType));
+    halo->back_send_buff_h = (DataType*) malloc(nx * ny * sizeof(DataType));
+    halo->back_recv_buff_h = (DataType*) malloc(nx * ny * sizeof(DataType));
+    halo->front_north_send_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    halo->front_north_recv_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    halo->front_east_send_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    halo->front_east_recv_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    halo->front_south_send_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    halo->front_south_recv_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    halo->front_west_send_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    halo->front_west_recv_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    halo->back_north_send_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    halo->back_north_recv_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    halo->back_east_send_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    halo->back_east_recv_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    halo->back_south_send_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    halo->back_south_recv_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    halo->back_west_send_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    halo->back_west_recv_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+}
+
 void SetHaloZeroGPU(Halo *halo){
     CHECK_CUDA(cudaMemset(halo->x_d, 0, halo->dimx * halo->dimy * halo->dimz * sizeof(DataType)));
 }
@@ -105,6 +144,45 @@ void SetHaloGlobalIndexGPU(Halo *halo, Problem *problem){
 
 void FreeHaloGPU(Halo *halo){
     CHECK_CUDA(cudaFree(halo->x_d));
+}
+
+void FreeHaloCPU(Halo *halo){
+    free(halo->north_send_buff_h);
+    free(halo->north_recv_buff_h);
+    free(halo->east_send_buff_h);
+    free(halo->east_recv_buff_h);
+    free(halo->south_send_buff_h);
+    free(halo->south_recv_buff_h);
+    free(halo->west_send_buff_h);
+    free(halo->west_recv_buff_h);
+    free(halo->ne_send_buff_h);
+    free(halo->ne_recv_buff_h);
+    free(halo->se_send_buff_h);
+    free(halo->se_recv_buff_h);
+    free(halo->sw_send_buff_h);
+    free(halo->sw_recv_buff_h);
+    free(halo->nw_send_buff_h);
+    free(halo->nw_recv_buff_h);
+    free(halo->front_send_buff_h);
+    free(halo->front_recv_buff_h);
+    free(halo->back_send_buff_h);
+    free(halo->back_recv_buff_h);
+    free(halo->front_north_send_buff_h);
+    free(halo->front_north_recv_buff_h);
+    free(halo->front_east_send_buff_h);
+    free(halo->front_east_recv_buff_h);
+    free(halo->front_south_send_buff_h);
+    free(halo->front_south_recv_buff_h);
+    free(halo->front_west_send_buff_h);
+    free(halo->front_west_recv_buff_h);
+    free(halo->back_north_send_buff_h);
+    free(halo->back_north_recv_buff_h);
+    free(halo->back_east_send_buff_h);
+    free(halo->back_east_recv_buff_h);
+    free(halo->back_south_send_buff_h);
+    free(halo->back_south_recv_buff_h);
+    free(halo->back_west_send_buff_h);
+    free(halo->back_west_recv_buff_h);
 }
 
 void InitGPU(Problem *problem){

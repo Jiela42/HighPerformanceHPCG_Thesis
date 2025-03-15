@@ -35,9 +35,17 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     DataType * rtz_d;
 
     InitHaloMemGPU(&p_d, problem->nx, problem->ny, problem->nz);
+    InitHaloMemCPU(&p_d, p_d.nx, p_d.ny, p_d.nz);
+
     InitHaloMemGPU(&z_d, problem->nx, problem->ny, problem->nz);
+    InitHaloMemCPU(&z_d, z_d.nx, z_d.ny, z_d.nz);
+
     InitHaloMemGPU(&Ap_d, problem->nx, problem->ny, problem->nz);
+    InitHaloMemCPU(&Ap_d, Ap_d.nx, Ap_d.ny, Ap_d.nz);
+
     InitHaloMemGPU(&r_d, problem->nx, problem->ny, problem->nz);
+    InitHaloMemCPU(&r_d, r_d.nx, r_d.ny, r_d.nz);
+
     CHECK_CUDA(cudaMalloc(&normr_d, sizeof(DataType)));
     CHECK_CUDA(cudaMalloc(&pAp_d, sizeof(DataType)));
     CHECK_CUDA(cudaMalloc(&rtz_d, sizeof(DataType)));
@@ -103,9 +111,13 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
 
     // Free device memory
     FreeHaloGPU(&p_d);
+    FreeHaloCPU(&p_d);
     FreeHaloGPU(&z_d);
+    FreeHaloCPU(&z_d);
     FreeHaloGPU(&Ap_d);
+    FreeHaloCPU(&Ap_d);
     FreeHaloGPU(&r_d);
+    FreeHaloCPU(&r_d);
     CHECK_CUDA(cudaFree(normr_d));
     CHECK_CUDA(cudaFree(pAp_d));
     CHECK_CUDA(cudaFree(rtz_d));
