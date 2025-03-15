@@ -3,6 +3,7 @@
 #include "UtilLib/hpcg_multi_GPU_utils.cuh"
 #include "HPCG_versions/striped_multi_GPU.cuh"
 #include "HPCG_versions/blocking_mpi_halo_exchange.cuh"
+#include "HPCG_versions/non_blocking_mpi_halo_exchange.cuh"
 
 #include <mpi.h>
 #include <cuda_runtime.h>
@@ -16,9 +17,9 @@ using DataType = double;
 #define NPY 3
 #define NPZ 3
 //each process gets assigned problem size of NX x NY x NZ
-#define NX 6
-#define NY 6
-#define NZ 6
+#define NX 8
+#define NY 8
+#define NZ 8
 
 #define MPIDataType MPI_DOUBLE
 
@@ -378,8 +379,8 @@ void test_Dot(striped_multi_GPU_Implementation<DataType>& implementation_multi_G
     bool all_passed = true;
 
     //make sure that we work on clean data
-    SetHaloGlobalIndexGPU(halo_x_local_d, problem);
-    SetHaloGlobalIndexGPU(halo_y_local_d, problem);
+    SetHaloQuotientGlobalIndexGPU(halo_x_local_d, problem);
+    SetHaloQuotientGlobalIndexGPU(halo_y_local_d, problem);
     DataType *result_multi_GPU_d;
     CHECK_CUDA(cudaMalloc(&result_multi_GPU_d, sizeof(DataType)));
     CHECK_CUDA(cudaMemset(result_multi_GPU_d, 0, sizeof(DataType)));
@@ -406,7 +407,7 @@ void test_Dot(striped_multi_GPU_Implementation<DataType>& implementation_multi_G
         //create p_global
         DataType *x_global_h = (DataType*) malloc(NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType));
         for(int i=0; i<NPX*NX*NPY*NY*NPZ*NZ; i++){
-            x_global_h[i] = i;
+            x_global_h[i] = 1.0/(i+1.0);
         }
         DataType *x_global_d;
         CHECK_CUDA(cudaMalloc(&x_global_d, NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType)));
@@ -414,7 +415,7 @@ void test_Dot(striped_multi_GPU_Implementation<DataType>& implementation_multi_G
 
         DataType *y_global_h = (DataType*) malloc(NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType));
         for(int i=0; i<NPX*NX*NPY*NY*NPZ*NZ; i++){
-            y_global_h[i] = i;
+            y_global_h[i] = 1.0/(i+1.0);
         }
         DataType *y_global_d;
         CHECK_CUDA(cudaMalloc(&y_global_d, NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType)));
@@ -440,7 +441,7 @@ void test_Dot(striped_multi_GPU_Implementation<DataType>& implementation_multi_G
             if(i!=0){
                 MPI_Recv(&result_multi_GPU_h, 1, MPIDataType, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             }
-            if(result_multi_GPU_h != result_single_GPU_h){
+            if(std::abs(result_multi_GPU_h - result_single_GPU_h) > 1e-10){
                 if(count == 0){
                     printf("Error: Dot result_multi_GPU_h != result_single_GPU_h for rank=%d.\t result_single_GPU_h=%f,\t result_multi_GPU_h=%f\n", i, result_single_GPU_h, result_multi_GPU_h);
                 }
@@ -455,6 +456,7 @@ void test_Dot(striped_multi_GPU_Implementation<DataType>& implementation_multi_G
         }else{
             printf("!!!!!Dot Result is NOT correct!!!!!\n");
             printf("%d ranks have wrong values\n", count);
+            printf("Difference: %20ef\n", result_single_GPU_h - result_multi_GPU_h);
         }
 
         free(x_global_h);
@@ -770,31 +772,65 @@ int main(int argc, char *argv[]){
     SetHaloGlobalIndexGPU(&halo_b_d, &problem);
 
     // create an instance of the version to run the functions on
-    blocking_mpi_Implementation<DataType> implementation_multi_GPU;
+    blocking_mpi_Implementation<DataType> implementation_multi_GPU_blocking_mpi;
+    non_blocking_mpi_Implementation<DataType> implementation_multi_GPU_non_blocking_mpi;
 
     //test matrix distribution
     test_matrix_distribution(num_stripes_local, num_stripes_global, num_rows_local, num_rows_global, striped_A_local_h, striped_A_global_h, &problem);
 
-    //test SPMV
-    test_SPMV(implementation_multi_GPU, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
+    // test SPMV
+    test_SPMV(implementation_multi_GPU_non_blocking_mpi, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
     
-    //test SymGS
-    test_SymGS(implementation_multi_GPU, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
+    // test SymGS
+    test_SymGS(implementation_multi_GPU_non_blocking_mpi, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
 
     //test WAXPBY
-    test_WAXPBY(implementation_multi_GPU, A_global_striped, &halo_w_d, &halo_x_d, &halo_y_d, &problem);
+    test_WAXPBY(implementation_multi_GPU_non_blocking_mpi, A_global_striped, &halo_w_d, &halo_x_d, &halo_y_d, &problem);
 
     //test Dot
-    test_Dot(implementation_multi_GPU, A_global_striped, &halo_x_d, &halo_y_d, &problem);
+    test_Dot(implementation_multi_GPU_non_blocking_mpi, A_global_striped, &halo_x_d, &halo_y_d, &problem);
 
     //test CG
-    test_CG(implementation_multi_GPU, A_local_striped, A_global_striped, &halo_b_d, &halo_x_d, &problem, j_min_i_d);
+    test_CG(implementation_multi_GPU_non_blocking_mpi, A_local_striped, A_global_striped, &halo_b_d, &halo_x_d, &problem, j_min_i_d);
+    
+
+    //uncomment to compare ExcangeHalo implementations
+    /*
+    int iters = 10;
+    double time_halo_exchange_blocking = 0;
+    for(int i = 0; i < iters; i++){
+        MPI_Barrier(MPI_COMM_WORLD);
+        double start = MPI_Wtime();
+        implementation_multi_GPU_blocking_mpi.ExchangeHalo(&halo_p_d, &problem);
+        MPI_Barrier(MPI_COMM_WORLD);
+        double end = MPI_Wtime();
+        time_halo_exchange_blocking += (end - start);
+    }
+    time_halo_exchange_blocking /= iters;
+    
+    double time_halo_exchange_non_blocking = 0;
+    for(int i = 0; i < iters; i++){
+        MPI_Barrier(MPI_COMM_WORLD);
+        double start = MPI_Wtime();
+        implementation_multi_GPU_non_blocking_mpi.ExchangeHalo(&halo_p_d, &problem);
+        MPI_Barrier(MPI_COMM_WORLD);
+        double end = MPI_Wtime();
+        time_halo_exchange_non_blocking += (end - start);
+    }
+    time_halo_exchange_non_blocking /= iters;
+    
+    if(rank == 13) {
+        printf("Time for halo exchange blocking: %f\n", time_halo_exchange_blocking);
+        printf("Time for halo exchange non-blocking: %f\n", time_halo_exchange_non_blocking);
+        printf("Speedup: %f\n", time_halo_exchange_blocking/time_halo_exchange_non_blocking);
+    }
+    */
 
     // free the memory
-    FreeHaloGPU(&halo_Ap_d);
-    FreeHaloCPU(&halo_Ap_d);
     FreeHaloGPU(&halo_p_d);
     FreeHaloCPU(&halo_p_d);
+    FreeHaloGPU(&halo_Ap_d);
+    FreeHaloCPU(&halo_Ap_d);
     FreeHaloGPU(&halo_w_d);
     FreeHaloCPU(&halo_w_d);
     FreeHaloGPU(&halo_x_d);

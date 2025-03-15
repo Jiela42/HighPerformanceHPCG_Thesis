@@ -6,6 +6,7 @@ project(HPCGLib LANGUAGES CXX CUDA)
 add_library(HPCGLib)
 
 find_package(CUDAToolkit REQUIRED)
+find_package(MPI REQUIRED)
 # Include CUDA directories
 include_directories(${CUDAToolkit_INCLUDE_DIRS})
 
@@ -51,6 +52,7 @@ target_sources(HPCGLib PRIVATE
     multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeWAXPBY.cu
 
     multi_GPU_halo_exchange/blocking_mpi_halo_exchange.cu
+    multi_GPU_halo_exchange/non_blocking_mpi_halo_exchange.cu
 
     striped_preprocessed/striped_preprocessed_computeSymGS.cu
 
@@ -72,4 +74,5 @@ target_link_libraries(
     CUDA::cusparse
     CUDA::cublas
     CUDA::cudart
+    MPI::MPI_CXX
 )

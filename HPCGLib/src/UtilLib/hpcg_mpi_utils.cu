@@ -105,6 +105,22 @@ void InitHaloMemCPU(Halo *halo, int nx, int ny, int nz){
     halo->back_south_recv_buff_h = (DataType*) malloc(nx * sizeof(DataType));
     halo->back_west_send_buff_h = (DataType*) malloc(ny * sizeof(DataType));
     halo->back_west_recv_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    halo->front_ne_send_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->front_ne_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->front_se_send_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->front_se_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->front_sw_send_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->front_sw_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->front_nw_send_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->front_nw_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->back_ne_send_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->back_ne_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->back_se_send_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->back_se_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->back_sw_send_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->back_sw_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->back_nw_send_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->back_nw_recv_buff_h = (DataType*) malloc(sizeof(DataType));
 }
 
 void SetHaloZeroGPU(Halo *halo){
@@ -118,7 +134,9 @@ void InjectDataToHalo(Halo *halo, DataType *data){
     inject_data_to_halo_kernel<<<num_blocks, num_threads>>>(halo->x_d, data, halo->nx, halo->ny, halo->nz, halo->dimx, halo->dimy);
 }
 
-//correctness verified
+/*
+* Initialize the halo with global index
+*/
 void SetHaloGlobalIndexGPU(Halo *halo, Problem *problem){
     DataType *x_h = (DataType*) malloc(halo->dimx * halo->dimy * halo->dimz * sizeof(DataType));
     for(int i=0; i<halo->dimx * halo->dimy * halo->dimz; i++){
@@ -130,6 +148,32 @@ void SetHaloGlobalIndexGPU(Halo *halo, Problem *problem){
         for(int j = 0; j<halo->ny; j++){
             for(int l = 0; l<halo->nx; l++){
                 *write_addr = gi;
+                gi++;
+                write_addr++;
+            }
+            write_addr += 2;
+            gi = gi - halo->nx + problem->gnx;
+        }
+        write_addr += 2 * halo->dimx;
+        gi = problem->gi0 + (i + 1) * problem->gnx * problem->gny;
+    }
+    CHECK_CUDA(cudaMemcpy(halo->x_d, x_h, halo->dimx * halo->dimy * halo->dimz * sizeof(DataType), cudaMemcpyHostToDevice));
+}
+
+/*
+* Initialize the halo with 1.0/(global index + 1.0)
+*/
+void SetHaloQuotientGlobalIndexGPU(Halo *halo, Problem *problem){
+    DataType *x_h = (DataType*) malloc(halo->dimx * halo->dimy * halo->dimz * sizeof(DataType));
+    for(int i=0; i<halo->dimx * halo->dimy * halo->dimz; i++){
+        x_h[i] = 0;
+    }
+    DataType *write_addr = x_h+ halo->dimx * halo->dimy + halo->dimx + 1;
+    int gi = problem->gi0;
+    for(int i = 0; i<halo->nz; i++){
+        for(int j = 0; j<halo->ny; j++){
+            for(int l = 0; l<halo->nx; l++){
+                *write_addr = 1.0/(gi+1.0);
                 gi++;
                 write_addr++;
             }
@@ -183,6 +227,22 @@ void FreeHaloCPU(Halo *halo){
     free(halo->back_south_recv_buff_h);
     free(halo->back_west_send_buff_h);
     free(halo->back_west_recv_buff_h);
+    free(halo->front_ne_send_buff_h);
+    free(halo->front_ne_recv_buff_h);
+    free(halo->front_se_send_buff_h);
+    free(halo->front_se_recv_buff_h);
+    free(halo->front_sw_send_buff_h);
+    free(halo->front_sw_recv_buff_h);
+    free(halo->front_nw_send_buff_h);
+    free(halo->front_nw_recv_buff_h);
+    free(halo->back_ne_send_buff_h);
+    free(halo->back_ne_recv_buff_h);
+    free(halo->back_se_send_buff_h);
+    free(halo->back_se_recv_buff_h);
+    free(halo->back_sw_send_buff_h);
+    free(halo->back_sw_recv_buff_h);
+    free(halo->back_nw_send_buff_h);
+    free(halo->back_nw_recv_buff_h);
 }
 
 void InitGPU(Problem *problem){

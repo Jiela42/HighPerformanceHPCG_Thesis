@@ -60,13 +60,21 @@ __global__ void striped_box_coloring_half_SymGS_kernel(
     int num_color_faces = nz / bz;
 
     // How is the vector colored
-    int color_offs_x = color % bx; //gives x-xcoordinate of first appearance of color
-    int color_offs_y = (color - color_offs_x) % (bx * by) / bx; //gives y-coordinate of first appearance of color
-    int color_offs_z = (color - color_offs_x - bx * color_offs_y) / (bx * by); //gives z-coordinate of first appearance of color
+    int color_offs_x_global = color % bx; //gives x-xcoordinate of first appearance of color
+    int color_offs_y_global = (color - color_offs_x_global) % (bx * by) / bx; //gives y-coordinate of first appearance of color
+    int color_offs_z_global = (color - color_offs_x_global - bx * color_offs_y_global) / (bx * by); //gives z-coordinate of first appearance of color
 
-    num_color_cols = (color_offs_x < nx % bx) ? (num_color_cols + 1) : num_color_cols;
-    num_color_rows = (color_offs_y < ny % by) ? (num_color_rows + 1) : num_color_rows;
-    num_color_faces = (color_offs_z < nz % bz) ? (num_color_faces + 1) : num_color_faces;
+    //TODO: can be improved by using modulo instead of computing the global x, y, z first
+    global_int_t gx0 = px * nx;
+    global_int_t gy0 = py * ny;
+    global_int_t gz0 = pz * nz;
+    int color_offs_x_local = (bx - gx0 % bx + color_offs_x_global) % bx;
+    int color_offs_y_local = (by - gy0 % by + color_offs_y_global) % by;
+    int color_offs_z_local = (bz - gz0 % bz + color_offs_z_global) % bz;
+
+    num_color_cols = (color_offs_x_local < nx % bx) ? (num_color_cols + 1) : num_color_cols;
+    num_color_rows = (color_offs_y_local < ny % by) ? (num_color_rows + 1) : num_color_rows;
+    num_color_faces = (color_offs_z_local < nz % bz) ? (num_color_faces + 1) : num_color_faces;
 
     int num_nodes_with_color = num_color_cols * num_color_rows * num_color_faces;
 
@@ -78,9 +86,9 @@ __global__ void striped_box_coloring_half_SymGS_kernel(
         int iz = i / (num_color_cols * num_color_rows);
         
         // adjust the counter to the correct position when all nodes are considered
-        ix = ix * bx + color_offs_x;
-        iy = iy * by + color_offs_y;
-        iz = iz * bz + color_offs_z;
+        ix = ix * bx + color_offs_x_local;
+        iy = iy * by + color_offs_y_local;
+        iz = iz * bz + color_offs_z_local;
 
         //compute the local index of the node and convert to global index
         local_int_t li = ix + iy * nx + iz * nx * ny;
@@ -123,9 +131,9 @@ void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_compute
     int nx = problem->nx;
     int ny = problem->ny;
     int nz = problem->nz;
-    assert(nx % 3 == 0);
-    assert(ny % 3 == 0);
-    assert(nz % 3 == 0);
+    // assert(nx % 3 == 0);
+    // assert(ny % 3 == 0);
+    // assert(nz % 3 == 0);
     global_int_t gnx = problem->gnx;
     global_int_t gny = problem->gny;
     global_int_t gnz = problem->gnz;

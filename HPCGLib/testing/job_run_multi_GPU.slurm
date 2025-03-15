@@ -5,9 +5,9 @@
 #SBATCH --output result.out
 ##SBATCH --partition=amdrtx
 #SBATCH --time 00:30:00
-#SBATCH --nodes=1
+#SBATCH --nodes=2
 #SBATCH --ntasks=27
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:v100:4
 #SBATCH --distribution=cyclic
 ##SBATCH --partition=amdv100
 

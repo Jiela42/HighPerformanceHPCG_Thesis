@@ -66,6 +66,23 @@ struct Halo_STRUCT{
     DataType *back_west_send_buff_h;
     DataType *back_west_recv_buff_h;
 
+    DataType *front_ne_send_buff_h;
+    DataType *front_ne_recv_buff_h;
+    DataType *front_se_send_buff_h;
+    DataType *front_se_recv_buff_h;
+    DataType *front_sw_send_buff_h;
+    DataType *front_sw_recv_buff_h;
+    DataType *front_nw_send_buff_h;
+    DataType *front_nw_recv_buff_h;
+    DataType *back_ne_send_buff_h;
+    DataType *back_ne_recv_buff_h;
+    DataType *back_se_send_buff_h;
+    DataType *back_se_recv_buff_h;
+    DataType *back_sw_send_buff_h;
+    DataType *back_sw_recv_buff_h;
+    DataType *back_nw_send_buff_h;
+    DataType *back_nw_recv_buff_h;
+
 };
 typedef struct Halo_STRUCT Halo;
 
@@ -105,6 +122,7 @@ void FreeHaloCPU(Halo *halo);
 void InjectDataToHalo(Halo *halo, DataType *data);
 void SetHaloZeroGPU(Halo *halo);
 void SetHaloGlobalIndexGPU(Halo *halo, Problem *problem);
+void SetHaloQuotientGlobalIndexGPU(Halo *halo, Problem *problem);
 void FreeHaloGPU(Halo *halo);
 void InitGPU(Problem *problem);
 void SendResult(int rank_recv, Halo *x_d, Problem *problem);
