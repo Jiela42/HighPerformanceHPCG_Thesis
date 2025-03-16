@@ -123,6 +123,15 @@ void InitHaloMemCPU(Halo *halo, int nx, int ny, int nz){
     halo->back_nw_recv_buff_h = (DataType*) malloc(sizeof(DataType));
 }
 
+/*
+* Initializes the memory for halo on both CPU and GPU and initializes all data memory with zeros.
+*/
+void InitHalo(Halo *halo, int nx, int ny, int nz){
+    InitHaloMemGPU(halo, nx, ny, nz);
+    InitHaloMemCPU(halo, nx, ny, nz);
+    SetHaloZeroGPU(halo);
+}
+
 void SetHaloZeroGPU(Halo *halo){
     CHECK_CUDA(cudaMemset(halo->x_d, 0, halo->dimx * halo->dimy * halo->dimz * sizeof(DataType)));
 }
@@ -174,6 +183,39 @@ void SetHaloQuotientGlobalIndexGPU(Halo *halo, Problem *problem){
         for(int j = 0; j<halo->ny; j++){
             for(int l = 0; l<halo->nx; l++){
                 *write_addr = 1.0/(gi+1.0);
+                gi++;
+                write_addr++;
+            }
+            write_addr += 2;
+            gi = gi - halo->nx + problem->gnx;
+        }
+        write_addr += 2 * halo->dimx;
+        gi = problem->gi0 + (i + 1) * problem->gnx * problem->gny;
+    }
+    CHECK_CUDA(cudaMemcpy(halo->x_d, x_h, halo->dimx * halo->dimy * halo->dimz * sizeof(DataType), cudaMemcpyHostToDevice));
+}
+
+/*
+* Initialize the halo with random numbers between min and max
+* Seed = input seed + rank for each process
+*/
+void SetHaloRandomGPU(Halo *halo, Problem *problem, int min, int max, int seed){
+    DataType *x_h = (DataType*) malloc(halo->dimx * halo->dimy * halo->dimz * sizeof(DataType));
+    for(int i=0; i<halo->dimx * halo->dimy * halo->dimz; i++){
+        x_h[i] = 0;
+    }
+    srand(seed + problem->rank);
+    DataType *write_addr = x_h+ halo->dimx * halo->dimy + halo->dimx + 1;
+    int gi = problem->gi0;
+    for(int i = 0; i<halo->nz; i++){
+        for(int j = 0; j<halo->ny; j++){
+            for(int l = 0; l<halo->nx; l++){
+                int rand_num = rand();
+                if(min == 0 && max == 1.0) {
+                    *write_addr = (DataType) rand_num / RAND_MAX;
+                }else{
+                    *write_addr = min + rand_num % (max - min);
+                }
                 gi++;
                 write_addr++;
             }

@@ -115,22 +115,29 @@ enum MPI_Tags {
     BACK_NW = 25
 };
 
+void InitGPU(Problem *problem);
+
 void GenerateProblem(int npx, int npy, int npz, local_int_t nx, local_int_t ny, local_int_t nz, int size, int rank, Problem *problem);
+
 void InitHaloMemGPU(Halo *halo, int nx, int ny, int nz);
 void InitHaloMemCPU(Halo *halo, int nx, int ny, int nz);
+void InitHalo(Halo *halo, int nx, int ny, int nz);
+void FreeHaloGPU(Halo *halo);
 void FreeHaloCPU(Halo *halo);
+
 void InjectDataToHalo(Halo *halo, DataType *data);
 void SetHaloZeroGPU(Halo *halo);
 void SetHaloGlobalIndexGPU(Halo *halo, Problem *problem);
 void SetHaloQuotientGlobalIndexGPU(Halo *halo, Problem *problem);
-void FreeHaloGPU(Halo *halo);
-void InitGPU(Problem *problem);
+void SetHaloRandomGPU(Halo *halo, Problem *problem, int min, int max, int seed);
+void PrintHalo(Halo *x_d);
+bool IsHaloZero(Halo *x_d);
+
 void SendResult(int rank_recv, Halo *x_d, Problem *problem);
 void GatherResult(Halo *x_d, Problem *problem, DataType *result_h);
-void PrintHalo(Halo *x_d);
+
 void GenerateStripedPartialMatrix(Problem *problem, DataType *A);
 bool VerifyPartialMatrix(DataType *striped_A_local_h, DataType *striped_A_global_h, int num_stripes, Problem *problem);
-bool IsHaloZero(Halo *x_d);
 
 void extract_horizontal_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Z, int dimx, int dimy, int dimz);
 void extract_vertical_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Y, int length_Z, int dimx, int dimy, int dimz);

@@ -24,7 +24,7 @@ public:
 
         this->dot_cooperation_number = 8;
 
-        this->doPreconditioning = false;
+        this->doPreconditioning = true;
 
         this->version_name = "Striped Warp Reduction";
         this->implementation_type = Implementation_Type::STRIPED;
@@ -36,8 +36,6 @@ public:
         this->MG_implemented = true;
         
     }
-
-    virtual
 
     void compute_CG(
         striped_Matrix<T> & A,

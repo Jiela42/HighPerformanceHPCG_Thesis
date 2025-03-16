@@ -4,9 +4,9 @@
 #SBATCH --job-name hpcgTesting
 #SBATCH --output result.out
 ##SBATCH --partition=amdrtx
-#SBATCH --time 00:30:00
-#SBATCH --nodes=2
-#SBATCH --ntasks=27
+#SBATCH --time 01:00:00
+#SBATCH --nodes=1
+#SBATCH --ntasks=4
 #SBATCH --gres=gpu:v100:4
 #SBATCH --distribution=cyclic
 ##SBATCH --partition=amdv100
