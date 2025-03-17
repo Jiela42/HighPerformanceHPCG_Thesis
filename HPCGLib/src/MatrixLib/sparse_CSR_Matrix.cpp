@@ -41,10 +41,12 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix() {
     this->xc_d = nullptr;
     this->Axf_d = nullptr;
     this->coarse_Matrix = nullptr;
+    this->Striped = nullptr;
 }
 
 template <typename T>
 sparse_CSR_Matrix<T>::~sparse_CSR_Matrix(){
+    // std::cout << "Deleting sparse_CSR_Matrix" << std::endl;
 
     if (this->row_ptr_d != nullptr) {
         // std::cout << row_ptr_d << std::endl;

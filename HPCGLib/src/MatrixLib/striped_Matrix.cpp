@@ -42,6 +42,8 @@ striped_Matrix<T>::striped_Matrix() {
     this->Axf_d = nullptr;
     this->f2c_op.clear();
 
+    this->CSR = nullptr;
+
 }
 
 template <typename T>
@@ -171,7 +173,6 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onCPU(sparse_CSR_Matrix<T>
     this->rc_d = nullptr;
     this->xc_d = nullptr;
     this->Axf_d = nullptr;
-    
 
     // first we make our mapping for the j_min_i
     // each point has num_stripe neighbours and each is associated with a coordinate relative to the point
@@ -227,8 +228,7 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onCPU(sparse_CSR_Matrix<T>
         this->f2c_op = A.get_f2c_op();
     } else {
         this->f2c_op.clear();
-    }
-    
+    }    
 }
 
 template <typename T>
@@ -605,6 +605,8 @@ T striped_Matrix<T>::get_element(int i, int j) const{
 
 template <typename T>
 void striped_Matrix<T>::set_num_rows(int num_rows){
+    // std::cout << "random debug prints here:" << std::endl;
+    // std::cout << "this->csr: " << this->CSR << std::endl;
     this->num_rows = num_rows;
 }
 

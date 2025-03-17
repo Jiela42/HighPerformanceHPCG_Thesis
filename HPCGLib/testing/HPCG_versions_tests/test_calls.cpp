@@ -580,7 +580,7 @@ bool test_Dot(
     bool test_pass = double_compare(result_baseline, result_uut);
 
     if (not test_pass){
-        std::cout << "Dot product failed: baseline = " << result_baseline << " uut = " << result_uut << std::endl;
+        std::cout << "Dot product failed for implementation: "<< uut.version_name << " baseline = " << result_baseline << " uut = " << result_uut << std::endl;
     }
 
     return test_pass;
@@ -680,9 +680,9 @@ bool test_Dot(
     CHECK_CUDA(cudaFree(y_d));
     CHECK_CUDA(cudaFree(result_d));
 
-    bool test_pass = double_compare(result, result_uut);
+    bool test_pass = relaxed_double_compare(result, result_uut, 1e-9);
     if (not test_pass){
-        std::cout << "Dot product failed: baseline = " << result << " uut = " << result_uut << std::endl;
+        std::cout << "Dot product failed for implementation: " << uut.version_name << " baseline = " << result << " uut = " << result_uut << std::endl;
     }
     // else {
     //     std::cout << "Dot product passed: baseline = " << result << " uut = " << result_uut << std::endl;

@@ -36,6 +36,8 @@ void run_no_store_striped_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz,
 void run_striped_coloringPrecomputed_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path, striped_coloringPrecomputed_Implementation<double>& implementation);
 
 void run_striped_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path, striped_box_coloring_Implementation<double>& implementation);
+void run_striped_box_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path, striped_box_coloring_Implementation<double>& implementation);
+void run_striped_box_coloring_3d27p_CG_benchmark(int nx, int ny, int nz, std::string folder_path, striped_box_coloring_Implementation<double>& implementation);
 
 // this function allows us to run the whole abstract benchmark
 // we have method overloading to support different matrix types
@@ -69,6 +71,14 @@ void bench_CG(
     striped_Matrix<double> & A,
     double * x_d, double * y_d
     );
+
+void bench_CG(
+    HPCG_functions<double>& implementation,
+    CudaTimer& timer,
+    sparse_CSR_Matrix<double> & A,
+    double * x_d, double * y_d
+    );
+
 
 void bench_MG(
     HPCG_functions<double>& implementation,

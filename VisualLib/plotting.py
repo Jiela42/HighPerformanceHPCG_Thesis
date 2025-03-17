@@ -122,7 +122,11 @@ versions_to_plot = [
     "Striped coloring (COR Format already stored on the GPU)",
     
     "Striped Box coloring (coloringBox 3x3x3) (coop_num 4)",
+    "Striped Box coloring (changed Norm) (coloringBox 3x3x3) (coop_num 4)",
+    "Striped Box coloring (maybe final norm)",
+
     "Striped Box coloring",
+    # "Striped Box coloring (including conversion to Striped)",
 
 
     # "Striped Box coloring (coloringBox: 4x4x4) (coop_num: 4)",
@@ -138,14 +142,20 @@ versions_to_plot = [
 
 ]
 plot_percentage_baseline = False
-plot_speedup_vs_baseline = False
+plot_speedup_vs_baseline = True
 plot_memory_roofline = True
 
 baseline_implementations = [
     # "CSR-Implementation",
     "BaseTorch",
     # "BaseCuPy",
-    # "AMGX",
+    "AMGX",
+    # "Striped Box coloring",
+    # "Striped Box coloring (coloringBox 3x3x3) (coop_num 4)",
+    
+    "Striped Box coloring (changed Norm) (coloringBox 3x3x3) (coop_num 4)",
+
+    # "Striped Box coloring (changed Norm) (coloringBox 3x3x3) (coop_num 4)",
     # "AMGX (converging) (non deterministic)",
     ]
 
@@ -244,6 +254,7 @@ def get_theoretical_bytes_read(nx, ny, nz, method):
 
         # take into account the two vectors
         num_doubles += 2 * nx * ny * nz
+        # num_doubles += (27*2 + 1) * nx * ny * nz
 
         # double both because we have two loops
         num_doubles *= 2
@@ -836,7 +847,7 @@ print(y_axis_to_plot, flush=True)
 #######################
 # we want to print a specific piece of data
 # filter_data = full_data[
-#     (full_data['Method'] == "SPMV") &
+#     (full_data['Method'] == "CG") &
 #     (full_data['Version'] == "Striped Warp Reduction") &
 #     (full_data['Matrix Size'] == "128x128x128")
 #     ]
@@ -845,6 +856,30 @@ print(y_axis_to_plot, flush=True)
 
 # filtered_data = full_data[ full_data['Version'] == "AMGX"]
 # print(filtered_data, flush=True)
+
+# We for every size we want to print the median of the including convergion of the version without convergion
+
+for s in sizes_to_plot:
+    wo_conversion = "Striped Box coloring"
+    with_conversion = "Striped Box coloring (including conversion to Striped)"
+
+    filter_data_wo = full_data[
+        (full_data['Method'] == "CG") &
+        (full_data['Version'] == wo_conversion) &
+        (full_data['Matrix Size'] == s)
+        ]
+    filter_data_with = full_data[
+        (full_data['Method'] == "CG") &
+        (full_data['Version'] == with_conversion) &
+        (full_data['Matrix Size'] == s)
+        ]
+    
+    median_wo = filter_data_wo['Time (ms)'].median()
+    median_with = filter_data_with['Time (ms)'].median()
+
+    print(f"Median Time for CG of size {s}, without conversion {median_wo}, with conversion {median_with}, conversion takes {median_with - median_wo} ms that is {(median_with-median_wo)/median_with * 100}% of the execution", flush=True)
+
+        
 
 #######################
 
