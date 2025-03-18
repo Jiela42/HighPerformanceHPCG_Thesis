@@ -53,6 +53,7 @@ target_sources(HPCGLib PRIVATE
 
     multi_GPU_halo_exchange/blocking_mpi_halo_exchange.cu
     multi_GPU_halo_exchange/non_blocking_mpi_halo_exchange.cu
+    multi_GPU_halo_exchange/nccl_halo_exchange.cu
 
     striped_preprocessed/striped_preprocessed_computeSymGS.cu
 

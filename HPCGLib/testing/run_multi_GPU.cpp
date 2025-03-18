@@ -9,20 +9,33 @@
 #include <cuda_runtime.h>
 #include <time.h>
 
-//number of processes in x, y, z
-#define NPX 2
-#define NPY 2
-#define NPZ 1
-//each process gets assigned problem size of NX x NY x NZ
-#define NX 128
-#define NY 128
-#define NZ 128
-
 using DataType = double;
 
 #define MPIDataType MPI_DOUBLE
 
 int main(int argc, char *argv[]){
+
+    // Declare variables for problem dimensions
+    int NPX, NPY, NPZ, NX, NY, NZ;
+    bool provided = false;
+    // Check if user provided dimensions via command-line arguments
+    if(argc >= 7) {
+         NPX = std::atoi(argv[1]);
+         NPY = std::atoi(argv[2]);
+         NPZ = std::atoi(argv[3]);
+         NX  = std::atoi(argv[4]);
+         NY  = std::atoi(argv[5]);
+         NZ  = std::atoi(argv[6]);
+        provided = true;
+    } else {
+         // Fallback default values
+         NPX = 3;
+         NPY = 3;
+         NPZ = 3;
+         NX  = 8;
+         NY  = 8;
+         NZ  = 8;
+    }
 
     MPI_Init( &argc , &argv );
     int size, rank;
@@ -30,6 +43,12 @@ int main(int argc, char *argv[]){
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     if(rank == 0) printf("Initialized.\n");
+    if(rank == 0) {
+        if(provided){
+            ("Using NPX=%d, NPY=%d, NPZ=%d, NX=%d, NY=%d, NZ=%d\n", NPX, NPY, NPZ, NX, NY, NZ)
+        } else {
+            printf("Using default values of NPX=%d, NPY=%d, NPZ=%d, NX=%d, NY=%d, NZ=%d\n", NPX, NPY, NPZ, NX, NY, NZ);
+        }
     
     //initialize problem struct
     Problem problem; //holds geometric data about the problem

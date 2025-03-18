@@ -2,14 +2,13 @@
 
 ##Resources
 #SBATCH --job-name hpcgTesting
+#SBATCH --account=g34
 #SBATCH --output result.out
-##SBATCH --partition=amdrtx
 #SBATCH --time 01:00:00
 #SBATCH --nodes=1
-#SBATCH --ntasks=4
-#SBATCH --gres=gpu:v100:4
-#SBATCH --distribution=cyclic
-##SBATCH --partition=amdv100
+#SBATCH --ntasks-per-node=4
+#SBATCH --gpus-per-task=1
+#SBATCH --distribution=block
 
 ##Modules
 module purge
@@ -23,5 +22,11 @@ module load cmake/3.21.3
 ##cd /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/testing
 cd /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/build/testing
 
-##Run
-srun /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/build/testing/run_multi_GPU
+# Run with npx npy npz nx ny nz
+srun /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/build/testing/run_multi_GPU 3 3 3 8 8 8
+
+# Run with npx npy npz nx ny nz
+srun /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/build/testing/run_multi_GPU 3 3 3 16 16 16
+
+# Run with npx npy npz nx ny nz
+srun /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/build/testing/run_multi_GPU 3 3 3 32 32 32
