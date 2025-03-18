@@ -131,29 +131,26 @@ def analyze_box_coloring(nx, ny, nz, bx, by, bz):
                 colors = [c for x, y, z, c in xyzc if (x, y, z) == node]
                 assert len(colors) == 1, f"Node {node} has multiple colors: {colors}"
 
-    
-    vector_matrix = [i for i in range(nx*ny*nz)]
+    # uncomment the following if you wanna see where in the vector color zero is
+    # vector_matrix = [i for i in range(nx*ny*nz)]
 
-    for i in range(nx*ny*nz):
-        # get the color of the node
-        ix = i % nx
-        iy = (i // nx) % ny
-        iz = i // (nx * ny)
+    # for i in range(nx*ny*nz):
+    #     # get the color of the node
+    #     ix = i % nx
+    #     iy = (i // nx) % ny
+    #     iz = i // (nx * ny)
 
-        row = ix + iy * nx + iz * nx * ny
+    #     row = ix + iy * nx + iz * nx * ny
 
-        assert row == i, f"Row {row} is not equal to i {i}"
-        node_color = [c for x, y, z, c in xyzc if (x, y, z) == (i % nx, (i // nx) % ny, i // (nx * ny))][0]
-        if node_color == 0:
-            vector_matrix[i] = -42
+    #     assert row == i, f"Row {row} is not equal to i {i}"
+    #     node_color = [c for x, y, z, c in xyzc if (x, y, z) == (i % nx, (i // nx) % ny, i // (nx * ny))][0]
+    #     if node_color == 0:
+    #         vector_matrix[i] = -42
 
-    for i in range(ny * nz):
-        row = vector_matrix[i * nx: (i+1) * nx]
-        formatted_row = " ".join(f"{num:4}" for num in row)  # Adjust the width as needed
-        print(formatted_row, flush=True)
-
-        
-
+    # for i in range(ny * nz):
+    #     row = vector_matrix[i * nx: (i+1) * nx]
+    #     formatted_row = " ".join(f"{num:4}" for num in row)  # Adjust the width as needed
+    #     print(formatted_row, flush=True)
 
 def analyze_general_box_coloring(num_rows, j_min_i, colors):
 
@@ -318,11 +315,6 @@ def nils_offset_analysis(nx, ny, nz, bx, by, bz):
         assert len(row) >= 1, f"Row {i} is not colored: {row}"
     
 
-    
-
-
-
-
     # visualize the nils color
     x = []
     y = []
@@ -337,6 +329,8 @@ def nils_offset_analysis(nx, ny, nz, bx, by, bz):
     
     dims = f"{nx}x{ny}x{nz}" + "_nils_offset_analysis"
     # create_animation(x, y, z, colors, dims)
+
+    return row_color_xyz
 
 def general_striped_box_coloring_for_3D27pt(nx):
 
@@ -384,6 +378,21 @@ def general_striped_box_coloring_for_3D27pt(nx):
     create_animation(x, y, z, resorted_colors, dims)
     analyze_general_box_coloring(nx*nx*nx, j_min_i, colors)
     
+        
+def compare_colorings(nx, ny, nz, bx, by, bz):
+
+    original_xyz_colors = generate_box_coloring(nx, ny, nz, bx, by, bz)
+    original_xyz_colors = list(zip(*original_xyz_colors))
+
+    nils_colors = nils_offset_analysis(nx, ny, nz, bx, by, bz)
+
+    for x, y, z, c in original_xyz_colors:
+        # find find nils' equivalent
+        for row, color, ix, iy, iz in nils_colors:
+            if x == ix and y == iy and z == iz:
+                assert c == color, f"Coloring mismatch: {c} != {color}"
+                break
+
 
 
 def main():
@@ -394,14 +403,14 @@ def main():
 
     # generate_box_coloring(4, 4, 4, bx, by, bz)
 
-    # analyze_box_coloring(3, 3, 3, bx, by, bz)
-    # analyze_box_coloring(4, 4, 4, bx, by, bz)
-    # analyze_box_coloring(4,5,6, bx, by, bz)
-    # analyze_box_coloring(6,5,4, bx, by, bz)
-    # analyze_box_coloring(5,4,6, bx, by, bz)
-    # analyze_box_coloring(8, 8, 8, bx, by, bz)
-    # analyze_box_coloring(12, 12, 6, bx, by, bz)
-    # analyze_box_coloring(16, 16, 16, bx, by, bz)
+    analyze_box_coloring(3, 3, 3, bx, by, bz)
+    analyze_box_coloring(4, 4, 4, bx, by, bz)
+    analyze_box_coloring(4,5,6, bx, by, bz)
+    analyze_box_coloring(6,5,4, bx, by, bz)
+    analyze_box_coloring(5,4,6, bx, by, bz)
+    analyze_box_coloring(8, 8, 8, bx, by, bz)
+    analyze_box_coloring(12, 12, 6, bx, by, bz)
+    analyze_box_coloring(16, 16, 16, bx, by, bz)
 
     # general_striped_box_coloring_for_3D27pt(4)
 
@@ -411,6 +420,11 @@ def main():
     nils_offset_analysis(9,9,9, 3, 3, 3)
     nils_offset_analysis(16, 16, 16, 3, 3, 3)
     # nils_offset_analysis(32, 32, 32, 3,3,3)
+
+    compare_colorings(4, 4, 4, bx, by, bz)
+    compare_colorings(8, 8, 8, bx, by, bz)
+    compare_colorings(16, 16, 16, bx, by, bz)
+
 
     print("All tests passed")
 

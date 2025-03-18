@@ -249,6 +249,57 @@ __global__ void print_COR_Format_kernel(
     }
 }
 
+__global__ void generate_COR_BoxColoring_kernel(
+    int nx, int ny, int nz,
+    int bx, int by, int bz,
+    int * color_pointer, int * color_sorted_rows
+){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+
+    for(int i = tid; i < nx * ny * nz; i += gridDim.x * blockDim.x){
+        
+        // figure out the coordinates of the node
+        int x = i % nx;
+        int y = (i / nx) % ny;
+        int z = i / (nx * ny);
+
+        int mod_x = x % bx;
+        int mod_y = y % by;
+        int mod_z = z % bz;
+
+        int color = mod_x + bx * mod_y + bx * by * mod_z;
+
+        // now calculate how many nodes smaller i have the same color
+        int num_color_cols_i = x / bx;
+        int num_color_rows_i = y / by;
+        int num_color_faces_i = z / bz;
+
+        int num_color_cols_total = nx / bx;
+        int num_color_rows_total = ny / by;
+        int num_color_faces_total = nz / bz;
+
+        int color_offs_x = color % bx;
+        int color_offs_y = (color - color_offs_x) % (bx * by) / bx;
+        int color_offs_z = (color - color_offs_x - bx * color_offs_y) / (bx * by);
+        
+        // the following adjustment on the other hand is absolutely necessary
+        num_color_cols_total = (color_offs_x < nx % bx) ? (num_color_cols_total + 1) : num_color_cols_total;
+        num_color_rows_total = (color_offs_y < ny % by) ? (num_color_rows_total + 1) : num_color_rows_total;
+        num_color_faces_total = (color_offs_z < nz % bz) ? (num_color_faces_total + 1) : num_color_faces_total;
+
+        int num_nodes_with_color_until_i = num_color_cols_i + num_color_rows_i * num_color_cols_total + num_color_faces_i * num_color_cols_total * num_color_rows_total;
+
+        int my_row_location = color_pointer[color] + num_nodes_with_color_until_i;
+
+        color_sorted_rows[my_row_location] = i;
+
+        // if (color == 0){
+        //    printf("i %d, x %d, y %d, z %d, color %d, num_color_cols_total %d, num_color_rows_total %d, num_color_faces_total %d,  my_row_location %d\n", i, x, y, z, color, num_color_cols_total, num_color_rows_total, num_color_faces_total, my_row_location);
+        // }
+
+    }
+}
+
 std::vector<int> color_for_forward_pass(striped_Matrix <double>& A){
 
     int num_rows = A.get_num_rows();
@@ -389,4 +440,54 @@ void print_COR_Format(int max_colors, int num_rows, int* color_pointer, int* col
     printf("Num rows: %d\n", num_rows);
 
     print_COR_Format_kernel<<<1,1>>>(max_colors, num_rows, color_pointer, color_sorted_rows);
+}
+
+void get_color_row_mapping_for_boxColoring(
+    int nx,
+    int ny,
+    int nz,
+    int *color_pointer_d,
+    int * color_sorted_rows_d
+){
+    int num_colors = 27;
+    int bx = 3;
+    int by = 3;
+    int bz = 3;
+    
+    std::vector<int> color_ptr_h(num_colors+1, 0);
+    
+    
+    // because we have only 27 colors, we can do the color-setting sequentially
+    for(int i = 1; i <= num_colors; i++){
+
+        int color = i-1;
+
+        int num_color_cols = nx / bx;
+        int num_color_rows = ny / by;
+        int num_color_faces = nz / bz;
+        
+        int color_offs_x = color % bx;
+        int color_offs_y = (color - color_offs_x) % (bx * by) / bx;
+        int color_offs_z = (color - color_offs_x - bx * color_offs_y) / (bx * by);
+
+        num_color_cols = (color_offs_x < nx % bx) ? (num_color_cols + 1) : num_color_cols;
+        num_color_rows = (color_offs_y < ny % by) ? (num_color_rows + 1) : num_color_rows;
+        num_color_faces = (color_offs_z < nz % bz) ? (num_color_faces + 1) : num_color_faces;
+
+        int num_nodes_with_color = num_color_cols * num_color_rows * num_color_faces;
+
+        color_ptr_h[i] = color_ptr_h[i-1] + num_nodes_with_color;
+    }
+    
+    // copy the color pointer to the device
+    CHECK_CUDA(cudaMemcpy(color_pointer_d, color_ptr_h.data(), (num_colors+1) * sizeof(int), cudaMemcpyHostToDevice));
+    
+    int num_threads = 1024;
+    int num_blocks = std::min(ceiling_division(num_colors, num_threads), MAX_NUM_BLOCKS);
+
+    generate_COR_BoxColoring_kernel<<<num_blocks, num_threads>>>(nx, ny, nz, bx, by, bz, color_pointer_d, color_sorted_rows_d);
+    cudaDeviceSynchronize();
+
+    // print_COR_Format(num_colors, nx * ny * nz, color_pointer_d, color_sorted_rows_d);
+
 }

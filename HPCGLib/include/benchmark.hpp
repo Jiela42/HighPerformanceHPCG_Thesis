@@ -39,6 +39,8 @@ void run_striped_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::stri
 void run_striped_box_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path, striped_box_coloring_Implementation<double>& implementation);
 void run_striped_box_coloring_3d27p_CG_benchmark(int nx, int ny, int nz, std::string folder_path, striped_box_coloring_Implementation<double>& implementation);
 
+void run_striped_COR_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path, striped_COR_box_coloring_Implementation<double>& implementation);
+
 // this function allows us to run the whole abstract benchmark
 // we have method overloading to support different matrix types
 

@@ -60,6 +60,8 @@ target_sources(HPCGLib PRIVATE
 
     striped_box_coloring/striped_box_coloring_computeSymGS.cu
 
+    striped_COR_box_coloring/striped_box_coloring_computeSymGS.cu
+
 )
 
 target_link_libraries(

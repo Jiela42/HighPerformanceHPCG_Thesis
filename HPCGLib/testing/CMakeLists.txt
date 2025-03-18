@@ -19,6 +19,7 @@ add_library(TestHPCGLib
     HPCG_versions_tests/stripedColoringPrecomputed_tests.cpp
     HPCG_versions_tests/stripedBoxColoring_tests.cpp
     HPCG_versions_tests/stripedNoStore_tests.cpp
+    HPCG_versions_tests/stripedCORBoxColoring_tests.cpp
     
     UtilLib_tests.cpp
     MatrixLib_tests.cpp

@@ -21,6 +21,7 @@ class striped_Matrix {
         ~striped_Matrix();
         
         void generate_coloring();
+        void generate_box_coloring();
         
         void copy_Matrix_toGPU();
         void copy_Matrix_toCPU();
