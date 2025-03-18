@@ -29,11 +29,11 @@ double L2_norm_for_SymGS(
     double * y
 );
 
-double L2_norm_for_SymGS(
-    striped_Matrix<double> & A,
-    double * x,
-    double * y
-);
+// double L2_norm_for_SymGS(
+//     striped_Matrix<double> & A,
+//     double * x,
+//     double * y
+// );
 
 double relative_residual_norm_for_SymGS(
     sparse_CSR_Matrix<double> & A,

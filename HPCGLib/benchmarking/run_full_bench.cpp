@@ -100,6 +100,7 @@ int main() {
     striped_warp_reduction_Implementation<double> SWR_implementation;
     // run_striped_warp_reduction_3d27p_benchmarks(8, 8, 8, folder_path, SWR_implementation);
     // run_striped_warp_reduction_3d27p_benchmarks(16, 16, 16, folder_path, SWR_implementation);
+    // run_striped_warp_reduction_3d27p_benchmarks(24, 24, 24, folder_path, SWR_implementation);
     // run_striped_warp_reduction_3d27p_benchmarks(32, 32, 32, folder_path, SWR_implementation);
     // run_striped_warp_reduction_3d27p_benchmarks(64, 64, 64, folder_path, SWR_implementation);
     // run_striped_warp_reduction_3d27p_benchmarks(128, 64, 64, folder_path, SWR_implementation);
@@ -131,14 +132,14 @@ int main() {
     striped_coloring_Implementation<double> SC_implementation;
     // run_striped_coloring_3d27p_benchmarks(8, 8, 8, folder_path, SC_implementation);
     // run_striped_coloring_3d27p_benchmarks(16, 16, 16, folder_path, SC_implementation);
-    run_striped_coloring_3d27p_benchmarks(24, 24, 24, folder_path, SC_implementation);
-    run_striped_coloring_3d27p_benchmarks(32, 32, 32, folder_path, SC_implementation);
-    run_striped_coloring_3d27p_benchmarks(64, 64, 64, folder_path, SC_implementation);
-    run_striped_coloring_3d27p_benchmarks(128, 64, 64, folder_path, SC_implementation);
-    run_striped_coloring_3d27p_benchmarks(128, 128, 64, folder_path, SC_implementation);
-    run_striped_coloring_3d27p_benchmarks(128, 128, 128, folder_path, SC_implementation);
-    run_striped_coloring_3d27p_benchmarks(256, 128, 128, folder_path, SC_implementation);
-    run_striped_coloring_3d27p_benchmarks(256, 256, 128, folder_path, SC_implementation);
+    // run_striped_coloring_3d27p_benchmarks(24, 24, 24, folder_path, SC_implementation);
+    // run_striped_coloring_3d27p_benchmarks(32, 32, 32, folder_path, SC_implementation);
+    // run_striped_coloring_3d27p_benchmarks(64, 64, 64, folder_path, SC_implementation);
+    // run_striped_coloring_3d27p_benchmarks(128, 64, 64, folder_path, SC_implementation);
+    // run_striped_coloring_3d27p_benchmarks(128, 128, 64, folder_path, SC_implementation);
+    // run_striped_coloring_3d27p_benchmarks(128, 128, 128, folder_path, SC_implementation);
+    // run_striped_coloring_3d27p_benchmarks(256, 128, 128, folder_path, SC_implementation);
+    // run_striped_coloring_3d27p_benchmarks(256, 256, 128, folder_path, SC_implementation);
     end = std::chrono::high_resolution_clock::now();
     elapsed_seconds = end-start;
     minutes = static_cast<int>(elapsed_seconds.count()) / 60;
@@ -186,7 +187,7 @@ int main() {
     striped_box_coloring_Implementation<double> SBC_implementation;
     // run_striped_box_coloring_3d27p_benchmarks(8, 8, 8, folder_path, SBC_implementation);
     // run_striped_box_coloring_3d27p_benchmarks(16, 16, 16, folder_path, SBC_implementation);
-    // run_striped_box_coloring_3d27p_benchmarks(24, 24, 24, folder_path, SBC_implementation);
+    run_striped_box_coloring_3d27p_benchmarks(24, 24, 24, folder_path, SBC_implementation);
     // run_striped_box_coloring_3d27p_benchmarks(32, 32, 32, folder_path, SBC_implementation);
     // run_striped_box_coloring_3d27p_benchmarks(64, 64, 64, folder_path, SBC_implementation);
     // run_striped_box_coloring_3d27p_benchmarks(128, 64, 64, folder_path, SBC_implementation);
@@ -199,6 +200,24 @@ int main() {
     seconds = static_cast<int>(elapsed_seconds.count()) % 60;
     std::cout << "Striped box coloring 3d27p Benchmarks took: " << minutes << "m" << seconds << "s" << std::endl;
     
+    std::cout << "Starting COR striped box coloring 3d27p Benchmarks" << std::endl;
+    start = std::chrono::high_resolution_clock::now();
+    striped_COR_box_coloring_Implementation<double> SBC_COR_implementation;
+    // run_striped_COR_box_coloring_3d27p_benchmarks(8, 8, 8, folder_path, SBC_COR_implementation);
+    // run_striped_COR_box_coloring_3d27p_benchmarks(16, 16, 16, folder_path, SBC_COR_implementation);
+    // run_striped_COR_box_coloring_3d27p_benchmarks(24, 24, 24, folder_path, SBC_COR_implementation);
+    // run_striped_COR_box_coloring_3d27p_benchmarks(32, 32, 32, folder_path, SBC_COR_implementation);
+    // run_striped_COR_box_coloring_3d27p_benchmarks(64, 64, 64, folder_path, SBC_COR_implementation);
+    // run_striped_COR_box_coloring_3d27p_benchmarks(128, 64, 64, folder_path, SBC_COR_implementation);
+    // run_striped_COR_box_coloring_3d27p_benchmarks(128, 128, 64, folder_path, SBC_COR_implementation);
+    // run_striped_COR_box_coloring_3d27p_benchmarks(128, 128, 128, folder_path, SBC_COR_implementation);
+    // run_striped_COR_box_coloring_3d27p_benchmarks(256, 128, 128, folder_path, SBC_COR_implementation);
+    end = std::chrono::high_resolution_clock::now();
+    elapsed_seconds = end-start;
+    minutes = static_cast<int>(elapsed_seconds.count()) / 60;
+    seconds = static_cast<int>(elapsed_seconds.count()) % 60;
+    std::cout << "COR Striped box coloring 3d27p Benchmarks took: " << minutes << "m" << seconds << "s" << std::endl;
+
     // because we wanna know roughly how long it takes us to run the benchmarks
     auto total_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> duration = total_end - total_start;

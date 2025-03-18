@@ -44,14 +44,14 @@ def run_BaseTorch_3d27pt_benchmark(nx: int, ny: int, nz: int, save_folder) -> No
     # we also include checks to not run the super big matrices
     # if limit_matrix_size_for_cg and nx < max_dim_cg and ny < max_dim_cg and nz < max_dim_cg:
 
-    # if limit_matrix_size and nx < max_dim_size and ny < max_dim_size and nz < max_dim_size:
-    #     benchmark_CG_coo_torch(CGimplementation=BaseTorch.computeCG, timer=matrix_timer, A_coo=A_coo, A=A, r=y, x=x)
-    #     benchmark_MG_coo_torch(BaseTorch.computeMG, matrix_timer, A_coo, A, y, x)
-    #     benchmark_SymGS_coo_torch(BaseTorch.computeSymGS, matrix_timer, A_coo, A, y, x)
+    if limit_matrix_size and nx < max_dim_size and ny < max_dim_size and nz < max_dim_size:
+        benchmark_CG_coo_torch(CGimplementation=BaseTorch.computeCG, timer=matrix_timer, A_coo=A_coo, A=A, r=y, x=x)
+        benchmark_MG_coo_torch(BaseTorch.computeMG, matrix_timer, A_coo, A, y, x)
+        benchmark_SymGS_coo_torch(BaseTorch.computeSymGS, matrix_timer, A_coo, A, y, x)
     
-    # benchmark_SPMV_torch(BaseTorch.computeSPMV, matrix_timer, A_coo, A, x, y)
+    benchmark_SPMV_torch(BaseTorch.computeSPMV, matrix_timer, A_coo, A, x, y)
     benchmark_WAXPBY_torch(BaseTorch.computeWAXPBY, vector_timer, alpha=alpha, x=a, beta=beta, y=b, w=x)
-    # benchmark_dot_torch(BaseTorch.computeDot, vector_timer, a, b, x)
+    benchmark_dot_torch(BaseTorch.computeDot, vector_timer, a, b, x)
 
     matrix_timer.destroy_timer()
     vector_timer.destroy_timer()

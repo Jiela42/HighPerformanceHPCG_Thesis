@@ -5,10 +5,11 @@
 #include <string>
 #include <vector>
 
-class CudaTimer {
+class Timer {
 public:
-    // Constructor
-    CudaTimer(
+    // Constructors
+    Timer();
+    Timer(
         int nx,
         int ny,
         int nz,
@@ -21,27 +22,24 @@ public:
     );
 
     // Destructor
-    ~CudaTimer();
+    ~Timer();
 
     // Function to start the timer
-    void startTimer();
+    virtual void startTimer() = 0;
 
     // Function to stop the timer and record the elapsed time
-    void stopTimer(std::string method_name);
+    virtual void stopTimer(std::string method_name) = 0;
 
-    void add_additional_parameters(std::string another_parameter) {
-        additional_parameters += "_" + another_parameter;
-    }
+    void add_additional_parameters(std::string another_parameter);
 
 
-private:
+protected:
     // Function to write the timing results to a CSV file
     void writeResultsToCsv();
     void writeCSV(std::string filepath, std::string file_header, std::vector<float> times);
-    float getElapsedTime() const;
+    // virtual float getElapsedTime() const = 0;
 
-    cudaEvent_t start, stop;
-    float milliseconds;
+    // float milliseconds;
     // the filename also includes the method name ;)
     std::string base_filename;
     std::string base_fileheader;

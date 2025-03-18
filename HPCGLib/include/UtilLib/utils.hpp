@@ -16,6 +16,8 @@ const double error_tolerance = 1e-12;
 // Function to compare two doubles with a tolerance
 bool double_compare(double a, double b);
 
+bool relaxed_double_compare(double a, double b, double tolerance);
+
 // Function to compare two vectors of doubles with a tolerance
 bool vector_compare(const std::vector<double>& a, const std::vector<double>& b);
 

@@ -5,6 +5,8 @@ add_library(TimingLib)
 
 target_sources(TimingLib PRIVATE
     timer.cpp
+    cudaTimer.cpp
+    cpuTimer.cpp
 )
 
 target_link_libraries(TimingLib

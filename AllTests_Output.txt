@@ -1,0 +1,1388 @@
+-- The C compiler identification is GNU 8.5.0
+-- The CXX compiler identification is GNU 8.5.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- The CUDA compiler identification is NVIDIA 12.1.105
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /apps/ault/spack/opt/spack/linux-centos8-zen/gcc-8.4.1/cuda-12.1.1-zbdbt4aikrp6sdems6n3t5wvqxm3tza5/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Found CUDAToolkit: /apps/ault/spack/opt/spack/linux-centos8-zen/gcc-8.4.1/cuda-12.1.1-zbdbt4aikrp6sdems6n3t5wvqxm3tza5/include (found version "12.1.105") 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE  
+-- Found MPI_C: /apps/ault/spack/opt/spack/linux-centos8-zen/gcc-8.4.1/openmpi-4.1.1-epxpvnwjl2smjwuwqg67h2wrmdxw6nhj/lib/libmpi.so (found version "3.1") 
+-- Found MPI_CXX: /apps/ault/spack/opt/spack/linux-centos8-zen/gcc-8.4.1/openmpi-4.1.1-epxpvnwjl2smjwuwqg67h2wrmdxw6nhj/lib/libmpi_cxx.so (found version "3.1") 
+-- Found MPI: TRUE (found version "3.1")  
+-- Configuring done
+CMake Warning (dev) in src/HPCG_versions/CMakeLists.txt:
+  Policy CMP0104 is not set: CMAKE_CUDA_ARCHITECTURES now detected for NVCC,
+  empty CUDA_ARCHITECTURES not allowed.  Run "cmake --help-policy CMP0104"
+  for policy details.  Use the cmake_policy command to set the policy and
+  suppress this warning.
+
+  CUDA_ARCHITECTURES is empty for target "HPCGLib".
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning (dev) in src/MatrixLib/CMakeLists.txt:
+  Policy CMP0104 is not set: CMAKE_CUDA_ARCHITECTURES now detected for NVCC,
+  empty CUDA_ARCHITECTURES not allowed.  Run "cmake --help-policy CMP0104"
+  for policy details.  Use the cmake_policy command to set the policy and
+  suppress this warning.
+
+  CUDA_ARCHITECTURES is empty for target "MatrixLib".
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning (dev) in src/UtilLib/CMakeLists.txt:
+  Policy CMP0104 is not set: CMAKE_CUDA_ARCHITECTURES now detected for NVCC,
+  empty CUDA_ARCHITECTURES not allowed.  Run "cmake --help-policy CMP0104"
+  for policy details.  Use the cmake_policy command to set the policy and
+  suppress this warning.
+
+  CUDA_ARCHITECTURES is empty for target "UtilLib".
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+-- Generating done
+-- Build files have been written to: /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/build
+[  2%] Building CUDA object src/UtilLib/CMakeFiles/UtilLib.dir/utils.cu.o
+[  3%] Building CUDA object src/UtilLib/CMakeFiles/UtilLib.dir/hpcg_mpi_utils.cu.o
+[  3%] Building CXX object src/UtilLib/CMakeFiles/UtilLib.dir/utils.cpp.o
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/UtilLib/hpcg_mpi_utils.cu(504): warning #177-D: variable "data_paket" was declared but never referenced
+      local_int_t data_paket = 0;
+                  ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/UtilLib/hpcg_mpi_utils.cu(569): warning #177-D: variable "i" was declared but never referenced
+                  int i = ix + nx * iy + nx * ny * iz;
+                      ^
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/UtilLib/hpcg_mpi_utils.cu(560): warning #177-D: variable "gi0" was declared but never referenced
+      global_int_t gi0 = problem->gi0;
+                   ^
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/UtilLib/hpcg_mpi_utils.cu(562): warning #177-D: variable "num_rows" was declared but never referenced
+      local_int_t num_rows = nx * ny * nz;
+                  ^
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/UtilLib/hpcg_mpi_utils.cu(563): warning #177-D: variable "num_cols" was declared but never referenced
+      local_int_t num_cols = nx * ny * nz;
+                  ^
+
+[  4%] Linking CXX static library libUtilLib.a
+[  4%] Built target UtilLib
+[  8%] Building CXX object src/MatrixLib/CMakeFiles/MatrixLib.dir/striped_Matrix.cpp.o
+[  9%] Building CXX object src/MatrixLib/CMakeFiles/MatrixLib.dir/sparse_CSR_Matrix.cpp.o
+[ 10%] Building CXX object src/MatrixLib/CMakeFiles/MatrixLib.dir/generations.cpp.o
+[ 10%] Building CUDA object src/MatrixLib/CMakeFiles/MatrixLib.dir/generations.cu.o
+[ 10%] Building CUDA object src/MatrixLib/CMakeFiles/MatrixLib.dir/coloring.cu.o
+[ 11%] Linking CXX static library libMatrixLib.a
+[ 11%] Built target MatrixLib
+[ 13%] Building CXX object src/TimingLib/CMakeFiles/TimingLib.dir/timer.cpp.o
+[ 14%] Linking CXX static library libTimingLib.a
+[ 14%] Built target TimingLib
+[ 15%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/cusparse/cusparse_computeDot.cu.o
+[ 17%] Building CXX object src/HPCG_versions/CMakeFiles/HPCGLib.dir/cusparse/cusparse_computeSPMV.cpp.o
+[ 17%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/cusparse/cusparse_computeSymGS.cu.o
+[ 20%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_shared_mem/striped_shared_mem_computeSPMV.cu.o
+[ 20%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/naiveStriped/naiveStriped_computeSPMV.cu.o
+[ 21%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_warp_reduction/striped_warp_reduction_computeSPMV.cu.o
+[ 22%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_warp_reduction/striped_warp_reduction_computeSymGS.cu.o
+[ 25%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_warp_reduction/striped_warp_reduction_computeDot.cu.o
+[ 25%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_warp_reduction/striped_warp_reduction_computeWAXPBY.cu.o
+[ 26%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_warp_reduction/striped_warp_reduction_computeCG.cu.o
+[ 27%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_warp_reduction/striped_warp_reduction_computeMG.cu.o
+[ 28%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU/striped_box_coloring_multi_GPU_computeSymGS.cu.o
+[ 30%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU/striped_warp_reduction_multi_GPU_computeCG.cu.o
+[ 30%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU/striped_warp_reduction_multi_GPU_computeDot.cu.o
+[ 32%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU/striped_warp_reduction_multi_GPU_computeMG.cu.o
+[ 33%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU/striped_warp_reduction_multi_GPU_computeSPMV.cu.o
+[ 34%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU/striped_warp_reduction_multi_GPU_computeWAXPBY.cu.o
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/multi_GPU/striped_warp_reduction_multi_GPU_computeCG.cu(15): warning #550-D: variable "alpha" was set but never used
+      double alpha = 0.0;
+             ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/multi_GPU/striped_warp_reduction_multi_GPU_computeCG.cu(16): warning #550-D: variable "beta" was set but never used
+      double beta = 0.0;
+             ^
+
+[ 35%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_preprocessed/striped_preprocessed_computeSymGS.cu.o
+[ 36%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_coloring/striped_coloring_computeSymGS.cu.o
+[ 38%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/no_store_striped_coloring/no_store_striped_coloring_computeSymGS.cu.o
+[ 39%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_coloringPrecomputed/striped_coloringPrecomputed_computeSymGS.cu.o
+[ 40%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_box_coloring/striped_box_coloring_computeSymGS.cu.o
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_box_coloring.cuh(19): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=double]" is only partially overridden in class "striped_box_coloring_Implementation<double>"
+  class striped_box_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_box_coloring_Implementation<T> [with T=double]" at line 242 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_box_coloring/striped_box_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_coloring.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=double]" is only partially overridden in class "striped_coloring_Implementation<double>"
+  class striped_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_coloring_Implementation<T> [with T=double]" at line 180 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_coloring/striped_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/no_store_striped_coloring.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=double]" is only partially overridden in class "no_store_striped_coloring_Implementation<double>"
+  class no_store_striped_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "no_store_striped_coloring_Implementation<T> [with T=double]" at line 137 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/no_store_striped_coloring/no_store_striped_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_coloringPrecomputed.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=double]" is only partially overridden in class "striped_coloringPrecomputed_Implementation<double>"
+  class striped_coloringPrecomputed_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_coloringPrecomputed_Implementation<T> [with T=double]" at line 74 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_coloringPrecomputed/striped_coloringPrecomputed_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_box_coloring.cuh(19): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=double]" is only partially overridden in class "striped_box_coloring_Implementation<double>"
+  class striped_box_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_box_coloring_Implementation<T> [with T=double]" at line 242 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_box_coloring/striped_box_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_coloring.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=double]" is only partially overridden in class "striped_coloring_Implementation<double>"
+  class striped_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_coloring_Implementation<T> [with T=double]" at line 180 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_coloring/striped_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/no_store_striped_coloring.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=double]" is only partially overridden in class "no_store_striped_coloring_Implementation<double>"
+  class no_store_striped_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "no_store_striped_coloring_Implementation<T> [with T=double]" at line 137 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/no_store_striped_coloring/no_store_striped_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_coloringPrecomputed.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=double]" is only partially overridden in class "striped_coloringPrecomputed_Implementation<double>"
+  class striped_coloringPrecomputed_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_coloringPrecomputed_Implementation<T> [with T=double]" at line 74 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_coloringPrecomputed/striped_coloringPrecomputed_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+[ 41%] Linking CXX static library libHPCGLib.a
+[ 41%] Built target HPCGLib
+[ 44%] Building CXX object testing/CMakeFiles/run_coloring.dir/run_coloring.cpp.o
+[ 45%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/cuSparse_tests.cpp.o
+[ 48%] Building CXX object testing/CMakeFiles/run_example.dir/run_example.cpp.o
+[ 51%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/naiveStriped_tests.cpp.o
+[ 51%] Building CXX object testing/CMakeFiles/run_get_Norm.dir/run_get_Norm.cpp.o
+[ 51%] Building CXX object testing/CMakeFiles/run_multi_GPU.dir/run_multi_GPU.cpp.o
+[ 51%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedSharedMem_tests.cpp.o
+[ 51%] Building CXX object benchmarking/CMakeFiles/run_bench_test.dir/run_bench_test.cpp.o
+[ 52%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedWarpReduction_tests.cpp.o
+[ 53%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedPreprocessed_tests.cpp.o
+[ 55%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedColored_tests.cpp.o
+[ 55%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedColoringPrecomputed_tests.cpp.o
+[ 57%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedBoxColoring_tests.cpp.o
+[ 58%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedNoStore_tests.cpp.o
+[ 59%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/UtilLib_tests.cpp.o
+[ 60%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/MatrixLib_tests.cpp.o
+[ 61%] Linking CXX executable run_bench_test
+[ 61%] Built target run_bench_test
+[ 63%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/test_calls.cpp.o
+[ 65%] Linking CXX executable run_get_Norm
+[ 65%] Linking CXX executable run_coloring
+[ 67%] Linking CXX executable run_example
+[ 67%] Linking CXX executable run_multi_GPU
+[ 67%] Built target run_coloring
+[ 67%] Built target run_get_Norm
+[ 67%] Built target run_example
+[ 67%] Built target run_multi_GPU
+[ 69%] Linking CXX static library libTestHPCGLib.a
+[ 69%] Built target TestHPCGLib
+[ 71%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/run_full_bench.cpp.o
+[ 71%] Building CXX object testing/CMakeFiles/run_AllTests.dir/run_all_tests.cpp.o
+[ 72%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/abstract_benchmark_functions.cpp.o
+[ 73%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_cuSparse.cpp.o
+[ 77%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/abstract_benchmark_functions.cpp.o
+[ 77%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/run_specific_bench.cpp.o
+[ 77%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_naiveStriped.cpp.o
+[ 79%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_cuSparse.cpp.o
+[ 80%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_naiveStriped.cpp.o
+[ 80%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedSharedMem.cpp.o
+[ 83%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedWarpReduction.cpp.o
+[ 83%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedSharedMem.cpp.o
+[ 84%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedPreprocessed.cpp.o
+[ 86%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedColoring.cpp.o
+[ 86%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_noStoreStripedColoring.cpp.o
+[ 88%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedWarpReduction.cpp.o
+[ 89%] Linking CXX executable run_AllTests
+[ 91%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedColoringPrecomputed.cpp.o
+[ 91%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedPreprocessed.cpp.o
+[ 92%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedBoxColoring.cpp.o
+[ 94%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedColoring.cpp.o
+[ 95%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_noStoreStripedColoring.cpp.o
+[ 96%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedColoringPrecomputed.cpp.o
+[ 97%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedBoxColoring.cpp.o
+[ 97%] Built target run_AllTests
+[ 98%] Linking CXX executable run_full_bench
+[100%] Linking CXX executable run_specific_bench
+[100%] Built target run_full_bench
+[100%] Built target run_specific_bench
+Starting Full Tests
+getting striped matrix
+CSR Host calculated l2 norm: 73.4717
+CSR Device calculated l2 norm: 73.4717
+Host calculated l2 norm: 73.4717
+Device calculated l2 norm: 73.4717
+getting striped matrix
+CSR Host calculated l2 norm: 74.8558
+CSR Device calculated l2 norm: 74.8558
+Host calculated l2 norm: 74.8558
+Device calculated l2 norm: 74.8558
+getting striped matrix
+CSR Host calculated l2 norm: 192.891
+CSR Device calculated l2 norm: 192.891
+Host calculated l2 norm: 192.891
+Device calculated l2 norm: 192.891
+getting striped matrix
+CSR Host calculated l2 norm: 514.498
+CSR Device calculated l2 norm: 514.498
+Host calculated l2 norm: 514.498
+Device calculated l2 norm: 514.498
+getting striped matrix
+CSR Host calculated l2 norm: 1415.72
+CSR Device calculated l2 norm: 1415.72
+Host calculated l2 norm: 1415.72
+Device calculated l2 norm: 1415.72
+getting striped matrix
+CSR Host calculated l2 norm: 3982.16
+CSR Device calculated l2 norm: 3982.16
+Host calculated l2 norm: 3982.16
+Device calculated l2 norm: 3982.16
+getting striped matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting striped matrix
+getting striped matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting striped matrix
+getting striped matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting striped matrix
+getting striped matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting striped matrix
+getting striped matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+getting striped matrix
+getting striped matrix
+getting striped matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+getting striped matrix
+getting striped matrix
+getting striped matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+getting striped matrix
+getting striped matrix
+getting striped matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+getting striped matrix
+getting striped matrix
+getting striped matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+getting striped matrix
+getting striped matrix
+Starting cuSparse tests
+Starting naiveStriped tests
+Starting striped shared memory tests
+Starting striped warp reduction tests
+Skipping test for size 64x64x64 to avoid out of memory during benchmark tests
+Skipping test for size 64x32x128 to avoid out of memory during benchmark tests
+Skipping test for size 32x64x128 to avoid out of memory during benchmark tests
+Skipping test for size 128x128x128 to avoid out of memory during benchmark tests
+CG took 50 iterations for size 32x64x128 without Preconditioning, with a normr/normr0 of 0.00145212
+CG took 50 iterations for size 32x32x32 without Preconditioning, with a normr/normr0 of 1.34164e-09
+Skipping preconditioning tests in the interest of time
+CG took 50 iterations for size 64x32x128 without Preconditioning, with a normr/normr0 of 0.00145212
+CG took 50 iterations for size 64x128x32 without Preconditioning, with a normr/normr0 of 0.00145212
+CG took 50 iterations for size 64x64x64 without Preconditioning, with a normr/normr0 of 0.00131022
+Skipping test for size 128x128x128 to avoid out of memory during benchmark tests
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping test for size 128x128x128 to avoid out of memory during benchmark tests
+Starting striped colored tests
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+Starting coloringPrecomputed tests
+CG took 50 iterations for size 32x64x128 without Preconditioning, with a normr/normr0 of 0.00145212
+CG took 50 iterations for size 32x32x32 without Preconditioning, with a normr/normr0 of 1.34164e-09
+Skipping preconditioning tests in the interest of time
+CG took 50 iterations for size 64x32x128 without Preconditioning, with a normr/normr0 of 0.00145212
+CG took 50 iterations for size 64x128x32 without Preconditioning, with a normr/normr0 of 0.00145212
+CG took 50 iterations for size 64x64x64 without Preconditioning, with a normr/normr0 of 0.00131022
+Skipping test for size 128x128x128 to avoid out of memory during benchmark tests
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping test for size 128x128x128 to avoid out of memory during benchmark tests
+CG norm based tests are not supported
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+Skipping test for size 64x64x64 to avoid out of memory during benchmark tests
+Skipping test for size 64x32x128 to avoid out of memory during benchmark tests
+Skipping test for size 32x64x128 to avoid out of memory during benchmark tests
+Skipping test for size 128x128x128 to avoid out of memory during benchmark tests
+Finished MG tests
+getting striped matrix
+*******************************************************************************************
+********************************FINISHED & PASSED ALL TESTS********************************
+*******************************************************************************************
+-- The C compiler identification is GNU 8.5.0
+-- The CXX compiler identification is GNU 8.5.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- The CUDA compiler identification is NVIDIA 12.1.105
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /apps/ault/spack/opt/spack/linux-centos8-zen/gcc-8.4.1/cuda-12.1.1-zbdbt4aikrp6sdems6n3t5wvqxm3tza5/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Found CUDAToolkit: /apps/ault/spack/opt/spack/linux-centos8-zen/gcc-8.4.1/cuda-12.1.1-zbdbt4aikrp6sdems6n3t5wvqxm3tza5/include (found version "12.1.105") 
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE  
+-- Found MPI_C: /apps/ault/spack/opt/spack/linux-centos8-zen/gcc-8.4.1/openmpi-4.1.1-epxpvnwjl2smjwuwqg67h2wrmdxw6nhj/lib/libmpi.so (found version "3.1") 
+-- Found MPI_CXX: /apps/ault/spack/opt/spack/linux-centos8-zen/gcc-8.4.1/openmpi-4.1.1-epxpvnwjl2smjwuwqg67h2wrmdxw6nhj/lib/libmpi_cxx.so (found version "3.1") 
+-- Found MPI: TRUE (found version "3.1")  
+-- Configuring done
+CMake Warning (dev) in src/HPCG_versions/CMakeLists.txt:
+  Policy CMP0104 is not set: CMAKE_CUDA_ARCHITECTURES now detected for NVCC,
+  empty CUDA_ARCHITECTURES not allowed.  Run "cmake --help-policy CMP0104"
+  for policy details.  Use the cmake_policy command to set the policy and
+  suppress this warning.
+
+  CUDA_ARCHITECTURES is empty for target "HPCGLib".
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning (dev) in src/MatrixLib/CMakeLists.txt:
+  Policy CMP0104 is not set: CMAKE_CUDA_ARCHITECTURES now detected for NVCC,
+  empty CUDA_ARCHITECTURES not allowed.  Run "cmake --help-policy CMP0104"
+  for policy details.  Use the cmake_policy command to set the policy and
+  suppress this warning.
+
+  CUDA_ARCHITECTURES is empty for target "MatrixLib".
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning (dev) in src/UtilLib/CMakeLists.txt:
+  Policy CMP0104 is not set: CMAKE_CUDA_ARCHITECTURES now detected for NVCC,
+  empty CUDA_ARCHITECTURES not allowed.  Run "cmake --help-policy CMP0104"
+  for policy details.  Use the cmake_policy command to set the policy and
+  suppress this warning.
+
+  CUDA_ARCHITECTURES is empty for target "UtilLib".
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+-- Generating done
+-- Build files have been written to: /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/build
+[  1%] Building CUDA object src/UtilLib/CMakeFiles/UtilLib.dir/utils.cu.o
+[  3%] Building CUDA object src/UtilLib/CMakeFiles/UtilLib.dir/hpcg_mpi_utils.cu.o
+[  3%] Building CXX object src/UtilLib/CMakeFiles/UtilLib.dir/utils.cpp.o
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/UtilLib/hpcg_mpi_utils.cu(504): warning #177-D: variable "data_paket" was declared but never referenced
+      local_int_t data_paket = 0;
+                  ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/UtilLib/hpcg_mpi_utils.cu(569): warning #177-D: variable "i" was declared but never referenced
+                  int i = ix + nx * iy + nx * ny * iz;
+                      ^
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/UtilLib/hpcg_mpi_utils.cu(560): warning #177-D: variable "gi0" was declared but never referenced
+      global_int_t gi0 = problem->gi0;
+                   ^
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/UtilLib/hpcg_mpi_utils.cu(562): warning #177-D: variable "num_rows" was declared but never referenced
+      local_int_t num_rows = nx * ny * nz;
+                  ^
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/UtilLib/hpcg_mpi_utils.cu(563): warning #177-D: variable "num_cols" was declared but never referenced
+      local_int_t num_cols = nx * ny * nz;
+                  ^
+
+[  4%] Linking CXX static library libUtilLib.a
+[  4%] Built target UtilLib
+[  7%] Building CXX object src/MatrixLib/CMakeFiles/MatrixLib.dir/striped_Matrix.cpp.o
+[  7%] Building CXX object src/MatrixLib/CMakeFiles/MatrixLib.dir/sparse_CSR_Matrix.cpp.o
+[  9%] Building CXX object src/MatrixLib/CMakeFiles/MatrixLib.dir/generations.cpp.o
+[  9%] Building CUDA object src/MatrixLib/CMakeFiles/MatrixLib.dir/generations.cu.o
+[ 10%] Building CUDA object src/MatrixLib/CMakeFiles/MatrixLib.dir/coloring.cu.o
+[ 11%] Linking CXX static library libMatrixLib.a
+[ 11%] Built target MatrixLib
+[ 13%] Building CXX object src/TimingLib/CMakeFiles/TimingLib.dir/timer.cpp.o
+[ 14%] Linking CXX static library libTimingLib.a
+[ 14%] Built target TimingLib
+[ 17%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/cusparse/cusparse_computeDot.cu.o
+[ 17%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/cusparse/cusparse_computeSymGS.cu.o
+[ 17%] Building CXX object src/HPCG_versions/CMakeFiles/HPCGLib.dir/cusparse/cusparse_computeSPMV.cpp.o
+[ 19%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/naiveStriped/naiveStriped_computeSPMV.cu.o
+[ 20%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_shared_mem/striped_shared_mem_computeSPMV.cu.o
+[ 21%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_warp_reduction/striped_warp_reduction_computeSPMV.cu.o
+[ 23%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_warp_reduction/striped_warp_reduction_computeSymGS.cu.o
+[ 23%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_warp_reduction/striped_warp_reduction_computeDot.cu.o
+[ 25%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_warp_reduction/striped_warp_reduction_computeWAXPBY.cu.o
+[ 27%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_warp_reduction/striped_warp_reduction_computeCG.cu.o
+[ 27%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_warp_reduction/striped_warp_reduction_computeMG.cu.o
+[ 29%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU/striped_box_coloring_multi_GPU_computeSymGS.cu.o
+[ 29%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU/striped_warp_reduction_multi_GPU_computeCG.cu.o
+[ 32%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU/striped_warp_reduction_multi_GPU_computeDot.cu.o
+[ 32%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU/striped_warp_reduction_multi_GPU_computeMG.cu.o
+[ 33%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU/striped_warp_reduction_multi_GPU_computeSPMV.cu.o
+[ 34%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU/striped_warp_reduction_multi_GPU_computeWAXPBY.cu.o
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/multi_GPU/striped_warp_reduction_multi_GPU_computeCG.cu(15): warning #550-D: variable "alpha" was set but never used
+      double alpha = 0.0;
+             ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/multi_GPU/striped_warp_reduction_multi_GPU_computeCG.cu(16): warning #550-D: variable "beta" was set but never used
+      double beta = 0.0;
+             ^
+
+[ 36%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_preprocessed/striped_preprocessed_computeSymGS.cu.o
+[ 36%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_coloring/striped_coloring_computeSymGS.cu.o
+[ 38%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/no_store_striped_coloring/no_store_striped_coloring_computeSymGS.cu.o
+[ 40%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_box_coloring/striped_box_coloring_computeSymGS.cu.o
+[ 40%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_coloringPrecomputed/striped_coloringPrecomputed_computeSymGS.cu.o
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/no_store_striped_coloring.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=double]" is only partially overridden in class "no_store_striped_coloring_Implementation<double>"
+  class no_store_striped_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "no_store_striped_coloring_Implementation<T> [with T=double]" at line 137 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/no_store_striped_coloring/no_store_striped_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_coloring.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=double]" is only partially overridden in class "striped_coloring_Implementation<double>"
+  class striped_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_coloring_Implementation<T> [with T=double]" at line 180 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_coloring/striped_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_coloringPrecomputed.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=double]" is only partially overridden in class "striped_coloringPrecomputed_Implementation<double>"
+  class striped_coloringPrecomputed_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_coloringPrecomputed_Implementation<T> [with T=double]" at line 74 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_coloringPrecomputed/striped_coloringPrecomputed_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_box_coloring.cuh(19): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=double]" is only partially overridden in class "striped_box_coloring_Implementation<double>"
+  class striped_box_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_box_coloring_Implementation<T> [with T=double]" at line 242 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_box_coloring/striped_box_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/no_store_striped_coloring.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=double]" is only partially overridden in class "no_store_striped_coloring_Implementation<double>"
+  class no_store_striped_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "no_store_striped_coloring_Implementation<T> [with T=double]" at line 137 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/no_store_striped_coloring/no_store_striped_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_coloring.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=double]" is only partially overridden in class "striped_coloring_Implementation<double>"
+  class striped_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_coloring_Implementation<T> [with T=double]" at line 180 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_coloring/striped_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_coloringPrecomputed.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=double]" is only partially overridden in class "striped_coloringPrecomputed_Implementation<double>"
+  class striped_coloringPrecomputed_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_coloringPrecomputed_Implementation<T> [with T=double]" at line 74 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_coloringPrecomputed/striped_coloringPrecomputed_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_box_coloring.cuh(19): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=double]" is only partially overridden in class "striped_box_coloring_Implementation<double>"
+  class striped_box_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_box_coloring_Implementation<T> [with T=double]" at line 242 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_box_coloring/striped_box_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+[ 41%] Linking CXX static library libHPCGLib.a
+[ 41%] Built target HPCGLib
+[ 42%] Building CXX object testing/CMakeFiles/run_coloring.dir/run_coloring.cpp.o
+[ 45%] Building CXX object testing/CMakeFiles/run_get_Norm.dir/run_get_Norm.cpp.o
+[ 48%] Building CXX object testing/CMakeFiles/run_multi_GPU.dir/run_multi_GPU.cpp.o
+[ 48%] Building CXX object benchmarking/CMakeFiles/run_bench_test.dir/run_bench_test.cpp.o
+[ 48%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/naiveStriped_tests.cpp.o
+[ 48%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/cuSparse_tests.cpp.o
+[ 52%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedWarpReduction_tests.cpp.o
+[ 52%] Building CXX object testing/CMakeFiles/run_example.dir/run_example.cpp.o
+[ 52%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedSharedMem_tests.cpp.o
+[ 53%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedPreprocessed_tests.cpp.o
+[ 54%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedColored_tests.cpp.o
+[ 57%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedColoringPrecomputed_tests.cpp.o
+[ 57%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedBoxColoring_tests.cpp.o
+[ 59%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedNoStore_tests.cpp.o
+[ 59%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/UtilLib_tests.cpp.o
+[ 60%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/MatrixLib_tests.cpp.o
+[ 61%] Linking CXX executable run_bench_test
+[ 61%] Built target run_bench_test
+[ 63%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/test_calls.cpp.o
+[ 65%] Linking CXX executable run_get_Norm
+[ 65%] Linking CXX executable run_example
+[ 66%] Linking CXX executable run_coloring
+[ 67%] Linking CXX executable run_multi_GPU
+[ 67%] Built target run_get_Norm
+[ 67%] Built target run_multi_GPU
+[ 67%] Built target run_coloring
+[ 67%] Built target run_example
+[ 69%] Linking CXX static library libTestHPCGLib.a
+[ 69%] Built target TestHPCGLib
+[ 70%] Building CXX object testing/CMakeFiles/run_AllTests.dir/run_all_tests.cpp.o
+[ 71%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/run_specific_bench.cpp.o
+[ 73%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_cuSparse.cpp.o
+[ 75%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_naiveStriped.cpp.o
+[ 77%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/abstract_benchmark_functions.cpp.o
+[ 78%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/run_full_bench.cpp.o
+[ 78%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/abstract_benchmark_functions.cpp.o
+[ 79%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedSharedMem.cpp.o
+[ 79%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_cuSparse.cpp.o
+[ 80%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedWarpReduction.cpp.o
+[ 82%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_naiveStriped.cpp.o
+[ 83%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedSharedMem.cpp.o
+[ 84%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedPreprocessed.cpp.o
+[ 88%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedColoring.cpp.o
+[ 88%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_noStoreStripedColoring.cpp.o
+[ 88%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedWarpReduction.cpp.o
+[ 89%] Linking CXX executable run_AllTests
+[ 92%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedPreprocessed.cpp.o
+[ 95%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedColoringPrecomputed.cpp.o
+[ 95%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedColoring.cpp.o
+[ 95%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_noStoreStripedColoring.cpp.o
+[ 95%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedBoxColoring.cpp.o
+[ 97%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedColoringPrecomputed.cpp.o
+[ 97%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedBoxColoring.cpp.o
+[ 97%] Built target run_AllTests
+[ 98%] Linking CXX executable run_specific_bench
+[100%] Linking CXX executable run_full_bench
+[100%] Built target run_specific_bench
+[100%] Built target run_full_bench
+CMakeCache.txt
+CMakeFiles
+Makefile
+benchmarking
+cmake_install.cmake
+src
+testing
+CMakeFiles
+Makefile
+cmake_install.cmake
+libTestHPCGLib.a
+run_AllTests
+run_coloring
+run_example
+run_get_Norm
+run_multi_GPU
+Starting Full Tests
+getting striped matrix
+CSR Host calculated l2 norm: 73.4717
+CSR Device calculated l2 norm: 73.4717
+Host calculated l2 norm: 73.4717
+Device calculated l2 norm: 73.4717
+getting striped matrix
+CSR Host calculated l2 norm: 74.8558
+CSR Device calculated l2 norm: 74.8558
+Host calculated l2 norm: 74.8558
+Device calculated l2 norm: 74.8558
+getting striped matrix
+CSR Host calculated l2 norm: 192.891
+CSR Device calculated l2 norm: 192.891
+Host calculated l2 norm: 192.891
+Device calculated l2 norm: 192.891
+getting striped matrix
+CSR Host calculated l2 norm: 514.498
+CSR Device calculated l2 norm: 514.498
+Host calculated l2 norm: 514.498
+Device calculated l2 norm: 514.498
+getting striped matrix
+CSR Host calculated l2 norm: 1415.72
+CSR Device calculated l2 norm: 1415.72
+Host calculated l2 norm: 1415.72
+Device calculated l2 norm: 1415.72
+getting striped matrix
+CSR Host calculated l2 norm: 3982.16
+CSR Device calculated l2 norm: 3982.16
+Host calculated l2 norm: 3982.16
+Device calculated l2 norm: 3982.16
+getting striped matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting striped matrix
+getting striped matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting striped matrix
+getting striped matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting striped matrix
+getting striped matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting striped matrix
+getting striped matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+getting striped matrix
+getting striped matrix
+getting striped matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+getting striped matrix
+getting striped matrix
+getting striped matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+getting striped matrix
+getting striped matrix
+getting striped matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+getting striped matrix
+getting striped matrix
+getting striped matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+Copying to GPU on purpose
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+Warning: copying a sparse CSR Matrix to the GPU
+WARNING: remove_Matrix_from_GPU called
+If the matrix did not contain relevant data, this is okay
+getting striped matrix
+getting CSR Matrix
+only compared meta data
+Comparing coarse matrices
+only compared meta data
+getting striped matrix
+getting striped matrix
+Starting cuSparse tests
+Starting naiveStriped tests
+Starting striped shared memory tests
+Starting striped warp reduction tests
+Skipping test for size 64x64x64 to avoid out of memory during benchmark tests
+Skipping test for size 64x32x128 to avoid out of memory during benchmark tests
+Skipping test for size 32x64x128 to avoid out of memory during benchmark tests
+Skipping test for size 128x128x128 to avoid out of memory during benchmark tests
+CG took 50 iterations for size 32x64x128 without Preconditioning, with a normr/normr0 of 0.00145212
+CG took 50 iterations for size 32x32x32 without Preconditioning, with a normr/normr0 of 1.34164e-09
+Skipping preconditioning tests in the interest of time
+CG took 50 iterations for size 64x32x128 without Preconditioning, with a normr/normr0 of 0.00145212
+CG took 50 iterations for size 64x128x32 without Preconditioning, with a normr/normr0 of 0.00145212
+CG took 50 iterations for size 64x64x64 without Preconditioning, with a normr/normr0 of 0.00131022
+Skipping test for size 128x128x128 to avoid out of memory during benchmark tests
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping test for size 128x128x128 to avoid out of memory during benchmark tests
+Starting striped colored tests
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+Starting coloringPrecomputed tests
+CG took 50 iterations for size 32x64x128 without Preconditioning, with a normr/normr0 of 0.00145212
+CG took 50 iterations for size 32x32x32 without Preconditioning, with a normr/normr0 of 1.34164e-09
+Skipping preconditioning tests in the interest of time
+CG took 50 iterations for size 64x32x128 without Preconditioning, with a normr/normr0 of 0.00145212
+CG took 50 iterations for size 64x128x32 without Preconditioning, with a normr/normr0 of 0.00145212
+CG took 50 iterations for size 64x64x64 without Preconditioning, with a normr/normr0 of 0.00131022
+Skipping test for size 128x128x128 to avoid out of memory during benchmark tests
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping test for size 128x128x128 to avoid out of memory during benchmark tests
+CG norm based tests are not supported
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+Skipping test for size 64x64x64 to avoid out of memory during benchmark tests
+Skipping test for size 64x32x128 to avoid out of memory during benchmark tests
+Skipping test for size 32x64x128 to avoid out of memory during benchmark tests
+Skipping test for size 128x128x128 to avoid out of memory during benchmark tests
+Finished MG tests
+getting striped matrix
+*******************************************************************************************
+********************************FINISHED & PASSED ALL TESTS********************************
+*******************************************************************************************

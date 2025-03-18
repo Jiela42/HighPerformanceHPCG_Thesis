@@ -42,6 +42,8 @@ striped_Matrix<T>::striped_Matrix() {
     this->Axf_d = nullptr;
     this->f2c_op.clear();
 
+    this->CSR = nullptr;
+
 }
 
 template <typename T>
@@ -171,7 +173,6 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onCPU(sparse_CSR_Matrix<T>
     this->rc_d = nullptr;
     this->xc_d = nullptr;
     this->Axf_d = nullptr;
-    
 
     // first we make our mapping for the j_min_i
     // each point has num_stripe neighbours and each is associated with a coordinate relative to the point
@@ -227,8 +228,7 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onCPU(sparse_CSR_Matrix<T>
         this->f2c_op = A.get_f2c_op();
     } else {
         this->f2c_op.clear();
-    }
-    
+    }    
 }
 
 template <typename T>
@@ -455,18 +455,62 @@ T* striped_Matrix<T>::get_Axf_d(){
 template <typename T>
 void striped_Matrix<T>::generate_coloring(){
 
-    int num_colors = (nx -1) + 2 * (ny-1) + 4 * (nz-1) + 1;
-
-    // first we allocate the space on the GPU
-    CHECK_CUDA(cudaMalloc(&this->color_pointer_d, (num_colors + 1) * sizeof(int)));
-    CHECK_CUDA(cudaMalloc(&this->color_sorted_rows_d, this->num_rows * sizeof(int)));
-
-    get_color_row_mapping(this->nx, this->ny, this->nz, this->color_pointer_d, this->color_sorted_rows_d);
-
-    // also generate the coloring for any coarse matrices
-    if(this->coarse_Matrix != nullptr){
-        this->coarse_Matrix->generate_coloring();
+    if(this->matrix_type == MatrixType::Stencil_3D27P){
+        int num_colors = (nx -1) + 2 * (ny-1) + 4 * (nz-1) + 1;
+    
+        // first we allocate the space on the GPU
+        CHECK_CUDA(cudaMalloc(&this->color_pointer_d, (num_colors + 1) * sizeof(int)));
+        CHECK_CUDA(cudaMalloc(&this->color_sorted_rows_d, this->num_rows * sizeof(int)));
+    
+        get_color_row_mapping(this->nx, this->ny, this->nz, this->color_pointer_d, this->color_sorted_rows_d);
+    
+        // also generate the coloring for any coarse matrices
+        if(this->coarse_Matrix != nullptr){
+            this->coarse_Matrix->generate_coloring();
+        }
+    } else{
+        printf("ERROR: Unsupported matrix type for coloring\n");
+        exit(1);
     }
+
+}
+
+template <typename T>
+void striped_Matrix<T>::generate_box_coloring(){
+
+    if(this->matrix_type == MatrixType::Stencil_3D27P){
+
+        int num_colors = 27;
+
+        // first we allocate the space on the GPU
+        // to do so we first check if the color ptr are nullptr
+        if(this->color_pointer_d != nullptr){
+            // if they are not nullptr, we print a warning and free them
+            std::cerr << "WARNING: color_pointer_d not nullptr, freeing it to generate box coloring" << std::endl;
+            CHECK_CUDA(cudaFree(this->color_pointer_d));
+        }
+        if(this->color_sorted_rows_d != nullptr){
+            // if they are not nullptr, we print a warning and free them
+            std::cerr << "WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring" << std::endl;
+            CHECK_CUDA(cudaFree(this->color_sorted_rows_d));
+        }
+
+        // now we can safely allocate the space for the pointers
+        CHECK_CUDA(cudaMalloc(&this->color_pointer_d, (num_colors + 1) * sizeof(int)));
+        CHECK_CUDA(cudaMalloc(&this->color_sorted_rows_d, this->num_rows * sizeof(int)));
+
+        get_color_row_mapping_for_boxColoring(this->nx, this->ny, this->nz, this->color_pointer_d, this->color_sorted_rows_d);
+
+        // also generate the coloring for any coarse matrices
+        if(this->coarse_Matrix != nullptr){
+            this->coarse_Matrix->generate_coloring();
+        }
+        
+    } else{
+        printf("ERROR: Unsupported matrix type for coloring\n");
+        exit(1);
+    }
+
 }
 
 template <typename T>
@@ -605,6 +649,8 @@ T striped_Matrix<T>::get_element(int i, int j) const{
 
 template <typename T>
 void striped_Matrix<T>::set_num_rows(int num_rows){
+    // std::cout << "random debug prints here:" << std::endl;
+    // std::cout << "this->csr: " << this->CSR << std::endl;
     this->num_rows = num_rows;
 }
 

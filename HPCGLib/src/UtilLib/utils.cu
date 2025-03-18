@@ -3,6 +3,7 @@
 #include "UtilLib/cuda_utils.hpp"
 #include "UtilLib/hpcg_multi_GPU_utils.cuh"
 #include "HPCG_versions/naiveStriped.cuh" // we need this for the matrix vector multiplication kernel
+#include "HPCG_versions/striped_warp_reduction.cuh" // we need this for the matrix vector multiplication kernel
 
 #include <cmath>
 #include <cuda_runtime.h>
@@ -33,20 +34,81 @@ __global__ void matvec_mult_kernel(int num_rows, int *row_ptr, int *col_idx, dou
     }
 }
 
-__global__ void diff_and_norm_kernel(int num_rows, double *Ax, double *y, double *diff) {
+__global__ void diff_and_norm_kernel(int num_rows, double *Ax, double *y, double *y_reduced) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    double my_sum = 0;
+    int lane = threadIdx.x % WARP_SIZE;
+    int warp_id = threadIdx.x / WARP_SIZE;
+    __shared__ double intermediate_sums[32];
 
     for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x) {
         double d = Ax[row] - y[row];
-        diff[row] = d * d;
+        my_sum += d * d;
+    }
+    // reduce along warps
+    for (int offset = WARP_SIZE/2; offset > 0; offset /= 2) {
+        my_sum += __shfl_down_sync(0xFFFFFFFF, my_sum, offset);
+    }
+
+    __syncthreads();
+
+    if (lane == 0) {
+        intermediate_sums[warp_id] = my_sum;
+    }
+
+    __syncthreads();
+
+    // sync threads in the block
+    if(warp_id == 0){
+        my_sum = intermediate_sums[lane];
+        for (int offset = WARP_SIZE/2; offset > 0; offset /= 2){
+            my_sum += __shfl_down_sync(0xFFFFFFFF, my_sum, offset);
+        }
+    }
+
+    if(threadIdx.x == 0){
+        y_reduced[blockIdx.x] = my_sum;
+        // printf("y_reduced[%d]: %f\n", blockIdx.x, y_reduced[blockIdx.x]);
     }
 }
 
-__global__ void square_vector_kernel(int num_rows, double *y, double *y_squared) {
+__global__ void square_fusedReduction_kernel(int num_rows, double *y, double *y_reduced) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    
+    double my_sum = 0;
+    int lane = threadIdx.x % WARP_SIZE;
+    int warp_id = threadIdx.x / WARP_SIZE;
+    __shared__ double intermediate_sums[32];
+
+    // printf("Hello from the kernel\n");
+
     for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x) {
-        y_squared[row] = y[row] * y[row];
+        my_sum += y[row] * y[row];
+    }
+
+    // reduce along warps
+    for (int offset = WARP_SIZE/2; offset > 0; offset /= 2) {
+        my_sum += __shfl_down_sync(0xFFFFFFFF, my_sum, offset);
+    }
+
+    __syncthreads();
+
+    if (lane == 0) {
+        intermediate_sums[warp_id] = my_sum;
+    }
+
+    __syncthreads();
+
+    // sync threads in the block
+    if(warp_id == 0){
+        my_sum = intermediate_sums[lane];
+        for (int offset = WARP_SIZE/2; offset > 0; offset /= 2){
+            my_sum += __shfl_down_sync(0xFFFFFFFF, my_sum, offset);
+        }
+    }
+
+    if(threadIdx.x == 0){
+        y_reduced[blockIdx.x] = my_sum;
+        // printf("y_reduced[%d]: %f\n", blockIdx.x, y_reduced[blockIdx.x]);
     }
 }
 
@@ -153,16 +215,20 @@ void L2_norm_for_Device_Vector(
     // Allocate memory for the squared vector on the device
     double *y_squared;
 
-    CHECK_CUDA(cudaMalloc(&y_squared, num_rows * sizeof(double)));
+    // std::cout << "Hello from L2_norm_for_Device_Vector" << std::endl;
 
-    // Compute the squared vector
+    
+    // Compute the squared vector and start reducing
     int blockSize = 1024;
-    int numBlocks = (num_rows + blockSize - 1) / blockSize;
-    square_vector_kernel<<<numBlocks, blockSize, 0, stream>>>(num_rows, y, y_squared);
+    int numBlocks = (num_rows + blockSize - 1) / (blockSize*8);
+    // we need to make sure there is at least one block
+    numBlocks = std::max(numBlocks, 1);
+    CHECK_CUDA(cudaMalloc(&y_squared, numBlocks * sizeof(double)));
+    square_fusedReduction_kernel<<<numBlocks, blockSize, 0, stream>>>(num_rows, y, y_squared);
 
     // Use Thrust to compute the sum of the squared vector
     thrust::device_ptr<double> y_squared_ptr(y_squared);
-    *result = std::sqrt(thrust::reduce(thrust::cuda::par.on(stream), y_squared_ptr, y_squared_ptr + num_rows));
+    *result = std::sqrt(thrust::reduce(thrust::cuda::par.on(stream), y_squared_ptr, y_squared_ptr + numBlocks));
 
     // Free device memory
     CHECK_CUDA(cudaFreeAsync(y_squared, stream));
@@ -208,7 +274,7 @@ double L2_norm_for_SymGS(
 
     // Use Thrust to compute the sum of the squared differences
     thrust::device_ptr<double> diff_ptr(diff);
-    double L2_norm = std::sqrt(thrust::reduce(diff_ptr, diff_ptr + num_rows));
+    double L2_norm = std::sqrt(thrust::reduce(diff_ptr, diff_ptr + numBlocks));
 
     // Free device memory
     CHECK_CUDA(cudaFree(Ax));
@@ -222,55 +288,35 @@ double L2_norm_for_SymGS(
     double * x,
     double * y
 ){
-    
+
+    striped_warp_reduction_Implementation<double> implementation;
     int num_rows = A.get_num_rows();
-    int num_stripes = A.get_num_stripes();
-    int * j_min_i = A.get_j_min_i_d();
-    double * striped_A_d = A.get_values_d();
     
     // Allocate memory for Ax on the device
     double *Ax;
-    double *diff;
+    double *result;
     CHECK_CUDA(cudaMalloc(&Ax, num_rows * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&diff, num_rows * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&result, 1 * sizeof(double)));
 
     CHECK_CUDA(cudaMemset(Ax, 0, num_rows * sizeof(double)));
+    CHECK_CUDA(cudaMemset(result, 0, 1 * sizeof(double)));
 
     // Perform matrix-vector multiplication: Ax = A * x
 
-    int blockSize = 1024;
-    int numBlocks = (num_rows + blockSize - 1) / blockSize;
+    implementation.compute_SPMV(A, x, Ax);
+    implementation.compute_WAXPBY(A, Ax, y, Ax, 1.0, -1.0);
+    implementation.compute_Dot(A, Ax, Ax, result);
 
-    naiveStriped_SPMV_kernel<<<numBlocks, blockSize>>>(
-        striped_A_d,
-        num_rows, num_stripes, j_min_i,
-        x, Ax);
+    // copy result over
+    double result_h;
+    CHECK_CUDA(cudaMemcpy(&result_h, result, 1 * sizeof(double), cudaMemcpyDeviceToHost));
 
-    
-    CHECK_CUDA(cudaDeviceSynchronize());
-
-    // // print Ax
-    // double *Ax_h = (double *)malloc(num_rows * sizeof(double));
-    // CHECK_CUDA(cudaMemcpy(Ax_h, Ax, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
-    // for (int i = 0; i < num_rows; i++) {
-    //     std::cout << Ax_h[i] << " ";
-    // }
-    // std::cout << std::endl;
-
-
-    // Compute the difference and the squared differences
-    diff_and_norm_kernel<<<numBlocks, blockSize>>>(num_rows, Ax, y, diff);
-    CHECK_CUDA(cudaDeviceSynchronize());
-
-    // Use Thrust to compute the sum of the squared differences
-    thrust::device_ptr<double> diff_ptr(diff);
-    double L2_norm = std::sqrt(thrust::reduce(diff_ptr, diff_ptr + num_rows));
 
     // Free device memory
     CHECK_CUDA(cudaFree(Ax));
-    CHECK_CUDA(cudaFree(diff));
+    CHECK_CUDA(cudaFree(result));
 
-    return L2_norm;
+    return std::sqrt(result_h);
 }
 
 
