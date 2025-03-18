@@ -363,6 +363,32 @@ void ExchangeHalo(Halo *halo, Problem *problem){
     MPI_Barrier(MPI_COMM_WORLD);
 }
 
+/* x_d is the pointer to the first element in the slice */
+/* every thread fills an element */
+__global__ void extract_xz_plane_kernel(DataType *x_d, DataType *slice_d, int length_X, int length_Z, int slice_X, int slice_Z){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    int z_loc = tid % length_X;
+    int x_loc = tid / length_X;
+    if (z_loc<length_Z) slice_d[tid]=x_d[z_loc*slice_Z + x_loc*slice_X];
+}
+
+__global__ void extract_yz_plane_kernel(DataType *x_d, DataType *slice_d, int length_Y, int length_Z, int slice_Y, int slice_Z){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    int z_loc = tid % length_Y;
+    int y_loc = tid / length_Y;
+    if (z_loc<length_Z) slice_d[tid]=x_d[z_loc*slice_Z + y_loc*slice_Y];
+}
+
+__global__ void extract_xy_plane_kernel(DataType *x_d, DataType *slice_d, int length_X, int length_Y, int slice_X, int slice_Y){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    int y_loc = tid % length_X;
+    int x_loc = tid / length_X;
+    if (y_loc<length_Y) slice_d[tid]=x_d[y_loc*slice_Y + x_loc*slice_X];
+}
+
 
 void extract_horizontal_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Z, int dimx, int dimy, int dimz){
     local_int_t k = x +  y * dimx + z * dimx * dimy;
@@ -387,6 +413,7 @@ void inject_horizontal_plane_to_GPU(DataType *x_d, DataType *x_h, int x, int y, 
 void extract_vertical_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Y, int length_Z, int dimx, int dimy, int dimz){
     local_int_t k = x +  y * dimx + z * dimx * dimy;
     x_d += k;
+    /* 
     for(int i = 0; i < length_Z; i++){
         for(int j = 0; j < length_Y; j++){
             CHECK_CUDA(cudaMemcpy(x_h, x_d, 1 * sizeof(DataType), cudaMemcpyDeviceToHost));
@@ -394,7 +421,19 @@ void extract_vertical_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y,
             x_d += dimx;
         }
         x_d += dimx * (dimy - length_Y);
-    }
+    } 
+    */
+    // allocate halo on device
+    DataType *slice_d;
+    CHECK_CUDA(cudaMalloc(&slice_d, length_Y*length_Z*sizeof(DataType)));
+
+    // collect halo on device
+    int nthread=256;
+    int nblock = (length_Y*length_Z + nthread - 1) / nthread;
+    extract_yz_plane_kernel<<<nblock,nthread>>>(x_d, slice_d, length_Y, length_Z, dimx, dimy*dimx);
+    
+    // copy from device to host
+    CHECK_CUDA(cudaMemcpy(x_h, slice_d, length_Y*length_Z*sizeof(DataType), cudaMemcpyDeviceToHost));
 }
 
 void inject_vertical_plane_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Y, int length_Z, int dimx, int dimy, int dimz){
@@ -644,53 +683,4 @@ bool IsHaloZero(Halo *x_d){
         }
     }
     return true;
-}
-
-void GenerateStripedPartialMatrix_GPU(Problem *problem, double *A_d) {
-    int nx = problem->nx;
-    int ny = problem->ny;
-    int nz = problem->nz;
-    local_int_t num_rows = nx * ny * nz;
-
-    int block_size = 256;
-    int num_blocks = (num_rows + block_size - 1) / block_size;
-
-    GenerateStripedPartialMatrix_kernel<<<block_size, num_blocks>>>(problem->nx, problem->ny, problem->nz, problem->gnx, problem->gny, problem->gnz, problem->gx0, problem->gy0, problem->gz0, A_d);
-}
-__global__ void GenerateStripedPartialMatrix_kernel(int nx, int ny, int nz, int gnx, int gny, int gnz, int offset_x, int offset_y, int offset_z, double *A_d){
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    
-    local_int_t num_rows = nx * ny * nz;
-    local_int_t num_cols = nx * ny * nz;
-    
-    for (int i=tid; i<num_rows; i += blockDim.x * gridDim.x) {
-        int gx = i % nx + offset_x;
-        int gy = (i / nx) % ny + offset_y;
-        int gz = i / (nx * ny) + offset_z;
-
-        for (int sz = -1; sz < 2; sz++){
-            for(int sy = -1; sy < 2; sy++){
-                for(int sx = -1; sx < 2; sx++){
-
-                    if(gx + sx < 0 || gx + sx >= gnx ||
-                        gy + sy < 0 || gy + sy >= gny ||
-                        gz + sz < 0 || gz + sz >= gnz) {
-                            *A = 0.0;
-                            A++;
-                        } else {
-                            if(sx == 0 && sy == 0 && sz == 0){
-                                *A = 26.0;
-                                A++;
-                            } else {
-                                *A = -1.0;
-                                A++;
-                            }
-                        }
-                }
-            }
-        }
-
-
-
-    }
 }

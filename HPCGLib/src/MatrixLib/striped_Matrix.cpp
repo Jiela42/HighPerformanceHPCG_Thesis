@@ -2,6 +2,7 @@
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
 #include "UtilLib/cuda_utils.hpp"
 #include "MatrixLib/coloring.cuh"
+#include "UtilLib/hpcg_mpi_utils.cuh"
 
 #include <vector>
 #include <iostream>
@@ -42,6 +43,41 @@ striped_Matrix<T>::striped_Matrix() {
     this->Axf_d = nullptr;
     this->f2c_op.clear();
 
+}
+
+template <typename T>
+striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
+    //this->nx = 0;
+    //this->ny = 0;
+    //this->nz = 0;
+    //this->nnz = 0;
+    //this->diag_index = -1;
+    this->problem = p;
+    //this->matrix_type = MatrixType::UNKNOWN;
+
+    this->num_rows = 0;
+    this->num_cols = 0;
+    this->num_stripes = 0;
+
+
+    //this->j_min_i.clear();
+    //this->values.clear();
+    this->j_min_i_d = nullptr;
+    this->values_d = nullptr;
+
+    //this->color_pointer_d = nullptr;
+    //this->color_sorted_rows_d = nullptr;
+
+    this->num_MG_pre_smooth_steps = 1;
+    this->num_MG_post_smooth_steps = 1;
+    this->coarse_Matrix = nullptr;
+    this->f2c_op_d = nullptr;
+    this->rc_d = nullptr;
+    this->xc_d = nullptr;
+    this->Axf_d = nullptr;
+    //this->f2c_op.clear();
+
+    GenerateStripedPartialMatrix_GPU(this->problem, this->values_d);
 }
 
 template <typename T>
@@ -105,6 +141,52 @@ striped_Matrix<T>::~striped_Matrix(){
         this->coarse_Matrix = nullptr;
     }
 
+}
+
+template <typename T>
+striped_partial_Matrix<T>::~striped_partial_Matrix(){
+
+    if(this->j_min_i_d != nullptr){
+        CHECK_CUDA(cudaFree(this->j_min_i_d));
+        this->j_min_i_d = nullptr;
+    }
+
+    if(this->values_d != nullptr){
+        CHECK_CUDA(cudaFree(this->values_d));
+        this->values_d = nullptr;
+    }
+
+    /* if (this->color_pointer_d != nullptr) {
+        CHECK_CUDA(cudaFree(this->color_pointer_d));
+        this->color_pointer_d = nullptr;
+
+    }
+    if (this->color_sorted_rows_d != nullptr) {
+        CHECK_CUDA(cudaFree(this->color_sorted_rows_d));
+        this->color_sorted_rows_d = nullptr;
+    } */
+
+    if (this->f2c_op_d != nullptr) {
+        CHECK_CUDA(cudaFree(this->f2c_op_d));
+        this->f2c_op_d = nullptr;
+    }
+    if (this->rc_d != nullptr) {
+        CHECK_CUDA(cudaFree(this->rc_d));
+        this->rc_d = nullptr;
+    }
+    if(this->xc_d != nullptr){
+        CHECK_CUDA(cudaFree(this->xc_d));
+        this->xc_d = nullptr;
+    }
+    if(this->Axf_d != nullptr){
+        CHECK_CUDA(cudaFree(this->Axf_d));
+        this->Axf_d = nullptr;
+    }
+    
+    if(this->coarse_Matrix != nullptr){
+        delete this->coarse_Matrix;
+        this->coarse_Matrix = nullptr;
+    }
 }
 
 template <typename T>
@@ -438,7 +520,17 @@ striped_Matrix<T>* striped_Matrix<T>::get_coarse_Matrix(){
 }
 
 template <typename T>
+striped_partial_Matrix<T>* striped_partial_Matrix<T>::get_coarse_Matrix(){
+    return this->coarse_Matrix;
+}
+
+template <typename T>
 T* striped_Matrix<T>::get_rc_d(){
+    return this->rc_d;
+}
+
+template <typename T>
+T* striped_partial_Matrix<T>::get_rc_d(){
     return this->rc_d;
 }
 
@@ -448,7 +540,18 @@ T* striped_Matrix<T>::get_xc_d(){
 }
 
 template <typename T>
+T* striped_partial_Matrix<T>::get_xc_d(){
+    return this->xc_d;
+}
+
+template <typename T>
 T* striped_Matrix<T>::get_Axf_d(){
+    return this->Axf_d;
+}
+
+
+template <typename T>
+T* striped_partial_Matrix<T>::get_Axf_d(){
     return this->Axf_d;
 }
 
@@ -518,6 +621,11 @@ int striped_Matrix<T>::get_num_stripes() const{
 }
 
 template <typename T>
+int striped_partial_Matrix<T>::get_num_stripes() const{
+    return this->num_stripes;
+}
+
+template <typename T>
 int striped_Matrix<T>::get_nx() const{
     return this->nx;
 }
@@ -544,7 +652,17 @@ int striped_Matrix<T>::get_num_MG_pre_smooth_steps() const{
 }
 
 template <typename T>
+int striped_partial_Matrix<T>::get_num_MG_pre_smooth_steps() const{
+    return this->num_MG_pre_smooth_steps;
+}
+
+template <typename T>
 int striped_Matrix<T>::get_num_MG_post_smooth_steps() const{
+    return this->num_MG_post_smooth_steps;
+}
+
+template <typename T>
+int striped_partial_Matrix<T>::get_num_MG_post_smooth_steps() const{
     return this->num_MG_post_smooth_steps;
 }
 
@@ -574,7 +692,17 @@ int * striped_Matrix<T>::get_j_min_i_d(){
 }
 
 template <typename T>
+int * striped_partial_Matrix<T>::get_j_min_i_d(){
+    return this->j_min_i_d;
+}
+
+template <typename T>
 T * striped_Matrix<T>::get_values_d(){
+    return this->values_d;
+}
+
+template <typename T>
+T * striped_partial_Matrix<T>::get_values_d(){
     return this->values_d;
 }
 
@@ -586,6 +714,25 @@ std::vector<int> striped_Matrix<T>::get_f2c_op(){
 template <typename T>
 int * striped_Matrix<T>::get_f2c_op_d(){
     return this->f2c_op_d;
+}
+
+template <typename T>
+int * striped_partial_Matrix<T>::get_f2c_op_d(){
+    return this->f2c_op_d;
+}
+
+template <typename T>
+void striped_partial_Matrix<T>::initialize_coarse_matrix(){
+    int nx = this->problem->nx;
+    int ny = this->problem->ny;
+    int fine_n_rows = this->nx *2 * this->ny * 2 * this->nz * 2;
+
+    //generate_partialf2c_operator();
+}
+
+template <typename T>
+void striped_partial_Matrix<T>::generateMatrix_onGPU(){
+    GenerateStripedPartialMatrix_GPU(this->problem, this->values_d);
 }
 
 template <typename T>
