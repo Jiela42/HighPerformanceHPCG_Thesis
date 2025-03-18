@@ -1,7 +1,6 @@
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
 #include "MatrixLib/generations.cuh"
 #include "UtilLib/cuda_utils.hpp"
-#include "UtilLib/hpcg_mpi_utils.cuh"
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -289,118 +288,6 @@ void sparse_CSR_Matrix<T>::generateMatrix_onCPU(int nx, int ny, int nz){
     this->row_ptr = std::vector<int>(num_rows + 1, 0);
     this->col_idx = std::vector<int>();
     this->values = std::vector<T>();
-
-    for (int i = 0; i < num_rows; i++){
-        this->row_ptr[i + 1] = this->row_ptr[i] + nnz_per_row[i];
-
-        for (int j = 0; j < nnz_per_row[i]; j++){
-            this->col_idx.push_back(col_idx_per_row[i][j]);
-            this->values.push_back(values_per_row[i][j]);
-        }
-    }
-
-    this->nnz = nnz;
-
-    this->row_ptr_d = nullptr;
-    this->col_idx_d = nullptr;
-    this->values_d = nullptr;
-
-    this->num_MG_pre_smooth_steps = 1;
-    this->num_MG_post_smooth_steps = 1;
-    this->coarse_Matrix = nullptr;
-    this->f2c_op_d = nullptr;
-    this->f2c_op.clear();
-    this->rc_d = nullptr;
-    this->xc_d = nullptr;
-    this->Axf_d = nullptr;
-}
-
-template <typename T>
-void sparse_CSR_Matrix<T>::generatePartialMatrix_onCPU(Problem *problem){
-    // currently this only supports 27pt 3D stencils
-    int nx = problem->nx;
-    int ny = problem->ny;
-    int nz = problem->nz;
-    global_int_t gnx = problem->gnx;
-    global_int_t gny = problem->gny;
-    global_int_t gnz = problem->gnz;
-    global_int_t gi0 = problem->gi0;
-    
-    
-    this->matrix_type = MatrixType::Stencil_3D27P;
-    this->nx = nx;
-    this->ny = ny;
-    this->nz = nz;
-    this->num_rows = nx * ny * nz;
-    this->num_cols = nx * ny * nz;
-    
-    int num_rows = nx * ny * nz;
-    int num_cols = nx * ny * nz;
-    
-    int nnz = 0;
-    
-    std::vector<int> nnz_per_row(num_rows);
-    
-    std::vector<std::vector<int>> col_idx_per_row(num_rows);
-    std::vector<std::vector<double>> values_per_row(num_rows);
-    
-    global_int_t gx = problem->gx0;
-    global_int_t gy = problem->gy0;
-    global_int_t gz = problem->gz0;
-    
-    for(int ix = 0; ix < nx; ix++){
-        for(int iy = 0; iy < ny; iy++){
-            for(int iz = 0; iz < nz; iz++){
-
-                int i = ix + nx * iy + nx * ny * iz;
-
-                //convert local i to global i
-                int local_i_x = i % nx;
-                int local_i_y = (i % (nx * ny)) / nx;
-                int local_i_z = i / (nx * ny);
-                global_int_t gi = gi0 + local_i_x + local_i_y * gnx + local_i_z * (gnx * gny);
-
-                int nnz_i = 0;
-
-                for (int sz = -1; sz < 2; sz++){
-                    if(gz + sz > -1 && gz + sz < gnz){
-                        for(int sy = -1; sy < 2; sy++){
-                            if(gy + sy > -1 && gy + sy < gny){
-                                for(int sx = -1; sx < 2; sx++){
-                                    if(gx + sx > -1 && gx + sx < gnx){
-                                        int j = ix + sx + nx * (iy + sy) + nx * ny * (iz + sz);
-                                        //convert local j to global j
-                                        int local_j_x = j % nx;
-                                        int local_j_y = (j % (nx * ny)) / nx;
-                                        int local_j_z = j / (nx * ny);
-                                        global_int_t gj = gi0 + local_j_x + local_j_y * gnx + local_j_z * (gnx * gny);
-
-                                        if(gi == gj){
-                                            col_idx_per_row[i].push_back(j);
-                                            values_per_row[i].push_back(26.0);
-                                        } else {
-                                            col_idx_per_row[i].push_back(j);
-                                            values_per_row[i].push_back(-1.0);
-                                        }
-                                            nnz_i++;
-                                            nnz++;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                nnz_per_row[i] = nnz_i;
-                gz++;
-            }
-            gy++;
-        }
-        gx++;
-    }
-
-    this->row_ptr = std::vector<int>(num_rows + 1, 0);
-    this->col_idx = std::vector<int>(nnz, 0);
-    this->values = std::vector<T>(nnz, 0);
 
     for (int i = 0; i < num_rows; i++){
         this->row_ptr[i + 1] = this->row_ptr[i] + nnz_per_row[i];

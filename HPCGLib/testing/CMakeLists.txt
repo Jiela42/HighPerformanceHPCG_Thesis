@@ -19,6 +19,7 @@ add_library(TestHPCGLib
     HPCG_versions_tests/stripedColoringPrecomputed_tests.cpp
     HPCG_versions_tests/stripedBoxColoring_tests.cpp
     HPCG_versions_tests/stripedNoStore_tests.cpp
+    HPCG_versions_tests/kernel_multi_GPU_tests.cpp
     HPCG_versions_tests/stripedCORBoxColoring_tests.cpp
     
     UtilLib_tests.cpp
@@ -40,6 +41,10 @@ add_executable(run_get_Norm
 
 add_executable(run_example
     run_example.cpp
+)
+
+add_executable(run_multi_GPU_tests
+    run_multi_GPU_tests.cpp
 )
 
 add_executable(run_multi_GPU
@@ -77,6 +82,13 @@ target_link_libraries(run_example
 )
 
 target_link_libraries(run_multi_GPU
+    HPCGLib
+    MatrixLib
+    UtilLib
+    MPI::MPI_CXX
+)
+
+target_link_libraries(run_multi_GPU_tests
     HPCGLib
     MatrixLib
     UtilLib

@@ -1,10 +1,6 @@
 #include "HPCG_versions/striped_multi_GPU.cuh"
 #include "UtilLib/cuda_utils.hpp"
 #include "UtilLib/utils.cuh"
-#include "UtilLib/hpcg_mpi_utils.cuh"
-// #include "MatrixLib/coloring.cuh"
-// #include <iostream>
-// #include <cuda_runtime.h>
 
 __inline__ __device__ global_int_t local_i_to_global_i(
     int i, 
@@ -64,13 +60,21 @@ __global__ void striped_box_coloring_half_SymGS_kernel(
     int num_color_faces = nz / bz;
 
     // How is the vector colored
-    int color_offs_x = color % bx; //gives x-xcoordinate of first appearance of color
-    int color_offs_y = (color - color_offs_x) % (bx * by) / bx; //gives y-coordinate of first appearance of color
-    int color_offs_z = (color - color_offs_x - bx * color_offs_y) / (bx * by); //gives z-coordinate of first appearance of color
+    int color_offs_x_global = color % bx; //gives x-xcoordinate of first appearance of color
+    int color_offs_y_global = (color - color_offs_x_global) % (bx * by) / bx; //gives y-coordinate of first appearance of color
+    int color_offs_z_global = (color - color_offs_x_global - bx * color_offs_y_global) / (bx * by); //gives z-coordinate of first appearance of color
 
-    num_color_cols = (color_offs_x < nx % bx) ? (num_color_cols + 1) : num_color_cols;
-    num_color_rows = (color_offs_y < ny % by) ? (num_color_rows + 1) : num_color_rows;
-    num_color_faces = (color_offs_z < nz % bz) ? (num_color_faces + 1) : num_color_faces;
+    //TODO: can be improved by using modulo instead of computing the global x, y, z first
+    global_int_t gx0 = px * nx;
+    global_int_t gy0 = py * ny;
+    global_int_t gz0 = pz * nz;
+    int color_offs_x_local = (bx - gx0 % bx + color_offs_x_global) % bx;
+    int color_offs_y_local = (by - gy0 % by + color_offs_y_global) % by;
+    int color_offs_z_local = (bz - gz0 % bz + color_offs_z_global) % bz;
+
+    num_color_cols = (color_offs_x_local < nx % bx) ? (num_color_cols + 1) : num_color_cols;
+    num_color_rows = (color_offs_y_local < ny % by) ? (num_color_rows + 1) : num_color_rows;
+    num_color_faces = (color_offs_z_local < nz % bz) ? (num_color_faces + 1) : num_color_faces;
 
     int num_nodes_with_color = num_color_cols * num_color_rows * num_color_faces;
 
@@ -82,9 +86,9 @@ __global__ void striped_box_coloring_half_SymGS_kernel(
         int iz = i / (num_color_cols * num_color_rows);
         
         // adjust the counter to the correct position when all nodes are considered
-        ix = ix * bx + color_offs_x;
-        iy = iy * by + color_offs_y;
-        iz = iz * bz + color_offs_z;
+        ix = ix * bx + color_offs_x_local;
+        iy = iy * by + color_offs_y_local;
+        iz = iz * bz + color_offs_z_local;
 
         //compute the local index of the node and convert to global index
         local_int_t li = ix + iy * nx + iz * nx * ny;
@@ -116,87 +120,6 @@ __global__ void striped_box_coloring_half_SymGS_kernel(
     }
 }
 
-/*
-__global__ void striped_box_coloring_half_SymGS_kernel(
-    int cooperation_number,
-    int color, int bx, int by, int bz,
-    int nx, int ny, int nz,
-    int num_rows, int num_cols,
-    int num_stripes, int diag_offset,
-    int * j_min_i,
-    double * striped_A,
-    double * x, double * y,
-    global_int_t gnx, global_int_t gny, global_int_t gnz,
-    global_int_t gi0,
-    int px, int py, int pz
-){
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    int coop_group_id = tid / cooperation_number;
-    int lane = tid % cooperation_number;
-    int num_coop_groups = blockDim.x * gridDim.x / cooperation_number;
-
-    // How is the vector colored
-    int color_offs_x = color % bx; //gives x-xcoordinate of first appearance of color
-    int color_offs_y = (color - color_offs_x) % (bx * by) / bx; //gives y-coordinate of first appearance of color
-    int color_offs_z = (color - color_offs_x - bx * color_offs_y) / (bx * by); //gives z-coordinate of first appearance of color
-
-    //first appearance of that color in local space, we need to adjust for the fact that nx, ny, nz might not be divisible by bx, by, bz and hence the first appearance of the color might not be at 0, 0, 0 locally
-    global_int_t cx0 = (color_offs_x + bx - (nx % bx)) % bx;
-    global_int_t cy0 = (color_offs_y + by - (ny % by)) % by;
-    global_int_t cz0 = (color_offs_z + bz - (nz % bz)) % bz;
-
-    //how often does this color appear in each direction
-    int num_color_in_x = 1 + (nx - cx0) / bx;
-    int num_color_in_y = 1 + (ny - cy0) / by;
-    int num_color_in_z = 1 + (nz - cz0) / bz;
-    int num_nodes_with_color = num_color_in_x * num_color_in_y * num_color_in_z;
-
-    for (int i = coop_group_id; i < num_nodes_with_color; i += num_coop_groups){
-        
-        // find out the position of the node based on the number of nodes with this color in each direction
-        int iz = i % num_color_in_x;
-        int iy = (i % (num_color_in_x * num_color_in_y)) / num_color_in_x;
-        int ix = i / (num_color_in_x * num_color_in_y);
-        
-        // adjust the counter to the correct position when all nodes are considered
-        ix = cx0 + ix * bx;
-        iy = cy0 + iy * by;
-        iz = cz0 + iz * bz;
-        //guard against out of bounds
-        if(ix >= nx || iy >= ny || iz >= nz || ix < 0 || iy < 0 || iz < 0){
-            continue;
-        }
-
-        //compute the local index of the node and convert to global index
-        local_int_t li = ix * ny * nz + iy * nz + iz;
-        global_int_t gi = local_i_to_global_i(li, nx, ny, nz, gnx, gny, gnz, gi0);
-        DataType my_sum = 0.0;
-        for(int stripe = lane; stripe < num_stripes; stripe += cooperation_number){
-            global_int_t gj = j_min_i[stripe] + gi;
-            if (gj >= 0 && gj < gnx * gny * gnz) {
-                //convert gj to halo coordinate hj which is the memory location of gj in the halo struct
-                local_int_t hj =  global_i_to_halo_i(gj, nx, ny, nz, gnx, gny, gnz, gi0, px, py, pz);
-                my_sum -= striped_A[li * num_stripes + stripe] * x[hj];
-            }
-        }
-
-        // reduce the my_sum using warp reduction
-        for (int offset = cooperation_number/2; offset > 0; offset /= 2){
-            my_sum += __shfl_down_sync(0xFFFFFFFF, my_sum, offset);
-        }
-
-        __syncthreads();
-        if (lane == 0){
-            local_int_t hi =  global_i_to_halo_i(gi, nx, ny, nz, gnx, gny, gnz, gi0, px, py, pz);
-            double diag = striped_A[li * num_stripes + diag_offset];
-            double sum = diag * x[hi] + y[hi] + my_sum;
-            x[hi] = sum / diag;           
-        }
-        __syncthreads();
-    }
-}
-*/
-
 template <typename T>
 void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_computeSymGS(
     striped_Matrix<T> & A,
@@ -208,9 +131,9 @@ void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_compute
     int nx = problem->nx;
     int ny = problem->ny;
     int nz = problem->nz;
-    assert(nx % 3 == 0);
-    assert(ny % 3 == 0);
-    assert(nz % 3 == 0);
+    // assert(nx % 3 == 0);
+    // assert(ny % 3 == 0);
+    // assert(nz % 3 == 0);
     global_int_t gnx = problem->gnx;
     global_int_t gny = problem->gny;
     global_int_t gnz = problem->gnz;
@@ -268,7 +191,7 @@ void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_compute
     //L2_norm_for_Device_Vector(y_Norm_stream, num_rows, b_d, &L2_norm_y);
     */
     // to do the L2 norm asynchroneously we do the first iteration outside of the loop
-    for(int color = 0; color < max_color; color++){
+    for(int color = 0; color <= max_color; color++){
             // we need to do a forward pass
             striped_box_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
             cooperation_number,
@@ -282,7 +205,7 @@ void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_compute
             gnx, gny, gnz, gi0, px, py, pz
             );
             CHECK_CUDA(cudaDeviceSynchronize());
-            ExchangeHalo(x_d, problem);
+            this->ExchangeHalo(x_d, problem);
         }
 
     // we need to do a backward pass,
@@ -301,7 +224,7 @@ void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_compute
         gnx, gny, gnz, gi0, px, py, pz
         );
         CHECK_CUDA(cudaDeviceSynchronize());
-        ExchangeHalo(x_d, problem);
+        this->ExchangeHalo(x_d, problem);
     }
     /*
     printf("ALERT: L2_norm_ is not implemented for multi GPU! Result is going to be wrong!");
@@ -334,7 +257,7 @@ void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_compute
             gnx, gny, gnz, gi0, px, py, pz
             );
             CHECK_CUDA(cudaDeviceSynchronize());
-            ExchangeHalo(x_d, problem);
+            this->ExchangeHalo(x_d, problem);
         }
 
         // we need to do a backward pass,
@@ -354,7 +277,7 @@ void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_compute
             gnx, gny, gnz, gi0, px, py, pz
             );
             CHECK_CUDA(cudaDeviceSynchronize());
-            ExchangeHalo(x_d, problem);
+            this->ExchangeHalo(x_d, problem);
         }
 
         printf("ALERT: L2_norm_ is not implemented for multi GPU! Result is going to be wrong!");

@@ -5,7 +5,6 @@
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
 #include "MatrixLib/striped_Matrix.hpp"
 #include "UtilLib/cuda_utils.hpp"
-#include "UtilLib/hpcg_mpi_utils.cuh"
 
 #include <vector>
 #include <iostream>

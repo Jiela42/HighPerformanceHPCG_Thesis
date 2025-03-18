@@ -4,7 +4,6 @@
 #include "MatrixLib/striped_Matrix.hpp"
 #include "MatrixLib/matrix_basics.hpp"
 #include "UtilLib/utils.hpp"
-#include "UtilLib/hpcg_mpi_utils.cuh"
 
 #include <vector>
 #include <string>
@@ -31,7 +30,6 @@ public:
 
     void generateMatrix_onGPU(int nx, int ny, int nz);
     void generateMatrix_onCPU(int nx, int ny, int nz);
-    void generatePartialMatrix_onCPU(Problem *problem);
 
     void generate_f2c_operator_onGPU();
     void generate_f2c_operator_onCPU();
