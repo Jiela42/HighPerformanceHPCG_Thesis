@@ -6,7 +6,7 @@
 
 void bench_CG(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A,
     double * x_d, double * y_d
     )
@@ -79,7 +79,7 @@ void bench_CG(
 
 void bench_CG(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     sparse_CSR_Matrix<double> & A,
     double * x_d, double * y_d
     )
@@ -152,7 +152,7 @@ void bench_CG(
 
 void bench_MG(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A,
     double * x_d, double * y_d
     )
@@ -205,7 +205,7 @@ void bench_MG(
 // this SPMV supports CSR matrixes
 void bench_SPMV(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     sparse_CSR_Matrix<double> & A,
     double * x_d, double * y_d
     )
@@ -246,7 +246,7 @@ void bench_SPMV(
 // this SPMV supports striped matrixes which requires CSR for metadata and testing
 void bench_SPMV(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A,
     double * x_d, double * y_d
     ){
@@ -290,7 +290,7 @@ void bench_SPMV(
 
 void bench_Dot(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A,
     double * x_d, double * y_d, double * result_d
     ){
@@ -323,7 +323,7 @@ void bench_Dot(
 
 void bench_Dot(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     sparse_CSR_Matrix<double> & A,
     double * x_d, double * y_d, double * result_d
     ){
@@ -356,7 +356,7 @@ void bench_Dot(
 
 void bench_WAXPBY(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A,
     double * x_d, double * y_d, double * w_d,
     double alpha, double beta
@@ -397,7 +397,7 @@ void bench_WAXPBY(
 
 void bench_SymGS(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     sparse_CSR_Matrix<double> & A,   
     double * x_d, double * y_d
     )
@@ -460,7 +460,7 @@ void bench_SymGS(
 
 void bench_SymGS(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A,
     double * x_d, double * y_d
     )
@@ -532,7 +532,7 @@ void bench_SymGS(
 // this version supports CSR
 void bench_Implementation(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     sparse_CSR_Matrix<double> & A,
     double * a_d, double * b_d, // a & b are random vectors
     double * x_d, double * y_d // x & y are vectors as used in HPCG
@@ -553,7 +553,7 @@ void bench_Implementation(
 // this version supports striped matrixes
 void bench_Implementation(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A, // we need to pass the CSR matrix for metadata and potential testing
     double * a_d, double * b_d, // a & b are random vectors
     double * x_d, double * y_d, // x & y are vectors as used in HPCG

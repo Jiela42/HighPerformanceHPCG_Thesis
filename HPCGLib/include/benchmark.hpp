@@ -3,6 +3,8 @@
 
 
 #include "TimingLib/timer.hpp"
+#include "TimingLib/cudaTimer.hpp"
+#include "TimingLib/cpuTimer.hpp"
 #include "testing.hpp"
 #include "HPCG_versions/striped_box_coloring.cuh"
 
@@ -47,7 +49,7 @@ void run_striped_COR_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::
 // this version supports CSR
 void bench_Implementation(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     sparse_CSR_Matrix<double> & A,
     double * a_d, double * b_d,
     double * x_d, double * y_d
@@ -56,7 +58,7 @@ void bench_Implementation(
 // this version supports striped matrixes
 void bench_Implementation(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A, // we need to pass the matrix for potential testing
     double * a_d, double * b_d,
     double * x_d, double * y_d,
@@ -69,14 +71,14 @@ void bench_Implementation(
 // we have method overloading to support different matrix types
 void bench_CG(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A,
     double * x_d, double * y_d
     );
 
 void bench_CG(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     sparse_CSR_Matrix<double> & A,
     double * x_d, double * y_d
     );
@@ -84,42 +86,42 @@ void bench_CG(
 
 void bench_MG(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A,
     double * x_d, double * y_d
     );
 
 void bench_SPMV(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     sparse_CSR_Matrix<double> & A,
     double * x_d, double * y_d
     );
 
 void bench_SPMV(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A,
     double * x_d, double * y_d
     );
 
 void bench_Dot(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A,
     double * x_d, double * y_d, double * result_d
     );
 
 void bench_Dot(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     sparse_CSR_Matrix<double> & A,
     double * x_d, double * y_d, double * result_d
     );
 
 void bench_WAXPBY(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A,
     double * x_d, double * y_d, double *w,
     double alpha, double beta
@@ -128,14 +130,14 @@ void bench_WAXPBY(
 
 void bench_SymGS(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     sparse_CSR_Matrix<double> & A,
     double * x_d, double * y_d
     );
 
 void bench_SymGS(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A,
     double * x_d, double * y_d
     );
