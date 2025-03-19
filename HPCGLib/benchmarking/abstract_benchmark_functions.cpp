@@ -537,12 +537,31 @@ void bench_Implementation(
     double * a_d, double * b_d, // a & b are random vectors
     double * x_d, double * y_d // x & y are vectors as used in HPCG
     )
-{
+{   
+    // we want to make sure the vectors are not changed, so we grab the first 100 elements
+    int num_sanity_elements = 100;
+    std::vector<double> a_original(num_sanity_elements);
+    std::vector<double> b_original(num_sanity_elements);
+    std::vector<double> x_original(num_sanity_elements);
+    std::vector<double> y_original(num_sanity_elements);
+
+    // copy the first 100 elements of the vectors
+    CHECK_CUDA(cudaMemcpy(a_original.data(), a_d, num_sanity_elements * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(b_original.data(), b_d, num_sanity_elements * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(x_original.data(), x_d, num_sanity_elements * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(y_original.data(), y_d, num_sanity_elements * sizeof(double), cudaMemcpyDeviceToHost));
+
+    // make a vector of vectors
+    std::vector<std::vector<double>> original_vectors = {a_original, b_original, x_original, y_original};
+    std::vector<double*> vectors_d = {a_d, b_d, x_d, y_d};
+
     if(implementation.SPMV_implemented){
         bench_SPMV(implementation, timer, A, a_d, y_d);
+        sanity_check_vectors(vectors_d, original_vectors);
     }
     if(implementation.SymGS_implemented){
         bench_SymGS(implementation, timer, A, x_d, y_d);
+        sanity_check_vectors(vectors_d, original_vectors);
     }
 
     // bench_SPMV(implementation, timer, A, A_row_ptr_d, A_col_idx_d, A_values_d, x_d, y_d);

@@ -41,7 +41,7 @@ int main() {
 
     std::cout << "Starting cuSparse 3d27p Benchmarks" << std::endl;
     auto start = std::chrono::high_resolution_clock::now();
-    // cuSparse_Implementation<double> CSR_implementation;
+    // cuSparse_Implementation<double> CSR_Implementation;
     // run_cuSparse_3d27p_benchmarks(8, 8, 8, folder_path, CSR_Implementation);
     // run_cuSparse_3d27p_benchmarks(16, 16, 16, folder_path, CSR_Implementation);
     // run_cuSparse_3d27p_benchmarks(32, 32, 32, folder_path, CSR_Implementation);
@@ -98,10 +98,10 @@ int main() {
     std::cout << "Starting Striped Warp Reduction 3d27p Benchmarks" << std::endl;
     start = std::chrono::high_resolution_clock::now();
     striped_warp_reduction_Implementation<double> SWR_implementation;
-    // run_striped_warp_reduction_3d27p_benchmarks(8, 8, 8, folder_path, SWR_implementation);
-    // run_striped_warp_reduction_3d27p_benchmarks(16, 16, 16, folder_path, SWR_implementation);
-    // run_striped_warp_reduction_3d27p_benchmarks(24, 24, 24, folder_path, SWR_implementation);
-    // run_striped_warp_reduction_3d27p_benchmarks(32, 32, 32, folder_path, SWR_implementation);
+    run_striped_warp_reduction_3d27p_benchmarks(8, 8, 8, folder_path, SWR_implementation);
+    run_striped_warp_reduction_3d27p_benchmarks(16, 16, 16, folder_path, SWR_implementation);
+    run_striped_warp_reduction_3d27p_benchmarks(24, 24, 24, folder_path, SWR_implementation);
+    run_striped_warp_reduction_3d27p_benchmarks(32, 32, 32, folder_path, SWR_implementation);
     // run_striped_warp_reduction_3d27p_benchmarks(64, 64, 64, folder_path, SWR_implementation);
     // run_striped_warp_reduction_3d27p_benchmarks(128, 64, 64, folder_path, SWR_implementation);
     // run_striped_warp_reduction_3d27p_benchmarks(128, 128, 64, folder_path, SWR_implementation);
@@ -187,7 +187,7 @@ int main() {
     striped_box_coloring_Implementation<double> SBC_implementation;
     // run_striped_box_coloring_3d27p_benchmarks(8, 8, 8, folder_path, SBC_implementation);
     // run_striped_box_coloring_3d27p_benchmarks(16, 16, 16, folder_path, SBC_implementation);
-    run_striped_box_coloring_3d27p_benchmarks(24, 24, 24, folder_path, SBC_implementation);
+    // run_striped_box_coloring_3d27p_benchmarks(24, 24, 24, folder_path, SBC_implementation);
     // run_striped_box_coloring_3d27p_benchmarks(32, 32, 32, folder_path, SBC_implementation);
     // run_striped_box_coloring_3d27p_benchmarks(64, 64, 64, folder_path, SBC_implementation);
     // run_striped_box_coloring_3d27p_benchmarks(128, 64, 64, folder_path, SBC_implementation);

@@ -12,7 +12,7 @@ def print_dense_version_of_striped_matrix(num_rows, j_min_i):
             neighbor = i + j_min_i[j]
             if neighbor < num_rows and neighbor >= 0:
                 matrix[i][neighbor] = 1
-    for i in range(num_stripes):
+    for i in range(num_rows):
         print(matrix[i])
 
 def generate_box_coloring(nx, ny, nz, bx, by, bz):
@@ -152,6 +152,29 @@ def analyze_box_coloring(nx, ny, nz, bx, by, bz):
     #     formatted_row = " ".join(f"{num:4}" for num in row)  # Adjust the width as needed
     #     print(formatted_row, flush=True)
 
+def generate_iterative_coloring(num_rows, j_min_i):
+    colors = [-1] * num_rows
+
+    for i in range(num_rows):
+        # if the row isn't colored
+        if colors[i] == -1:
+            
+            neighbors_colors = []
+            for j in range(len(j_min_i)):
+                neighbor = i + j_min_i[j]
+                if neighbor < num_rows and neighbor >= 0:
+                    neighbors_colors.append(colors[neighbor])
+
+            for c in range(num_rows):
+                if c not in neighbors_colors:
+                    colors[i] = c
+                    break
+        
+    for i in range(num_rows):
+        print(f"Node {i} has color {colors[i]}")
+
+    return colors
+
 def analyze_general_box_coloring(num_rows, j_min_i, colors):
 
     num_stripes = len(j_min_i)
@@ -161,25 +184,35 @@ def analyze_general_box_coloring(num_rows, j_min_i, colors):
     for i in range(num_rows):
         for j in range(num_stripes):
             neighbor = i + j_min_i[j]
-            if neighbor < num_rows and neighbor >= 0 and neighbor != i:
+            if neighbor < num_rows and neighbor >= 0 and neighbor != i and colors[i] !=-42 and colors[i] != -1:
+                
                 assert colors[i] != colors[neighbor], f"Neighbor {neighbor} of node {i} has the same color {colors[i]}"
 
     print("analisys passed for general box coloring")
 
 def general_striped_box_coloring(num_rows, j_min_i):
-
-    print_dense_version_of_striped_matrix(num_rows, j_min_i)
+    print(f"stripe 18: {j_min_i[18]}")
+    # print(num_rows)
+    # print_dense_version_of_striped_matrix(num_rows, j_min_i)
 
     num_stripes = len(j_min_i)
     colors = [-1] * num_rows
     # adapting the starting rows ensures that row zero gets colored
     starting_rows = [x - j_min_i[0] for x in j_min_i]
 
+    first_non_neg_idx = -1
+
     num_patterns = 1
     # this stores the pattern of the stripes, i.e. the length and the starting color
     patterns = [(1,0)]
 
+
+
     for i in range(1, num_stripes):
+
+        if j_min_i[i] >= 0 and first_non_neg_idx == -1:
+            first_non_neg_idx = i
+
         # every time the new j_min_i is increased by more than just 1 we get a new pattern
         if j_min_i[i] - 1 != j_min_i[i-1]:
             num_patterns += 1
@@ -187,10 +220,15 @@ def general_striped_box_coloring(num_rows, j_min_i):
         else:
             patterns[-1] = (patterns[-1][0] + 1, patterns[-1][1])
     
+    print(f"first_non_neg_idx: {first_non_neg_idx}")    
 
     # first we set the initial colors
     for i in range(num_stripes):
-        colors[starting_rows[i]] = i
+
+        # if j_min_i[i] >= 0:
+            colors[j_min_i[i]] = i
+            # print("yoho")
+            # print(f"i: {i}, j_min_i[i]: {j_min_i[i]}, colors[j_min_i[i]]: {colors[j_min_i[i]]}")
 
     # how do we know what the end of the last pattern is?
     # in the box coloring for the stencil we repeat the pattern 3 times, because
@@ -214,35 +252,167 @@ def general_striped_box_coloring(num_rows, j_min_i):
                    
                     # we apply the next color in the pattern
                     color = prev_row_color + 1 if prev_row_color + 1 < pattern_start + pattern_len else pattern_start
-            
-                    if(color == 3):
-                        print(f"i: {i}, prev_row_color: {prev_row_color}, pattern: {pattern}, pattern_len: {pattern_len}, pattern_start: {pattern_start}")
-                        # print(f"colors: {colors}")
 
                     # check if one of the neighbors has the same color
-                    for j in range(num_stripes):
-                        neighbor = i + j_min_i[j]
-                        if i== 3:
-                            print(f"neighbor: {neighbor}, color: {color}, colors[neighbor]: {colors[neighbor]}")
-                        if neighbor < num_rows and neighbor >= 0 and colors[neighbor] == color:
-                            # if the neighbor has the same color, we know we are at the end of the pattern and we need to start a new one
-                            if pattern < len(patterns) - 1:
-                                next_pattern_len, next_pattern_start = patterns[pattern+1]
-                                color = next_pattern_start
-                            else:
-                                # print("we are at the last pattern")
-                                # print(f"pattern: {pattern}, patterns: {patterns}, pattern_len: {pattern_len}, pattern_start: {pattern_start}")
-                                
-                                # if we are at the last pattern, we need to start over
-                                color = 0
+                    check_color = True
+                    check_color_count = 0
+                    while(check_color):
+                        print(f"color at beginning of while check for i={i}: {color}")
+                        # we only need to check the color once unless we change the color
+                        check_color = False
+                        check_color_count += 1
+                        if check_color_count > num_stripes:
+                            # we went through all possible colors
+                            print(f"i: {i}, colors: {colors}")
+                            # assert False, "We went through all possible colors"
+                            check_color = False
+                            color = -42
                             break
+                        for j in range(num_stripes):
+                            neighbor = i + j_min_i[j]
+                            
+                            if neighbor < num_rows and neighbor >= 0 and colors[neighbor] == color:
+                                
+                                # if the neighbor has the same color, we know we are at the end of the pattern and we need to start a new one
+                                if pattern < len(patterns) - 1:
+                                    next_pattern_len, next_pattern_start = patterns[pattern+1]
+                                    pattern_len, pattern_start = next_pattern_len, next_pattern_start
+                                    pattern = pattern + 1
+                                    color = next_pattern_start
+                                    check_color_count += 1
+                                    check_color = True
+                                    print(f"go to next pattern: {pattern+1}")
+                                    print(f"new color: {color}")
+
+                                else:
+                                    # print("we are at the last pattern")
+                                    # print(f"pattern: {pattern}, patterns: {patterns}, pattern_len: {pattern_len}, pattern_start: {pattern_start}")
+                                    
+                                    # if we are at the last pattern, we need to start over
+                                    color = 0
+                                    next_pattern_len, next_pattern_start = patterns[0]
+                                    pattern_len, pattern_start = next_pattern_len, next_pattern_start
+                                    pattern += 1
+                                    check_color_count += 1
+                                    check_color = True
+
+                                break
+                    
+                    if(i == 22):
+                        print(f"i: {i}, color: {color}, check_color_count: {check_color_count}")
                     colors[i] = color
                     break
+    
+    # # now we do the same thing backwards for the rows that are before the first non-negative j_min_i
+    # for i in range(first_non_neg_idx-1, -1, -1):
+
+    #     if colors[i] == -1:
+    #         next_row_color = colors[i+1]
+    #         for pattern in range(len(patterns)):
+    #             pattern_len, pattern_start = patterns[pattern]
+    #             if next_row_color >= pattern_start and next_row_color < pattern_start + pattern_len:
+                   
+    #                 # we apply the previous color in the pattern
+    #                 color = next_row_color - 1 if next_row_color - 1 >= pattern_start else pattern_start + pattern_len - 1   
+
+    #                 # check if one of the neighbors has the same color
+    #                 # we need to check the neighbors in the opposite direction
+    #                 for j in range(num_stripes):
+    #                     neighbor = i + j_min_i[j]
+    #                     if neighbor < num_rows and neighbor >= 0 and colors[neighbor] == color:
+    #                         # if the neighbor has the same color, we know we are at the end of the pattern and we need to start a new one
+    #                         if pattern > 0:
+    #                             prev_pattern_len, prev_pattern_start = patterns[pattern-1]
+    #                             color = prev_pattern_start + prev_pattern_len - 1
+    #                         else:
+    #                             # if we are at the first pattern, we need to start over
+    #                             color = patterns[-1][1] + patterns[-1][0] - 1
+    #                         break
+                    
+    #                 colors[i] = color
+    #                 break
 
     
     print(f"patterns: {patterns}")
     print(f"colors: {colors}")
+
+    for i in range(num_rows):
+        if colors[i] == -42:
+            neighbors_colors = [colors[i + j_min_i[j]] for j in range(num_stripes) if i + j_min_i[j] < num_rows and i + j_min_i[j] >= 0]
+            all_colors = [c for c in range(num_stripes)]
+            available_colors = [c for c in all_colors if c not in neighbors_colors]
+            print(f"Node {i} has no color, neighbors colors: {neighbors_colors}, available colors: {available_colors}")
+
+    # # make colors start at 0
+    # min_color = min(colors)
+    # colors = [c - min_color for c in colors]
+
     return colors             
+
+def general_striped_box_coloring2(num_rows, j_min_i):
+
+    num_stripes = len(j_min_i)
+    colors = [-1] * num_rows
+
+    num_critital_rows = j_min_i[-1] - j_min_i[0]
+    # max_num_critical_cols = num_critical_rows
+    start_critial_rows = -j_min_i[0]
+
+    # find the first row that has all num_stripes neighbors
+    # to do that we subtract the smallest j_min_i from all the j_min_i
+    initial_colors = [i - j_min_i[0] for i in j_min_i]
+
+    for i in range(num_stripes):
+        colors[j_min_i[i] - j_min_i[0]] = i
+    
+
+
+    # not_colored = [i for i in range(num_critital_rows) if colors[i] == -1]
+
+    # generate & populate the matrix
+    matrix = [[0 for i in range(num_rows)] for j in range(num_rows)]
+
+    for i in range(num_rows):
+        for j in range(num_stripes):
+            neighbor = i + j_min_i[j]
+            if neighbor < num_rows and neighbor >= 0:
+                matrix[i][neighbor] = 1
+
+    for row in range(num_rows):
+        color_to_print = [colors[row]]
+
+        if color_to_print == [-1]:
+            # if we didn't color it we find all the possible colors
+            neighbors_colors = [colors[row + j_min_i[j]] for j in range(num_stripes) if row + j_min_i[j] < num_rows and row + j_min_i[j] >= 0]
+            all_colors = [c for c in range(num_stripes)]
+            available_colors = [c for c in all_colors if c not in neighbors_colors]
+            
+            # color_to_print = list(set(neighbors_colors))
+            color_to_print = available_colors
+
+            # if(row == 3):
+            #     print(f"Node {row} has no color, neighbors colors: {neighbors_colors}, available colors: {available_colors}")
+
+        matrix_row = matrix[row]
+        
+        # Format the print statement for better spacing
+        formatted_color = f"{color_to_print}".ljust(65)
+        formatted_matrix_row = " ".join(f"{num:2}" for num in matrix_row)
+        print(f"{formatted_color} {formatted_matrix_row}")
+
+    print(f"size critical rows: {num_critital_rows}, start critical rows: {start_critial_rows}")
+    
+
+    return colors
+
+
+   
+    
+
+        
+
+
+
 
 
 def nils_offset_analysis(nx, ny, nz, bx, by, bz):
@@ -353,7 +523,7 @@ def general_striped_box_coloring_for_3D27pt(nx):
         off_x, off_y, off_z = neighbour_offsets[i]
         j_min_i.append(off_x + nx*off_y + nx*nx*off_z)
 
-    colors = general_striped_box_coloring(nx*nx*nx, j_min_i)
+    colors = general_striped_box_coloring2(nx*nx*nx, j_min_i)
     resorted_colors = []
 
     ny = nx
@@ -412,7 +582,10 @@ def main():
     # analyze_box_coloring(12, 12, 6, bx, by, bz)
     # analyze_box_coloring(16, 16, 16, bx, by, bz)
 
+    print(f"size: {4*4*4}")
     general_striped_box_coloring_for_3D27pt(4)
+    # print(f"size: {5*5*5}")
+    # general_striped_box_coloring_for_3D27pt(5)
 
     # nils_offset_analysis(3, 3, 3, 3, 3, 3)
     # nils_offset_analysis(4, 4, 4, 3, 3, 3)

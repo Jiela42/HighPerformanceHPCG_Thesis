@@ -484,12 +484,11 @@ if __name__ == "__main__":
     # for i in range(A_np.shape[0]):
     #     y[i] = 8.0 - A_csr[i].nnz
     
-    # run_AMGX_SymGS(A_csr, x_np, y, 1)
 
     meta_data , A_csr, y = generations.generate_cupy_csr_problem(64, 64, 64)
     x = np.zeros(meta_data.num_rows, dtype=np.float64)
     A_csr_scipy =  sparse.csr_matrix((A_csr.data.get(), A_csr.indices.get(), A_csr.indptr.get()), shape=A_csr.shape)
 
+    # run_AMGX_SymGS(A_csr, x_np, y, 1)
 
-    run_AMGX_CG(A_csr_scipy, x, y)
-
+    # run_AMGX_CG(A_csr_scipy, x, y)
