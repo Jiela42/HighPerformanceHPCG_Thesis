@@ -373,6 +373,14 @@ __global__ void extract_xz_plane_kernel(DataType *x_d, DataType *slice_d, int le
     if (z_loc<length_Z) slice_d[tid]=x_d[z_loc*slice_Z + x_loc*slice_X];
 }
 
+__global__ void inject_xz_plane_kernel(DataType *x_d, DataType *slice_d, int length_X, int length_Z, int slice_X, int slice_Z){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    int z_loc = tid % length_X;
+    int x_loc = tid / length_X;
+    if (z_loc<length_Z) x_d[z_loc*slice_Z + x_loc*slice_X]=slice_d[tid];
+}
+
 __global__ void extract_yz_plane_kernel(DataType *x_d, DataType *slice_d, int length_Y, int length_Z, int slice_Y, int slice_Z){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     
@@ -381,6 +389,13 @@ __global__ void extract_yz_plane_kernel(DataType *x_d, DataType *slice_d, int le
     if (z_loc<length_Z) slice_d[tid]=x_d[z_loc*slice_Z + y_loc*slice_Y];
 }
 
+__global__ void inject_yz_plane_kernel(DataType *x_d, DataType *slice_d, int length_Y, int length_Z, int slice_Y, int slice_Z){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    int z_loc = tid % length_Y;
+    int y_loc = tid / length_Y;
+    if (z_loc<length_Z) x_d[z_loc*slice_Z + y_loc*slice_Y]=slice_d[tid];
+}
 __global__ void extract_xy_plane_kernel(DataType *x_d, DataType *slice_d, int length_X, int length_Y, int slice_X, int slice_Y){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     
@@ -389,15 +404,33 @@ __global__ void extract_xy_plane_kernel(DataType *x_d, DataType *slice_d, int le
     if (y_loc<length_Y) slice_d[tid]=x_d[y_loc*slice_Y + x_loc*slice_X];
 }
 
+__global__ void inject_xy_plane_kernel(DataType *x_d, DataType *slice_d, int length_X, int length_Y, int slice_X, int slice_Y){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    int y_loc = tid % length_X;
+    int x_loc = tid / length_X;
+    if (y_loc<length_Y) x_d[y_loc*slice_Y + x_loc*slice_X]=slice_d[tid];
+}
 
 void extract_horizontal_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Z, int dimx, int dimy, int dimz){
     local_int_t k = x +  y * dimx + z * dimx * dimy;
     x_d += k;
-    for(int i = 0; i < length_Z; i++){
+    /* for(int i = 0; i < length_Z; i++){
         CHECK_CUDA(cudaMemcpy(x_h, x_d, length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
         x_h += length_X;
         x_d += dimx * dimy;
-    }
+    } */
+    DataType *slice_d;
+    CHECK_CUDA(cudaMalloc(&slice_d, length_X*length_Z*sizeof(DataType)));
+
+    // collect halo on device
+    int nthread=256;
+    int nblock = (length_X*length_Z + nthread - 1) / nthread;
+    extract_xz_plane_kernel<<<nblock,nthread>>>(x_d, slice_d, length_X, length_Z, dimx, dimy*dimx);
+    
+    // copy from device to host
+    CHECK_CUDA(cudaMemcpy(x_h, slice_d, length_X*length_Z*sizeof(DataType), cudaMemcpyDeviceToHost));
+
 }
 
 void inject_horizontal_plane_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Z, int dimx, int dimy, int dimz){

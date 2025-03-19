@@ -467,7 +467,7 @@ void GenerateStripedPartialMatrix_GPU(Problem *problem, double *A_d) {
     int block_size = 256;
     int num_blocks = (num_rows + block_size - 1) / block_size;
 
-    GenerateStripedPartialMatrix_kernel<<<block_size, num_blocks>>>(problem->nx, problem->ny, problem->nz, problem->gnx, problem->gny, problem->gnz, problem->gx0, problem->gy0, problem->gz0, A_d);
+    GenerateStripedPartialMatrix_kernel<<<num_blocks, block_size>>>(problem->nx, problem->ny, problem->nz, problem->gnx, problem->gny, problem->gnz, problem->gx0, problem->gy0, problem->gz0, A_d);
 }
 
 void generate_partialf2c_operator(
@@ -488,4 +488,47 @@ void generate_partialf2c_operator(
     CHECK_CUDA(cudaDeviceSynchronize());
 }
 
+
+__global__ void generate_y_vector_for_HPCG_problem_kernel(int gnx, int gny, int gnz, int nx, int ny, int nz, int gx0, int gy0, int gz0, double *y){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    for (int i = tid; i < nx*ny*nz; i += blockDim.x * gridDim.x){
+        int iz = i / (nx*ny) + gz0;
+        int iy = i % (nx*ny) / nx + gy0;
+        int ix = i - iz * (nx*ny) - iy * nx + gx0;
+
+        int nnz_i=0;
+
+        for (int sz = -1; sz < 2; sz++){
+            if(iz + sz > -1 && iz + sz < gnz){
+                for(int sy = -1; sy < 2; sy++){
+                    if(iy + sy > -1 && iy + sy < gny){
+                        for(int sx = -1; sx < 2; sx++){
+                            if(ix + sx > -1 && ix + sx < gnx){
+                                int j = ix + sx + nx * (iy + sy) + nx * ny * (iz + sz);
+                                nnz_i++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        y[i] = 26.0 - nnz_i;
+    }
+
+}
+
+
+
+void generate_y_vector_for_HPCG_problem_onGPU(Problem *problem, double *y_d){
+    int num_rows = problem->nx * problem->ny * problem->nz;
+    int num_cols = problem->nx * problem->ny * problem->nz;
+
+    CHECK_CUDA(cudaMalloc(&y_d, sizeof(double)*num_rows));
+    CHECK_CUDA(cudaMemset(y_d, 0., sizeof(double)*num_rows));
+
+    int nthread=256;
+    int nblocks=(num_rows+nthread-1) / nthread;
+    generate_y_vector_for_HPCG_problem_kernel<<<nblocks, nthread>>>(problem->gnx, problem->gny, problem->gnz, problem->nx, problem->ny, problem->nz, problem->gx0, problem->gy0, problem->gz0, y_d);
+}
 

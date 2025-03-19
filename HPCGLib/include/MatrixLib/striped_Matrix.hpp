@@ -125,10 +125,10 @@ class striped_partial_Matrix {
         int get_num_rows() const;
         int get_num_cols() const;
         int get_num_stripes() const;
-        int get_nx() const;
-        int get_ny() const;
-        int get_nz() const;
-        int get_nnz() const;
+        //int get_nx() const;
+        //int get_ny() const;
+        //int get_nz() const;
+        //int get_nnz() const;
         //int get_diag_index() const;
         //MatrixType get_matrix_type() const;
 
@@ -145,7 +145,7 @@ class striped_partial_Matrix {
         std::vector<int> get_f2c_op();
 
         T get_element(int i, int j) const;
-        std::vector <int>& get_j_min_i();
+        //std::vector <int>& get_j_min_i();
         //std::vector <T>& get_values();
         int * get_j_min_i_d();
         T * get_values_d();
@@ -161,15 +161,15 @@ class striped_partial_Matrix {
         private:
         //friend class sparse_CSR_Matrix<T>;
         Problem *problem;
-        int nx;
-        int ny;
-        int nz;
-        int nnz;
+        //int nx;
+        //int ny;
+        //int nz;
+        //int nnz;
         int diag_index;
         int num_rows;
         int num_cols;
         int num_stripes;
-        // std::vector<int> j_min_i;
+        std::vector<int> j_min_i;
         // std::vector<T> values;
         // MatrixType matrix_type;
         // friend void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped(striped_Matrix<T> & A);

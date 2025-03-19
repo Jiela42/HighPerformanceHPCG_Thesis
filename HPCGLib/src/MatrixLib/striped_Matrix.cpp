@@ -55,13 +55,14 @@ striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
     this->problem = p;
     //this->matrix_type = MatrixType::UNKNOWN;
 
-    this->num_rows = 0;
-    this->num_cols = 0;
-    this->num_stripes = 0;
+    this->num_rows = p->nx * p->ny * p->nz; // is this global or local? 
+    this->num_cols = p->nx * p->ny * p->nz;
+    this->num_stripes = 27;
 
 
     //this->j_min_i.clear();
     //this->values.clear();
+    this->j_min_i = std::vector<int>(this->num_stripes, 0);
     this->j_min_i_d = nullptr;
     this->values_d = nullptr;
 
@@ -78,6 +79,39 @@ striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
     //this->f2c_op.clear();
 
     GenerateStripedPartialMatrix_GPU(this->problem, this->values_d);
+
+    // fill j_min_i_d
+    int neighbour_offsets [num_stripes][3] = {
+        {-1, -1, -1}, {0, -1, -1}, {1, -1, -1},
+        {-1, 0, -1}, {0, 0, -1}, {1, 0, -1},
+        {-1, 1, -1}, {0, 1, -1}, {1, 1, -1},
+        {-1, -1, 0}, {0, -1, 0}, {1, -1, 0},
+        {-1, 0, 0}, {0, 0, 0}, {1, 0, 0},
+        {-1, 1, 0}, {0, 1, 0}, {1, 1, 0},
+        {-1, -1, 1}, {0, -1, 1}, {1, -1, 1},
+        {-1, 0, 1}, {0, 0, 1}, {1, 0, 1},
+        {-1, 1, 1}, {0, 1, 1}, {1, 1, 1}
+    };
+
+    for (int i = 0; i < this->num_stripes; i++) {
+        int off_x = neighbour_offsets[i][0];
+        int off_y = neighbour_offsets[i][1];
+        int off_z = neighbour_offsets[i][2];
+        
+        this->j_min_i[i] = off_x + off_y * p->gnx + off_z * p->gnx * p->gny;
+        if (this->j_min_i[i] == 0) {
+            this->diag_index = i;
+        }
+    }
+
+    CHECK_CUDA(cudaMalloc(&this->j_min_i_d, this->num_stripes * sizeof(int)));
+    CHECK_CUDA(cudaMemcpy(this->j_min_i_d, this->j_min_i.data(), this->num_stripes * sizeof(int), cudaMemcpyHostToDevice));
+
+    CHECK_CUDA(cudaMalloc(&this->rc_d, this->num_rows * sizeof(T)));
+    CHECK_CUDA(cudaMalloc(&this->xc_d, this->num_rows * sizeof(T)));
+    CHECK_CUDA(cudaMalloc(&this->Axf_d, this->num_rows * sizeof(T)));
+    
+    
 }
 
 template <typename T>
