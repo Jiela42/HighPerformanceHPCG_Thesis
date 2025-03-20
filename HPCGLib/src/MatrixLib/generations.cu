@@ -505,7 +505,7 @@ __global__ void generate_y_vector_for_HPCG_problem_kernel(int gnx, int gny, int 
                     if(iy + sy > -1 && iy + sy < gny){
                         for(int sx = -1; sx < 2; sx++){
                             if(ix + sx > -1 && ix + sx < gnx){
-                                int j = ix + sx + nx * (iy + sy) + nx * ny * (iz + sz);
+                                /* int j = ix + sx + nx * (iy + sy) + nx * ny * (iz + sz); */
                                 nnz_i++;
                             }
                         }

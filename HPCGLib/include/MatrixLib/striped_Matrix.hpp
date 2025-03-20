@@ -156,7 +156,8 @@ class striped_partial_Matrix {
         // void write_to_file() const;
 
         void initialize_coarse_matrix();
-        void generateMatrix_onGPU();        
+        void generateMatrix_onGPU();     
+        void generate_f2c_operator_onGPU();   
         
         private:
         //friend class sparse_CSR_Matrix<T>;
@@ -190,9 +191,9 @@ class striped_partial_Matrix {
         int *f2c_op_d;
         // since we only have the MG routines run on the GPU, we only have the coarse matrix data (except f2c_op) on the GPU
         // (they are all vectors)
-        T* rc_d;
-        T* xc_d;
-        T* Axf_d;
+        Halo* rc_d;
+        Halo* xc_d;
+        Halo* Axf_d;
 
 };
 #endif // STRIPED_MATRIX_HPP

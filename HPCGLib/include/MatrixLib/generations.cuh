@@ -44,4 +44,8 @@ void generate_partialf2c_operator(
     int * f2c_op_d
 );
 
+void generate_y_vector_for_HPCG_problem_onGPU(
+    Problem *problem, 
+    double *y_d);
+
 #endif // GENERATIONS_CUH
