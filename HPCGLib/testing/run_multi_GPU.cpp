@@ -37,25 +37,21 @@ int main(int argc, char *argv[]){
          NZ  = 8;
     }
 
-    MPI_Init( &argc , &argv );
-    int size, rank;
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    // create an instance of the version to run the functions on
+    non_blocking_mpi_Implementation<DataType> implementation_multi_GPU_non_blocking_mpi;
+
+    Problem *problem = implementation_multi_GPU_non_blocking_mpi.init_comm(argc, argv, NPX, NPY, NPZ, NX, NY, NZ);
+    int rank = problem->rank;
+    int size = problem->size;
 
     if(rank == 0) printf("Initialized.\n");
     if(rank == 0) {
         if(provided){
-            ("Using NPX=%d, NPY=%d, NPZ=%d, NX=%d, NY=%d, NZ=%d\n", NPX, NPY, NPZ, NX, NY, NZ)
+            ("Using NPX=%d, NPY=%d, NPZ=%d, NX=%d, NY=%d, NZ=%d\n", NPX, NPY, NPZ, NX, NY, NZ);
         } else {
             printf("Using default values of NPX=%d, NPY=%d, NPZ=%d, NX=%d, NY=%d, NZ=%d\n", NPX, NPY, NPZ, NX, NY, NZ);
         }
-    
-    //initialize problem struct
-    Problem problem; //holds geometric data about the problem
-    GenerateProblem(NPX, NPY, NPZ, NX, NY, NZ, size, rank, &problem);
-
-    //set Device
-    InitGPU(&problem);
+    }
 
     //initialize matrix partial matrix A_local
     sparse_CSR_Matrix<DataType> A_local;
@@ -69,7 +65,7 @@ int main(int argc, char *argv[]){
     local_int_t num_rows_local = (*A_local_striped).get_num_rows();
     int num_stripes_local = (*A_local_striped).get_num_stripes();
     DataType *striped_A_local_h = (DataType*) malloc(num_rows_local*num_stripes_local*sizeof(DataType));
-    GenerateStripedPartialMatrix(&problem, striped_A_local_h);
+    GenerateStripedPartialMatrix(problem, striped_A_local_h);
     CHECK_CUDA(cudaMemcpy(striped_A_local_d, striped_A_local_h, num_rows_local*num_stripes_local*sizeof(DataType), cudaMemcpyHostToDevice));
 
     //intialize j_min_i_d
@@ -88,13 +84,10 @@ int main(int argc, char *argv[]){
 
     Halo halo_b_d;
     InitHalo(&halo_b_d, NX, NY, NZ);
-    SetHaloGlobalIndexGPU(&halo_b_d, &problem);
-
-    // create an instance of the version to run the functions on
-    non_blocking_mpi_Implementation<DataType> implementation_multi_GPU_non_blocking_mpi;
+    SetHaloGlobalIndexGPU(&halo_b_d, problem);
 
     //exchange halos so each process starts with the correct data
-    implementation_multi_GPU_non_blocking_mpi.ExchangeHalo(&halo_b_d, &problem);
+    implementation_multi_GPU_non_blocking_mpi.ExchangeHalo(&halo_b_d, problem);
 
     //run CG on multi GPU
     int n_iters_local;
@@ -109,14 +102,14 @@ int main(int argc, char *argv[]){
                                                     n_iters_local, 
                                                     normr_local, 
                                                     normr0_local, 
-                                                    &problem, 
+                                                    problem, 
                                                     j_min_i_d);
 
     MPI_Barrier(MPI_COMM_WORLD); // ensure all processes complete the call
     double end_time = MPI_Wtime();
 
     double elapsed_time = end_time - start_time;
-    if(problem.rank == 0) {
+    if(rank == 0) {
         printf("CG computation time: %f seconds\n", elapsed_time);
     }
     if(rank == 0) printf("CG done with n_iters_local=%d.\n", n_iters_local);
@@ -127,7 +120,7 @@ int main(int argc, char *argv[]){
     FreeHaloGPU(&halo_x_d);
     FreeHaloGPU(&halo_b_d);
 
-    MPI_Finalize();
+    implementation_multi_GPU_non_blocking_mpi.finalize_comm(problem);
 
     return 0;
 }

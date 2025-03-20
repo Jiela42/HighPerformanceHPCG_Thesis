@@ -55,70 +55,175 @@ void InitHaloMemGPU(Halo *halo, int nx, int ny, int nz){
     int dimx = nx + 2;
     int dimy = ny + 2;
     int dimz = nz + 2;
-    DataType *x_d;
-    CHECK_CUDA(cudaMalloc(&x_d, dimx * dimy * dimz * sizeof(DataType)));
-    halo->x_d = x_d;
-    DataType *interior = x_d + dimx * dimy + dimx + 1;
     halo->nx = nx;
     halo->ny = ny;
     halo->nz = nz;
     halo->dimx = dimx;
     halo->dimy = dimy;
     halo->dimz = dimz;
+    
+    DataType *x_d;
+    CHECK_CUDA(cudaMalloc(&x_d, dimx * dimy * dimz * sizeof(DataType)));
+    halo->x_d = x_d;
+    DataType *interior = x_d + dimx * dimy + dimx + 1;
     halo->interior = interior;
+    
+    // Allocate device memory for halo exchange buffers
+    CHECK_CUDA(cudaMalloc(&halo->north_send_buff_d, nx * nz * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->north_recv_buff_d, nx * nz * sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->east_send_buff_d, ny * nz * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->east_recv_buff_d, ny * nz * sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->south_send_buff_d, nx * nz * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->south_recv_buff_d, nx * nz * sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->west_send_buff_d, ny * nz * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->west_recv_buff_d, ny * nz * sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->ne_send_buff_d, nz * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->ne_recv_buff_d, nz * sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->se_send_buff_d, nz * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->se_recv_buff_d, nz * sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->sw_send_buff_d, nz * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->sw_recv_buff_d, nz * sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->nw_send_buff_d, nz * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->nw_recv_buff_d, nz * sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->front_send_buff_d, nx * ny * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->front_recv_buff_d, nx * ny * sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->back_send_buff_d, nx * ny * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->back_recv_buff_d, nx * ny * sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->front_north_send_buff_d, nx * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->front_north_recv_buff_d, nx * sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->front_east_send_buff_d, ny * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->front_east_recv_buff_d, ny * sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->front_south_send_buff_d, nx * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->front_south_recv_buff_d, nx * sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->front_west_send_buff_d, ny * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->front_west_recv_buff_d, ny * sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->back_north_send_buff_d, nx * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->back_north_recv_buff_d, nx * sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->back_east_send_buff_d, ny * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->back_east_recv_buff_d, ny * sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->back_south_send_buff_d, nx * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->back_south_recv_buff_d, nx * sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->back_west_send_buff_d, ny * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->back_west_recv_buff_d, ny * sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->front_ne_send_buff_d, sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->front_ne_recv_buff_d, sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->front_se_send_buff_d, sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->front_se_recv_buff_d, sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->front_sw_send_buff_d, sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->front_sw_recv_buff_d, sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->front_nw_send_buff_d, sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->front_nw_recv_buff_d, sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->back_ne_send_buff_d, sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->back_ne_recv_buff_d, sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->back_se_send_buff_d, sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->back_se_recv_buff_d, sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->back_sw_send_buff_d, sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->back_sw_recv_buff_d, sizeof(DataType)));
+
+    CHECK_CUDA(cudaMalloc(&halo->back_nw_send_buff_d, sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&halo->back_nw_recv_buff_d, sizeof(DataType)));
 }
 
 void InitHaloMemCPU(Halo *halo, int nx, int ny, int nz){
     halo->north_send_buff_h = (DataType*) malloc(nx * nz * sizeof(DataType));
     halo->north_recv_buff_h = (DataType*) malloc(nx * nz * sizeof(DataType));
+    
     halo->east_send_buff_h = (DataType*) malloc(ny * nz * sizeof(DataType));
     halo->east_recv_buff_h = (DataType*) malloc(ny * nz * sizeof(DataType));
+    
     halo->south_send_buff_h = (DataType*) malloc(nx * nz * sizeof(DataType));
     halo->south_recv_buff_h = (DataType*) malloc(nx * nz * sizeof(DataType));
+    
     halo->west_send_buff_h = (DataType*) malloc(ny * nz * sizeof(DataType));
     halo->west_recv_buff_h = (DataType*) malloc(ny * nz * sizeof(DataType));
+    
     halo->ne_send_buff_h = (DataType*) malloc(nz * sizeof(DataType));
     halo->ne_recv_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    
     halo->se_send_buff_h = (DataType*) malloc(nz * sizeof(DataType));
     halo->se_recv_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    
     halo->sw_send_buff_h = (DataType*) malloc(nz * sizeof(DataType));
     halo->sw_recv_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    
     halo->nw_send_buff_h = (DataType*) malloc(nz * sizeof(DataType));
     halo->nw_recv_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    
     halo->front_send_buff_h = (DataType*) malloc(nx * ny * sizeof(DataType));
     halo->front_recv_buff_h = (DataType*) malloc(nx * ny * sizeof(DataType));
+    
     halo->back_send_buff_h = (DataType*) malloc(nx * ny * sizeof(DataType));
     halo->back_recv_buff_h = (DataType*) malloc(nx * ny * sizeof(DataType));
+    
     halo->front_north_send_buff_h = (DataType*) malloc(nx * sizeof(DataType));
     halo->front_north_recv_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    
     halo->front_east_send_buff_h = (DataType*) malloc(ny * sizeof(DataType));
     halo->front_east_recv_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    
     halo->front_south_send_buff_h = (DataType*) malloc(nx * sizeof(DataType));
     halo->front_south_recv_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    
     halo->front_west_send_buff_h = (DataType*) malloc(ny * sizeof(DataType));
     halo->front_west_recv_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    
     halo->back_north_send_buff_h = (DataType*) malloc(nx * sizeof(DataType));
     halo->back_north_recv_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    
     halo->back_east_send_buff_h = (DataType*) malloc(ny * sizeof(DataType));
     halo->back_east_recv_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    
     halo->back_south_send_buff_h = (DataType*) malloc(nx * sizeof(DataType));
     halo->back_south_recv_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    
     halo->back_west_send_buff_h = (DataType*) malloc(ny * sizeof(DataType));
     halo->back_west_recv_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    
     halo->front_ne_send_buff_h = (DataType*) malloc(sizeof(DataType));
     halo->front_ne_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    
     halo->front_se_send_buff_h = (DataType*) malloc(sizeof(DataType));
     halo->front_se_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    
     halo->front_sw_send_buff_h = (DataType*) malloc(sizeof(DataType));
     halo->front_sw_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    
     halo->front_nw_send_buff_h = (DataType*) malloc(sizeof(DataType));
     halo->front_nw_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    
     halo->back_ne_send_buff_h = (DataType*) malloc(sizeof(DataType));
     halo->back_ne_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    
     halo->back_se_send_buff_h = (DataType*) malloc(sizeof(DataType));
     halo->back_se_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    
     halo->back_sw_send_buff_h = (DataType*) malloc(sizeof(DataType));
     halo->back_sw_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    
     halo->back_nw_send_buff_h = (DataType*) malloc(sizeof(DataType));
     halo->back_nw_recv_buff_h = (DataType*) malloc(sizeof(DataType));
 }
@@ -285,6 +390,11 @@ void FreeHaloCPU(Halo *halo){
     free(halo->back_sw_recv_buff_h);
     free(halo->back_nw_send_buff_h);
     free(halo->back_nw_recv_buff_h);
+}
+
+void FreeHalo(Halo *halo){
+    FreeHaloGPU(halo);
+    FreeHaloCPU(halo);
 }
 
 void InitGPU(Problem *problem){

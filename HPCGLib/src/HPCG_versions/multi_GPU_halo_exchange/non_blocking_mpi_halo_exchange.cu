@@ -5,6 +5,22 @@
 #include <mpi.h>
 #include <stdio.h>
 
+template <typename T>
+Problem* non_blocking_mpi_Implementation<T>::init_comm_non_blocking_MPI(int argc, char *argv[], int npx, int npy, int npz, int nx, int ny, int nz){
+    MPI_Init( &argc , &argv );
+    int size, rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    
+    Problem *problem = (Problem *)malloc(sizeof(Problem));
+    GenerateProblem(npx, npy, npz, nx, ny, nz, size, rank, problem);
+
+    InitGPU(problem);
+
+    return problem;
+}
+
+
 // Copies to host and back to device, no device-to-device copy
 // TODO: Replace malloc per exchange with malloc once at beginning
 template <typename T>
@@ -486,6 +502,11 @@ void non_blocking_mpi_Implementation<T>::ExchangeHaloNonBlockingMPI(Halo *halo, 
         }
     }
 
+}
+
+template <typename T>
+void non_blocking_mpi_Implementation<T>::finalize_comm_non_blocking_MPI(Problem *problem){
+    MPI_Finalize();
 }
 
 // Explicit template instantiation

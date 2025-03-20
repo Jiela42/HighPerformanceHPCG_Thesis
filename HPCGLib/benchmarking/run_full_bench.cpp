@@ -218,6 +218,18 @@ int main() {
     seconds = static_cast<int>(elapsed_seconds.count()) % 60;
     std::cout << "COR Striped box coloring 3d27p Benchmarks took: " << minutes << "m" << seconds << "s" << std::endl;
 
+    std::cout << "Starting multi GPU Benchmarks" << std::endl;
+    start = std::chrono::high_resolution_clock::now();
+    //non_blocking_mpi_implementation<double> MGPU_implementation;
+    //run_multi_GPU_benchmarks(8, 8, 8, folder_path, MGPU_implementation);
+    // TODO: more
+    
+    end = std::chrono::high_resolution_clock::now();
+    elapsed_seconds = end-start;
+    minutes = static_cast<int>(elapsed_seconds.count()) / 60;
+    seconds = static_cast<int>(elapsed_seconds.count()) % 60;
+    std::cout << "Multi GPU Benchmarks took: " << minutes << "m" << seconds << "s" << std::endl;
+
     // because we wanna know roughly how long it takes us to run the benchmarks
     auto total_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> duration = total_end - total_start;

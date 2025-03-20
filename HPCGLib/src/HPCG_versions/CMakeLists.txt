@@ -9,6 +9,7 @@ find_package(CUDAToolkit REQUIRED)
 find_package(MPI REQUIRED)
 # Include CUDA directories
 include_directories(${CUDAToolkit_INCLUDE_DIRS})
+include_directories(/user-environment/linux-sles15-neoverse_v2/gcc-13.3.0/nccl-2.22.3-1-4j6h3ffzysukqpqbvriorrzk2lm762dd/include)
 
 # specify cuda standard
 # set(CMAKE_CUDA_STANDARD 12)
