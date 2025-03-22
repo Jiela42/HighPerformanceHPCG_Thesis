@@ -4,6 +4,7 @@
 #include "MatrixLib/generations.hpp"
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
 #include "MatrixLib/striped_Matrix.hpp"
+#include "MatrixLib/striped_partial_Matrix.hpp"
 
 #include "HPCGLib.hpp"
 #include "HPCG_versions/cusparse.hpp"

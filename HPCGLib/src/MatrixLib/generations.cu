@@ -392,32 +392,31 @@ void generate_f2c_operator(
 __global__ void GenerateStripedPartialMatrix_kernel(int nx, int ny, int nz, int gnx, int gny, int gnz, int offset_x, int offset_y, int offset_z, double *A){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     
-    local_int_t num_rows = nx * ny * nz;
-    local_int_t num_cols = nx * ny * nz;
+    int num_rows = nx * ny * nz;
     
     for (int i=tid; i<num_rows; i += blockDim.x * gridDim.x) {
         int gx = i % nx + offset_x;
         int gy = (i / nx) % ny + offset_y;
         int gz = i / (nx * ny) + offset_z;
 
+        int id=i*27;
         for (int sz = -1; sz < 2; sz++){
             for(int sy = -1; sy < 2; sy++){
                 for(int sx = -1; sx < 2; sx++){
-
                     if(gx + sx < 0 || gx + sx >= gnx ||
                         gy + sy < 0 || gy + sy >= gny ||
                         gz + sz < 0 || gz + sz >= gnz) {
-                            *A = 0.0;
-                            A++;
-                        } else {
-                            if(sx == 0 && sy == 0 && sz == 0){
-                                *A = 26.0;
-                                A++;
-                            } else {
-                                *A = -1.0;
-                                A++;
-                            }
+                            A[id] = 0.0;
+                    } 
+                    else {
+                        if(sx == 0 && sy == 0 && sz == 0){
+                            A[id] = 26.0;
+                        } 
+                        else {
+                            A[id] = -1.0;
                         }
+                    }
+                    id++;
                 }
             }
         }
@@ -479,13 +478,10 @@ void generate_partialf2c_operator(
     int num_coarse_rows = nxc * nyc * nzc;
 
     int num_threads = 1024;
-    int num_blocks = num_coarse_rows/num_threads;
-
-    // we need at least 1 block
-    num_blocks = num_blocks == 0 ? 1 : num_blocks;
+    int num_blocks = (num_coarse_rows+num_threads-1)/num_threads;
 
     generate_partialf2c_operator_kernel<<<num_blocks, num_threads>>>(nxf, nyf, nzf, nxc, nyc, nzc, f2c_op_d);
-    CHECK_CUDA(cudaDeviceSynchronize());
+    //CHECK_CUDA(cudaDeviceSynchronize());
 }
 
 
