@@ -298,11 +298,22 @@ void InitGPU(Problem *problem){
 void extract_horizontal_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Z, int dimx, int dimy, int dimz){
     local_int_t k = x +  y * dimx + z * dimx * dimy;
     x_d += k;
-    for(int i = 0; i < length_Z; i++){
+    /* for(int i = 0; i < length_Z; i++){
         CHECK_CUDA(cudaMemcpy(x_h, x_d, length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
         x_h += length_X;
         x_d += dimx * dimy;
-    }
+    } */
+    DataType *slice_d;
+    CHECK_CUDA(cudaMalloc(&slice_d, length_X*length_Z*sizeof(DataType)));
+
+    // collect halo on device
+    int nthread=256;
+    int nblock = (length_X*length_Z + nthread - 1) / nthread;
+    extract_xz_plane_kernel<<<nblock,nthread>>>(x_d, slice_d, length_X, length_Z, dimx, dimy*dimx);
+    
+    // copy from device to host
+    CHECK_CUDA(cudaMemcpy(x_h, slice_d, length_X*length_Z*sizeof(DataType), cudaMemcpyDeviceToHost));
+
 }
 
 void inject_horizontal_plane_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Z, int dimx, int dimy, int dimz){
@@ -318,6 +329,7 @@ void inject_horizontal_plane_to_GPU(DataType *x_d, DataType *x_h, int x, int y, 
 void extract_vertical_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Y, int length_Z, int dimx, int dimy, int dimz){
     local_int_t k = x +  y * dimx + z * dimx * dimy;
     x_d += k;
+    /* 
     for(int i = 0; i < length_Z; i++){
         for(int j = 0; j < length_Y; j++){
             CHECK_CUDA(cudaMemcpy(x_h, x_d, 1 * sizeof(DataType), cudaMemcpyDeviceToHost));
@@ -325,7 +337,19 @@ void extract_vertical_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y,
             x_d += dimx;
         }
         x_d += dimx * (dimy - length_Y);
-    }
+    } 
+    */
+    // allocate halo on device
+    DataType *slice_d;
+    CHECK_CUDA(cudaMalloc(&slice_d, length_Y*length_Z*sizeof(DataType)));
+
+    // collect halo on device
+    int nthread=256;
+    int nblock = (length_Y*length_Z + nthread - 1) / nthread;
+    extract_yz_plane_kernel<<<nblock,nthread>>>(x_d, slice_d, length_Y, length_Z, dimx, dimy*dimx);
+    
+    // copy from device to host
+    CHECK_CUDA(cudaMemcpy(x_h, slice_d, length_Y*length_Z*sizeof(DataType), cudaMemcpyDeviceToHost));
 }
 
 void inject_vertical_plane_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Y, int length_Z, int dimx, int dimy, int dimz){

@@ -4,6 +4,7 @@
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
 #include "MatrixLib/matrix_basics.hpp"
 #include "MatrixLib/generations.cuh"
+#include "UtilLib/hpcg_mpi_utils.cuh"
 
 #include <vector>
 #include <iostream>
