@@ -16,6 +16,7 @@
 #include "HPCG_versions/no_store_striped_coloring.cuh"
 #include "HPCG_versions/striped_coloringPrecomputed.cuh"
 #include "HPCG_versions/striped_box_coloring.cuh"
+#include "HPCG_versions/striped_COR_box_coloring.cuh"
 
 #include "HPCG_versions/striped_multi_GPU.cuh"
 
@@ -128,5 +129,6 @@ bool run_stripedColoringPrecomputed_tests(int nx, int ny, int nz);
 bool run_stripedBoxColoring_tests(int nx, int ny, int nz);
 bool run_no_store_stripedColoring_tests(int nx, int ny, int nz);
 bool run_no_store_stripedColoring_filebased_tests();
+bool run_COR_BoxColoring_tests(int nx, int ny, int nz);
 
 #endif // TESTING_HPP

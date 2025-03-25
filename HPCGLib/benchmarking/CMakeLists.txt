@@ -22,6 +22,7 @@ add_executable(run_full_bench
     benchmark_noStoreStripedColoring.cpp
     benchmark_stripedColoringPrecomputed.cpp
     benchmark_stripedBoxColoring.cpp
+    benchmark_stripedCORBoxColoring.cpp
 
 )
 
@@ -37,6 +38,7 @@ add_executable(run_specific_bench
     benchmark_noStoreStripedColoring.cpp
     benchmark_stripedColoringPrecomputed.cpp
     benchmark_stripedBoxColoring.cpp
+    benchmark_stripedCORBoxColoring.cpp
 )
 
 

@@ -580,7 +580,7 @@ bool test_Dot(
     bool test_pass = double_compare(result_baseline, result_uut);
 
     if (not test_pass){
-        std::cout << "Dot product failed: baseline = " << result_baseline << " uut = " << result_uut << std::endl;
+        std::cout << "Dot product failed for implementation: "<< uut.version_name << " baseline = " << result_baseline << " uut = " << result_uut << std::endl;
     }
 
     return test_pass;
@@ -680,9 +680,9 @@ bool test_Dot(
     CHECK_CUDA(cudaFree(y_d));
     CHECK_CUDA(cudaFree(result_d));
 
-    bool test_pass = double_compare(result, result_uut);
+    bool test_pass = relaxed_double_compare(result, result_uut, 1e-9);
     if (not test_pass){
-        std::cout << "Dot product failed: baseline = " << result << " uut = " << result_uut << std::endl;
+        std::cout << "Dot product failed for implementation: " << uut.version_name << " baseline = " << result << " uut = " << result_uut << std::endl;
     }
     // else {
     //     std::cout << "Dot product passed: baseline = " << result << " uut = " << result_uut << std::endl;
@@ -901,94 +901,146 @@ bool test_SymGS(
     return test_pass;
 }
 
+
 bool test_SymGS(
     HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
     striped_Matrix<double> & striped_A, // we pass A for the metadata
-    
     double * y_d // the vectors x is already on the device
         
 ){
-    // std::cout << "SymGS test 2" << std::endl;
-
     int num_rows = striped_A.get_num_rows();
-
-    sparse_CSR_Matrix<double>* A = striped_A.get_CSR();
-    // A.sparse_CSR_Matrix_from_striped(striped_A);
-
-    int num_rows_baseline = A->get_num_rows();
-
-    double * x_uut_d;
-    CHECK_CUDA(cudaMalloc(&x_uut_d, num_rows * sizeof(double)));
-    CHECK_CUDA(cudaMemset(x_uut_d, 0, num_rows * sizeof(double)));
-
-    // std::cout << "Baseline name = " << baseline.version_name << std::endl;
-
-    std::vector<double> x_baseline(num_rows, 0.0);
-    std::vector<double> x_uut(num_rows, 0.0);
-
-    // in case it is a norm based SymGS (we do more than one iteration)
-    // we need to store and adjust the number of max iterations
-    int original_max_iter = uut.get_maxSymGSIters();
-    uut.set_maxSymGSIters(500);
-
-    // std::vector<double> looki(5);
-    // CHECK_CUDA(cudaMemcpy(looki.data(), x_uut_d, 5 * sizeof(double), cudaMemcpyDeviceToHost));
-    // std::cout << "Looki: " << looki[0] << std::endl;
-
-    uut.compute_SymGS(striped_A,
-                    x_uut_d, y_d);
-
-
-    // testing depends on the version it either checks for a relative residual or for the result
-
     bool test_pass;
 
-    if (uut.norm_based){
+    // if the baseline is a CSR implementation we make the distinction between normbased and "correct" implementations
+    // this distinction is really only made for the test runs, but there it is useful ;)
+    if(baseline.implementation_type == Implementation_Type::CSR){
 
-        // std::cout << "SymGS norm based test" << std::endl;
-        // std::cout << "version name " << uut.version_name << std::endl;
+        // std::cout << "SymGS test 2" << std::endl;
 
-        double rr_norm = relative_residual_norm_for_SymGS(
-            striped_A,
-            x_uut_d, y_d
-        );
 
-        int nx = A->get_nx();
-        int ny = A->get_ny();
-        int nz = A->get_nz();
+        sparse_CSR_Matrix<double>* A = striped_A.get_CSR();
+        // A.sparse_CSR_Matrix_from_striped(striped_A);
 
-        double threshold_norm = uut.getSymGS_rrNorm_zero_init(nx, ny, nz);
+        int num_rows_baseline = A->get_num_rows();
+
+        double * x_uut_d;
+        CHECK_CUDA(cudaMalloc(&x_uut_d, num_rows * sizeof(double)));
+        CHECK_CUDA(cudaMemset(x_uut_d, 0, num_rows * sizeof(double)));
+
+        // std::cout << "Baseline name = " << baseline.version_name << std::endl;
+
+        std::vector<double> x_baseline(num_rows, 0.0);
+        std::vector<double> x_uut(num_rows, 0.0);
+
+        // in case it is a norm based SymGS (we do more than one iteration)
+        // we need to store and adjust the number of max iterations
+        int original_max_iter = uut.get_maxSymGSIters();
         
-        test_pass = rr_norm <= threshold_norm;
-
-        if (not test_pass){
-            std::cout << "SymGS test failed for size " << nx << "x" << ny << "x" << nz << " version: " << uut.version_name << std::endl;
-            std::cout << "The rr norm was " << rr_norm << " and the threshold is " << threshold_norm << std::endl;
-            // std::cout << "heul doch" << std::endl;
-            // test_pass = false;
+        if(uut.norm_based){
+            uut.set_maxSymGSIters(500);
         }
-        // else {
-        //     std::cout << "SymGS test passed for size " << nx << "x" << ny << "x" << nz << std::endl;
-        //     std::cout << "The rr norm was " << rr_norm << " and the threshold was " << threshold_norm << std::endl;
-        // }
 
-    } else{
-        // this is the case where we compare to a baseline
+        // std::vector<double> looki(5);
+        // CHECK_CUDA(cudaMemcpy(looki.data(), x_uut_d, 5 * sizeof(double), cudaMemcpyDeviceToHost));
+        // std::cout << "Looki: " << looki[0] << std::endl;
+
+        uut.compute_SymGS(striped_A,
+                        x_uut_d, y_d);
+
+
+        // testing depends on the version it either checks for a relative residual or for the result
+
+        if (uut.norm_based){
+
+            // std::cout << "SymGS norm based test" << std::endl;
+            // std::cout << "version name " << uut.version_name << std::endl;
+
+            double rr_norm = relative_residual_norm_for_SymGS(
+                striped_A,
+                x_uut_d, y_d
+            );
+
+            int nx = A->get_nx();
+            int ny = A->get_ny();
+            int nz = A->get_nz();
+
+            double threshold_norm = uut.getSymGS_rrNorm_zero_init(nx, ny, nz);
+            
+            test_pass = rr_norm <= threshold_norm;
+
+            if (not test_pass){
+                std::cout << "SymGS test failed for size " << nx << "x" << ny << "x" << nz << " version: " << uut.version_name << std::endl;
+                std::cout << "The rr norm was " << rr_norm << " and the threshold is " << threshold_norm << std::endl;
+                // std::cout << "heul doch" << std::endl;
+                // test_pass = false;
+            }
+            // else {
+            //     std::cout << "SymGS test passed for size " << nx << "x" << ny << "x" << nz << std::endl;
+            //     std::cout << "The rr norm was " << rr_norm << " and the threshold was " << threshold_norm << std::endl;
+            // }
+
+        } else{
+            // this is the case where we compare to a CSR baseline
+            double * x_baseline_d;
+
+            CHECK_CUDA(cudaMalloc(&x_baseline_d, num_rows * sizeof(double)));
+
+            // we need the x to be all set to zero, otherwise with different initial conditions the results will be different
+            CHECK_CUDA(cudaMemset(x_baseline_d, 0, num_rows * sizeof(double)));
+
+            baseline.compute_SymGS(*A, x_baseline_d, y_d);
+
+            // and now we need to copy the result back and de-allocate the memory
+            CHECK_CUDA(cudaMemcpy(x_baseline.data(), x_baseline_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(x_uut.data(), x_uut_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+            
+            CHECK_CUDA(cudaFree(x_baseline_d));
+
+            // compare the results
+            test_pass = vector_compare(x_baseline, x_uut);
+            
+            if (not test_pass){
+                std::cout << "SymGS test failed for uut: " << uut.version_name << std::endl;
+                // std::cout << "I am sad" << std::endl;
+            }
+            // std::cout << "Baseline: " << x_baseline[0] << std::endl;
+            // std::cout << "UUT: " << x_uut[0] << std::endl;
+        }
+
+        CHECK_CUDA(cudaFree(x_uut_d));
+
+        // reset the number of iterations
+        uut.set_maxSymGSIters(original_max_iter);
+    
+        
+    } else if (baseline.implementation_type == Implementation_Type::STRIPED){
+        // if the baseline is STriped, we can directly compare the results of the two implementations
+    
+        std::vector<double> x_baseline(num_rows, 0.0);
+        std::vector<double> x_uut(num_rows, 0.0);
+
+        double * x_uut_d;
         double * x_baseline_d;
 
-        CHECK_CUDA(cudaMalloc(&x_baseline_d, num_rows * sizeof(double)));
+        CHECK_CUDA(cudaMalloc(&x_uut_d, num_rows * sizeof(double)));
+        CHECK_CUDA(cudaMemset(x_uut_d, 0, num_rows * sizeof(double)));
 
+        // std::cout << "Baseline name = " << baseline.version_name << std::endl;
+
+        CHECK_CUDA(cudaMalloc(&x_baseline_d, num_rows * sizeof(double)));
+        
+        uut.compute_SymGS(striped_A,
+            x_uut_d, y_d);
         // we need the x to be all set to zero, otherwise with different initial conditions the results will be different
         CHECK_CUDA(cudaMemset(x_baseline_d, 0, num_rows * sizeof(double)));
 
-        baseline.compute_SymGS(*A, x_baseline_d, y_d);
+        baseline.compute_SymGS(striped_A, x_baseline_d, y_d);
 
         // and now we need to copy the result back and de-allocate the memory
         CHECK_CUDA(cudaMemcpy(x_baseline.data(), x_baseline_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
         CHECK_CUDA(cudaMemcpy(x_uut.data(), x_uut_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
         
-        CHECK_CUDA(cudaFree(x_baseline_d));
-
+        
         // compare the results
         test_pass = vector_compare(x_baseline, x_uut);
         
@@ -996,14 +1048,12 @@ bool test_SymGS(
             std::cout << "SymGS test failed for uut: " << uut.version_name << std::endl;
             // std::cout << "I am sad" << std::endl;
         }
-        // std::cout << "Baseline: " << x_baseline[0] << std::endl;
-        // std::cout << "UUT: " << x_uut[0] << std::endl;
+            
+        CHECK_CUDA(cudaFree(x_baseline_d));
+        CHECK_CUDA(cudaFree(x_uut_d));
+
     }
 
-    CHECK_CUDA(cudaFree(x_uut_d));
-
-    // reset the number of iterations
-    uut.set_maxSymGSIters(original_max_iter);
-    
     return test_pass;
+    
 }

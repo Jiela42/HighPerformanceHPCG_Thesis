@@ -1,4 +1,3 @@
-#include <cuda_runtime.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -10,7 +9,20 @@
 
 #include "TimingLib/timer.hpp"
 
-CudaTimer::CudaTimer(
+// Default constructor for the Timer class
+Timer::Timer(){
+    this->nx = 0;
+    this->ny = 0;
+    this->nz = 0;
+    this->nnz = 0;
+    this->ault_node = "";
+    this->matrix_type = "";
+    this->version_name = "";
+    this->additional_parameters = "";
+    this->folder_path = "";
+}
+
+Timer::Timer(
         int nx,
         int ny,
         int nz,
@@ -22,8 +34,7 @@ CudaTimer::CudaTimer(
         // this folderpath leads to a timestamped folder, this way we only get a single folder per benchrun
         std::string folder_path
     ) {
-        cudaEventCreate(&start);
-        cudaEventCreate(&stop);
+
         this->nx = nx;
         this->ny = ny;
         this->nz = nz;
@@ -35,39 +46,17 @@ CudaTimer::CudaTimer(
         this->folder_path = folder_path;
  }
 
-CudaTimer::~CudaTimer() {
-    cudaEventDestroy(start);
-    cudaEventDestroy(stop);
-    writeResultsToCsv();
+Timer::~Timer() {
+    // the default constructor does not write anything
+    // please add this call to the derived class
+    // writeResultsToCsv();
 }
 
-void CudaTimer::startTimer() {
-    cudaEventRecord(start, 0);
+void Timer::add_additional_parameters(std::string another_parameter) {
+    this->additional_parameters += "_" + another_parameter;
 }
 
-void CudaTimer::stopTimer(std::string method_name) {
-    cudaEventRecord(stop, 0);
-    cudaEventSynchronize(stop);
-    cudaEventElapsedTime(&milliseconds, start, stop);
-
-    if (method_name == "compute_CG_noPreconditioning") CG_noPreconditioning_times.push_back(milliseconds);
-    else if (method_name == "compute_CG") CG_times.push_back(milliseconds);
-    else if (method_name == "compute_MG") MG_times.push_back(milliseconds);
-    else if (method_name == "compute_SymGS") SymGS_times.push_back(milliseconds);
-    else if (method_name == "compute_SPMV") SPMV_times.push_back(milliseconds);
-    else if (method_name == "compute_Dot") Dot_times.push_back(milliseconds);
-    else if (method_name == "compute_WAXPBY") WAXPBY_times.push_back(milliseconds);
-    else{
-        std::cerr << "Invalid method name " << method_name << std::endl;
-        return;
-    }
-}
-
-float CudaTimer::getElapsedTime() const {
-    return milliseconds;
-}
-
-void CudaTimer::writeCSV(std::string filepath, std::string file_header, std::vector<float> times){
+void Timer::writeCSV(std::string filepath, std::string file_header, std::vector<float> times){
     
 
     // if the vector is empty we don't need to write anything
@@ -97,7 +86,7 @@ void CudaTimer::writeCSV(std::string filepath, std::string file_header, std::vec
     csv_file.close();
 }
 
-void CudaTimer::writeResultsToCsv() {
+void Timer::writeResultsToCsv() {
 
     // std::cout << "Writing results to CSV all of them" << std::endl;
 

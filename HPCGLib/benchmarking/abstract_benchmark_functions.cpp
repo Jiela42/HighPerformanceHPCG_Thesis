@@ -6,8 +6,81 @@
 
 void bench_CG(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A,
+    double * x_d, double * y_d
+    )
+{
+    int num_iterations = implementation.getNumberOfIterations();
+    
+    // grab original data to store it
+    std::vector<double> x_original(A.get_num_rows(), 0.0);
+    CHECK_CUDA(cudaMemcpy(x_original.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+
+    if(implementation.test_before_bench and not implementation.CG_file_based_tests_passed){
+        // we do not have a baseline for CG
+        // therefore we run the filebased tests
+        bool test_passed = test_CG(implementation);
+        implementation.CG_file_based_tests_passed = test_passed;
+
+        // std::cout << "CG tested for implementation " << implementation.version_name << std::endl;
+
+        if (not test_passed){
+            num_iterations = 0;
+        }
+    }
+
+    // we need a few more parameters for the CG function
+    int n_iters = 0;
+    double normr;
+    double normr0;
+
+    // we do both with and without preconditioning
+
+    if( // the MG preconditioner can only be applied for matrices divisible by 8 and the result needs to be bigger than 2
+        A.get_nx() % 8 == 0 and
+        A.get_ny() % 8 == 0 and
+        A.get_nz() % 8 == 0 and
+        A.get_nx() / 8 > 2 and
+        A.get_ny() / 8 > 2 and
+        A.get_nz() / 8 > 2
+    ){
+        implementation.doPreconditioning = true;
+        for(int i = 0; i < num_iterations; i++){
+            timer.startTimer();
+            implementation.compute_CG(
+                A,
+                y_d, x_d,
+                n_iters, normr, normr0
+            );
+            timer.stopTimer("compute_CG");
+            std::cout << "CG took " << n_iters << " iterations for size " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz()<< " and implementation " << implementation.version_name << std::endl;
+            // restore original x
+            CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+        }
+    } else{
+        std::cout << "Skipping CG Preconditioned bench for matrix with dimensions " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz() << " not divisible by 8 or too small for MG" << std::endl;
+    }
+
+    // now without preconditioning (can always be done)
+    implementation.doPreconditioning = false;
+    for(int i = 0; i < num_iterations; i++){
+        timer.startTimer();
+        implementation.compute_CG(
+            A,
+            y_d, x_d,
+            n_iters, normr, normr0
+        );
+        timer.stopTimer("compute_CG_noPreconditioning");
+        // restore original x
+        CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+    }
+}
+
+void bench_CG(
+    HPCG_functions<double>& implementation,
+    Timer& timer,
+    sparse_CSR_Matrix<double> & A,
     double * x_d, double * y_d
     )
 {
@@ -79,7 +152,7 @@ void bench_CG(
 
 void bench_MG(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A,
     double * x_d, double * y_d
     )
@@ -132,7 +205,7 @@ void bench_MG(
 // this SPMV supports CSR matrixes
 void bench_SPMV(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     sparse_CSR_Matrix<double> & A,
     double * x_d, double * y_d
     )
@@ -173,7 +246,7 @@ void bench_SPMV(
 // this SPMV supports striped matrixes which requires CSR for metadata and testing
 void bench_SPMV(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A,
     double * x_d, double * y_d
     ){
@@ -217,7 +290,7 @@ void bench_SPMV(
 
 void bench_Dot(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A,
     double * x_d, double * y_d, double * result_d
     ){
@@ -250,7 +323,7 @@ void bench_Dot(
 
 void bench_Dot(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     sparse_CSR_Matrix<double> & A,
     double * x_d, double * y_d, double * result_d
     ){
@@ -283,7 +356,7 @@ void bench_Dot(
 
 void bench_WAXPBY(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A,
     double * x_d, double * y_d, double * w_d,
     double alpha, double beta
@@ -324,7 +397,7 @@ void bench_WAXPBY(
 
 void bench_SymGS(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     sparse_CSR_Matrix<double> & A,   
     double * x_d, double * y_d
     )
@@ -387,7 +460,7 @@ void bench_SymGS(
 
 void bench_SymGS(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A,
     double * x_d, double * y_d
     )
@@ -459,7 +532,7 @@ void bench_SymGS(
 // this version supports CSR
 void bench_Implementation(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     sparse_CSR_Matrix<double> & A,
     double * a_d, double * b_d, // a & b are random vectors
     double * x_d, double * y_d // x & y are vectors as used in HPCG
@@ -480,7 +553,7 @@ void bench_Implementation(
 // this version supports striped matrixes
 void bench_Implementation(
     HPCG_functions<double>& implementation,
-    CudaTimer& timer,
+    Timer& timer,
     striped_Matrix<double> & A, // we need to pass the CSR matrix for metadata and potential testing
     double * a_d, double * b_d, // a & b are random vectors
     double * x_d, double * y_d, // x & y are vectors as used in HPCG

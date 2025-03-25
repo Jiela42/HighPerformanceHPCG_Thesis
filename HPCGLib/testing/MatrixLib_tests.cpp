@@ -457,6 +457,103 @@ bool coloring_test(striped_Matrix<double>& A){
 
 }
 
+bool box_coloring_test(striped_Matrix<double>& A){
+
+    // first color the matrix
+    A.generate_box_coloring();
+
+    int nx = A.get_nx();
+    int ny = A.get_ny();
+    int nz = A.get_nz();
+
+    int num_colors = 27;
+    int bx = 3;
+    int by = 3;
+    int bz = 3;
+
+    // now we get the colors from the matrix
+    std::vector<int> color_idx_ptr(num_colors + 1, 0);
+    std::vector<int> color_sorted_rows(A.get_num_rows(), 0);
+
+    CHECK_CUDA(cudaMemcpy(color_idx_ptr.data(), A.get_color_pointer_d(), 28 * sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(color_sorted_rows.data(), A.get_color_sorted_rows_d(), A.get_num_rows() * sizeof(int), cudaMemcpyDeviceToHost));
+
+    for(int i = 1; i <= num_colors; i ++){
+        int color = i-1;
+        int start = color_idx_ptr[color];
+        int end = color_idx_ptr[color+1];
+
+        int num_color_cols = nx / bx;
+        int num_color_rows = ny / by;
+        int num_color_faces = nz / bz;
+        
+        int color_offs_x = color % bx;
+        int color_offs_y = (color - color_offs_x) % (bx * by) / bx;
+        int color_offs_z = (color - color_offs_x - bx * color_offs_y) / (bx * by);
+        
+        num_color_cols = (color_offs_x < nx % bx) ? (num_color_cols + 1) : num_color_cols;
+        num_color_rows = (color_offs_y < ny % by) ? (num_color_rows + 1) : num_color_rows;
+        num_color_faces = (color_offs_z < nz % bz) ? (num_color_faces + 1) : num_color_faces;
+        
+        int num_nodes_with_color = num_color_cols * num_color_rows * num_color_faces;
+        std::vector<int> symGS_color_i(num_nodes_with_color);
+        
+        assert(num_nodes_with_color == end-start);
+        // std::cout << "nodes with color: " << color << ": " << num_nodes_with_color << std::endl;
+
+        // populate the symGS_color_i
+        for(int r = 0; r < num_nodes_with_color; r++){
+            // find out the position of the node (only considering faces, cols and rows that actually have that color)
+            int ix = r % num_color_cols;
+            int iy = (r % (num_color_cols * num_color_rows)) / num_color_cols;
+            int iz = r / (num_color_cols * num_color_rows);
+            
+            // adjust the counter to the correct position when all nodes are considered
+            ix = ix * bx + color_offs_x;
+            iy = iy * by + color_offs_y;
+            iz = iz * bz + color_offs_z;
+
+            int row = ix + iy * nx + iz * nx * ny;
+            symGS_color_i[r] = row;
+        }
+
+        int prev_row = -1;
+        // now we check that every row in the COR format is also calculated by symGS
+        for(int row_idx = start; row_idx < end; row_idx++){
+            int row = color_sorted_rows[row_idx];
+            // make sure the rows increase for each color
+            assert(row > prev_row);
+            prev_row = row;
+            bool found_row = false;
+            for(int j = 0; j < num_nodes_with_color; j++){
+                if(symGS_color_i[j] == row){
+                    found_row = true;
+                    break;
+                }
+            }
+            if (not found_row){
+                std::cout << "start: " << start << " end: " << end << std::endl;
+                std::cout << "row " << row << " not found in symGS_color_i, color: " << color << std::endl;
+                std::cout << "symGS_color_i: ";
+                for(int j = 0; j < num_nodes_with_color; j++){
+                    std::cout << symGS_color_i[j] << " ";
+                }
+                std::cout << std::endl;
+                std::cout << "color_sorted_rows: ";
+                for(int j = start; j < end; j++){
+                    std::cout << color_sorted_rows[j] << " ";
+                }
+                std::cout << std::endl;
+            }
+            assert (found_row);
+        }
+
+    }
+    return true;
+
+
+}
+
 
 bool run_MG_data_tests(sparse_CSR_Matrix<double>& A){
 
@@ -554,6 +651,8 @@ bool run_all_matrixLib_tests(int nx, int ny, int nz){
     // all_pass = all_pass && read_save_test(A, "read_save_test on 3d27p CSR Matrix for " + dim_info);
     // read_save_test(striped_A, "read_save_test on 3d27p striped Matrix for " + dim_info);
     
+    std::cout << "testing " << dim_info << std::endl;
+
     all_pass = all_pass && parallel_CSR_generation_test(A);
     // std::cout << "parallel CSR generation test passed for " << dim_info << std::endl;
     all_pass = all_pass && run_striped_csr_conversion_test(nx, ny, nz);
@@ -562,6 +661,7 @@ bool run_all_matrixLib_tests(int nx, int ny, int nz){
     // std::cout << "striped vs csr parallel conversion test passed for " << dim_info << std::endl;
     all_pass = all_pass && parallel_generation_from_CSR_test(A);
     all_pass = all_pass && coloring_test(*striped_A);
+    all_pass = all_pass && box_coloring_test(*striped_A);
     // std::cout << "coloring test passed for " << dim_info << std::endl;
     all_pass = all_pass && run_MG_data_tests(A);
 

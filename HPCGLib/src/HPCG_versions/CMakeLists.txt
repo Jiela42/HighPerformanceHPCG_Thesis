@@ -6,6 +6,7 @@ project(HPCGLib LANGUAGES CXX CUDA)
 add_library(HPCGLib)
 
 find_package(CUDAToolkit REQUIRED)
+find_package(MPI REQUIRED)
 # Include CUDA directories
 include_directories(${CUDAToolkit_INCLUDE_DIRS})
 
@@ -43,12 +44,15 @@ target_sources(HPCGLib PRIVATE
     striped_warp_reduction/striped_warp_reduction_computeCG.cu
     striped_warp_reduction/striped_warp_reduction_computeMG.cu
 
-    multi_GPU/striped_box_coloring_multi_GPU_computeSymGS.cu
-    multi_GPU/striped_warp_reduction_multi_GPU_computeCG.cu
-    multi_GPU/striped_warp_reduction_multi_GPU_computeDot.cu
-    multi_GPU/striped_warp_reduction_multi_GPU_computeMG.cu
-    multi_GPU/striped_warp_reduction_multi_GPU_computeSPMV.cu
-    multi_GPU/striped_warp_reduction_multi_GPU_computeWAXPBY.cu
+    multi_GPU_kernels/striped_box_coloring_multi_GPU_computeSymGS.cu
+    multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeCG.cu
+    multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeDot.cu
+    multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeMG.cu
+    multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeSPMV.cu
+    multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeWAXPBY.cu
+
+    multi_GPU_halo_exchange/blocking_mpi_halo_exchange.cu
+    multi_GPU_halo_exchange/non_blocking_mpi_halo_exchange.cu
 
     striped_preprocessed/striped_preprocessed_computeSymGS.cu
 
@@ -60,6 +64,8 @@ target_sources(HPCGLib PRIVATE
 
     striped_box_coloring/striped_box_coloring_computeSymGS.cu
 
+    striped_COR_box_coloring/striped_box_coloring_computeSymGS.cu
+
 )
 
 target_link_libraries(
@@ -70,4 +76,5 @@ target_link_libraries(
     CUDA::cusparse
     CUDA::cublas
     CUDA::cudart
+    MPI::MPI_CXX
 )

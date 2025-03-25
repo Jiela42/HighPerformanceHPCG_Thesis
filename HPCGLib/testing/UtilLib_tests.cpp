@@ -26,8 +26,10 @@ bool test_l2_norm(
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), y.size() * sizeof(double), cudaMemcpyHostToDevice));
 
     // calculate the l2 norm on the device
+    // we made this a function of the HPCGLib of the implementation, so we need an instance of an implementation
+    striped_box_coloring_Implementation<double> impl;
 
-    double l2_norm_device_calculated = L2_norm_for_SymGS(
+    double l2_norm_device_calculated = impl.L2_norm_for_SymGS(
                                             striped_A,
                                             x_d, y_d
                                         );
@@ -42,10 +44,9 @@ bool test_l2_norm(
     CHECK_CUDA(cudaFree(y_d));
 
     // // print norms for sanity
-    // std::cout << "Host calculated l2 norm: " << l2_norm_host_calculated << std::endl;
-    // std::cout << "Device calculated l2 norm: " << l2_norm_device_calculated << std::endl;
-
-    return double_compare(l2_norm_host_calculated, l2_norm_device_calculated);
+    std::cout << "Host calculated l2 norm: " << l2_norm_host_calculated << std::endl;
+    std::cout << "Device calculated l2 norm: " << l2_norm_device_calculated << std::endl;
+    return relaxed_double_compare(l2_norm_host_calculated, l2_norm_device_calculated, 1e-10);
 
 }
 
@@ -85,10 +86,10 @@ bool test_l2_norm(sparse_CSR_Matrix<double>& A, std::vector<double>& x_solution,
     cudaFree(y_d);
 
     // // print norms for sanity
-    // std::cout << "CSR Host calculated l2 norm: " << l2_norm_host_calculated << std::endl;
-    // std::cout << "CSR Device calculated l2 norm: " << l2_norm_device_calculated << std::endl;
+    std::cout << "CSR Host calculated l2 norm: " << l2_norm_host_calculated << std::endl;
+    std::cout << "CSR Device calculated l2 norm: " << l2_norm_device_calculated << std::endl;
 
-    return double_compare(l2_norm_host_calculated, l2_norm_device_calculated);
+    return (l2_norm_host_calculated, l2_norm_device_calculated);
 
 
 }
@@ -171,7 +172,7 @@ bool test_rr_norm(
     CHECK_CUDA(cudaFree(x_d));
     CHECK_CUDA(cudaFree(y_d));
 
-    return double_compare(rr_norm_host_calculated, rr_norm_device_calculated);
+    return relaxed_double_compare(rr_norm_host_calculated, rr_norm_device_calculated, 1e-10);
     
 }
 

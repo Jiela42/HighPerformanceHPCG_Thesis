@@ -5,8 +5,11 @@
 #include <vector>
 #include <string>
 
+#include "UtilLib/cuda_utils.hpp"
+#include "cuda_runtime.h"
+
 // define number of iterations we want to have
-#define num_bench_iter 1
+#define num_bench_iter 10
 
 enum class Implementation_Type {
     STRIPED,
@@ -67,6 +70,15 @@ class HPCG_functions {
             striped_Matrix<T> & A,
             T * b_d, T * x_d,
             int & n_iters, T& normr, T& normr0) = 0;
+    
+        void compute_CG(
+            sparse_CSR_Matrix<T> & A,
+            T * b_d, T * x_d,
+            int & n_iters, T& normr, T& normr0
+        ) {
+            striped_Matrix<double>* striped_A = A.get_Striped();
+            compute_CG(*striped_A, b_d, x_d, n_iters, normr, normr0);
+        }
         
     // MG, SymGS, SPMV, WAXPBY and Dot have the data on the GPU already
         virtual void compute_MG(
@@ -121,6 +133,40 @@ class HPCG_functions {
 
         int getNumberOfIterations() const {
             return num_bench_iter;
+    }
+
+    double L2_norm_for_SymGS(
+        striped_Matrix<double> & A,
+        double * x,
+        double * y
+    ){
+        int num_rows = A.get_num_rows();
+
+        // Allocate memory for Ax on the device
+        double *Ax;
+        double *result;
+        CHECK_CUDA(cudaMalloc(&Ax, num_rows * sizeof(double)));
+        CHECK_CUDA(cudaMalloc(&result, 1 * sizeof(double)));
+    
+        CHECK_CUDA(cudaMemset(Ax, 0, num_rows * sizeof(double)));
+        CHECK_CUDA(cudaMemset(result, 0, 1 * sizeof(double)));
+    
+        // Perform matrix-vector multiplication: Ax = A * x
+    
+        compute_SPMV(A, x, Ax);
+        compute_WAXPBY(A, Ax, y, Ax, 1.0, -1.0);
+        compute_Dot(A, Ax, Ax, result);
+    
+        // copy result over
+        double result_h;
+        CHECK_CUDA(cudaMemcpy(&result_h, result, 1 * sizeof(double), cudaMemcpyDeviceToHost));
+    
+    
+        // Free device memory
+        CHECK_CUDA(cudaFree(Ax));
+        CHECK_CUDA(cudaFree(result));
+    
+        return std::sqrt(result_h);
     }
 
         double getSymGS_rrNorm(int nx, int ny, int nz){

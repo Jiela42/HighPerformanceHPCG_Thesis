@@ -1,4 +1,4 @@
-#include "UtilLib/hpcg_mpi_utils.cuh"
+#include "UtilLib/hpcg_multi_GPU_utils.cuh"
 #include "UtilLib/cuda_utils.hpp"
 #include <testing.hpp>
 
@@ -7,6 +7,24 @@
 #include <stdio.h>
 #include <cassert>
 #include <stdbool.h>
+
+__inline__ __device__ global_int_t local_i_to_halo_i(
+    int i, 
+    int nx, int ny, int nz,
+    local_int_t dimx, local_int_t dimy
+    )
+    {
+        return dimx*(dimy+1) + 1 + (i % nx) + dimx*((i % (nx*ny)) / nx) + (dimx*dimy)*(i / (nx*ny));
+}
+
+__global__ void inject_data_to_halo_kernel(DataType *x_d, DataType *data, int nx, int ny, int nz, int dimx, int dimy){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    int n = nx * ny * nz;
+    for(int i = tid; i < n; i += blockDim.x * gridDim.x){
+            int hi = local_i_to_halo_i(i, nx, ny, nz, dimx, dimy);
+            x_d[hi] = data[i];
+    }
+}
 
 void GenerateProblem(int npx, int npy, int npz, local_int_t nx, local_int_t ny, local_int_t nz, int size, int rank, Problem *problem){
     problem->npx = npx; //number of processes in x
@@ -50,11 +68,84 @@ void InitHaloMemGPU(Halo *halo, int nx, int ny, int nz){
     halo->interior = interior;
 }
 
+void InitHaloMemCPU(Halo *halo, int nx, int ny, int nz){
+    halo->north_send_buff_h = (DataType*) malloc(nx * nz * sizeof(DataType));
+    halo->north_recv_buff_h = (DataType*) malloc(nx * nz * sizeof(DataType));
+    halo->east_send_buff_h = (DataType*) malloc(ny * nz * sizeof(DataType));
+    halo->east_recv_buff_h = (DataType*) malloc(ny * nz * sizeof(DataType));
+    halo->south_send_buff_h = (DataType*) malloc(nx * nz * sizeof(DataType));
+    halo->south_recv_buff_h = (DataType*) malloc(nx * nz * sizeof(DataType));
+    halo->west_send_buff_h = (DataType*) malloc(ny * nz * sizeof(DataType));
+    halo->west_recv_buff_h = (DataType*) malloc(ny * nz * sizeof(DataType));
+    halo->ne_send_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    halo->ne_recv_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    halo->se_send_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    halo->se_recv_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    halo->sw_send_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    halo->sw_recv_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    halo->nw_send_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    halo->nw_recv_buff_h = (DataType*) malloc(nz * sizeof(DataType));
+    halo->front_send_buff_h = (DataType*) malloc(nx * ny * sizeof(DataType));
+    halo->front_recv_buff_h = (DataType*) malloc(nx * ny * sizeof(DataType));
+    halo->back_send_buff_h = (DataType*) malloc(nx * ny * sizeof(DataType));
+    halo->back_recv_buff_h = (DataType*) malloc(nx * ny * sizeof(DataType));
+    halo->front_north_send_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    halo->front_north_recv_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    halo->front_east_send_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    halo->front_east_recv_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    halo->front_south_send_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    halo->front_south_recv_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    halo->front_west_send_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    halo->front_west_recv_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    halo->back_north_send_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    halo->back_north_recv_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    halo->back_east_send_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    halo->back_east_recv_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    halo->back_south_send_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    halo->back_south_recv_buff_h = (DataType*) malloc(nx * sizeof(DataType));
+    halo->back_west_send_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    halo->back_west_recv_buff_h = (DataType*) malloc(ny * sizeof(DataType));
+    halo->front_ne_send_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->front_ne_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->front_se_send_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->front_se_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->front_sw_send_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->front_sw_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->front_nw_send_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->front_nw_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->back_ne_send_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->back_ne_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->back_se_send_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->back_se_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->back_sw_send_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->back_sw_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->back_nw_send_buff_h = (DataType*) malloc(sizeof(DataType));
+    halo->back_nw_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+}
+
+/*
+* Initializes the memory for halo on both CPU and GPU and initializes all data memory with zeros.
+*/
+void InitHalo(Halo *halo, int nx, int ny, int nz){
+    InitHaloMemGPU(halo, nx, ny, nz);
+    InitHaloMemCPU(halo, nx, ny, nz);
+    SetHaloZeroGPU(halo);
+}
+
 void SetHaloZeroGPU(Halo *halo){
     CHECK_CUDA(cudaMemset(halo->x_d, 0, halo->dimx * halo->dimy * halo->dimz * sizeof(DataType)));
 }
 
-//correctness verified
+void InjectDataToHalo(Halo *halo, DataType *data){
+    int n = halo->nx * halo->ny * halo->nz;
+    int num_threads = 1024;
+    int num_blocks = std::min(MAX_NUM_BLOCKS, ceiling_division(n, num_threads));
+    inject_data_to_halo_kernel<<<num_blocks, num_threads>>>(halo->x_d, data, halo->nx, halo->ny, halo->nz, halo->dimx, halo->dimy);
+}
+
+/*
+* Initialize the halo with global index
+*/
 void SetHaloGlobalIndexGPU(Halo *halo, Problem *problem){
     DataType *x_h = (DataType*) malloc(halo->dimx * halo->dimy * halo->dimz * sizeof(DataType));
     for(int i=0; i<halo->dimx * halo->dimy * halo->dimz; i++){
@@ -78,8 +169,122 @@ void SetHaloGlobalIndexGPU(Halo *halo, Problem *problem){
     CHECK_CUDA(cudaMemcpy(halo->x_d, x_h, halo->dimx * halo->dimy * halo->dimz * sizeof(DataType), cudaMemcpyHostToDevice));
 }
 
+/*
+* Initialize the halo with 1.0/(global index + 1.0)
+*/
+void SetHaloQuotientGlobalIndexGPU(Halo *halo, Problem *problem){
+    DataType *x_h = (DataType*) malloc(halo->dimx * halo->dimy * halo->dimz * sizeof(DataType));
+    for(int i=0; i<halo->dimx * halo->dimy * halo->dimz; i++){
+        x_h[i] = 0;
+    }
+    DataType *write_addr = x_h+ halo->dimx * halo->dimy + halo->dimx + 1;
+    int gi = problem->gi0;
+    for(int i = 0; i<halo->nz; i++){
+        for(int j = 0; j<halo->ny; j++){
+            for(int l = 0; l<halo->nx; l++){
+                *write_addr = 1.0/(gi+1.0);
+                gi++;
+                write_addr++;
+            }
+            write_addr += 2;
+            gi = gi - halo->nx + problem->gnx;
+        }
+        write_addr += 2 * halo->dimx;
+        gi = problem->gi0 + (i + 1) * problem->gnx * problem->gny;
+    }
+    CHECK_CUDA(cudaMemcpy(halo->x_d, x_h, halo->dimx * halo->dimy * halo->dimz * sizeof(DataType), cudaMemcpyHostToDevice));
+}
+
+/*
+* Initialize the halo with random numbers between min and max
+* Seed = input seed + rank for each process
+*/
+void SetHaloRandomGPU(Halo *halo, Problem *problem, int min, int max, int seed){
+    DataType *x_h = (DataType*) malloc(halo->dimx * halo->dimy * halo->dimz * sizeof(DataType));
+    for(int i=0; i<halo->dimx * halo->dimy * halo->dimz; i++){
+        x_h[i] = 0;
+    }
+    srand(seed + problem->rank);
+    DataType *write_addr = x_h+ halo->dimx * halo->dimy + halo->dimx + 1;
+    int gi = problem->gi0;
+    for(int i = 0; i<halo->nz; i++){
+        for(int j = 0; j<halo->ny; j++){
+            for(int l = 0; l<halo->nx; l++){
+                int rand_num = rand();
+                if(min == 0 && max == 1.0) {
+                    *write_addr = (DataType) rand_num / RAND_MAX;
+                }else{
+                    *write_addr = min + rand_num % (max - min);
+                }
+                gi++;
+                write_addr++;
+            }
+            write_addr += 2;
+            gi = gi - halo->nx + problem->gnx;
+        }
+        write_addr += 2 * halo->dimx;
+        gi = problem->gi0 + (i + 1) * problem->gnx * problem->gny;
+    }
+    CHECK_CUDA(cudaMemcpy(halo->x_d, x_h, halo->dimx * halo->dimy * halo->dimz * sizeof(DataType), cudaMemcpyHostToDevice));
+}
+
 void FreeHaloGPU(Halo *halo){
     CHECK_CUDA(cudaFree(halo->x_d));
+}
+
+void FreeHaloCPU(Halo *halo){
+    free(halo->north_send_buff_h);
+    free(halo->north_recv_buff_h);
+    free(halo->east_send_buff_h);
+    free(halo->east_recv_buff_h);
+    free(halo->south_send_buff_h);
+    free(halo->south_recv_buff_h);
+    free(halo->west_send_buff_h);
+    free(halo->west_recv_buff_h);
+    free(halo->ne_send_buff_h);
+    free(halo->ne_recv_buff_h);
+    free(halo->se_send_buff_h);
+    free(halo->se_recv_buff_h);
+    free(halo->sw_send_buff_h);
+    free(halo->sw_recv_buff_h);
+    free(halo->nw_send_buff_h);
+    free(halo->nw_recv_buff_h);
+    free(halo->front_send_buff_h);
+    free(halo->front_recv_buff_h);
+    free(halo->back_send_buff_h);
+    free(halo->back_recv_buff_h);
+    free(halo->front_north_send_buff_h);
+    free(halo->front_north_recv_buff_h);
+    free(halo->front_east_send_buff_h);
+    free(halo->front_east_recv_buff_h);
+    free(halo->front_south_send_buff_h);
+    free(halo->front_south_recv_buff_h);
+    free(halo->front_west_send_buff_h);
+    free(halo->front_west_recv_buff_h);
+    free(halo->back_north_send_buff_h);
+    free(halo->back_north_recv_buff_h);
+    free(halo->back_east_send_buff_h);
+    free(halo->back_east_recv_buff_h);
+    free(halo->back_south_send_buff_h);
+    free(halo->back_south_recv_buff_h);
+    free(halo->back_west_send_buff_h);
+    free(halo->back_west_recv_buff_h);
+    free(halo->front_ne_send_buff_h);
+    free(halo->front_ne_recv_buff_h);
+    free(halo->front_se_send_buff_h);
+    free(halo->front_se_recv_buff_h);
+    free(halo->front_sw_send_buff_h);
+    free(halo->front_sw_recv_buff_h);
+    free(halo->front_nw_send_buff_h);
+    free(halo->front_nw_recv_buff_h);
+    free(halo->back_ne_send_buff_h);
+    free(halo->back_ne_recv_buff_h);
+    free(halo->back_se_send_buff_h);
+    free(halo->back_se_recv_buff_h);
+    free(halo->back_sw_send_buff_h);
+    free(halo->back_sw_recv_buff_h);
+    free(halo->back_nw_send_buff_h);
+    free(halo->back_nw_recv_buff_h);
 }
 
 void InitGPU(Problem *problem){
@@ -89,280 +294,6 @@ void InitGPU(Problem *problem){
     CHECK_CUDA(cudaSetDevice(problem->rank % deviceCount));
     //printf("Rank=%d:\t\t Set my device to device=%d, available=%d.\n", problem->rank, problem->rank % deviceCount, deviceCount);
 }
-
-//copies to host and back to device, no device-to-device copy
-//TODO: Replace malloc per exchange with malloc once at beginning
-void ExchangeHalo(Halo *halo, Problem *problem){
-    MPI_Barrier(MPI_COMM_WORLD);
-    int dimx = halo->dimx;
-    int dimy = halo->dimy;
-    int dimz = halo->dimz;
-    int nx = halo->nx;
-    int ny = halo->ny;
-    int nz = halo->nz;
-    DataType *x_d = halo->x_d;
-    //exchange north if got north
-    if(problem->py > 0){
-        DataType *north_send = (DataType*) malloc(nx * nz * sizeof(DataType));
-        extract_horizontal_plane_from_GPU(x_d, north_send, 1, 1, 1, nx, nz, dimx, dimy, dimz);
-        DataType *north_receive = (DataType*) malloc(nx * nz * sizeof(DataType));
-        MPI_Sendrecv(north_send, nx * nz, MPIDataType, problem->rank - problem->npx, NORTH, north_receive, nx * nz, MPIDataType, problem->rank - problem->npx, SOUTH, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_horizontal_plane_to_GPU(x_d, north_receive, 1, 0, 1, nx, nz, dimx, dimy, dimz);
-        free(north_send);
-        free(north_receive);
-    }
-    
-    //exchange east if got east
-    if(problem->px < problem->npx - 1){
-        DataType *east_send = (DataType*) malloc(ny * nz * sizeof(DataType));
-        extract_vertical_plane_from_GPU(x_d, east_send, dimx - 2, 1, 1, ny, nz, dimx, dimy, dimz);
-        DataType *east_receive = (DataType*) malloc(ny * nz * sizeof(DataType));
-        MPI_Sendrecv(east_send, ny * nz, MPIDataType, problem->rank + 1, EAST, east_receive, ny * nz, MPIDataType, problem->rank + 1, WEST, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_vertical_plane_to_GPU(x_d, east_receive, dimx - 1, 1, 1, ny, nz, dimx, dimy, dimz);
-        free(east_send);
-        free(east_receive);
-        
-    }
-    
-    //exchange south if got south
-    if(problem->py < problem->npy - 1){
-        DataType *south_send = (DataType*) malloc(nx * nz * sizeof(DataType));
-        extract_horizontal_plane_from_GPU(x_d, south_send, 1, dimy - 2, 1, nx, nz, dimx, dimy, dimz);
-        DataType *south_receive = (DataType*) malloc(nx * nz * sizeof(DataType));
-        MPI_Sendrecv(south_send, nx * nz, MPIDataType, problem->rank + problem->npx, SOUTH, south_receive, nx * nz, MPIDataType, problem->rank + problem->npx, NORTH, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_horizontal_plane_to_GPU(x_d, south_receive, 1, dimy - 1, 1, nx, nz, dimx, dimy, dimz);
-        free(south_send);
-        free(south_receive);
-    }
-    
-    //exchange west if got west
-    if(problem->px > 0){
-        DataType *west_send = (DataType*) malloc(ny * nz * sizeof(DataType));
-        extract_vertical_plane_from_GPU(x_d, west_send, 1, 1, 1, ny, nz, dimx, dimy, dimz);
-        DataType *west_receive = (DataType*) malloc(ny * nz * sizeof(DataType));
-        MPI_Sendrecv(west_send, ny * nz, MPIDataType, problem->rank - 1, WEST, west_receive, ny * nz, MPIDataType, problem->rank - 1, EAST, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_vertical_plane_to_GPU(x_d, west_receive, 0, 1, 1, ny, nz, dimx, dimy, dimz);
-        free(west_send);
-        free(west_receive);
-    }
-    //exchange ne if got ne
-    if(problem->px < problem->npx - 1 && problem->py > 0){
-        DataType *ne_send = (DataType*) malloc(nz * sizeof(DataType));
-        extract_edge_Z_from_GPU(x_d, ne_send, dimx - 2, 1, 1, nz, dimx, dimy, dimz);
-        DataType *ne_receive = (DataType*) malloc(nz * sizeof(DataType));
-        MPI_Sendrecv(ne_send, nz, MPIDataType, problem->rank - problem->npx + 1, NE, ne_receive, nz, MPIDataType, problem->rank - problem->npx + 1, SW, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_Z_to_GPU(x_d, ne_receive, dimx - 1, 0, 1, nz, dimx, dimy, dimz);
-        free(ne_send);
-        free(ne_receive);
-    }
-    
-    //exchange se if got se
-    if(problem->py < problem->npy - 1 && problem->px < problem->npx - 1){
-        DataType *se_send = (DataType*) malloc(nz * sizeof(DataType));
-        extract_edge_Z_from_GPU(x_d, se_send, dimx - 2, dimy - 2, 1, nz, dimx, dimy, dimz);
-        DataType *se_receive = (DataType*) malloc(nz * sizeof(DataType));
-        MPI_Sendrecv(se_send, nz, MPIDataType, problem->rank + problem->npx + 1, SE, se_receive, nz, MPIDataType, problem->rank + problem->npx + 1, NW, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_Z_to_GPU(x_d, se_receive, dimx - 1, dimy - 1, 1, nz, dimx, dimy, dimz);
-        free(se_send);
-        free(se_receive);
-    }
-    
-    //exchange sw if got sw
-    if(problem->px > 0 && problem->py < problem->npy - 1){
-        DataType *sw_send = (DataType*) malloc(nz * sizeof(DataType));
-        extract_edge_Z_from_GPU(x_d, sw_send, 1, dimy - 2, 1, nz, dimx, dimy, dimz);
-        DataType *sw_receive = (DataType*) malloc(nz * sizeof(DataType));
-        MPI_Sendrecv(sw_send, nz, MPIDataType, problem->rank + problem->npx - 1, SW, sw_receive, nz, MPIDataType, problem->rank + problem->npx - 1, NE, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_Z_to_GPU(x_d, sw_receive, 0, dimy - 1, 1, nz, dimx, dimy, dimz);
-        free(sw_send);
-        free(sw_receive);
-    }
-    
-    //exchange nw if got nw
-    if(problem->py > 0 && problem->px > 0){
-        DataType *nw_send = (DataType*) malloc(nz * sizeof(DataType));
-        extract_edge_Z_from_GPU(x_d, nw_send, 1, 1, 1, nz, dimx, dimy, dimz);
-        DataType *nw_receive = (DataType*) malloc(nz * sizeof(DataType));
-        MPI_Sendrecv(nw_send, nz, MPIDataType, problem->rank - problem->npx - 1, NW, nw_receive, nz, MPIDataType, problem->rank - problem->npx - 1, SE, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_Z_to_GPU(x_d, nw_receive, 0, 0, 1, nz, dimx, dimy, dimz);
-        free(nw_send);
-        free(nw_receive);
-    }
-    
-    //exchange front if got front
-    if(problem->pz > 0){
-        DataType *front_send = (DataType*) malloc(nx * ny * sizeof(DataType));
-        extract_frontal_plane_from_GPU(x_d, front_send, 1, 1, 1, nx, ny, dimx, dimy, dimz);
-        DataType *front_receive = (DataType*) malloc(nx * ny * sizeof(DataType));
-        MPI_Sendrecv(front_send, nx * ny, MPIDataType, problem->rank - problem->npx * problem->npy, FRONT, front_receive, nx * ny, MPIDataType, problem->rank - problem->npx * problem->npy, BACK, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_frontal_plane_to_GPU(x_d, front_receive, 1, 1, 0, nx, ny, dimx, dimy, dimz);
-        free(front_send);
-        free(front_receive);
-    }
-    //exchange back if got back
-    if(problem->pz < problem->npz-1){
-        DataType *back_send = (DataType*) malloc(nx * ny * sizeof(DataType));
-        extract_frontal_plane_from_GPU(x_d, back_send, 1, 1, dimz-2, nx, ny, dimx, dimy, dimz);
-        DataType *back_receive = (DataType*) malloc(nx * ny * sizeof(DataType));
-        MPI_Sendrecv(back_send, nx * ny, MPIDataType, problem->rank + problem->npx * problem->npy, BACK, back_receive, nx * ny, MPIDataType, problem->rank + problem->npx * problem->npy, FRONT, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_frontal_plane_to_GPU(x_d, back_receive, 1, 1, dimz-1, nx, ny, dimx, dimy, dimz);
-        free(back_send);
-        free(back_receive);
-    }
-    //exchange front_north if got front_north
-    if(problem->py > 0 && problem->pz > 0){
-        DataType *front_north_send = (DataType*) malloc(nx * sizeof(DataType));
-        extract_edge_X_from_GPU(x_d, front_north_send, 1, 1, 1, nx, dimx, dimy, dimz);
-        DataType *front_north_receive = (DataType*) malloc(nx * sizeof(DataType));
-        MPI_Sendrecv(front_north_send, nx, MPIDataType, problem->rank - problem->npx * (problem->npy+1), FRONT_NORTH, front_north_receive, nx, MPIDataType, problem->rank - problem->npx * (problem->npy+1), BACK_SOUTH, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_X_to_GPU(x_d, front_north_receive, 1, 0, 0, nx, dimx, dimy, dimz);
-        free(front_north_send);
-        free(front_north_receive);
-    }
-    //exchange front_east if got front_east
-    if(problem->px < problem->npx - 1 && problem->pz > 0){
-        DataType *front_east_send = (DataType*) malloc(ny * sizeof(DataType));
-        extract_edge_Y_from_GPU(x_d, front_east_send, dimx-2, 1, 1, ny, dimx, dimy, dimz);
-        DataType *front_east_receive = (DataType*) malloc(ny * sizeof(DataType));
-        MPI_Sendrecv(front_east_send, ny, MPIDataType, problem->rank - problem->npx * problem->npy + 1, FRONT_EAST, front_east_receive, ny, MPIDataType, problem->rank - problem->npx * problem->npy + 1, BACK_WEST, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_Y_to_GPU(x_d, front_east_receive, dimx-1, 1, 0, ny, dimx, dimy, dimz);
-        free(front_east_send);
-        free(front_east_receive);
-    }
-    //exchange front_south if got front_south
-    if(problem->py < problem->npy - 1 && problem->pz > 0){
-        DataType *front_south_send = (DataType*) malloc(nx * sizeof(DataType));
-        extract_edge_X_from_GPU(x_d, front_south_send, 1, dimy - 2, 1, nx, dimx, dimy, dimz);
-        DataType *front_south_receive = (DataType*) malloc(nx * sizeof(DataType));
-        MPI_Sendrecv(front_south_send, nx, MPIDataType, problem->rank - problem->npx * (problem->npy-1), FRONT_SOUTH, front_south_receive, nx, MPIDataType, problem->rank - problem->npx * (problem->npy-1), BACK_NORTH, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_X_to_GPU(x_d, front_south_receive, 1, dimy - 1, 0, nx, dimx, dimy, dimz);
-        free(front_south_send);
-        free(front_south_receive);
-    }
-    //exchange front_west if got front_west
-    if(problem->px > 0 && problem->pz > 0){
-        DataType *front_west_send = (DataType*) malloc(ny * sizeof(DataType));
-        extract_edge_Y_from_GPU(x_d, front_west_send, 1, 1, 1, ny, dimx, dimy, dimz);
-        DataType *front_west_receive = (DataType*) malloc(ny * sizeof(DataType));
-        MPI_Sendrecv(front_west_send, ny, MPIDataType, problem->rank - problem->npx * problem->npy - 1, FRONT_WEST, front_west_receive, ny, MPIDataType, problem->rank - problem->npx * problem->npy - 1, BACK_EAST, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_Y_to_GPU(x_d, front_west_receive, 0, 1, 0, ny, dimx, dimy, dimz);
-        free(front_west_send);
-        free(front_west_receive);
-    }
-    //exchange back_north if got back_north
-    if(problem->py > 0 && problem->pz < problem->npz-1){
-        DataType *back_north_send = (DataType*) malloc(nx * sizeof(DataType));
-        extract_edge_X_from_GPU(x_d, back_north_send, 1, 1, dimz-2, nx, dimx, dimy, dimz);
-        DataType *back_north_receive = (DataType*) malloc(nx * sizeof(DataType));
-        MPI_Sendrecv(back_north_send, nx, MPIDataType, problem->rank + problem->npx * (problem->npy-1), BACK_NORTH, back_north_receive, nx, MPIDataType, problem->rank + problem->npx * (problem->npy-1), FRONT_SOUTH, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_X_to_GPU(x_d, back_north_receive, 1, 0, dimz-1, nx, dimx, dimy, dimz);
-        free(back_north_send);
-        free(back_north_receive);
-    }
-    //exchange back_east if got back_east
-    if(problem->px < problem->npx - 1 && problem->pz < problem->npz-1){
-        DataType *back_east_send = (DataType*) malloc(ny * sizeof(DataType));
-        extract_edge_Y_from_GPU(x_d, back_east_send, dimx-2, 1, dimz-2, ny, dimx, dimy, dimz);
-        DataType *back_east_receive = (DataType*) malloc(ny * sizeof(DataType));
-        MPI_Sendrecv(back_east_send, ny, MPIDataType, problem->rank + problem->npx * problem->npy + 1, BACK_EAST, back_east_receive, ny, MPIDataType, problem->rank + problem->npx * problem->npy + 1, FRONT_WEST, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_Y_to_GPU(x_d, back_east_receive, dimx-1, 1, dimz-1, ny, dimx, dimy, dimz);
-        free(back_east_send);
-        free(back_east_receive);
-    }
-    //exchange back_south if got back_south
-    if(problem->py < problem->npy - 1 && problem->pz < problem->npz-1){
-        DataType *back_south_send = (DataType*) malloc(nx * sizeof(DataType));
-        extract_edge_X_from_GPU(x_d, back_south_send, 1, dimy - 2, dimz-2, nx, dimx, dimy, dimz);
-        DataType *back_south_receive = (DataType*) malloc(nx * sizeof(DataType));
-        MPI_Sendrecv(back_south_send, nx, MPIDataType, problem->rank + problem->npx * (problem->npy+1), BACK_SOUTH, back_south_receive, nx, MPIDataType, problem->rank + problem->npx * (problem->npy+1), FRONT_NORTH, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_X_to_GPU(x_d, back_south_receive, 1, dimy - 1, dimz-1, nx, dimx, dimy, dimz);
-        free(back_south_send);
-        free(back_south_receive);
-    }
-    //exchange back_west if got back_west
-    if(problem->px > 0 && problem->pz < problem->npz-1){
-        DataType *back_west_send = (DataType*) malloc(ny * sizeof(DataType));
-        extract_edge_Y_from_GPU(x_d, back_west_send, 1, 1, dimz-2, ny, dimx, dimy, dimz);
-        DataType *back_west_receive = (DataType*) malloc(ny * sizeof(DataType));
-        MPI_Sendrecv(back_west_send, ny, MPIDataType, problem->rank + problem->npx * problem->npy - 1, BACK_WEST, back_west_receive, ny, MPIDataType, problem->rank + problem->npx * problem->npy - 1, FRONT_EAST, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_Y_to_GPU(x_d, back_west_receive, 0, 1, dimz-1, ny, dimx, dimy, dimz);
-        free(back_west_send);
-        free(back_west_receive);
-    }
-    //exchange front corners
-    if(problem->pz > 0){
-        //exchange front_ne if got front_ne
-        if(problem->py > 0 && problem->px < problem->npx - 1){
-            DataType front_ne_send;
-            CHECK_CUDA(cudaMemcpy(&front_ne_send, x_d + dimx * dimy + dimx + dimx - 2, sizeof(DataType), cudaMemcpyDeviceToHost));
-            DataType front_ne_receive;
-            MPI_Sendrecv(&front_ne_send, 1, MPIDataType, problem->rank - problem->npx * (problem->npy+1) + 1, FRONT_NE, &front_ne_receive, 1, MPIDataType, problem->rank - problem->npx * (problem->npy+1) + 1, BACK_SW, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            CHECK_CUDA(cudaMemcpy(x_d + dimx - 1, &front_ne_receive, sizeof(DataType), cudaMemcpyHostToDevice));
-        }
-        //exchange front_se if got front_se
-        if(problem->py < problem->npy - 1 && problem->px < problem->npx - 1){
-            DataType front_se_send;
-            CHECK_CUDA(cudaMemcpy(&front_se_send, x_d + dimx * dimy + dimx + dimx - 2 + (dimy-3)*dimx, sizeof(DataType), cudaMemcpyDeviceToHost));
-            DataType front_se_receive;
-            MPI_Sendrecv(&front_se_send, 1, MPIDataType, problem->rank - problem->npx * (problem->npy-1) + 1, FRONT_SE, &front_se_receive, 1, MPIDataType, problem->rank - problem->npx * (problem->npy-1) + 1, BACK_NW, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            CHECK_CUDA(cudaMemcpy(x_d + dimx * dimy - 1, &front_se_receive, sizeof(DataType), cudaMemcpyHostToDevice));
-        }
-        //exchange front_sw if got front_sw
-        if(problem->py < problem->npy - 1 && problem->px > 0){
-            DataType front_sw_send;
-            CHECK_CUDA(cudaMemcpy(&front_sw_send, x_d + dimx * dimy + dimx + 1 + (ny-1) * dimx, sizeof(DataType), cudaMemcpyDeviceToHost));
-            DataType front_sw_receive;
-            MPI_Sendrecv(&front_sw_send, 1, MPIDataType, problem->rank - problem->npx * (problem->npy-1) - 1, FRONT_SW, &front_sw_receive, 1, MPIDataType, problem->rank - problem->npx * (problem->npy-1) - 1, BACK_NE, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            CHECK_CUDA(cudaMemcpy(x_d + (dimy -1) * dimx, &front_sw_receive, sizeof(DataType), cudaMemcpyHostToDevice));
-        }
-        //exchange front_nw if got front_nw
-        if(problem->py > 0 && problem->px > 0){
-            DataType front_nw_send;
-            CHECK_CUDA(cudaMemcpy(&front_nw_send, x_d + dimx * dimy + 1 + dimx, sizeof(DataType), cudaMemcpyDeviceToHost));
-            DataType front_nw_receive;
-            MPI_Sendrecv(&front_nw_send, 1, MPIDataType, problem->rank - problem->npx * (problem->npy+1) - 1, FRONT_NW, &front_nw_receive, 1, MPIDataType, problem->rank - problem->npx * (problem->npy+1) - 1, BACK_SE, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            CHECK_CUDA(cudaMemcpy(x_d, &front_nw_receive, sizeof(DataType), cudaMemcpyHostToDevice));
-        }
-    }
-    //exchange back corners
-    if(problem->pz < problem->npz - 1){
-        //exchange back_ne if got back_ne
-        if(problem->py > 0 && problem->px < problem->npx - 1){
-            DataType back_ne_send;
-            CHECK_CUDA(cudaMemcpy(&back_ne_send, x_d + dimx * dimy * (dimz - 2) + dimx - 2 + dimx, sizeof(DataType), cudaMemcpyDeviceToHost));
-            DataType back_ne_receive;
-            MPI_Sendrecv(&back_ne_send, 1, MPIDataType, problem->rank + problem->npx * (problem->npy-1) + 1, BACK_NE, &back_ne_receive, 1, MPIDataType, problem->rank + problem->npx * (problem->npy-1) + 1, FRONT_SW, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            CHECK_CUDA(cudaMemcpy(x_d + dimx - 1 + dimx * dimy * (dimz - 1), &back_ne_receive, sizeof(DataType), cudaMemcpyHostToDevice));
-        }
-        //exchange back_se if got back_se
-        if(problem->py < problem->npy - 1 && problem->px < problem->npx - 1){
-            DataType back_se_send;
-            CHECK_CUDA(cudaMemcpy(&back_se_send, x_d + dimx * dimy * (dimz - 2) + dimx - 2 + dimx + (dimy-3) * dimx, sizeof(DataType), cudaMemcpyDeviceToHost));
-            DataType back_se_receive;
-            MPI_Sendrecv(&back_se_send, 1, MPIDataType, problem->rank + problem->npx * (problem->npy+1) + 1, BACK_SE, &back_se_receive, 1, MPIDataType, problem->rank + problem->npx * (problem->npy+1) + 1, FRONT_NW, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            CHECK_CUDA(cudaMemcpy(x_d + dimx - 1 + (dimy - 1) * dimx + dimx * dimy * (dimz - 1), &back_se_receive, sizeof(DataType), cudaMemcpyHostToDevice));
-        }
-        //exchange back_sw if got back_sw
-        if(problem->py < problem->npy - 1 && problem->px > 0){
-            DataType back_sw_send;
-            CHECK_CUDA(cudaMemcpy(&back_sw_send, x_d + dimx * dimy * (dimz - 2) + 1 + dimx + (ny-1) * dimx, sizeof(DataType), cudaMemcpyDeviceToHost));
-            DataType back_sw_receive;
-            MPI_Sendrecv(&back_sw_send, 1, MPIDataType, problem->rank + problem->npx * (problem->npy+1) - 1, BACK_SW, &back_sw_receive, 1, MPIDataType, problem->rank + problem->npx * (problem->npy+1) - 1, FRONT_NE, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            CHECK_CUDA(cudaMemcpy(x_d + dimx * (dimy - 1) + dimx * dimy * (dimz - 1), &back_sw_receive, sizeof(DataType), cudaMemcpyHostToDevice));
-        }
-        //exchange back_nw if got back_nw
-        if(problem->py > 0 && problem->px > 0){
-            DataType back_nw_send;
-            CHECK_CUDA(cudaMemcpy(&back_nw_send, x_d + dimx * dimy * (dimz - 2) + 1 + dimx, sizeof(DataType), cudaMemcpyDeviceToHost));
-            DataType back_nw_receive;
-            MPI_Sendrecv(&back_nw_send, 1, MPIDataType, problem->rank + problem->npx * (problem->npy-1) - 1, BACK_NW, &back_nw_receive, 1, MPIDataType, problem->rank + problem->npx * (problem->npy-1) - 1, FRONT_SE, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            CHECK_CUDA(cudaMemcpy(x_d + dimx * dimy * (dimz-1), &back_nw_receive, sizeof(DataType), cudaMemcpyHostToDevice));
-        }
-    }
-    
-    MPI_Barrier(MPI_COMM_WORLD);
-}
-
 /* x_d is the pointer to the first element in the slice */
 /* every thread fills an element */
 __global__ void extract_xz_plane_kernel(DataType *x_d, DataType *slice_d, int length_X, int length_Z, int slice_X, int slice_Z){
@@ -411,7 +342,6 @@ __global__ void inject_xy_plane_kernel(DataType *x_d, DataType *slice_d, int len
     int x_loc = tid / length_X;
     if (y_loc<length_Y) x_d[y_loc*slice_Y + x_loc*slice_X]=slice_d[tid];
 }
-
 void extract_horizontal_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Z, int dimx, int dimy, int dimz){
     local_int_t k = x +  y * dimx + z * dimx * dimy;
     x_d += k;
