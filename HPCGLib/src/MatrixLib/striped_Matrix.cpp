@@ -847,13 +847,13 @@ void striped_partial_Matrix<T>::initialize_coarse_matrix(){
     this->coarse_Matrix->generate_f2c_operator_onGPU();
 
     // allocate halos rc, xc, Axf and set to zero
-    /* InitHaloMemGPU(rc_d, this->problem->nx, this->problem->ny, this->problem->nz);
-    InitHaloMemGPU(xc_d, this->problem->nx, this->problem->ny, this->problem->nz);
-    InitHaloMemGPU(Axf_d, this->problem->nx, this->problem->ny, this->problem->nz);
+    InitHalo(rc_d, this->problem->nx, this->problem->ny, this->problem->nz);
+    InitHalo(xc_d, this->problem->nx, this->problem->ny, this->problem->nz);
+    InitHalo(Axf_d, this->problem->nx, this->problem->ny, this->problem->nz);
 
-    SetHaloZeroGPU(rc_d);
-    SetHaloZeroGPU(xc_d);
-    SetHaloZeroGPU(Axf_d); */
+    SetHaloGlobalIndexGPU(rc_d, this->problem);
+    SetHaloGlobalIndexGPU(xc_d, this->problem);
+    SetHaloGlobalIndexGPU(Axf_d, this->problem);
 }
 
 template <typename T>
