@@ -33,6 +33,9 @@ void GenerateProblem(int npx, int npy, int npz, local_int_t nx, local_int_t ny, 
     problem->nx = nx; //number of grid points of processes subdomain in x
     problem->ny = ny; //number of grid points of processes subdomain in y
     problem->nz = nz; //number of grid points of processes subdomain in z
+    local_int_t dimx = nx + 2;
+    local_int_t dimy = ny + 2;
+    local_int_t dimz = nz + 2;
     problem->size = size;
     problem->rank = rank;
     problem->gnx = npx * nx; //global number of grid points in x
@@ -49,9 +52,337 @@ void GenerateProblem(int npx, int npy, int npz, local_int_t nx, local_int_t ny, 
     problem->gx0 = px * nx; //base global x index for this rank in the npx by npy by npz point grid
     problem->gy0 = py * ny; //base global y index for this rank in the npx by npy by npz point grid
     problem->gz0 = pz * nz; //base global z index for this rank in the npx by npy by npz point grid
+
+    // initialize neighbors, follows the same order as Comm_Tags
+    int tmp_neighbors[NUMBER_NEIGHBORS] = {
+        /* NORTH       */ (problem->py > 0)                          ? problem->rank - problem->npx               : -1,
+        /* EAST        */ (problem->px < problem->npx - 1)             ? problem->rank + 1                          : -1,
+        /* SOUTH       */ (problem->py < problem->npy - 1)             ? problem->rank + problem->npx               : -1,
+        /* WEST        */ (problem->px > 0)                          ? problem->rank - 1                          : -1,
+        /* NE          */ (problem->py > 0 && problem->px < problem->npx - 1) ? problem->rank - problem->npx + 1        : -1,
+        /* SE          */ (problem->py < problem->npy - 1 && problem->px < problem->npx - 1) ? problem->rank + problem->npx + 1 : -1,
+        /* SW          */ (problem->py < problem->npy - 1 && problem->px > 0) ? problem->rank + problem->npx - 1        : -1,
+        /* NW          */ (problem->py > 0 && problem->px > 0)         ? problem->rank - problem->npx - 1             : -1,
+        /* FRONT       */ (problem->pz > 0)                          ? problem->rank - problem->npx * problem->npy  : -1,
+        /* BACK        */ (problem->pz < problem->npz - 1)             ? problem->rank + problem->npx * problem->npy  : -1,
+        /* FRONT_NORTH */ (problem->pz > 0 && problem->py > 0)         ? problem->rank - problem->npx * (problem->npy + 1): -1,
+        /* FRONT_EAST  */ (problem->pz > 0 && problem->px < problem->npx - 1) ? problem->rank - problem->npx * problem->npy + 1 : -1,
+        /* FRONT_SOUTH */ (problem->pz > 0 && problem->py < problem->npy - 1) ? problem->rank - problem->npx * (problem->npy - 1): -1,
+        /* FRONT_WEST  */ (problem->pz > 0 && problem->px > 0)         ? problem->rank - problem->npx * problem->npy - 1 : -1,
+        /* BACK_NORTH  */ (problem->pz < problem->npz - 1 && problem->py > 0) ? problem->rank + problem->npx * (problem->npy - 1) : -1,
+        /* BACK_EAST   */ (problem->pz < problem->npz - 1 && problem->px < problem->npx - 1) ? problem->rank + problem->npx * problem->npy + 1 : -1,
+        /* BACK_SOUTH  */ (problem->pz < problem->npz - 1 && problem->py < problem->npy - 1) ? problem->rank + problem->npx * (problem->npy + 1) : -1,
+        /* BACK_WEST   */ (problem->pz < problem->npz - 1 && problem->px > 0) ? problem->rank + problem->npx * problem->npy - 1 : -1,
+        /* FRONT_NE    */ (problem->pz > 0 && problem->py > 0 && problem->px < problem->npx - 1) ? problem->rank - problem->npx * (problem->npy + 1) + 1 : -1,
+        /* FRONT_SE    */ (problem->pz > 0 && problem->py < problem->npy - 1 && problem->px < problem->npx - 1) ? problem->rank - problem->npx * (problem->npy - 1) + 1 : -1,
+        /* FRONT_SW    */ (problem->pz > 0 && problem->py < problem->npy - 1 && problem->px > 0) ? problem->rank - problem->npx * (problem->npy - 1) - 1 : -1,
+        /* FRONT_NW    */ (problem->pz > 0 && problem->py > 0 && problem->px > 0) ? problem->rank - problem->npx * (problem->npy + 1) - 1 : -1,
+        /* BACK_NE     */ (problem->pz < problem->npz - 1 && problem->py > 0 && problem->px < problem->npx - 1) ? problem->rank + problem->npx * (problem->npy - 1) + 1 : -1,
+        /* BACK_SE     */ (problem->pz < problem->npz - 1 && problem->py < problem->npy - 1 && problem->px < problem->npx - 1) ? problem->rank + problem->npx * (problem->npy + 1) + 1 : -1,
+        /* BACK_SW     */ (problem->pz < problem->npz - 1 && problem->py < problem->npy - 1 && problem->px > 0) ? problem->rank + problem->npx * (problem->npy + 1) - 1 : -1,
+        /* BACK_NW     */ (problem->pz < problem->npz - 1 && problem->py > 0 && problem->px > 0) ? problem->rank + problem->npx * (problem->npy - 1) - 1 : -1
+    };
+    memcpy(problem->neighbors, tmp_neighbors, sizeof(tmp_neighbors));
+
+    // initialize neighbors_mask, follows the same order as Comm_Tags
+    bool tmp_neighbors_mask[NUMBER_NEIGHBORS] = {
+        /* NORTH       */ (problem->py > 0),
+        /* EAST        */ (problem->px < problem->npx - 1),
+        /* SOUTH       */ (problem->py < problem->npy - 1),
+        /* WEST        */ (problem->px > 0),
+        /* NE          */ (problem->px < problem->npx - 1 && problem->py > 0),
+        /* SE          */ (problem->px < problem->npx - 1 && problem->py < problem->npy - 1),
+        /* SW          */ (problem->px > 0 && problem->py < problem->npy - 1),
+        /* NW          */ (problem->px > 0 && problem->py > 0),
+        /* FRONT       */ (problem->pz > 0),
+        /* BACK        */ (problem->pz < problem->npz - 1),
+        /* FRONT_NORTH */ (problem->py > 0 && problem->pz > 0),
+        /* FRONT_EAST  */ (problem->px < problem->npx - 1 && problem->pz > 0),
+        /* FRONT_SOUTH */ (problem->py < problem->npy - 1 && problem->pz > 0),
+        /* FRONT_WEST  */ (problem->px > 0 && problem->pz > 0),
+        /* BACK_NORTH  */ (problem->py > 0 && problem->pz < problem->npz - 1),
+        /* BACK_EAST   */ (problem->px < problem->npx - 1 && problem->pz < problem->npz - 1),
+        /* BACK_SOUTH  */ (problem->py < problem->npy - 1 && problem->pz < problem->npz - 1),
+        /* BACK_WEST   */ (problem->px > 0 && problem->pz < problem->npz - 1),
+        /* FRONT_NE    */ (problem->pz > 0 && problem->py > 0 && problem->px < problem->npx - 1),
+        /* FRONT_SE    */ (problem->pz > 0 && problem->py < problem->npy - 1 && problem->px < problem->npx - 1),
+        /* FRONT_SW    */ (problem->pz > 0 && problem->py < problem->npy - 1 && problem->px > 0),
+        /* FRONT_NW    */ (problem->pz > 0 && problem->py > 0 && problem->px > 0),
+        /* BACK_NE     */ (problem->pz < problem->npz - 1 && problem->py > 0 && problem->px < problem->npx - 1),
+        /* BACK_SE     */ (problem->pz < problem->npz - 1 && problem->py < problem->npy - 1 && problem->px < problem->npx - 1),
+        /* BACK_SW     */ (problem->pz < problem->npz - 1 && problem->py < problem->npy - 1 && problem->px > 0),
+        /* BACK_NW     */ (problem->pz < problem->npz - 1 && problem->py > 0 && problem->px > 0)
+    };
+    memcpy(problem->neighbors_mask, tmp_neighbors_mask, sizeof(tmp_neighbors_mask));
+
+    // initialize count_exchange, follows the same order as Comm_Tags
+    local_int_t tmp_count_exchange[NUMBER_NEIGHBORS] = {
+        /* NORTH       */ nx * nz,
+        /* EAST        */ ny * nz,
+        /* SOUTH       */ nx * nz,
+        /* WEST        */ ny * nz,
+        /* NE          */ nz,
+        /* SE          */ nz,
+        /* SW          */ nz,
+        /* NW          */ nz,
+        /* FRONT       */ nx * ny,
+        /* BACK        */ nx * ny,
+        /* FRONT_NORTH */ nx,
+        /* FRONT_EAST  */ ny,
+        /* FRONT_SOUTH */ nx,
+        /* FRONT_WEST  */ ny,
+        /* BACK_NORTH  */ nx,
+        /* BACK_EAST   */ ny,
+        /* BACK_SOUTH  */ nx,
+        /* BACK_WEST   */ ny,
+        /* FRONT_NE    */ 1,
+        /* FRONT_SE    */ 1,
+        /* FRONT_SW    */ 1,
+        /* FRONT_NW    */ 1,
+        /* BACK_NE     */ 1,
+        /* BACK_SE     */ 1,
+        /* BACK_SW     */ 1,
+        /* BACK_NW     */ 1
+    };
+    memcpy(problem->count_exchange, tmp_count_exchange, sizeof(tmp_count_exchange));
+
+    // initialize the Ghost Cells, which store information of the correct extraction and injection from/to GPU
+    GhostCell tmp_extraction_ghost_cells[NUMBER_NEIGHBORS] = {
+        // NORTH: extract_horizontal_plane from (1,1,1) with patch (nx, 1, nz)
+        { 1, 1, 1,    dimx, dimy, dimz,    nx, 1, nz },
+        
+        // EAST: extract_vertical_plane from (dimx-2,1,1) with patch (1, ny, nz)
+        { dimx - 2, 1, 1,    dimx, dimy, dimz,    1, ny, nz },
+        
+        // SOUTH: extract_horizontal_plane from (1,dimy-2,1) with patch (nx, 1, nz)
+        { 1, dimy - 2, 1,   dimx, dimy, dimz,    nx, 1, nz },
+        
+        // WEST: extract_vertical_plane from (1,1,1) with patch (1, ny, nz)
+        { 1, 1, 1,    dimx, dimy, dimz,    1, ny, nz },
+        
+        // NE: extract_edge_Z from (dimx-2,1,1) with patch (1, 1, nz)
+        { dimx - 2, 1, 1,    dimx, dimy, dimz,    1, 1, nz },
+        
+        // SE: extract_edge_Z from (dimx-2, dimy-2,1) with patch (1, 1, nz)
+        { dimx - 2, dimy - 2, 1,   dimx, dimy, dimz,    1, 1, nz },
+        
+        // SW: extract_edge_Z from (1, dimy-2,1) with patch (1, 1, nz)
+        { 1, dimy - 2, 1,   dimx, dimy, dimz,    1, 1, nz },
+        
+        // NW: extract_edge_Z from (1,1,1) with patch (1, 1, nz)
+        { 1, 1, 1,    dimx, dimy, dimz,    1, 1, nz },
+        
+        // FRONT: extract_frontal_plane from (1,1,1) with patch (nx, ny, 1)
+        { 1, 1, 1,    dimx, dimy, dimz,    nx, ny, 1 },
+        
+        // BACK: extract_frontal_plane from (1,1, dimz-2) with patch (nx, ny, 1)
+        { 1, 1, dimz - 2,   dimx, dimy, dimz,    nx, ny, 1 },
+        
+        // FRONT_NORTH: extract_edge_X from (1,1,1) with patch (nx, 1, 1)
+        { 1, 1, 1,    dimx, dimy, dimz,    nx, 1, 1 },
+        
+        // FRONT_EAST: extract_edge_Y from (dimx-2,1,1) with patch (1, ny, 1)
+        { dimx - 2, 1, 1,    dimx, dimy, dimz,    1, ny, 1 },
+        
+        // FRONT_SOUTH: extract_edge_X from (1, dimy-2,1) with patch (nx, 1, 1)
+        { 1, dimy - 2, 1,    dimx, dimy, dimz,    nx, 1, 1 },
+        
+        // FRONT_WEST: extract_edge_Y from (1,1,1) with patch (1, ny, 1)
+        { 1, 1, 1,    dimx, dimy, dimz,    1, ny, 1 },
+        
+        // BACK_NORTH: extract_edge_X from (1,1, dimz-2) with patch (nx, 1, 1)
+        { 1, 1, dimz - 2,   dimx, dimy, dimz,    nx, 1, 1 },
+        
+        // BACK_EAST: extract_edge_Y from (dimx-2,1, dimz-2) with patch (1, ny, 1)
+        { dimx - 2, 1, dimz - 2,   dimx, dimy, dimz,    1, ny, 1 },
+        
+        // BACK_SOUTH: extract_edge_X from (1, dimy-2, dimz-2) with patch (nx, 1, 1)
+        { 1, dimy - 2, dimz - 2,   dimx, dimy, dimz,    nx, 1, 1 },
+        
+        // BACK_WEST: extract_edge_Y from (1,1, dimz-2) with patch (1, ny, 1)
+        { 1, 1, dimz - 2,   dimx, dimy, dimz,    1, ny, 1 },
+        
+        // FRONT_NE: corner extraction from (dimx-2,1,1) with patch (1, 1, 1)
+        { dimx - 2, 1, 1,    dimx, dimy, dimz,    1, 1, 1 },
+        
+        // FRONT_SE: corner extraction from (dimx-2, dimy-2,1) with patch (1, 1, 1)
+        { dimx - 2, dimy - 2, 1,   dimx, dimy, dimz,    1, 1, 1 },
+        
+        // FRONT_SW: corner extraction from (1, dimy-2,1) with patch (1, 1, 1)
+        { 1, dimy - 2, 1,   dimx, dimy, dimz,    1, 1, 1 },
+        
+        // FRONT_NW: corner extraction from (1,1,1) with patch (1, 1, 1)
+        { 1, 1, 1,    dimx, dimy, dimz,    1, 1, 1 },
+        
+        // BACK_NE: corner extraction from (dimx-2,1, dimz-2) with patch (1, 1, 1)
+        { dimx - 2, 1, dimz - 2,   dimx, dimy, dimz,    1, 1, 1 },
+        
+        // BACK_SE: corner extraction from (dimx-2, dimy-2, dimz-2) with patch (1, 1, 1)
+        { dimx - 2, dimy - 2, dimz - 2,   dimx, dimy, dimz,    1, 1, 1 },
+        
+        // BACK_SW: corner extraction from (1, dimy-2, dimz-2) with patch (1, 1, 1)
+        { 1, dimy - 2, dimz - 2,   dimx, dimy, dimz,    1, 1, 1 },
+        
+        // BACK_NW: corner extraction from (1,1, dimz-2) with patch (1, 1, 1)
+        { 1, 1, dimz - 2,   dimx, dimy, dimz,    1, 1, 1 }
+    };
+    memcpy(problem->extraction_ghost_cells, tmp_extraction_ghost_cells, sizeof(tmp_extraction_ghost_cells));
+
+    GhostCell tmp_injection_ghost_cells[NUMBER_NEIGHBORS] = {
+        // NORTH: inject_horizontal_plane_to_GPU(x_d, halo->north_recv_buff_h, 1, 0, 1, nx, nz, dimx, dimy, dimz);
+        { 1, 0, 1,    dimx, dimy, dimz,    nx, 1, nz },
+        
+        // EAST: inject_vertical_plane_to_GPU(x_d, halo->east_recv_buff_h, dimx - 1, 1, 1, ny, nz, dimx, dimy, dimz);
+        { dimx - 1, 1, 1,    dimx, dimy, dimz,    1, ny, nz },
+        
+        // SOUTH: inject_horizontal_plane_to_GPU(x_d, halo->south_recv_buff_h, 1, dimy - 1, 1, nx, nz, dimx, dimy, dimz);
+        { 1, dimy - 1, 1,    dimx, dimy, dimz,    nx, 1, nz },
+        
+        // WEST: inject_vertical_plane_to_GPU(x_d, halo->west_recv_buff_h, 0, 1, 1, ny, nz, dimx, dimy, dimz);
+        { 0, 1, 1,    dimx, dimy, dimz,    1, ny, nz },
+        
+        // NE: inject_edge_Z_to_GPU(x_d, halo->ne_recv_buff_h, dimx - 1, 0, 1, nz, dimx, dimy, dimz);
+        { dimx - 1, 0, 1,    dimx, dimy, dimz,    1, 1, nz },
+        
+        // SE: inject_edge_Z_to_GPU(x_d, halo->se_recv_buff_h, dimx - 1, dimy - 1, 1, nz, dimx, dimy, dimz);
+        { dimx - 1, dimy - 1, 1,    dimx, dimy, dimz,    1, 1, nz },
+        
+        // SW: inject_edge_Z_to_GPU(x_d, halo->sw_recv_buff_h, 0, dimy - 1, 1, nz, dimx, dimy, dimz);
+        { 0, dimy - 1, 1,    dimx, dimy, dimz,    1, 1, nz },
+        
+        // NW: inject_edge_Z_to_GPU(x_d, halo->nw_recv_buff_h, 0, 0, 1, nz, dimx, dimy, dimz);
+        { 0, 0, 1,    dimx, dimy, dimz,    1, 1, nz },
+        
+        // FRONT: inject_frontal_plane_to_GPU(x_d, halo->front_recv_buff_h, 1, 1, 0, nx, ny, dimx, dimy, dimz);
+        { 1, 1, 0,    dimx, dimy, dimz,    nx, ny, 1 },
+        
+        // BACK: inject_frontal_plane_to_GPU(x_d, halo->back_recv_buff_h, 1, 1, dimz - 1, nx, ny, dimx, dimy, dimz);
+        { 1, 1, dimz - 1,    dimx, dimy, dimz,    nx, ny, 1 },
+        
+        // FRONT_NORTH: inject_edge_X_to_GPU(x_d, halo->front_north_recv_buff_h, 1, 0, 0, nx, dimx, dimy, dimz);
+        { 1, 0, 0,    dimx, dimy, dimz,    nx, 1, 1 },
+        
+        // FRONT_EAST: inject_edge_Y_to_GPU(x_d, halo->front_east_recv_buff_h, dimx - 1, 1, 0, ny, dimx, dimy, dimz);
+        { dimx - 1, 1, 0,    dimx, dimy, dimz,    1, ny, 1 },
+        
+        // FRONT_SOUTH: inject_edge_X_to_GPU(x_d, halo->front_south_recv_buff_h, 1, dimy - 1, 0, nx, dimx, dimy, dimz);
+        { 1, dimy - 1, 0,    dimx, dimy, dimz,    nx, 1, 1 },
+        
+        // FRONT_WEST: inject_edge_Y_to_GPU(x_d, halo->front_west_recv_buff_h, 0, 1, 0, ny, dimx, dimy, dimz);
+        { 0, 1, 0,    dimx, dimy, dimz,    1, ny, 1 },
+        
+        // BACK_NORTH: inject_edge_X_to_GPU(x_d, halo->back_north_recv_buff_h, 1, 0, dimz - 1, nx, dimx, dimy, dimz);
+        { 1, 0, dimz - 1,    dimx, dimy, dimz,    nx, 1, 1 },
+        
+        // BACK_EAST: inject_edge_Y_to_GPU(x_d, halo->back_east_recv_buff_h, dimx - 1, 1, dimz - 1, ny, dimx, dimy, dimz);
+        { dimx - 1, 1, dimz - 1,    dimx, dimy, dimz,    1, ny, 1 },
+        
+        // BACK_SOUTH: inject_edge_X_to_GPU(x_d, halo->back_south_recv_buff_h, 1, dimy - 1, dimz - 1, nx, dimx, dimy, dimz);
+        { 1, dimy - 1, dimz - 1,    dimx, dimy, dimz,    nx, 1, 1 },
+        
+        // BACK_WEST: inject_edge_Y_to_GPU(x_d, halo->back_west_recv_buff_h, 0, 1, dimz - 1, ny, dimx, dimy, dimz);
+        { 0, 1, dimz - 1,    dimx, dimy, dimz,    1, ny, 1 },
+        
+        // FRONT_NE (corner injection): corresponds to cudaMemcpy(x_d + dimx - 1, ...),
+        // which gives coordinate (dimx - 1, 0, 0)
+        { dimx - 1, 0, 0,    dimx, dimy, dimz,    1, 1, 1 },
+        
+        // FRONT_SE (corner injection): corresponds to cudaMemcpy(x_d + dimx * dimy - 1, ...),
+        // i.e. (dimx - 1, dimy - 1, 0)
+        { dimx - 1, dimy - 1, 0,    dimx, dimy, dimz,    1, 1, 1 },
+        
+        // FRONT_SW (corner injection): corresponds to cudaMemcpy(x_d + (dimy - 1) * dimx, ...),
+        // i.e. (0, dimy - 1, 0)
+        { 0, dimy - 1, 0,    dimx, dimy, dimz,    1, 1, 1 },
+        
+        // FRONT_NW (corner injection): corresponds to cudaMemcpy(x_d, ...),
+        // i.e. (0, 0, 0)
+        { 0, 0, 0,    dimx, dimy, dimz,    1, 1, 1 },
+        
+        // BACK_NE (corner injection): corresponds to cudaMemcpy(x_d + dimx - 1 + dimx * dimy * (dimz - 1), ...),
+        // i.e. (dimx - 1, 0, dimz - 1)
+        { dimx - 1, 0, dimz - 1,    dimx, dimy, dimz,    1, 1, 1 },
+        
+        // BACK_SE (corner injection): corresponds to cudaMemcpy(x_d + dimx - 1 + (dimy - 1) * dimx + dimx * dimy * (dimz - 1), ...),
+        // i.e. (dimx - 1, dimy - 1, dimz - 1)
+        { dimx - 1, dimy - 1, dimz - 1,    dimx, dimy, dimz,    1, 1, 1 },
+        
+        // BACK_SW (corner injection): corresponds to cudaMemcpy(x_d + dimx * (dimy - 1) + dimx * dimy * (dimz - 1), ...),
+        // i.e. (0, dimy - 1, dimz - 1)
+        { 0, dimy - 1, dimz - 1,    dimx, dimy, dimz,    1, 1, 1 },
+        
+        // BACK_NW (corner injection): corresponds to cudaMemcpy(x_d + dimx * dimy * (dimz - 1), ...),
+        // i.e. (0, 0, dimz - 1)
+        { 0, 0, dimz - 1,    dimx, dimy, dimz,    1, 1, 1 }
+    };
+    memcpy(problem->injection_ghost_cells, tmp_injection_ghost_cells, sizeof(tmp_injection_ghost_cells));
+
+    void (*tmp_extraction_functions[NUMBER_NEIGHBORS])(Halo *halo, DataType *buff, GhostCell *gh) = {
+        extract_horizontal_plane_from_GPU,
+        extract_vertical_plane_from_GPU,
+        extract_horizontal_plane_from_GPU,
+        extract_vertical_plane_from_GPU,
+        extract_edge_Z_from_GPU,
+        extract_edge_Z_from_GPU,
+        extract_edge_Z_from_GPU,
+        extract_edge_Z_from_GPU,
+        extract_frontal_plane_from_GPU,
+        extract_frontal_plane_from_GPU,
+        extract_edge_X_from_GPU,
+        extract_edge_Y_from_GPU,
+        extract_edge_X_from_GPU,
+        extract_edge_Y_from_GPU,
+        extract_edge_X_from_GPU,
+        extract_edge_Y_from_GPU,
+        extract_edge_X_from_GPU,
+        extract_edge_Y_from_GPU,
+        extract_corner_from_GPU,
+        extract_corner_from_GPU,
+        extract_corner_from_GPU,
+        extract_corner_from_GPU,
+        extract_corner_from_GPU,
+        extract_corner_from_GPU,
+        extract_corner_from_GPU,
+        extract_corner_from_GPU
+    };
+    memcpy(problem->extraction_functions, tmp_extraction_functions, sizeof(tmp_extraction_functions));
+
+    void (*tmp_injection_functions[NUMBER_NEIGHBORS])(Halo *halo, DataType *buff, GhostCell *gh) = {
+        inject_horizontal_plane_to_GPU,
+        inject_vertical_plane_to_GPU,
+        inject_horizontal_plane_to_GPU,
+        inject_vertical_plane_to_GPU,
+        inject_edge_Z_to_GPU,
+        inject_edge_Z_to_GPU,
+        inject_edge_Z_to_GPU,
+        inject_edge_Z_to_GPU,
+        inject_frontal_plane_to_GPU,
+        inject_frontal_plane_to_GPU,
+        inject_edge_X_to_GPU,
+        inject_edge_Y_to_GPU,
+        inject_edge_X_to_GPU,
+        inject_edge_Y_to_GPU,
+        inject_edge_X_to_GPU,
+        inject_edge_Y_to_GPU,
+        inject_edge_X_to_GPU,
+        inject_edge_Y_to_GPU,
+        inject_corner_to_GPU,
+        inject_corner_to_GPU,
+        inject_corner_to_GPU,
+        inject_corner_to_GPU,
+        inject_corner_to_GPU,
+        inject_corner_to_GPU,
+        inject_corner_to_GPU,
+        inject_corner_to_GPU
+    };
+    memcpy(problem->injection_functions, tmp_injection_functions, sizeof(tmp_injection_functions));
+
 }
 
-void InitHaloMemGPU(Halo *halo, int nx, int ny, int nz){
+void InitHaloMemGPU(Halo *halo, Problem *problem){
+    int nx = problem->nx;
+    int ny = problem->ny;
+    int nz = problem->nz;
     int dimx = nx + 2;
     int dimy = ny + 2;
     int dimz = nz + 2;
@@ -67,173 +398,46 @@ void InitHaloMemGPU(Halo *halo, int nx, int ny, int nz){
     halo->x_d = x_d;
     DataType *interior = x_d + dimx * dimy + dimx + 1;
     halo->interior = interior;
+
+    //allocate communcation buffers on device
+    for(int i = 0; i < NUMBER_NEIGHBORS; i++){
+        if(halo->problem->neighbors_mask[i]){
+            CHECK_CUDA(cudaMalloc(&(halo->send_buff_d[i]), problem->count_exchange[i] * sizeof(DataType)));
+            CHECK_CUDA(cudaMalloc(&(halo->recv_buff_d[i]), problem->count_exchange[i] * sizeof(DataType)));
+        }
+    }
     
-    // Allocate device memory for halo exchange buffers
-    CHECK_CUDA(cudaMalloc(&halo->north_send_buff_d, nx * nz * sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->north_recv_buff_d, nx * nz * sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->east_send_buff_d, ny * nz * sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->east_recv_buff_d, ny * nz * sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->south_send_buff_d, nx * nz * sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->south_recv_buff_d, nx * nz * sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->west_send_buff_d, ny * nz * sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->west_recv_buff_d, ny * nz * sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->ne_send_buff_d, nz * sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->ne_recv_buff_d, nz * sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->se_send_buff_d, nz * sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->se_recv_buff_d, nz * sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->sw_send_buff_d, nz * sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->sw_recv_buff_d, nz * sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->nw_send_buff_d, nz * sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->nw_recv_buff_d, nz * sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->front_send_buff_d, nx * ny * sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->front_recv_buff_d, nx * ny * sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->back_send_buff_d, nx * ny * sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->back_recv_buff_d, nx * ny * sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->front_north_send_buff_d, nx * sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->front_north_recv_buff_d, nx * sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->front_east_send_buff_d, ny * sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->front_east_recv_buff_d, ny * sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->front_south_send_buff_d, nx * sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->front_south_recv_buff_d, nx * sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->front_west_send_buff_d, ny * sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->front_west_recv_buff_d, ny * sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->back_north_send_buff_d, nx * sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->back_north_recv_buff_d, nx * sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->back_east_send_buff_d, ny * sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->back_east_recv_buff_d, ny * sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->back_south_send_buff_d, nx * sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->back_south_recv_buff_d, nx * sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->back_west_send_buff_d, ny * sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->back_west_recv_buff_d, ny * sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->front_ne_send_buff_d, sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->front_ne_recv_buff_d, sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->front_se_send_buff_d, sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->front_se_recv_buff_d, sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->front_sw_send_buff_d, sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->front_sw_recv_buff_d, sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->front_nw_send_buff_d, sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->front_nw_recv_buff_d, sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->back_ne_send_buff_d, sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->back_ne_recv_buff_d, sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->back_se_send_buff_d, sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->back_se_recv_buff_d, sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->back_sw_send_buff_d, sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->back_sw_recv_buff_d, sizeof(DataType)));
-
-    CHECK_CUDA(cudaMalloc(&halo->back_nw_send_buff_d, sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&halo->back_nw_recv_buff_d, sizeof(DataType)));
 }
 
-void InitHaloMemCPU(Halo *halo, int nx, int ny, int nz){
-    halo->north_send_buff_h = (DataType*) malloc(nx * nz * sizeof(DataType));
-    halo->north_recv_buff_h = (DataType*) malloc(nx * nz * sizeof(DataType));
-    
-    halo->east_send_buff_h = (DataType*) malloc(ny * nz * sizeof(DataType));
-    halo->east_recv_buff_h = (DataType*) malloc(ny * nz * sizeof(DataType));
-    
-    halo->south_send_buff_h = (DataType*) malloc(nx * nz * sizeof(DataType));
-    halo->south_recv_buff_h = (DataType*) malloc(nx * nz * sizeof(DataType));
-    
-    halo->west_send_buff_h = (DataType*) malloc(ny * nz * sizeof(DataType));
-    halo->west_recv_buff_h = (DataType*) malloc(ny * nz * sizeof(DataType));
-    
-    halo->ne_send_buff_h = (DataType*) malloc(nz * sizeof(DataType));
-    halo->ne_recv_buff_h = (DataType*) malloc(nz * sizeof(DataType));
-    
-    halo->se_send_buff_h = (DataType*) malloc(nz * sizeof(DataType));
-    halo->se_recv_buff_h = (DataType*) malloc(nz * sizeof(DataType));
-    
-    halo->sw_send_buff_h = (DataType*) malloc(nz * sizeof(DataType));
-    halo->sw_recv_buff_h = (DataType*) malloc(nz * sizeof(DataType));
-    
-    halo->nw_send_buff_h = (DataType*) malloc(nz * sizeof(DataType));
-    halo->nw_recv_buff_h = (DataType*) malloc(nz * sizeof(DataType));
-    
-    halo->front_send_buff_h = (DataType*) malloc(nx * ny * sizeof(DataType));
-    halo->front_recv_buff_h = (DataType*) malloc(nx * ny * sizeof(DataType));
-    
-    halo->back_send_buff_h = (DataType*) malloc(nx * ny * sizeof(DataType));
-    halo->back_recv_buff_h = (DataType*) malloc(nx * ny * sizeof(DataType));
-    
-    halo->front_north_send_buff_h = (DataType*) malloc(nx * sizeof(DataType));
-    halo->front_north_recv_buff_h = (DataType*) malloc(nx * sizeof(DataType));
-    
-    halo->front_east_send_buff_h = (DataType*) malloc(ny * sizeof(DataType));
-    halo->front_east_recv_buff_h = (DataType*) malloc(ny * sizeof(DataType));
-    
-    halo->front_south_send_buff_h = (DataType*) malloc(nx * sizeof(DataType));
-    halo->front_south_recv_buff_h = (DataType*) malloc(nx * sizeof(DataType));
-    
-    halo->front_west_send_buff_h = (DataType*) malloc(ny * sizeof(DataType));
-    halo->front_west_recv_buff_h = (DataType*) malloc(ny * sizeof(DataType));
-    
-    halo->back_north_send_buff_h = (DataType*) malloc(nx * sizeof(DataType));
-    halo->back_north_recv_buff_h = (DataType*) malloc(nx * sizeof(DataType));
-    
-    halo->back_east_send_buff_h = (DataType*) malloc(ny * sizeof(DataType));
-    halo->back_east_recv_buff_h = (DataType*) malloc(ny * sizeof(DataType));
-    
-    halo->back_south_send_buff_h = (DataType*) malloc(nx * sizeof(DataType));
-    halo->back_south_recv_buff_h = (DataType*) malloc(nx * sizeof(DataType));
-    
-    halo->back_west_send_buff_h = (DataType*) malloc(ny * sizeof(DataType));
-    halo->back_west_recv_buff_h = (DataType*) malloc(ny * sizeof(DataType));
-    
-    halo->front_ne_send_buff_h = (DataType*) malloc(sizeof(DataType));
-    halo->front_ne_recv_buff_h = (DataType*) malloc(sizeof(DataType));
-    
-    halo->front_se_send_buff_h = (DataType*) malloc(sizeof(DataType));
-    halo->front_se_recv_buff_h = (DataType*) malloc(sizeof(DataType));
-    
-    halo->front_sw_send_buff_h = (DataType*) malloc(sizeof(DataType));
-    halo->front_sw_recv_buff_h = (DataType*) malloc(sizeof(DataType));
-    
-    halo->front_nw_send_buff_h = (DataType*) malloc(sizeof(DataType));
-    halo->front_nw_recv_buff_h = (DataType*) malloc(sizeof(DataType));
-    
-    halo->back_ne_send_buff_h = (DataType*) malloc(sizeof(DataType));
-    halo->back_ne_recv_buff_h = (DataType*) malloc(sizeof(DataType));
-    
-    halo->back_se_send_buff_h = (DataType*) malloc(sizeof(DataType));
-    halo->back_se_recv_buff_h = (DataType*) malloc(sizeof(DataType));
-    
-    halo->back_sw_send_buff_h = (DataType*) malloc(sizeof(DataType));
-    halo->back_sw_recv_buff_h = (DataType*) malloc(sizeof(DataType));
-    
-    halo->back_nw_send_buff_h = (DataType*) malloc(sizeof(DataType));
-    halo->back_nw_recv_buff_h = (DataType*) malloc(sizeof(DataType));
+void InitHaloMemCPU(Halo *halo, Problem *problem){
+    int nx = problem->nx;
+    int ny = problem->ny;
+    int nz = problem->nz;
+    int dimx = nx + 2;
+    int dimy = ny + 2;
+    int dimz = nz + 2;
+    halo->nx = nx;
+    halo->ny = ny;
+    halo->nz = nz;
+    halo->dimx = dimx;
+    halo->dimy = dimy;
+    halo->dimz = dimz;
+
+    // allocate memory for send and receive buffers on CPU
+    for(int i = 0; i < NUMBER_NEIGHBORS; i++){
+        if(halo->problem->neighbors_mask[i]){
+            halo->send_buff_h[i] = (DataType *) malloc(problem->count_exchange[i] * sizeof(DataType));
+            halo->recv_buff_h[i] = (DataType *) malloc(problem->count_exchange[i] * sizeof(DataType));
+        }
+    }
 }
 
 /*
 * Initializes the memory for halo on both CPU and GPU and initializes all data memory with zeros.
 */
-void InitHalo(Halo *halo, int nx, int ny, int nz){
-    InitHaloMemGPU(halo, nx, ny, nz);
-    InitHaloMemCPU(halo, nx, ny, nz);
+void InitHalo(Halo *halo, Problem *problem){
+    InitHaloMemGPU(halo, problem);
+    InitHaloMemCPU(halo, problem);
     SetHaloZeroGPU(halo);
 }
 
@@ -335,61 +539,21 @@ void SetHaloRandomGPU(Halo *halo, Problem *problem, int min, int max, int seed){
 
 void FreeHaloGPU(Halo *halo){
     CHECK_CUDA(cudaFree(halo->x_d));
+    for(int i = 0; i<NUMBER_NEIGHBORS; i++){
+        if(halo->problem->neighbors_mask[i]){
+            CHECK_CUDA(cudaFree(halo->send_buff_d[i]));
+            CHECK_CUDA(cudaFree(halo->recv_buff_d[i]));
+        }
+    }
 }
 
 void FreeHaloCPU(Halo *halo){
-    free(halo->north_send_buff_h);
-    free(halo->north_recv_buff_h);
-    free(halo->east_send_buff_h);
-    free(halo->east_recv_buff_h);
-    free(halo->south_send_buff_h);
-    free(halo->south_recv_buff_h);
-    free(halo->west_send_buff_h);
-    free(halo->west_recv_buff_h);
-    free(halo->ne_send_buff_h);
-    free(halo->ne_recv_buff_h);
-    free(halo->se_send_buff_h);
-    free(halo->se_recv_buff_h);
-    free(halo->sw_send_buff_h);
-    free(halo->sw_recv_buff_h);
-    free(halo->nw_send_buff_h);
-    free(halo->nw_recv_buff_h);
-    free(halo->front_send_buff_h);
-    free(halo->front_recv_buff_h);
-    free(halo->back_send_buff_h);
-    free(halo->back_recv_buff_h);
-    free(halo->front_north_send_buff_h);
-    free(halo->front_north_recv_buff_h);
-    free(halo->front_east_send_buff_h);
-    free(halo->front_east_recv_buff_h);
-    free(halo->front_south_send_buff_h);
-    free(halo->front_south_recv_buff_h);
-    free(halo->front_west_send_buff_h);
-    free(halo->front_west_recv_buff_h);
-    free(halo->back_north_send_buff_h);
-    free(halo->back_north_recv_buff_h);
-    free(halo->back_east_send_buff_h);
-    free(halo->back_east_recv_buff_h);
-    free(halo->back_south_send_buff_h);
-    free(halo->back_south_recv_buff_h);
-    free(halo->back_west_send_buff_h);
-    free(halo->back_west_recv_buff_h);
-    free(halo->front_ne_send_buff_h);
-    free(halo->front_ne_recv_buff_h);
-    free(halo->front_se_send_buff_h);
-    free(halo->front_se_recv_buff_h);
-    free(halo->front_sw_send_buff_h);
-    free(halo->front_sw_recv_buff_h);
-    free(halo->front_nw_send_buff_h);
-    free(halo->front_nw_recv_buff_h);
-    free(halo->back_ne_send_buff_h);
-    free(halo->back_ne_recv_buff_h);
-    free(halo->back_se_send_buff_h);
-    free(halo->back_se_recv_buff_h);
-    free(halo->back_sw_send_buff_h);
-    free(halo->back_sw_recv_buff_h);
-    free(halo->back_nw_send_buff_h);
-    free(halo->back_nw_recv_buff_h);
+    for(int i = 0; i<NUMBER_NEIGHBORS; i++){
+        if(halo->problem->neighbors_mask[i]){
+            free(halo->send_buff_h[i]);
+            free(halo->recv_buff_h[i]);
+        }
+    }
 }
 
 void FreeHalo(Halo *halo){
@@ -405,122 +569,151 @@ void InitGPU(Problem *problem){
     //printf("Rank=%d:\t\t Set my device to device=%d, available=%d.\n", problem->rank, problem->rank % deviceCount, deviceCount);
 }
 
-void extract_horizontal_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Z, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int i = 0; i < length_Z; i++){
-        CHECK_CUDA(cudaMemcpy(x_h, x_d, length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
-        x_h += length_X;
-        x_d += dimx * dimy;
+void extract_horizontal_plane_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int i = 0; i < gh->length_Z; i++) {
+        CHECK_CUDA(cudaMemcpy(buff, x_d, gh->length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
+        buff += gh->length_X;
+        x_d += gh->dimx * gh->dimy;
     }
 }
 
-void inject_horizontal_plane_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Z, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int i = 0; i < length_Z; i++){
-        CHECK_CUDA(cudaMemcpy(x_d, x_h, length_X * sizeof(DataType), cudaMemcpyHostToDevice));
-        x_d += dimx * dimy;
-        x_h += length_X;
+void inject_horizontal_plane_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int i = 0; i < gh->length_Z; i++) {
+        CHECK_CUDA(cudaMemcpy(x_d, buff, gh->length_X * sizeof(DataType), cudaMemcpyHostToDevice));
+        x_d += gh->dimx * gh->dimy;
+        buff += gh->length_X;
     }
 }
 
-void extract_vertical_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Y, int length_Z, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int i = 0; i < length_Z; i++){
-        for(int j = 0; j < length_Y; j++){
-            CHECK_CUDA(cudaMemcpy(x_h, x_d, 1 * sizeof(DataType), cudaMemcpyDeviceToHost));
-            x_h++;
-            x_d += dimx;
+void extract_vertical_plane_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int i = 0; i < gh->length_Z; i++) {
+        for (int j = 0; j < gh->length_Y; j++) {
+            CHECK_CUDA(cudaMemcpy(buff, x_d, sizeof(DataType), cudaMemcpyDeviceToHost));
+            buff++;
+            x_d += gh->dimx;
         }
-        x_d += dimx * (dimy - length_Y);
+        x_d += gh->dimx * (gh->dimy - gh->length_Y);
     }
 }
 
-void inject_vertical_plane_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Y, int length_Z, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int i = 0; i < length_Z; i++){
-        for(int j = 0; j < length_Y; j++){
-            CHECK_CUDA(cudaMemcpy(x_d, x_h, 1 * sizeof(DataType), cudaMemcpyHostToDevice));
-            x_d += dimx;
-            x_h ++;
+void inject_vertical_plane_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int i = 0; i < gh->length_Z; i++) {
+        for (int j = 0; j < gh->length_Y; j++) {
+            CHECK_CUDA(cudaMemcpy(x_d, buff, sizeof(DataType), cudaMemcpyHostToDevice));
+            x_d += gh->dimx;
+            buff++;
         }
-        x_d += dimx * (dimy - length_Y);
+        x_d += gh->dimx * (gh->dimy - gh->length_Y);
     }
 }
 
-void extract_frontal_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Y, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int i = 0; i < length_Y; i++){
-        CHECK_CUDA(cudaMemcpy(x_h, x_d, length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
-        x_h += length_X;
-        x_d += dimx;
+void extract_frontal_plane_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int i = 0; i < gh->length_Y; i++) {
+        CHECK_CUDA(cudaMemcpy(buff, x_d, gh->length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
+        buff += gh->length_X;
+        x_d += gh->dimx;
     }
 }
 
-void inject_frontal_plane_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Y, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int i = 0; i < length_Y; i++){
-        CHECK_CUDA(cudaMemcpy(x_d, x_h, length_X * sizeof(DataType), cudaMemcpyHostToDevice));
-        x_d += dimx;
-        x_h += length_X;
-    }
-
-}
-
-void extract_edge_X_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    CHECK_CUDA(cudaMemcpy(x_h, x_d, length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
-}
-
-void inject_edge_X_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    CHECK_CUDA(cudaMemcpy(x_d, x_h, length_X * sizeof(DataType), cudaMemcpyHostToDevice));
-}
-
-void extract_edge_Y_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Y, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int j = 0; j < length_Y; j++){
-        CHECK_CUDA(cudaMemcpy(x_h, x_d, 1 * sizeof(DataType), cudaMemcpyDeviceToHost));
-        x_h++;
-        x_d += dimx;
+void inject_frontal_plane_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int i = 0; i < gh->length_Y; i++) {
+        CHECK_CUDA(cudaMemcpy(x_d, buff, gh->length_X * sizeof(DataType), cudaMemcpyHostToDevice));
+        x_d += gh->dimx;
+        buff += gh->length_X;
     }
 }
 
-void inject_edge_Y_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Y, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int j = 0; j < length_Y; j++){
-        CHECK_CUDA(cudaMemcpy(x_d, x_h, 1 * sizeof(DataType), cudaMemcpyHostToDevice));
-        x_d += dimx;
-        x_h ++;
+void extract_edge_X_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    CHECK_CUDA(cudaMemcpy(buff, x_d, gh->length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
+}
+
+void inject_edge_X_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    CHECK_CUDA(cudaMemcpy(x_d, buff, gh->length_X * sizeof(DataType), cudaMemcpyHostToDevice));
+}
+
+void extract_edge_Y_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int j = 0; j < gh->length_Y; j++) {
+        CHECK_CUDA(cudaMemcpy(buff, x_d, sizeof(DataType), cudaMemcpyDeviceToHost));
+        buff++;
+        x_d += gh->dimx;
     }
 }
 
-void extract_edge_Z_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Z, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int j = 0; j < length_Z; j++){
-        CHECK_CUDA(cudaMemcpy(x_h, x_d, 1 * sizeof(DataType), cudaMemcpyDeviceToHost));
-        x_h++;
-        x_d += dimx * dimy;
+void inject_edge_Y_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int j = 0; j < gh->length_Y; j++) {
+        CHECK_CUDA(cudaMemcpy(x_d, buff, sizeof(DataType), cudaMemcpyHostToDevice));
+        x_d += gh->dimx;
+        buff++;
     }
 }
 
-void inject_edge_Z_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Z, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int j = 0; j < length_Z; j++){
-        CHECK_CUDA(cudaMemcpy(x_d, x_h, 1 * sizeof(DataType), cudaMemcpyHostToDevice));
-        x_d += dimx * dimy;
-        x_h ++;
+void extract_edge_Z_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int j = 0; j < gh->length_Z; j++) {
+        CHECK_CUDA(cudaMemcpy(buff, x_d, sizeof(DataType), cudaMemcpyDeviceToHost));
+        buff++;
+        x_d += gh->dimx * gh->dimy;
+    }
+}
+
+void inject_edge_Z_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int j = 0; j < gh->length_Z; j++) {
+        CHECK_CUDA(cudaMemcpy(x_d, buff, sizeof(DataType), cudaMemcpyHostToDevice));
+        x_d += gh->dimx * gh->dimy;
+        buff++;
+    }
+}
+
+void extract_corner_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int z = 0; z < gh->length_Z; z++) {
+        for (int y = 0; y < gh->length_Y; y++) {
+            // Copy a contiguous block of length_X elements (one row of the corner)
+            CHECK_CUDA(cudaMemcpy(buff, x_d, gh->length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
+            buff += gh->length_X;
+            x_d += gh->dimx;  // move to the next row in the halo
+        }
+        // Jump to the start of the next z-plane:
+        x_d += gh->dimx * (gh->dimy - gh->length_Y);
+    }
+}
+
+void inject_corner_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int z = 0; z < gh->length_Z; z++) {
+        for (int y = 0; y < gh->length_Y; y++) {
+            // Copy a contiguous block of length_X elements (one row of the corner)
+            CHECK_CUDA(cudaMemcpy(x_d, buff, gh->length_X * sizeof(DataType), cudaMemcpyHostToDevice));
+            buff += gh->length_X;
+            x_d += gh->dimx;  // move to the next row in the halo
+        }
+        // Jump to the start of the next z-plane:
+        x_d += gh->dimx * (gh->dimy - gh->length_Y);
     }
 }
 
@@ -542,7 +735,6 @@ void SendResult(int rank_recv, Halo *x_d, Problem *problem){
 //correctness verified
 void GatherResult(Halo *x_d, Problem *problem, DataType *result_h){
     DataType *own_data_d = x_d->interior;
-    local_int_t data_paket = 0;
     for(int i = 0; i<problem->gnz; i++){ // go through all gnz layers
         int pz_recv = i / problem->nz;
         for(int j = 0; j<problem->gny; j++){ // go through all gny rows
@@ -598,16 +790,10 @@ void GenerateStripedPartialMatrix(Problem *problem, DataType *A){
     global_int_t gnx = problem->gnx; //global number of points in x
     global_int_t gny = problem->gny; //global number of points in y
     global_int_t gnz = problem->gnz; //global number of points in z
-    global_int_t gi0 = problem->gi0; //global index of local (0,0,0)
-    
-    local_int_t num_rows = nx * ny * nz;
-    local_int_t num_cols = nx * ny * nz;
     
     for(int iz = 0; iz < nz; iz++){
         for(int iy = 0; iy < ny; iy++){
             for(int ix = 0; ix < nx; ix++){
-
-                int i = ix + nx * iy + nx * ny * iz;
 
                 int gx = problem->gx0 + ix; //global x index
                 int gy = problem->gy0 + iy; //global y index

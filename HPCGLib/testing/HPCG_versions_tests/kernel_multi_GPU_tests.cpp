@@ -692,19 +692,15 @@ void test_MG(striped_multi_GPU_Implementation<DataType>& implementation_multi_GP
 * Multi GPU result is compared to single GPU result (warp striped version).
 * Result is printed.
 */
-void run_multi_GPU_tests(){
-    //get MPI rank and size
-    int size, rank;
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+void run_multi_GPU_tests(int argc, char *argv[]){
+
+    blocking_mpi_Implementation<DataType> implementation_multi_GPU_blocking_mpi;
+    Problem problem = *implementation_multi_GPU_blocking_mpi.init_comm(argc, argv, NPX, NPY, NPZ, NX, NY, NZ);
+
 
     MPI_Barrier(MPI_COMM_WORLD);
-    if(rank == 0) printf("Testing started.\n", rank);
+    if(problem.rank == 0) printf("Testing started.\n", problem.rank);
     MPI_Barrier(MPI_COMM_WORLD);
-    
-    //initialize problem struct
-    Problem problem; //holds geometric data about the problem
-    GenerateProblem(NPX, NPY, NPZ, NX, NY, NZ, size, rank, &problem);
 
     //set Device
     InitGPU(&problem);
@@ -737,57 +733,53 @@ void run_multi_GPU_tests(){
     
     //initialize p and Ap
     Halo halo_p_d;
-    InitHaloMemGPU(&halo_p_d, NX, NY, NZ);
-    InitHaloMemCPU(&halo_p_d, NX, NY, NZ);
+    InitHaloMemGPU(&halo_p_d, &problem);
+    InitHaloMemCPU(&halo_p_d, &problem);
     SetHaloGlobalIndexGPU(&halo_p_d, &problem);
 
     Halo halo_Ap_d;
-    InitHaloMemGPU(&halo_Ap_d, NX, NY, NZ);
-    InitHaloMemCPU(&halo_Ap_d, NX, NY, NZ);
+    InitHaloMemGPU(&halo_Ap_d, &problem);
+    InitHaloMemCPU(&halo_Ap_d, &problem);
     SetHaloZeroGPU(&halo_Ap_d);
 
     //initialize b, w, x and y
     Halo halo_w_d;
-    InitHaloMemGPU(&halo_w_d, NX, NY, NZ);
-    InitHaloMemCPU(&halo_w_d, NX, NY, NZ);
+    InitHaloMemGPU(&halo_w_d, &problem);
+    InitHaloMemCPU(&halo_w_d, &problem);
     SetHaloZeroGPU(&halo_w_d);
 
     Halo halo_x_d;
-    InitHaloMemGPU(&halo_x_d, NX, NY, NZ);
-    InitHaloMemCPU(&halo_x_d, NX, NY, NZ);
+    InitHaloMemGPU(&halo_x_d, &problem);
+    InitHaloMemCPU(&halo_x_d, &problem);
     SetHaloGlobalIndexGPU(&halo_x_d, &problem);
 
     Halo halo_y_d;
-    InitHaloMemGPU(&halo_y_d, NX, NY, NZ);
-    InitHaloMemCPU(&halo_y_d, NX, NY, NZ);
+    InitHaloMemGPU(&halo_y_d, &problem);
+    InitHaloMemCPU(&halo_y_d, &problem);
     SetHaloGlobalIndexGPU(&halo_y_d, &problem);
 
     Halo halo_b_d;
-    InitHaloMemGPU(&halo_b_d, NX, NY, NZ);
-    InitHaloMemCPU(&halo_b_d, NX, NY, NZ);
+    InitHaloMemGPU(&halo_b_d, &problem);
+    InitHaloMemCPU(&halo_b_d, &problem);
     SetHaloGlobalIndexGPU(&halo_b_d, &problem);
-
-    // create an instance of the version to run the functions on
-    blocking_mpi_Implementation<DataType> implementation_multi_GPU_blocking_mpi;
-    non_blocking_mpi_Implementation<DataType> implementation_multi_GPU_non_blocking_mpi;
 
     //test matrix distribution
     test_matrix_distribution(num_stripes_local, num_stripes_global, num_rows_local, num_rows_global, striped_A_local_h, striped_A_global_h, &problem);
 
     // test SPMV
-    test_SPMV(implementation_multi_GPU_non_blocking_mpi, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
+    test_SPMV(implementation_multi_GPU_blocking_mpi, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
     
     // test SymGS
-    test_SymGS(implementation_multi_GPU_non_blocking_mpi, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
+    test_SymGS(implementation_multi_GPU_blocking_mpi, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
 
     //test WAXPBY
-    test_WAXPBY(implementation_multi_GPU_non_blocking_mpi, A_global_striped, &halo_w_d, &halo_x_d, &halo_y_d, &problem);
+    test_WAXPBY(implementation_multi_GPU_blocking_mpi, A_global_striped, &halo_w_d, &halo_x_d, &halo_y_d, &problem);
 
     //test Dot
-    test_Dot(implementation_multi_GPU_non_blocking_mpi, A_global_striped, &halo_x_d, &halo_y_d, &problem);
+    test_Dot(implementation_multi_GPU_blocking_mpi, A_global_striped, &halo_x_d, &halo_y_d, &problem);
     
     //test CG
-    test_CG(implementation_multi_GPU_non_blocking_mpi, A_local_striped, A_global_striped, &halo_b_d, &halo_x_d, &problem, j_min_i_d);
+    test_CG(implementation_multi_GPU_blocking_mpi, A_local_striped, A_global_striped, &halo_b_d, &halo_x_d, &problem, j_min_i_d);
     
 
     //uncomment to compare ExchangeHalo implementations
@@ -815,7 +807,7 @@ void run_multi_GPU_tests(){
     }
     time_halo_exchange_non_blocking /= iters;
     
-    if(rank == 13) {
+    if(problem.rank == 13) {
         printf("Time for halo exchange blocking: %f\n", time_halo_exchange_blocking);
         printf("Time for halo exchange non-blocking: %f\n", time_halo_exchange_non_blocking);
         printf("Speedup: %f\n", time_halo_exchange_blocking/time_halo_exchange_non_blocking);
@@ -838,8 +830,10 @@ void run_multi_GPU_tests(){
 
 
     MPI_Barrier(MPI_COMM_WORLD);
-    if(rank == 0) printf("Testing done.\n", rank);
+    if(problem.rank == 0) printf("Testing done.\n", problem.rank);
     MPI_Barrier(MPI_COMM_WORLD);
+
+    implementation_multi_GPU_blocking_mpi.finalize_comm(&problem);
 
 }
 

@@ -80,10 +80,10 @@ int main(int argc, char *argv[]){
 
     //initialize x and b
     Halo halo_x_d;
-    InitHalo(&halo_x_d, NX, NY, NZ);
+    InitHalo(&halo_x_d, problem);
 
     Halo halo_b_d;
-    InitHalo(&halo_b_d, NX, NY, NZ);
+    InitHalo(&halo_b_d, problem);
     SetHaloGlobalIndexGPU(&halo_b_d, problem);
 
     //exchange halos so each process starts with the correct data

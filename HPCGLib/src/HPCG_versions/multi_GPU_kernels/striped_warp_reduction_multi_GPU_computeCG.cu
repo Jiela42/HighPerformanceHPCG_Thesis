@@ -34,17 +34,17 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     DataType * pAp_d;
     DataType * rtz_d;
 
-    InitHaloMemGPU(&p_d, problem->nx, problem->ny, problem->nz);
-    InitHaloMemCPU(&p_d, p_d.nx, p_d.ny, p_d.nz);
+    InitHaloMemGPU(&p_d, problem);
+    InitHaloMemCPU(&p_d, problem);
 
-    InitHaloMemGPU(&z_d, problem->nx, problem->ny, problem->nz);
-    InitHaloMemCPU(&z_d, z_d.nx, z_d.ny, z_d.nz);
+    InitHaloMemGPU(&z_d, problem);
+    InitHaloMemCPU(&z_d, problem);
 
-    InitHaloMemGPU(&Ap_d, problem->nx, problem->ny, problem->nz);
-    InitHaloMemCPU(&Ap_d, Ap_d.nx, Ap_d.ny, Ap_d.nz);
+    InitHaloMemGPU(&Ap_d, problem);
+    InitHaloMemCPU(&Ap_d, problem);
 
-    InitHaloMemGPU(&r_d, problem->nx, problem->ny, problem->nz);
-    InitHaloMemCPU(&r_d, r_d.nx, r_d.ny, r_d.nz);
+    InitHaloMemGPU(&r_d, problem);
+    InitHaloMemCPU(&r_d, problem);
 
     CHECK_CUDA(cudaMalloc(&normr_d, sizeof(DataType)));
     CHECK_CUDA(cudaMalloc(&pAp_d, sizeof(DataType)));

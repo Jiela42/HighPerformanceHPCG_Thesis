@@ -1,8 +1,8 @@
 #!/usr/local/bin/bash
 
 ##Resources
-#SBATCH --job-name=CHOOSE YOUR OWN
-#SBATCH --account=a-g34
+#SBATCH --job-name=hpcg_test
+#SBATCH --account=a-g200
 #SBATCH --output result.out
 #SBATCH --time 00:05:00
 #SBATCH --partition=debug
@@ -24,4 +24,4 @@ module load nccl
 ## cd /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/build/testing
 
 ## Run 
-srun /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/build/testing/run_AllTests
+srun /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/testing/run_multi_GPU_tests.cpp
