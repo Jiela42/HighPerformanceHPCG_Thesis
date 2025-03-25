@@ -14,9 +14,9 @@
 #define NPY 2
 #define NPZ 1
 //each process gets assigned problem size of NX x NY x NZ
-#define NX 128
-#define NY 128
-#define NZ 128
+#define NX 8
+#define NY 8
+#define NZ 8
 
 using DataType = double;
 

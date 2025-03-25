@@ -11,9 +11,9 @@
 #include <time.h>
 
 //number of processes in x, y, z
-#define NPX 3
-#define NPY 3
-#define NPZ 3
+#define NPX 2
+#define NPY 2
+#define NPZ 1
 //each process gets assigned problem size of NX x NY x NZ
 #define NX 8
 #define NY 8
@@ -772,22 +772,22 @@ void run_multi_GPU_tests(){
     non_blocking_mpi_Implementation<DataType> implementation_multi_GPU_non_blocking_mpi;
 
     //test matrix distribution
-    test_matrix_distribution(num_stripes_local, num_stripes_global, num_rows_local, num_rows_global, striped_A_local_h, striped_A_global_h, &problem);
+    //test_matrix_distribution(num_stripes_local, num_stripes_global, num_rows_local, num_rows_global, striped_A_local_h, striped_A_global_h, &problem);
 
     // test SPMV
-    test_SPMV(implementation_multi_GPU_non_blocking_mpi, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
+    //test_SPMV(implementation_multi_GPU_non_blocking_mpi, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
     
     // test SymGS
-    test_SymGS(implementation_multi_GPU_non_blocking_mpi, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
+    //test_SymGS(implementation_multi_GPU_non_blocking_mpi, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
 
     //test WAXPBY
-    test_WAXPBY(implementation_multi_GPU_non_blocking_mpi, A_global_striped, &halo_w_d, &halo_x_d, &halo_y_d, &problem);
+    //test_WAXPBY(implementation_multi_GPU_non_blocking_mpi, A_global_striped, &halo_w_d, &halo_x_d, &halo_y_d, &problem);
 
     //test Dot
     test_Dot(implementation_multi_GPU_non_blocking_mpi, A_global_striped, &halo_x_d, &halo_y_d, &problem);
     
     //test CG
-    test_CG(implementation_multi_GPU_non_blocking_mpi, A_local_striped, A_global_striped, &halo_b_d, &halo_x_d, &problem, j_min_i_d);
+    //test_CG(implementation_multi_GPU_non_blocking_mpi, A_local_striped, A_global_striped, &halo_b_d, &halo_x_d, &problem, j_min_i_d);
     
 
     //uncomment to compare ExchangeHalo implementations

@@ -3,7 +3,7 @@
 #include "MatrixLib/striped_partial_Matrix.hpp"
 #include "UtilLib/cuda_utils.hpp"
 #include "MatrixLib/coloring.cuh"
-#include "UtilLib/hpcg_mpi_utils.cuh"
+#include "UtilLib/hpcg_multi_GPU_utils.cuh"
 
 #include <vector>
 #include <iostream>
@@ -891,7 +891,7 @@ void striped_Matrix<T>::print() const{
     std::cout << "num_rows: " << this->num_rows << " num_cols: " << this->num_cols << std::endl;
     std::cout << "num_stripes: " << this->num_stripes << std::endl;
     std::cout << "j_min_i: ";
-    for (int i = 0; i < this->num_strigenerate_f2c_operator_onGPUpes; i++) {
+    for (int i = 0; i < this->num_stripes; i++) {
         std::cout << this->j_min_i[i] << " ";
     }
     std::cout << std::endl;

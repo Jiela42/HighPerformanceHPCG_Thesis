@@ -1,7 +1,7 @@
 #ifndef GENERATIONS_CUH
 #define GENERATIONS_CUH
 
-#include "UtilLib/hpcg_mpi_utils.cuh"
+#include "UtilLib/hpcg_multi_GPU_utils.cuh"
 
 void generateHPCGProblem(
     int nx, int ny, int nz,
