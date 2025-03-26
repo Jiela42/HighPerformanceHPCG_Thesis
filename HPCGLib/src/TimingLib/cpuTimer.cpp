@@ -8,10 +8,13 @@
 #include <iomanip>
 #include <sstream>
 
-// #include "TimingLib/timer.hpp"
-#include "TimingLib/cudaTimer.hpp"
+#include "mpi.h"
 
-CudaTimer::CudaTimer(
+// #include "TimingLib/timer.hpp"
+#include "TimingLib/cpuTimer.hpp"
+#include "UtilLib/cuda_utils.hpp"
+
+cpuTimer::cpuTimer(
         int nx,
         int ny,
         int nz,
@@ -23,7 +26,7 @@ CudaTimer::CudaTimer(
         // this folderpath leads to a timestamped folder, this way we only get a single folder per benchrun
         std::string folder_path
     ) {
-
+        this->t_start = 0.0;
         this->nx = nx;
         this->ny = ny;
         this->nz = nz;
@@ -35,23 +38,47 @@ CudaTimer::CudaTimer(
         this->folder_path = folder_path;
  }
 
-CudaTimer::~CudaTimer() {
-
-    writeResultsToCsv();
+ void reduceVector(std::vector<float>& local_times){
+     int n = local_times.size();
+     for(int i = 0; i < n; i++){
+         float local_time = local_times[i];
+         float global_time;
+         MPI_Reduce(&local_time, &global_time, 1, MPI_FLOAT, MPI_MAX, 0, MPI_COMM_WORLD);
+         local_times[i] = global_time;
+     }
 }
 
-void CudaTimer::startTimer() {
-    // @Nils
-    // Please implement for CPU
+cpuTimer::~cpuTimer() {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    //find the per measurement
+    reduceVector(CG_times);
+    reduceVector(CG_noPreconditioning_times);
+    reduceVector(MG_times);
+    reduceVector(SymGS_times);
+    reduceVector(SPMV_times);
+    reduceVector(Dot_times);
+    reduceVector(WAXPBY_times);
+    reduceVector(ExchangeHalo_times);
+
+    //only one csv file is written
+    if (rank == 0) {
+        writeResultsToCsv();
+    }
 }
 
-void CudaTimer::stopTimer(std::string method_name) {
 
-    float milliseconds = 0.0;
+void cpuTimer::startTimer() {
+    CHECK_CUDA(cudaDeviceSynchronize());
+    this->t_start = MPI_Wtime();
+}
 
-    // @Nils
-    // Please implement for CPU
-    // write the measured milliseconds into the milliseconds variable
+void cpuTimer::stopTimer(std::string method_name) {
+    CHECK_CUDA(cudaDeviceSynchronize());
+    float t_end = MPI_Wtime();
+
+    float milliseconds = (t_end - this->t_start) * 1000.0;
 
 
     if (method_name == "compute_CG_noPreconditioning") CG_noPreconditioning_times.push_back(milliseconds);
@@ -61,6 +88,7 @@ void CudaTimer::stopTimer(std::string method_name) {
     else if (method_name == "compute_SPMV") SPMV_times.push_back(milliseconds);
     else if (method_name == "compute_Dot") Dot_times.push_back(milliseconds);
     else if (method_name == "compute_WAXPBY") WAXPBY_times.push_back(milliseconds);
+    else if (method_name == "ExchangeHalo") ExchangeHalo_times.push_back(milliseconds);
     else{
         std::cerr << "Invalid method name " << method_name << std::endl;
         return;
