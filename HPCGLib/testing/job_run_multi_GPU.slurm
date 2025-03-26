@@ -7,8 +7,8 @@
 #SBATCH --time 00:05:00
 #SBATCH --partition=debug
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=4
-#SBATCH --gpus-per-task=1
+#SBATCH --ntasks=1
+##SBATCH --gpus-per-task=1
 
 ##Modules
 module purge
@@ -16,6 +16,7 @@ module load cuda
 module load cray-mpich
 module load cmake
 module load nccl
+module load gcc
 
 ##Compile
 ##cd /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/build
@@ -24,4 +25,4 @@ module load nccl
 ## cd /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/build/testing
 
 ## Run 
-srun /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/testing/run_multi_GPU_tests.cpp
+srun /users/nrottstegge/github/HighPerformanceHPCG_Thesis/HPCGLib/build/testing/run_AllTests
