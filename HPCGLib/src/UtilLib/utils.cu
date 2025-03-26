@@ -1,6 +1,7 @@
 #include "UtilLib/utils.cuh"
 
 #include "UtilLib/cuda_utils.hpp"
+#include "UtilLib/hpcg_multi_GPU_utils.cuh"
 #include "HPCG_versions/naiveStriped.cuh" // we need this for the matrix vector multiplication kernel
 #include "HPCG_versions/striped_warp_reduction.cuh" // we need this for the matrix vector multiplication kernel
 
@@ -125,11 +126,64 @@ __global__ void compute_restriction_kernel(
     }
 }
 
+__inline__ __device__ global_int_t local_i_to_halo_i(
+    int i, 
+    int nx, int ny, int nz,
+    local_int_t dimx, local_int_t dimy
+    )
+    {
+        return dimx*(dimy+1) + 1 + (i % nx) + dimx*((i % (nx*ny)) / nx) + (dimx*dimy)*(i / (nx*ny));
+}
+
+__global__ void compute_restriction_multi_GPU_kernel(
+    local_int_t num_rows,
+    DataType * Axf, //halo access, fine number of rows
+    DataType * rf, //halo access, fine number of rows
+    DataType * rc, //halo access, coarse number of rows
+    int *f2c_operator, //normal access
+    int nx, int ny, int nz
+){
+    local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+
+    for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x) {
+        local_int_t hi = local_i_to_halo_i(row, nx / 2, ny / 2, nz / 2, nx / 2 + 2, ny / 2 + 2); // bc we need to access rc and rc is coarse
+        local_int_t f2c_hi = local_i_to_halo_i(f2c_operator[row], nx, ny, nz, nx + 2, ny + 2);
+        rc[hi] = rf[f2c_hi] - Axf[f2c_hi];
+    }
+}
+
+
 __global__ void compute_prolongation_kernel(
     int num_rows,
     double * xc,
     double * xf,
     int * f2c_operator
+){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x) {
+        
+        // if(f2c_operator[row] < 0){
+            
+        //     printf("f2c_operator is the problem for row %d\n", row);
+        //     printf("f2c_operator[%d]: %d\n", row, f2c_operator[row]);
+        //     printf("xc is the problem for row %d\n", row);
+        //     printf("xc[row]: %f\n", xc[row]);
+        //     printf("xf is the problem for row %d\n", row);
+        //     printf("xf[f2c_operator[%d]]: %f\n",row, xf[f2c_operator[row]]);
+        // }
+        
+        
+        xf[f2c_operator[row]] += xc[row];
+    }
+}
+
+__global__ void compute_prolongation_multi_GPU_kernel(
+    int num_rows,
+    DataType * xc, //coarse, Halo
+    DataType * xf, //fine, Halo
+    int * f2c_operator,
+    int nx, int ny, int nz
 ){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -145,11 +199,11 @@ __global__ void compute_prolongation_kernel(
         //     printf("xf[f2c_operator[%d]]: %f\n",row, xf[f2c_operator[row]]);
         // }
 
-
-        xf[f2c_operator[row]] += xc[row];
+        local_int_t f2c_fine_hi = local_i_to_halo_i(f2c_operator[row], nx, ny, nz, nx + 2, ny + 2);
+        local_int_t f2c_coarse_hi = local_i_to_halo_i(row, nx / 2, ny / 2, nz / 2, nx / 2 + 2, ny / 2 + 2);
+        xf[f2c_fine_hi] += xc[f2c_coarse_hi];
     }
 }
-
 
 void L2_norm_for_Device_Vector(
     cudaStream_t stream,

@@ -1,6 +1,5 @@
 #include "HPCG_versions/striped_multi_GPU.cuh"
 #include "UtilLib/utils.cuh"
-#include "UtilLib/hpcg_mpi_utils.cuh"
 #include <cuda_runtime.h>
 
 __inline__ __device__ global_int_t local_i_to_global_i(

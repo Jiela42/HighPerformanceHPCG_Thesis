@@ -362,7 +362,60 @@ Starting cuSparse tests
 Starting naiveStriped tests
 Starting striped shared memory tests
 Starting striped warp reduction tests
-terminate called after throwing an instance of 'std::filesystem::__cxx11::filesystem_error'
-  what():  filesystem error: directory iterator cannot open directory: No such file or directory [../../../hpcg_output]
-srun: error: nid006620: task 0: Aborted (core dumped)
-srun: Terminating StepId=311559.0
+Skipping test for size 64x64x64 to avoid out of memory during benchmark tests
+Skipping test for size 128x128x128 to avoid out of memory during benchmark tests
+Skipping test for size 32x64x128 to avoid out of memory during benchmark tests
+Skipping test for size 64x32x128 to avoid out of memory during benchmark tests
+CG took 50 iterations for size 64x128x32 without Preconditioning, with a normr/normr0 of 0.00145212
+CG took 50 iterations for size 64x32x128 without Preconditioning, with a normr/normr0 of 0.00145212
+CG took 50 iterations for size 32x64x128 without Preconditioning, with a normr/normr0 of 0.00145212
+Skipping test for size 128x128x128 to avoid out of memory during benchmark tests
+CG took 50 iterations for size 64x64x64 without Preconditioning, with a normr/normr0 of 0.00131022
+CG took 50 iterations for size 32x32x32 without Preconditioning, with a normr/normr0 of 1.34164e-09
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping test for size 128x128x128 to avoid out of memory during benchmark tests
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Starting striped colored tests
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+Starting coloringPrecomputed tests
+CG took 50 iterations for size 64x128x32 without Preconditioning, with a normr/normr0 of 0.00145212
+CG took 50 iterations for size 64x32x128 without Preconditioning, with a normr/normr0 of 0.00145212
+CG took 50 iterations for size 32x64x128 without Preconditioning, with a normr/normr0 of 0.00145212
+Skipping test for size 128x128x128 to avoid out of memory during benchmark tests
+CG took 50 iterations for size 64x64x64 without Preconditioning, with a normr/normr0 of 0.00131022
+CG took 50 iterations for size 32x32x32 without Preconditioning, with a normr/normr0 of 1.34164e-09
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping test for size 128x128x128 to avoid out of memory during benchmark tests
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+Skipping preconditioning tests in the interest of time
+CG norm based tests are not supported
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+getting striped matrix
+Skipping test for size 64x64x64 to avoid out of memory during benchmark tests
+Skipping test for size 128x128x128 to avoid out of memory during benchmark tests
+Skipping test for size 32x64x128 to avoid out of memory during benchmark tests
+Skipping test for size 64x32x128 to avoid out of memory during benchmark tests
+Finished MG tests
+getting striped matrix
+*******************************************************************************************
+********************************FINISHED & PASSED ALL TESTS********************************
+*******************************************************************************************

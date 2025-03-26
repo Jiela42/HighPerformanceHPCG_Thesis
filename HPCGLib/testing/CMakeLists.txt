@@ -8,6 +8,7 @@ project(Testing LANGUAGES CXX CUDA)
 
 # Find MPI and make sure it's available
 find_package(MPI REQUIRED)
+link_directories("/user-environment/linux-sles15-neoverse_v2/gcc-13.3.0/nccl-2.22.3-1-4j6h3ffzysukqpqbvriorrzk2lm762dd/lib")
 
 add_library(TestHPCGLib
     HPCG_versions_tests/cuSparse_tests.cpp
@@ -19,6 +20,7 @@ add_library(TestHPCGLib
     HPCG_versions_tests/stripedColoringPrecomputed_tests.cpp
     HPCG_versions_tests/stripedBoxColoring_tests.cpp
     HPCG_versions_tests/stripedNoStore_tests.cpp
+    HPCG_versions_tests/kernel_multi_GPU_tests.cpp
     HPCG_versions_tests/stripedCORBoxColoring_tests.cpp
     
     UtilLib_tests.cpp
@@ -40,6 +42,10 @@ add_executable(run_get_Norm
 
 add_executable(run_example
     run_example.cpp
+)
+
+add_executable(run_multi_GPU_tests
+    run_multi_GPU_tests.cpp
 )
 
 add_executable(run_multi_GPU
@@ -81,4 +87,12 @@ target_link_libraries(run_multi_GPU
     MatrixLib
     UtilLib
     MPI::MPI_CXX
+)
+
+target_link_libraries(run_multi_GPU_tests
+    HPCGLib
+    MatrixLib
+    UtilLib
+    MPI::MPI_CXX
+    nccl
 )

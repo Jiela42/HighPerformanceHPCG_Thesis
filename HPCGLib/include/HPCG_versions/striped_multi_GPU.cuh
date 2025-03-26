@@ -5,13 +5,7 @@
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
 #include "MatrixLib/striped_Matrix.hpp"
 #include "UtilLib/cuda_utils.hpp"
-#include "UtilLib/cuda_utils.hpp"
-#include "UtilLib/hpcg_mpi_utils.cuh"
-
-#include <vector>
-#include <iostream>
-#include <string>
-#include <stdexcept>
+#include "UtilLib/hpcg_multi_GPU_utils.cuh"
 
 #include <cuda_runtime.h>
 
@@ -28,7 +22,7 @@ public:
 
         this->dot_cooperation_number = 8;
 
-        this->doPreconditioning = true;
+        this->doPreconditioning = false;
 
         this->version_name = "Striped Multi GPU";
         this->implementation_type = Implementation_Type::STRIPED;
@@ -36,7 +30,7 @@ public:
         this->Dot_implemented = true;
         this->SymGS_implemented = true;
         this->WAXPBY_implemented = true;
-        this->CG_implemented = false;
+        this->CG_implemented = true;
         this->MG_implemented = false;
         this->norm_based = false;
 
@@ -50,19 +44,52 @@ public:
 
     }
 
+    virtual Problem* init_comm(
+        int argc, char *argv[],
+        int npx, int npy, int npz,
+        int nx, int ny, int nz
+        ) = 0;
+
+    virtual void ExchangeHalo(
+        Halo *halo, Problem *problem
+    ) = 0;
+        
+    virtual void finalize_comm(
+        Problem *problem
+    ) = 0;
+
     void compute_CG(
         striped_Matrix<T> & A,
         T * b_d, T * x_d,
         int & n_iters, T& normr, T& normr0
     ) override {
-        striped_warp_reduction_multi_GPU_computeCG(A, b_d, x_d, n_iters, normr, normr0);
+        std::cerr << "Warning: compute_CG requires different arguments in multi GPU." << std::endl;
     }
-    
+
+    void compute_CG(
+        striped_Matrix<T> & A,
+        Halo * b_d, Halo * x_d,
+        int & n_iters, T& normr, T& normr0,
+        Problem *problem,
+        int *j_min_i_d
+    ) {
+        striped_warp_reduction_multi_GPU_computeCG(A, b_d, x_d, n_iters, normr, normr0, problem, j_min_i_d);
+    }
+
     void compute_MG(
         striped_Matrix<T> & A,
         T * x_d, T * y_d // the vectors x and y are already on the device
         ) override {
-            striped_warp_reduction_multi_GPU_computeMG(A, x_d, y_d);
+            std::cerr << "Warning: compute_MG requires different arguments in multi GPU." << std::endl;
+    }
+    
+    void compute_MG(
+        striped_Matrix<T> & A,
+        Halo * x_d, Halo * y_d, // the vectors x and y are already on the device
+        Problem *problem,
+        int *j_min_i_d
+        ) {
+            striped_warp_reduction_multi_GPU_computeMG(A, x_d, y_d, problem, j_min_i_d);
     }
 
     void compute_SymGS(
@@ -166,13 +193,17 @@ private:
 
     void striped_warp_reduction_multi_GPU_computeCG(
         striped_Matrix<T> & A,
-        T * b_d, T * x_d,
-        int & n_iters, T& normr, T& normr0
+        Halo * b_d, Halo * x_d,
+        int & n_iters, T& normr, T& normr0,
+        Problem *problem,
+        int *j_min_i_d
     );
 
     void striped_warp_reduction_multi_GPU_computeMG(
         striped_Matrix<T> & A,
-        T * x_d, T * y_d // the vectors x and y are already on the device
+        Halo * x_d, Halo * y_d, // the vectors x and y are already on the device
+        Problem *problem,
+        int *j_min_i_d
     );
 
     void striped_warp_reduction_multi_GPU_computeSPMV(

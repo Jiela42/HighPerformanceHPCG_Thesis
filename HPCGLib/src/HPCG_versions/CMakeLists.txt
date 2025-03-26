@@ -1,13 +1,16 @@
 # Minimum CMake version required
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.21)
 
 project(HPCGLib LANGUAGES CXX CUDA)
 
 add_library(HPCGLib)
 
 find_package(CUDAToolkit REQUIRED)
+find_package(MPI REQUIRED)
 # Include CUDA directories
 include_directories(${CUDAToolkit_INCLUDE_DIRS})
+include_directories(/user-environment/linux-sles15-neoverse_v2/gcc-13.3.0/nccl-2.22.3-1-4j6h3ffzysukqpqbvriorrzk2lm762dd/include)
+
 
 # specify cuda standard
 # set(CMAKE_CUDA_STANDARD 12)
@@ -43,12 +46,16 @@ target_sources(HPCGLib PRIVATE
     striped_warp_reduction/striped_warp_reduction_computeCG.cu
     striped_warp_reduction/striped_warp_reduction_computeMG.cu
 
-    multi_GPU/striped_box_coloring_multi_GPU_computeSymGS.cu
-    multi_GPU/striped_warp_reduction_multi_GPU_computeCG.cu
-    multi_GPU/striped_warp_reduction_multi_GPU_computeDot.cu
-    multi_GPU/striped_warp_reduction_multi_GPU_computeMG.cu
-    multi_GPU/striped_warp_reduction_multi_GPU_computeSPMV.cu
-    multi_GPU/striped_warp_reduction_multi_GPU_computeWAXPBY.cu
+    multi_GPU_kernels/striped_box_coloring_multi_GPU_computeSymGS.cu
+    multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeCG.cu
+    multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeDot.cu
+    multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeMG.cu
+    multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeSPMV.cu
+    multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeWAXPBY.cu
+
+    multi_GPU_halo_exchange/blocking_mpi_halo_exchange.cu
+    multi_GPU_halo_exchange/non_blocking_mpi_halo_exchange.cu
+    multi_GPU_halo_exchange/nccl_halo_exchange.cu
 
     striped_preprocessed/striped_preprocessed_computeSymGS.cu
 
@@ -72,4 +79,5 @@ target_link_libraries(
     CUDA::cusparse
     CUDA::cublas
     CUDA::cudart
+    MPI::MPI_CXX
 )

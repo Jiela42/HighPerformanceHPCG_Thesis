@@ -101,21 +101,31 @@ int main(){
     // all_pass = all_pass && run_stripedColoringPrecomputed_tests(128, 128, 128);
     // all_pass = all_pass && run_stripedColoringPrecomputed_tests(256, 256, 256);
     // all_pass = all_pass && run_stripedColoringPrecomputed_tests(512, 256, 256);
+    all_pass = all_pass && run_stripedColoringPrecomputed_tests(176, 176, 176);
+    all_pass = all_pass && run_stripedColoringPrecomputed_tests(240, 240, 240);
 
+    std::cout << "Starting stripedBoxColoring tests" << std::endl;
     all_pass = all_pass && run_stripedBoxColoring_tests(4, 4, 4);
     all_pass = all_pass && run_stripedBoxColoring_tests(8, 8, 8);
     all_pass = all_pass && run_stripedBoxColoring_tests(16, 16, 16);
     all_pass = all_pass && run_stripedBoxColoring_tests(32, 32, 32);
     all_pass = all_pass && run_stripedBoxColoring_tests(64, 64, 64);
-    // all_pass = all_pass && run_stripedBoxColoring_tests(128, 128, 128);
+    all_pass = all_pass && run_stripedBoxColoring_tests(128, 128, 128);
+    all_pass = all_pass && run_stripedBoxColoring_tests(176, 176, 176);
+    all_pass = all_pass && run_stripedBoxColoring_tests(240, 240, 240);
 
+    std::cout << "Starting no_store tests" << std::endl;
     all_pass = all_pass && run_no_store_stripedColoring_filebased_tests();
     all_pass = all_pass && run_no_store_stripedColoring_tests(32, 32, 32);
 
+    std::cout << "Starting COR tests" << std::endl;
     all_pass = all_pass && run_COR_BoxColoring_tests(16, 16, 16);
     all_pass = all_pass && run_COR_BoxColoring_tests(24, 24, 24);
     all_pass = all_pass && run_COR_BoxColoring_tests(32, 32, 32);
     all_pass = all_pass && run_COR_BoxColoring_tests(64, 64, 64);
+    all_pass = all_pass && run_COR_BoxColoring_tests(128, 128, 128);
+    all_pass = all_pass && run_COR_BoxColoring_tests(176, 176, 176);
+    all_pass = all_pass && run_COR_BoxColoring_tests(240, 240, 240);
 
 
     if (all_pass){

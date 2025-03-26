@@ -16,6 +16,7 @@ methods_to_plot = [
     # "Prolongation",
     # "Dot",
     # "WAXPBY",
+    # "ExchangeHalo",
 ]
 
 sizes_to_plot =[

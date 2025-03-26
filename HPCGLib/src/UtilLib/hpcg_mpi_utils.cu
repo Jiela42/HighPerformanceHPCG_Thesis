@@ -1,4 +1,4 @@
-#include "UtilLib/hpcg_mpi_utils.cuh"
+#include "UtilLib/hpcg_multi_GPU_utils.cuh"
 #include "UtilLib/cuda_utils.hpp"
 #include <testing.hpp>
 
@@ -8,6 +8,24 @@
 #include <cassert>
 #include <stdbool.h>
 
+__inline__ __device__ global_int_t local_i_to_halo_i(
+    int i, 
+    int nx, int ny, int nz,
+    local_int_t dimx, local_int_t dimy
+    )
+    {
+        return dimx*(dimy+1) + 1 + (i % nx) + dimx*((i % (nx*ny)) / nx) + (dimx*dimy)*(i / (nx*ny));
+}
+
+__global__ void inject_data_to_halo_kernel(DataType *x_d, DataType *data, int nx, int ny, int nz, int dimx, int dimy){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    int n = nx * ny * nz;
+    for(int i = tid; i < n; i += blockDim.x * gridDim.x){
+            int hi = local_i_to_halo_i(i, nx, ny, nz, dimx, dimy);
+            x_d[hi] = data[i];
+    }
+}
+
 void GenerateProblem(int npx, int npy, int npz, local_int_t nx, local_int_t ny, local_int_t nz, int size, int rank, Problem *problem){
     problem->npx = npx; //number of processes in x
     problem->npy = npy; //number of processes in y
@@ -15,6 +33,9 @@ void GenerateProblem(int npx, int npy, int npz, local_int_t nx, local_int_t ny, 
     problem->nx = nx; //number of grid points of processes subdomain in x
     problem->ny = ny; //number of grid points of processes subdomain in y
     problem->nz = nz; //number of grid points of processes subdomain in z
+    local_int_t dimx = nx + 2;
+    local_int_t dimy = ny + 2;
+    local_int_t dimz = nz + 2;
     problem->size = size;
     problem->rank = rank;
     problem->gnx = npx * nx; //global number of grid points in x
@@ -31,30 +52,417 @@ void GenerateProblem(int npx, int npy, int npz, local_int_t nx, local_int_t ny, 
     problem->gx0 = px * nx; //base global x index for this rank in the npx by npy by npz point grid
     problem->gy0 = py * ny; //base global y index for this rank in the npx by npy by npz point grid
     problem->gz0 = pz * nz; //base global z index for this rank in the npx by npy by npz point grid
+
+    // initialize neighbors, follows the same order as Comm_Tags
+    int tmp_neighbors[NUMBER_NEIGHBORS] = {
+        /* 0 NORTH       */ (problem->py > 0)                          ? problem->rank - problem->npx               : -1,
+        /* 1 EAST        */ (problem->px < problem->npx - 1)             ? problem->rank + 1                          : -1,
+        /* 2 SOUTH       */ (problem->py < problem->npy - 1)             ? problem->rank + problem->npx               : -1,
+        /* 3 WEST        */ (problem->px > 0)                          ? problem->rank - 1                          : -1,
+        /* 4 NE          */ (problem->py > 0 && problem->px < problem->npx - 1) ? problem->rank - problem->npx + 1        : -1,
+        /* 5 SE          */ (problem->py < problem->npy - 1 && problem->px < problem->npx - 1) ? problem->rank + problem->npx + 1 : -1,
+        /* 6 SW          */ (problem->py < problem->npy - 1 && problem->px > 0) ? problem->rank + problem->npx - 1        : -1,
+        /* 7 NW          */ (problem->py > 0 && problem->px > 0)         ? problem->rank - problem->npx - 1             : -1,
+        /* 8 FRONT       */ (problem->pz > 0)                          ? problem->rank - problem->npx * problem->npy  : -1,
+        /* 9 BACK        */ (problem->pz < problem->npz - 1)             ? problem->rank + problem->npx * problem->npy  : -1,
+        /* 10 FRONT_NORTH */ (problem->pz > 0 && problem->py > 0)         ? problem->rank - problem->npx * (problem->npy + 1): -1,
+        /* 11 FRONT_EAST  */ (problem->pz > 0 && problem->px < problem->npx - 1) ? problem->rank - problem->npx * problem->npy + 1 : -1,
+        /* 12 FRONT_SOUTH */ (problem->pz > 0 && problem->py < problem->npy - 1) ? problem->rank - problem->npx * (problem->npy - 1): -1,
+        /* 13 FRONT_WEST  */ (problem->pz > 0 && problem->px > 0)         ? problem->rank - problem->npx * problem->npy - 1 : -1,
+        /* 14 BACK_NORTH  */ (problem->pz < problem->npz - 1 && problem->py > 0) ? problem->rank + problem->npx * (problem->npy - 1) : -1,
+        /* 15 BACK_EAST   */ (problem->pz < problem->npz - 1 && problem->px < problem->npx - 1) ? problem->rank + problem->npx * problem->npy + 1 : -1,
+        /* 16 BACK_SOUTH  */ (problem->pz < problem->npz - 1 && problem->py < problem->npy - 1) ? problem->rank + problem->npx * (problem->npy + 1) : -1,
+        /* 17 BACK_WEST   */ (problem->pz < problem->npz - 1 && problem->px > 0) ? problem->rank + problem->npx * problem->npy - 1 : -1,
+        /* 18 FRONT_NE    */ (problem->pz > 0 && problem->py > 0 && problem->px < problem->npx - 1) ? problem->rank - problem->npx * (problem->npy + 1) + 1 : -1,
+        /* 19 FRONT_SE    */ (problem->pz > 0 && problem->py < problem->npy - 1 && problem->px < problem->npx - 1) ? problem->rank - problem->npx * (problem->npy - 1) + 1 : -1,
+        /* 20 FRONT_SW    */ (problem->pz > 0 && problem->py < problem->npy - 1 && problem->px > 0) ? problem->rank - problem->npx * (problem->npy - 1) - 1 : -1,
+        /* 21 FRONT_NW    */ (problem->pz > 0 && problem->py > 0 && problem->px > 0) ? problem->rank - problem->npx * (problem->npy + 1) - 1 : -1,
+        /* 22 BACK_NE     */ (problem->pz < problem->npz - 1 && problem->py > 0 && problem->px < problem->npx - 1) ? problem->rank + problem->npx * (problem->npy - 1) + 1 : -1,
+        /* 23 BACK_SE     */ (problem->pz < problem->npz - 1 && problem->py < problem->npy - 1 && problem->px < problem->npx - 1) ? problem->rank + problem->npx * (problem->npy + 1) + 1 : -1,
+        /* 24 BACK_SW     */ (problem->pz < problem->npz - 1 && problem->py < problem->npy - 1 && problem->px > 0) ? problem->rank + problem->npx * (problem->npy + 1) - 1 : -1,
+        /* 25 BACK_NW     */ (problem->pz < problem->npz - 1 && problem->py > 0 && problem->px > 0) ? problem->rank + problem->npx * (problem->npy - 1) - 1 : -1
+    };
+    memcpy(problem->neighbors, tmp_neighbors, sizeof(tmp_neighbors));
+
+    // initialize neighbors_mask, follows the same order as Comm_Tags
+    bool tmp_neighbors_mask[NUMBER_NEIGHBORS] = {
+        /* NORTH       */ (problem->py > 0),
+        /* EAST        */ (problem->px < problem->npx - 1),
+        /* SOUTH       */ (problem->py < problem->npy - 1),
+        /* WEST        */ (problem->px > 0),
+        /* NE          */ (problem->px < problem->npx - 1 && problem->py > 0),
+        /* SE          */ (problem->px < problem->npx - 1 && problem->py < problem->npy - 1),
+        /* SW          */ (problem->px > 0 && problem->py < problem->npy - 1),
+        /* NW          */ (problem->px > 0 && problem->py > 0),
+        /* FRONT       */ (problem->pz > 0),
+        /* BACK        */ (problem->pz < problem->npz - 1),
+        /* FRONT_NORTH */ (problem->py > 0 && problem->pz > 0),
+        /* FRONT_EAST  */ (problem->px < problem->npx - 1 && problem->pz > 0),
+        /* FRONT_SOUTH */ (problem->py < problem->npy - 1 && problem->pz > 0),
+        /* FRONT_WEST  */ (problem->px > 0 && problem->pz > 0),
+        /* BACK_NORTH  */ (problem->py > 0 && problem->pz < problem->npz - 1),
+        /* BACK_EAST   */ (problem->px < problem->npx - 1 && problem->pz < problem->npz - 1),
+        /* BACK_SOUTH  */ (problem->py < problem->npy - 1 && problem->pz < problem->npz - 1),
+        /* BACK_WEST   */ (problem->px > 0 && problem->pz < problem->npz - 1),
+        /* FRONT_NE    */ (problem->pz > 0 && problem->py > 0 && problem->px < problem->npx - 1),
+        /* FRONT_SE    */ (problem->pz > 0 && problem->py < problem->npy - 1 && problem->px < problem->npx - 1),
+        /* FRONT_SW    */ (problem->pz > 0 && problem->py < problem->npy - 1 && problem->px > 0),
+        /* FRONT_NW    */ (problem->pz > 0 && problem->py > 0 && problem->px > 0),
+        /* BACK_NE     */ (problem->pz < problem->npz - 1 && problem->py > 0 && problem->px < problem->npx - 1),
+        /* BACK_SE     */ (problem->pz < problem->npz - 1 && problem->py < problem->npy - 1 && problem->px < problem->npx - 1),
+        /* BACK_SW     */ (problem->pz < problem->npz - 1 && problem->py < problem->npy - 1 && problem->px > 0),
+        /* BACK_NW     */ (problem->pz < problem->npz - 1 && problem->py > 0 && problem->px > 0)
+    };
+    memcpy(problem->neighbors_mask, tmp_neighbors_mask, sizeof(tmp_neighbors_mask));
+
+    // initialize count_exchange, follows the same order as Comm_Tags
+    local_int_t tmp_count_exchange[NUMBER_NEIGHBORS] = {
+        /* NORTH       */ nx * nz,
+        /* EAST        */ ny * nz,
+        /* SOUTH       */ nx * nz,
+        /* WEST        */ ny * nz,
+        /* NE          */ nz,
+        /* SE          */ nz,
+        /* SW          */ nz,
+        /* NW          */ nz,
+        /* FRONT       */ nx * ny,
+        /* BACK        */ nx * ny,
+        /* FRONT_NORTH */ nx,
+        /* FRONT_EAST  */ ny,
+        /* FRONT_SOUTH */ nx,
+        /* FRONT_WEST  */ ny,
+        /* BACK_NORTH  */ nx,
+        /* BACK_EAST   */ ny,
+        /* BACK_SOUTH  */ nx,
+        /* BACK_WEST   */ ny,
+        /* FRONT_NE    */ 1,
+        /* FRONT_SE    */ 1,
+        /* FRONT_SW    */ 1,
+        /* FRONT_NW    */ 1,
+        /* BACK_NE     */ 1,
+        /* BACK_SE     */ 1,
+        /* BACK_SW     */ 1,
+        /* BACK_NW     */ 1
+    };
+    memcpy(problem->count_exchange, tmp_count_exchange, sizeof(tmp_count_exchange));
+
+    // initialize the Ghost Cells, which store information of the correct extraction and injection from/to GPU
+    GhostCell tmp_extraction_ghost_cells[NUMBER_NEIGHBORS] = {
+        // NORTH: extract_horizontal_plane from (1,1,1) with patch (nx, 1, nz)
+        { 1, 1, 1,    dimx, dimy, dimz,    nx, 1, nz },
+        
+        // EAST: extract_vertical_plane from (dimx-2,1,1) with patch (1, ny, nz)
+        { dimx - 2, 1, 1,    dimx, dimy, dimz,    1, ny, nz },
+        
+        // SOUTH: extract_horizontal_plane from (1,dimy-2,1) with patch (nx, 1, nz)
+        { 1, dimy - 2, 1,   dimx, dimy, dimz,    nx, 1, nz },
+        
+        // WEST: extract_vertical_plane from (1,1,1) with patch (1, ny, nz)
+        { 1, 1, 1,    dimx, dimy, dimz,    1, ny, nz },
+        
+        // NE: extract_edge_Z from (dimx-2,1,1) with patch (1, 1, nz)
+        { dimx - 2, 1, 1,    dimx, dimy, dimz,    1, 1, nz },
+        
+        // SE: extract_edge_Z from (dimx-2, dimy-2,1) with patch (1, 1, nz)
+        { dimx - 2, dimy - 2, 1,   dimx, dimy, dimz,    1, 1, nz },
+        
+        // SW: extract_edge_Z from (1, dimy-2,1) with patch (1, 1, nz)
+        { 1, dimy - 2, 1,   dimx, dimy, dimz,    1, 1, nz },
+        
+        // NW: extract_edge_Z from (1,1,1) with patch (1, 1, nz)
+        { 1, 1, 1,    dimx, dimy, dimz,    1, 1, nz },
+        
+        // FRONT: extract_frontal_plane from (1,1,1) with patch (nx, ny, 1)
+        { 1, 1, 1,    dimx, dimy, dimz,    nx, ny, 1 },
+        
+        // BACK: extract_frontal_plane from (1,1, dimz-2) with patch (nx, ny, 1)
+        { 1, 1, dimz - 2,   dimx, dimy, dimz,    nx, ny, 1 },
+        
+        // FRONT_NORTH: extract_edge_X from (1,1,1) with patch (nx, 1, 1)
+        { 1, 1, 1,    dimx, dimy, dimz,    nx, 1, 1 },
+        
+        // FRONT_EAST: extract_edge_Y from (dimx-2,1,1) with patch (1, ny, 1)
+        { dimx - 2, 1, 1,    dimx, dimy, dimz,    1, ny, 1 },
+        
+        // FRONT_SOUTH: extract_edge_X from (1, dimy-2,1) with patch (nx, 1, 1)
+        { 1, dimy - 2, 1,    dimx, dimy, dimz,    nx, 1, 1 },
+        
+        // FRONT_WEST: extract_edge_Y from (1,1,1) with patch (1, ny, 1)
+        { 1, 1, 1,    dimx, dimy, dimz,    1, ny, 1 },
+        
+        // BACK_NORTH: extract_edge_X from (1,1, dimz-2) with patch (nx, 1, 1)
+        { 1, 1, dimz - 2,   dimx, dimy, dimz,    nx, 1, 1 },
+        
+        // BACK_EAST: extract_edge_Y from (dimx-2,1, dimz-2) with patch (1, ny, 1)
+        { dimx - 2, 1, dimz - 2,   dimx, dimy, dimz,    1, ny, 1 },
+        
+        // BACK_SOUTH: extract_edge_X from (1, dimy-2, dimz-2) with patch (nx, 1, 1)
+        { 1, dimy - 2, dimz - 2,   dimx, dimy, dimz,    nx, 1, 1 },
+        
+        // BACK_WEST: extract_edge_Y from (1,1, dimz-2) with patch (1, ny, 1)
+        { 1, 1, dimz - 2,   dimx, dimy, dimz,    1, ny, 1 },
+        
+        // FRONT_NE: corner extraction from (dimx-2,1,1) with patch (1, 1, 1)
+        { dimx - 2, 1, 1,    dimx, dimy, dimz,    1, 1, 1 },
+        
+        // FRONT_SE: corner extraction from (dimx-2, dimy-2,1) with patch (1, 1, 1)
+        { dimx - 2, dimy - 2, 1,   dimx, dimy, dimz,    1, 1, 1 },
+        
+        // FRONT_SW: corner extraction from (1, dimy-2,1) with patch (1, 1, 1)
+        { 1, dimy - 2, 1,   dimx, dimy, dimz,    1, 1, 1 },
+        
+        // FRONT_NW: corner extraction from (1,1,1) with patch (1, 1, 1)
+        { 1, 1, 1,    dimx, dimy, dimz,    1, 1, 1 },
+        
+        // BACK_NE: corner extraction from (dimx-2,1, dimz-2) with patch (1, 1, 1)
+        { dimx - 2, 1, dimz - 2,   dimx, dimy, dimz,    1, 1, 1 },
+        
+        // BACK_SE: corner extraction from (dimx-2, dimy-2, dimz-2) with patch (1, 1, 1)
+        { dimx - 2, dimy - 2, dimz - 2,   dimx, dimy, dimz,    1, 1, 1 },
+        
+        // BACK_SW: corner extraction from (1, dimy-2, dimz-2) with patch (1, 1, 1)
+        { 1, dimy - 2, dimz - 2,   dimx, dimy, dimz,    1, 1, 1 },
+        
+        // BACK_NW: corner extraction from (1,1, dimz-2) with patch (1, 1, 1)
+        { 1, 1, dimz - 2,   dimx, dimy, dimz,    1, 1, 1 }
+    };
+    memcpy(problem->extraction_ghost_cells, tmp_extraction_ghost_cells, sizeof(tmp_extraction_ghost_cells));
+
+    GhostCell tmp_injection_ghost_cells[NUMBER_NEIGHBORS] = {
+        // NORTH: inject_horizontal_plane_to_GPU(x_d, halo->north_recv_buff_h, 1, 0, 1, nx, nz, dimx, dimy, dimz);
+        { 1, 0, 1,    dimx, dimy, dimz,    nx, 1, nz },
+        
+        // EAST: inject_vertical_plane_to_GPU(x_d, halo->east_recv_buff_h, dimx - 1, 1, 1, ny, nz, dimx, dimy, dimz);
+        { dimx - 1, 1, 1,    dimx, dimy, dimz,    1, ny, nz },
+        
+        // SOUTH: inject_horizontal_plane_to_GPU(x_d, halo->south_recv_buff_h, 1, dimy - 1, 1, nx, nz, dimx, dimy, dimz);
+        { 1, dimy - 1, 1,    dimx, dimy, dimz,    nx, 1, nz },
+        
+        // WEST: inject_vertical_plane_to_GPU(x_d, halo->west_recv_buff_h, 0, 1, 1, ny, nz, dimx, dimy, dimz);
+        { 0, 1, 1,    dimx, dimy, dimz,    1, ny, nz },
+        
+        // NE: inject_edge_Z_to_GPU(x_d, halo->ne_recv_buff_h, dimx - 1, 0, 1, nz, dimx, dimy, dimz);
+        { dimx - 1, 0, 1,    dimx, dimy, dimz,    1, 1, nz },
+        
+        // SE: inject_edge_Z_to_GPU(x_d, halo->se_recv_buff_h, dimx - 1, dimy - 1, 1, nz, dimx, dimy, dimz);
+        { dimx - 1, dimy - 1, 1,    dimx, dimy, dimz,    1, 1, nz },
+        
+        // SW: inject_edge_Z_to_GPU(x_d, halo->sw_recv_buff_h, 0, dimy - 1, 1, nz, dimx, dimy, dimz);
+        { 0, dimy - 1, 1,    dimx, dimy, dimz,    1, 1, nz },
+        
+        // NW: inject_edge_Z_to_GPU(x_d, halo->nw_recv_buff_h, 0, 0, 1, nz, dimx, dimy, dimz);
+        { 0, 0, 1,    dimx, dimy, dimz,    1, 1, nz },
+        
+        // FRONT: inject_frontal_plane_to_GPU(x_d, halo->front_recv_buff_h, 1, 1, 0, nx, ny, dimx, dimy, dimz);
+        { 1, 1, 0,    dimx, dimy, dimz,    nx, ny, 1 },
+        
+        // BACK: inject_frontal_plane_to_GPU(x_d, halo->back_recv_buff_h, 1, 1, dimz - 1, nx, ny, dimx, dimy, dimz);
+        { 1, 1, dimz - 1,    dimx, dimy, dimz,    nx, ny, 1 },
+        
+        // FRONT_NORTH: inject_edge_X_to_GPU(x_d, halo->front_north_recv_buff_h, 1, 0, 0, nx, dimx, dimy, dimz);
+        { 1, 0, 0,    dimx, dimy, dimz,    nx, 1, 1 },
+        
+        // FRONT_EAST: inject_edge_Y_to_GPU(x_d, halo->front_east_recv_buff_h, dimx - 1, 1, 0, ny, dimx, dimy, dimz);
+        { dimx - 1, 1, 0,    dimx, dimy, dimz,    1, ny, 1 },
+        
+        // FRONT_SOUTH: inject_edge_X_to_GPU(x_d, halo->front_south_recv_buff_h, 1, dimy - 1, 0, nx, dimx, dimy, dimz);
+        { 1, dimy - 1, 0,    dimx, dimy, dimz,    nx, 1, 1 },
+        
+        // FRONT_WEST: inject_edge_Y_to_GPU(x_d, halo->front_west_recv_buff_h, 0, 1, 0, ny, dimx, dimy, dimz);
+        { 0, 1, 0,    dimx, dimy, dimz,    1, ny, 1 },
+        
+        // BACK_NORTH: inject_edge_X_to_GPU(x_d, halo->back_north_recv_buff_h, 1, 0, dimz - 1, nx, dimx, dimy, dimz);
+        { 1, 0, dimz - 1,    dimx, dimy, dimz,    nx, 1, 1 },
+        
+        // BACK_EAST: inject_edge_Y_to_GPU(x_d, halo->back_east_recv_buff_h, dimx - 1, 1, dimz - 1, ny, dimx, dimy, dimz);
+        { dimx - 1, 1, dimz - 1,    dimx, dimy, dimz,    1, ny, 1 },
+        
+        // BACK_SOUTH: inject_edge_X_to_GPU(x_d, halo->back_south_recv_buff_h, 1, dimy - 1, dimz - 1, nx, dimx, dimy, dimz);
+        { 1, dimy - 1, dimz - 1,    dimx, dimy, dimz,    nx, 1, 1 },
+        
+        // BACK_WEST: inject_edge_Y_to_GPU(x_d, halo->back_west_recv_buff_h, 0, 1, dimz - 1, ny, dimx, dimy, dimz);
+        { 0, 1, dimz - 1,    dimx, dimy, dimz,    1, ny, 1 },
+        
+        // FRONT_NE (corner injection): corresponds to cudaMemcpy(x_d + dimx - 1, ...),
+        // which gives coordinate (dimx - 1, 0, 0)
+        { dimx - 1, 0, 0,    dimx, dimy, dimz,    1, 1, 1 },
+        
+        // FRONT_SE (corner injection): corresponds to cudaMemcpy(x_d + dimx * dimy - 1, ...),
+        // i.e. (dimx - 1, dimy - 1, 0)
+        { dimx - 1, dimy - 1, 0,    dimx, dimy, dimz,    1, 1, 1 },
+        
+        // FRONT_SW (corner injection): corresponds to cudaMemcpy(x_d + (dimy - 1) * dimx, ...),
+        // i.e. (0, dimy - 1, 0)
+        { 0, dimy - 1, 0,    dimx, dimy, dimz,    1, 1, 1 },
+        
+        // FRONT_NW (corner injection): corresponds to cudaMemcpy(x_d, ...),
+        // i.e. (0, 0, 0)
+        { 0, 0, 0,    dimx, dimy, dimz,    1, 1, 1 },
+        
+        // BACK_NE (corner injection): corresponds to cudaMemcpy(x_d + dimx - 1 + dimx * dimy * (dimz - 1), ...),
+        // i.e. (dimx - 1, 0, dimz - 1)
+        { dimx - 1, 0, dimz - 1,    dimx, dimy, dimz,    1, 1, 1 },
+        
+        // BACK_SE (corner injection): corresponds to cudaMemcpy(x_d + dimx - 1 + (dimy - 1) * dimx + dimx * dimy * (dimz - 1), ...),
+        // i.e. (dimx - 1, dimy - 1, dimz - 1)
+        { dimx - 1, dimy - 1, dimz - 1,    dimx, dimy, dimz,    1, 1, 1 },
+        
+        // BACK_SW (corner injection): corresponds to cudaMemcpy(x_d + dimx * (dimy - 1) + dimx * dimy * (dimz - 1), ...),
+        // i.e. (0, dimy - 1, dimz - 1)
+        { 0, dimy - 1, dimz - 1,    dimx, dimy, dimz,    1, 1, 1 },
+        
+        // BACK_NW (corner injection): corresponds to cudaMemcpy(x_d + dimx * dimy * (dimz - 1), ...),
+        // i.e. (0, 0, dimz - 1)
+        { 0, 0, dimz - 1,    dimx, dimy, dimz,    1, 1, 1 }
+    };
+    memcpy(problem->injection_ghost_cells, tmp_injection_ghost_cells, sizeof(tmp_injection_ghost_cells));
+
+    void (*tmp_extraction_functions[NUMBER_NEIGHBORS])(Halo *halo, DataType *buff, GhostCell *gh) = {
+        extract_horizontal_plane_from_GPU,
+        extract_vertical_plane_from_GPU,
+        extract_horizontal_plane_from_GPU,
+        extract_vertical_plane_from_GPU,
+        extract_edge_Z_from_GPU,
+        extract_edge_Z_from_GPU,
+        extract_edge_Z_from_GPU,
+        extract_edge_Z_from_GPU,
+        extract_frontal_plane_from_GPU,
+        extract_frontal_plane_from_GPU,
+        extract_edge_X_from_GPU,
+        extract_edge_Y_from_GPU,
+        extract_edge_X_from_GPU,
+        extract_edge_Y_from_GPU,
+        extract_edge_X_from_GPU,
+        extract_edge_Y_from_GPU,
+        extract_edge_X_from_GPU,
+        extract_edge_Y_from_GPU,
+        extract_corner_from_GPU,
+        extract_corner_from_GPU,
+        extract_corner_from_GPU,
+        extract_corner_from_GPU,
+        extract_corner_from_GPU,
+        extract_corner_from_GPU,
+        extract_corner_from_GPU,
+        extract_corner_from_GPU
+    };
+    memcpy(problem->extraction_functions, tmp_extraction_functions, sizeof(tmp_extraction_functions));
+
+    void (*tmp_injection_functions[NUMBER_NEIGHBORS])(Halo *halo, DataType *buff, GhostCell *gh) = {
+        inject_horizontal_plane_to_GPU,
+        inject_vertical_plane_to_GPU,
+        inject_horizontal_plane_to_GPU,
+        inject_vertical_plane_to_GPU,
+        inject_edge_Z_to_GPU,
+        inject_edge_Z_to_GPU,
+        inject_edge_Z_to_GPU,
+        inject_edge_Z_to_GPU,
+        inject_frontal_plane_to_GPU,
+        inject_frontal_plane_to_GPU,
+        inject_edge_X_to_GPU,
+        inject_edge_Y_to_GPU,
+        inject_edge_X_to_GPU,
+        inject_edge_Y_to_GPU,
+        inject_edge_X_to_GPU,
+        inject_edge_Y_to_GPU,
+        inject_edge_X_to_GPU,
+        inject_edge_Y_to_GPU,
+        inject_corner_to_GPU,
+        inject_corner_to_GPU,
+        inject_corner_to_GPU,
+        inject_corner_to_GPU,
+        inject_corner_to_GPU,
+        inject_corner_to_GPU,
+        inject_corner_to_GPU,
+        inject_corner_to_GPU
+    };
+    memcpy(problem->injection_functions, tmp_injection_functions, sizeof(tmp_injection_functions));
+
+
 }
 
-void InitHaloMemGPU(Halo *halo, int nx, int ny, int nz){
+void InitHaloMemGPU(Halo *halo, Problem *problem){
+    int nx = problem->nx;
+    int ny = problem->ny;
+    int nz = problem->nz;
     int dimx = nx + 2;
     int dimy = ny + 2;
     int dimz = nz + 2;
-    DataType *x_d;
-    CHECK_CUDA(cudaMalloc(&x_d, dimx * dimy * dimz * sizeof(DataType)));
-    halo->x_d = x_d;
-    DataType *interior = x_d + dimx * dimy + dimx + 1;
     halo->nx = nx;
     halo->ny = ny;
     halo->nz = nz;
     halo->dimx = dimx;
     halo->dimy = dimy;
     halo->dimz = dimz;
+    
+    DataType *x_d;
+    CHECK_CUDA(cudaMalloc(&x_d, dimx * dimy * dimz * sizeof(DataType)));
+    CHECK_CUDA(cudaMemset(x_d, 0, dimx * dimy * dimz * sizeof(DataType)));
+    halo->x_d = x_d;
+    DataType *interior = x_d + dimx * dimy + dimx + 1;
     halo->interior = interior;
+
+    //allocate communcation buffers on device
+    for(int i = 0; i < NUMBER_NEIGHBORS; i++){
+        CHECK_CUDA(cudaMalloc(&(halo->send_buff_d[i]), problem->count_exchange[i] * sizeof(DataType)));
+        CHECK_CUDA(cudaMemset(halo->send_buff_d[i], 0, problem->count_exchange[i] * sizeof(DataType)));
+        CHECK_CUDA(cudaMalloc(&(halo->recv_buff_d[i]), problem->count_exchange[i] * sizeof(DataType)));
+        CHECK_CUDA(cudaMemset(halo->recv_buff_d[i], 0, problem->count_exchange[i] * sizeof(DataType)));
+        
+    }
+    // Ensure all device memory setting is complete
+    CHECK_CUDA(cudaDeviceSynchronize());
+    
+}
+
+void InitHaloMemCPU(Halo *halo, Problem *problem){
+    int nx = problem->nx;
+    int ny = problem->ny;
+    int nz = problem->nz;
+    int dimx = nx + 2;
+    int dimy = ny + 2;
+    int dimz = nz + 2;
+    halo->nx = nx;
+    halo->ny = ny;
+    halo->nz = nz;
+    halo->dimx = dimx;
+    halo->dimy = dimy;
+    halo->dimz = dimz;
+
+    // allocate memory for send and receive buffers on CPU
+    for(int i = 0; i < NUMBER_NEIGHBORS; i++){
+        
+        halo->send_buff_h[i] = (DataType *) malloc(problem->count_exchange[i] * sizeof(DataType));
+        memset(halo->send_buff_h[i], 0, problem->count_exchange[i] * sizeof(DataType));
+        halo->recv_buff_h[i] = (DataType *) malloc(problem->count_exchange[i] * sizeof(DataType));
+        memset(halo->recv_buff_h[i], 0, problem->count_exchange[i] * sizeof(DataType));
+        
+    }
+}
+
+/*
+* Initializes the memory for halo on both CPU and GPU and initializes all data memory with zeros.
+*/
+void InitHalo(Halo *halo, Problem *problem){
+    halo->problem = problem;
+    InitHaloMemGPU(halo, problem);
+    InitHaloMemCPU(halo, problem);
+    SetHaloZeroGPU(halo);
 }
 
 void SetHaloZeroGPU(Halo *halo){
     CHECK_CUDA(cudaMemset(halo->x_d, 0, halo->dimx * halo->dimy * halo->dimz * sizeof(DataType)));
 }
 
-//correctness verified
+void InjectDataToHalo(Halo *halo, DataType *data){
+    int n = halo->nx * halo->ny * halo->nz;
+    int num_threads = 1024;
+    int num_blocks = std::min(MAX_NUM_BLOCKS, ceiling_division(n, num_threads));
+    inject_data_to_halo_kernel<<<num_blocks, num_threads>>>(halo->x_d, data, halo->nx, halo->ny, halo->nz, halo->dimx, halo->dimy);
+}
+
+/*
+* Initialize the halo with global index
+*/
 void SetHaloGlobalIndexGPU(Halo *halo, Problem *problem){
     DataType *x_h = (DataType*) malloc(halo->dimx * halo->dimy * halo->dimz * sizeof(DataType));
     for(int i=0; i<halo->dimx * halo->dimy * halo->dimz; i++){
@@ -78,8 +486,83 @@ void SetHaloGlobalIndexGPU(Halo *halo, Problem *problem){
     CHECK_CUDA(cudaMemcpy(halo->x_d, x_h, halo->dimx * halo->dimy * halo->dimz * sizeof(DataType), cudaMemcpyHostToDevice));
 }
 
+/*
+* Initialize the halo with 1.0/(global index + 1.0)
+*/
+void SetHaloQuotientGlobalIndexGPU(Halo *halo, Problem *problem){
+    DataType *x_h = (DataType*) malloc(halo->dimx * halo->dimy * halo->dimz * sizeof(DataType));
+    for(int i=0; i<halo->dimx * halo->dimy * halo->dimz; i++){
+        x_h[i] = 0;
+    }
+    DataType *write_addr = x_h+ halo->dimx * halo->dimy + halo->dimx + 1;
+    int gi = problem->gi0;
+    for(int i = 0; i<halo->nz; i++){
+        for(int j = 0; j<halo->ny; j++){
+            for(int l = 0; l<halo->nx; l++){
+                *write_addr = 1.0/(gi+1.0);
+                gi++;
+                write_addr++;
+            }
+            write_addr += 2;
+            gi = gi - halo->nx + problem->gnx;
+        }
+        write_addr += 2 * halo->dimx;
+        gi = problem->gi0 + (i + 1) * problem->gnx * problem->gny;
+    }
+    CHECK_CUDA(cudaMemcpy(halo->x_d, x_h, halo->dimx * halo->dimy * halo->dimz * sizeof(DataType), cudaMemcpyHostToDevice));
+}
+
+/*
+* Initialize the halo with random numbers between min and max
+* Seed = input seed + rank for each process
+*/
+void SetHaloRandomGPU(Halo *halo, Problem *problem, int min, int max, int seed){
+    DataType *x_h = (DataType*) malloc(halo->dimx * halo->dimy * halo->dimz * sizeof(DataType));
+    for(int i=0; i<halo->dimx * halo->dimy * halo->dimz; i++){
+        x_h[i] = 0;
+    }
+    srand(seed + problem->rank);
+    DataType *write_addr = x_h+ halo->dimx * halo->dimy + halo->dimx + 1;
+    int gi = problem->gi0;
+    for(int i = 0; i<halo->nz; i++){
+        for(int j = 0; j<halo->ny; j++){
+            for(int l = 0; l<halo->nx; l++){
+                int rand_num = rand();
+                if(min == 0 && max == 1.0) {
+                    *write_addr = (DataType) rand_num / RAND_MAX;
+                }else{
+                    *write_addr = min + rand_num % (max - min);
+                }
+                gi++;
+                write_addr++;
+            }
+            write_addr += 2;
+            gi = gi - halo->nx + problem->gnx;
+        }
+        write_addr += 2 * halo->dimx;
+        gi = problem->gi0 + (i + 1) * problem->gnx * problem->gny;
+    }
+    CHECK_CUDA(cudaMemcpy(halo->x_d, x_h, halo->dimx * halo->dimy * halo->dimz * sizeof(DataType), cudaMemcpyHostToDevice));
+}
+
 void FreeHaloGPU(Halo *halo){
     CHECK_CUDA(cudaFree(halo->x_d));
+    for(int i = 0; i<NUMBER_NEIGHBORS; i++){
+            CHECK_CUDA(cudaFree(halo->send_buff_d[i]));
+            CHECK_CUDA(cudaFree(halo->recv_buff_d[i]));
+    }
+}
+
+void FreeHaloCPU(Halo *halo){
+    for(int i = 0; i<NUMBER_NEIGHBORS; i++){
+            free(halo->send_buff_h[i]);
+            free(halo->recv_buff_h[i]);
+    }
+}
+
+void FreeHalo(Halo *halo){
+    FreeHaloGPU(halo);
+    FreeHaloCPU(halo);
 }
 
 void InitGPU(Problem *problem){
@@ -90,396 +573,151 @@ void InitGPU(Problem *problem){
     //printf("Rank=%d:\t\t Set my device to device=%d, available=%d.\n", problem->rank, problem->rank % deviceCount, deviceCount);
 }
 
-//copies to host and back to device, no device-to-device copy
-//TODO: Replace malloc per exchange with malloc once at beginning
-void ExchangeHalo(Halo *halo, Problem *problem){
-    MPI_Barrier(MPI_COMM_WORLD);
-    int dimx = halo->dimx;
-    int dimy = halo->dimy;
-    int dimz = halo->dimz;
-    int nx = halo->nx;
-    int ny = halo->ny;
-    int nz = halo->nz;
-    DataType *x_d = halo->x_d;
-    //exchange north if got north
-    if(problem->py > 0){
-        DataType *north_send = (DataType*) malloc(nx * nz * sizeof(DataType));
-        extract_horizontal_plane_from_GPU(x_d, north_send, 1, 1, 1, nx, nz, dimx, dimy, dimz);
-        DataType *north_receive = (DataType*) malloc(nx * nz * sizeof(DataType));
-        MPI_Sendrecv(north_send, nx * nz, MPIDataType, problem->rank - problem->npx, NORTH, north_receive, nx * nz, MPIDataType, problem->rank - problem->npx, SOUTH, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_horizontal_plane_to_GPU(x_d, north_receive, 1, 0, 1, nx, nz, dimx, dimy, dimz);
-        free(north_send);
-        free(north_receive);
+void extract_horizontal_plane_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int i = 0; i < gh->length_Z; i++) {
+        CHECK_CUDA(cudaMemcpy(buff, x_d, gh->length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
+        buff += gh->length_X;
+        x_d += gh->dimx * gh->dimy;
     }
-    
-    //exchange east if got east
-    if(problem->px < problem->npx - 1){
-        DataType *east_send = (DataType*) malloc(ny * nz * sizeof(DataType));
-        extract_vertical_plane_from_GPU(x_d, east_send, dimx - 2, 1, 1, ny, nz, dimx, dimy, dimz);
-        DataType *east_receive = (DataType*) malloc(ny * nz * sizeof(DataType));
-        MPI_Sendrecv(east_send, ny * nz, MPIDataType, problem->rank + 1, EAST, east_receive, ny * nz, MPIDataType, problem->rank + 1, WEST, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_vertical_plane_to_GPU(x_d, east_receive, dimx - 1, 1, 1, ny, nz, dimx, dimy, dimz);
-        free(east_send);
-        free(east_receive);
-        
+}
+
+void inject_horizontal_plane_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int i = 0; i < gh->length_Z; i++) {
+        CHECK_CUDA(cudaMemcpy(x_d, buff, gh->length_X * sizeof(DataType), cudaMemcpyHostToDevice));
+        x_d += gh->dimx * gh->dimy;
+        buff += gh->length_X;
     }
-    
-    //exchange south if got south
-    if(problem->py < problem->npy - 1){
-        DataType *south_send = (DataType*) malloc(nx * nz * sizeof(DataType));
-        extract_horizontal_plane_from_GPU(x_d, south_send, 1, dimy - 2, 1, nx, nz, dimx, dimy, dimz);
-        DataType *south_receive = (DataType*) malloc(nx * nz * sizeof(DataType));
-        MPI_Sendrecv(south_send, nx * nz, MPIDataType, problem->rank + problem->npx, SOUTH, south_receive, nx * nz, MPIDataType, problem->rank + problem->npx, NORTH, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_horizontal_plane_to_GPU(x_d, south_receive, 1, dimy - 1, 1, nx, nz, dimx, dimy, dimz);
-        free(south_send);
-        free(south_receive);
-    }
-    
-    //exchange west if got west
-    if(problem->px > 0){
-        DataType *west_send = (DataType*) malloc(ny * nz * sizeof(DataType));
-        extract_vertical_plane_from_GPU(x_d, west_send, 1, 1, 1, ny, nz, dimx, dimy, dimz);
-        DataType *west_receive = (DataType*) malloc(ny * nz * sizeof(DataType));
-        MPI_Sendrecv(west_send, ny * nz, MPIDataType, problem->rank - 1, WEST, west_receive, ny * nz, MPIDataType, problem->rank - 1, EAST, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_vertical_plane_to_GPU(x_d, west_receive, 0, 1, 1, ny, nz, dimx, dimy, dimz);
-        free(west_send);
-        free(west_receive);
-    }
-    //exchange ne if got ne
-    if(problem->px < problem->npx - 1 && problem->py > 0){
-        DataType *ne_send = (DataType*) malloc(nz * sizeof(DataType));
-        extract_edge_Z_from_GPU(x_d, ne_send, dimx - 2, 1, 1, nz, dimx, dimy, dimz);
-        DataType *ne_receive = (DataType*) malloc(nz * sizeof(DataType));
-        MPI_Sendrecv(ne_send, nz, MPIDataType, problem->rank - problem->npx + 1, NE, ne_receive, nz, MPIDataType, problem->rank - problem->npx + 1, SW, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_Z_to_GPU(x_d, ne_receive, dimx - 1, 0, 1, nz, dimx, dimy, dimz);
-        free(ne_send);
-        free(ne_receive);
-    }
-    
-    //exchange se if got se
-    if(problem->py < problem->npy - 1 && problem->px < problem->npx - 1){
-        DataType *se_send = (DataType*) malloc(nz * sizeof(DataType));
-        extract_edge_Z_from_GPU(x_d, se_send, dimx - 2, dimy - 2, 1, nz, dimx, dimy, dimz);
-        DataType *se_receive = (DataType*) malloc(nz * sizeof(DataType));
-        MPI_Sendrecv(se_send, nz, MPIDataType, problem->rank + problem->npx + 1, SE, se_receive, nz, MPIDataType, problem->rank + problem->npx + 1, NW, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_Z_to_GPU(x_d, se_receive, dimx - 1, dimy - 1, 1, nz, dimx, dimy, dimz);
-        free(se_send);
-        free(se_receive);
-    }
-    
-    //exchange sw if got sw
-    if(problem->px > 0 && problem->py < problem->npy - 1){
-        DataType *sw_send = (DataType*) malloc(nz * sizeof(DataType));
-        extract_edge_Z_from_GPU(x_d, sw_send, 1, dimy - 2, 1, nz, dimx, dimy, dimz);
-        DataType *sw_receive = (DataType*) malloc(nz * sizeof(DataType));
-        MPI_Sendrecv(sw_send, nz, MPIDataType, problem->rank + problem->npx - 1, SW, sw_receive, nz, MPIDataType, problem->rank + problem->npx - 1, NE, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_Z_to_GPU(x_d, sw_receive, 0, dimy - 1, 1, nz, dimx, dimy, dimz);
-        free(sw_send);
-        free(sw_receive);
-    }
-    
-    //exchange nw if got nw
-    if(problem->py > 0 && problem->px > 0){
-        DataType *nw_send = (DataType*) malloc(nz * sizeof(DataType));
-        extract_edge_Z_from_GPU(x_d, nw_send, 1, 1, 1, nz, dimx, dimy, dimz);
-        DataType *nw_receive = (DataType*) malloc(nz * sizeof(DataType));
-        MPI_Sendrecv(nw_send, nz, MPIDataType, problem->rank - problem->npx - 1, NW, nw_receive, nz, MPIDataType, problem->rank - problem->npx - 1, SE, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_Z_to_GPU(x_d, nw_receive, 0, 0, 1, nz, dimx, dimy, dimz);
-        free(nw_send);
-        free(nw_receive);
-    }
-    
-    //exchange front if got front
-    if(problem->pz > 0){
-        DataType *front_send = (DataType*) malloc(nx * ny * sizeof(DataType));
-        extract_frontal_plane_from_GPU(x_d, front_send, 1, 1, 1, nx, ny, dimx, dimy, dimz);
-        DataType *front_receive = (DataType*) malloc(nx * ny * sizeof(DataType));
-        MPI_Sendrecv(front_send, nx * ny, MPIDataType, problem->rank - problem->npx * problem->npy, FRONT, front_receive, nx * ny, MPIDataType, problem->rank - problem->npx * problem->npy, BACK, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_frontal_plane_to_GPU(x_d, front_receive, 1, 1, 0, nx, ny, dimx, dimy, dimz);
-        free(front_send);
-        free(front_receive);
-    }
-    //exchange back if got back
-    if(problem->pz < problem->npz-1){
-        DataType *back_send = (DataType*) malloc(nx * ny * sizeof(DataType));
-        extract_frontal_plane_from_GPU(x_d, back_send, 1, 1, dimz-2, nx, ny, dimx, dimy, dimz);
-        DataType *back_receive = (DataType*) malloc(nx * ny * sizeof(DataType));
-        MPI_Sendrecv(back_send, nx * ny, MPIDataType, problem->rank + problem->npx * problem->npy, BACK, back_receive, nx * ny, MPIDataType, problem->rank + problem->npx * problem->npy, FRONT, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_frontal_plane_to_GPU(x_d, back_receive, 1, 1, dimz-1, nx, ny, dimx, dimy, dimz);
-        free(back_send);
-        free(back_receive);
-    }
-    //exchange front_north if got front_north
-    if(problem->py > 0 && problem->pz > 0){
-        DataType *front_north_send = (DataType*) malloc(nx * sizeof(DataType));
-        extract_edge_X_from_GPU(x_d, front_north_send, 1, 1, 1, nx, dimx, dimy, dimz);
-        DataType *front_north_receive = (DataType*) malloc(nx * sizeof(DataType));
-        MPI_Sendrecv(front_north_send, nx, MPIDataType, problem->rank - problem->npx * (problem->npy+1), FRONT_NORTH, front_north_receive, nx, MPIDataType, problem->rank - problem->npx * (problem->npy+1), BACK_SOUTH, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_X_to_GPU(x_d, front_north_receive, 1, 0, 0, nx, dimx, dimy, dimz);
-        free(front_north_send);
-        free(front_north_receive);
-    }
-    //exchange front_east if got front_east
-    if(problem->px < problem->npx - 1 && problem->pz > 0){
-        DataType *front_east_send = (DataType*) malloc(ny * sizeof(DataType));
-        extract_edge_Y_from_GPU(x_d, front_east_send, dimx-2, 1, 1, ny, dimx, dimy, dimz);
-        DataType *front_east_receive = (DataType*) malloc(ny * sizeof(DataType));
-        MPI_Sendrecv(front_east_send, ny, MPIDataType, problem->rank - problem->npx * problem->npy + 1, FRONT_EAST, front_east_receive, ny, MPIDataType, problem->rank - problem->npx * problem->npy + 1, BACK_WEST, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_Y_to_GPU(x_d, front_east_receive, dimx-1, 1, 0, ny, dimx, dimy, dimz);
-        free(front_east_send);
-        free(front_east_receive);
-    }
-    //exchange front_south if got front_south
-    if(problem->py < problem->npy - 1 && problem->pz > 0){
-        DataType *front_south_send = (DataType*) malloc(nx * sizeof(DataType));
-        extract_edge_X_from_GPU(x_d, front_south_send, 1, dimy - 2, 1, nx, dimx, dimy, dimz);
-        DataType *front_south_receive = (DataType*) malloc(nx * sizeof(DataType));
-        MPI_Sendrecv(front_south_send, nx, MPIDataType, problem->rank - problem->npx * (problem->npy-1), FRONT_SOUTH, front_south_receive, nx, MPIDataType, problem->rank - problem->npx * (problem->npy-1), BACK_NORTH, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_X_to_GPU(x_d, front_south_receive, 1, dimy - 1, 0, nx, dimx, dimy, dimz);
-        free(front_south_send);
-        free(front_south_receive);
-    }
-    //exchange front_west if got front_west
-    if(problem->px > 0 && problem->pz > 0){
-        DataType *front_west_send = (DataType*) malloc(ny * sizeof(DataType));
-        extract_edge_Y_from_GPU(x_d, front_west_send, 1, 1, 1, ny, dimx, dimy, dimz);
-        DataType *front_west_receive = (DataType*) malloc(ny * sizeof(DataType));
-        MPI_Sendrecv(front_west_send, ny, MPIDataType, problem->rank - problem->npx * problem->npy - 1, FRONT_WEST, front_west_receive, ny, MPIDataType, problem->rank - problem->npx * problem->npy - 1, BACK_EAST, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_Y_to_GPU(x_d, front_west_receive, 0, 1, 0, ny, dimx, dimy, dimz);
-        free(front_west_send);
-        free(front_west_receive);
-    }
-    //exchange back_north if got back_north
-    if(problem->py > 0 && problem->pz < problem->npz-1){
-        DataType *back_north_send = (DataType*) malloc(nx * sizeof(DataType));
-        extract_edge_X_from_GPU(x_d, back_north_send, 1, 1, dimz-2, nx, dimx, dimy, dimz);
-        DataType *back_north_receive = (DataType*) malloc(nx * sizeof(DataType));
-        MPI_Sendrecv(back_north_send, nx, MPIDataType, problem->rank + problem->npx * (problem->npy-1), BACK_NORTH, back_north_receive, nx, MPIDataType, problem->rank + problem->npx * (problem->npy-1), FRONT_SOUTH, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_X_to_GPU(x_d, back_north_receive, 1, 0, dimz-1, nx, dimx, dimy, dimz);
-        free(back_north_send);
-        free(back_north_receive);
-    }
-    //exchange back_east if got back_east
-    if(problem->px < problem->npx - 1 && problem->pz < problem->npz-1){
-        DataType *back_east_send = (DataType*) malloc(ny * sizeof(DataType));
-        extract_edge_Y_from_GPU(x_d, back_east_send, dimx-2, 1, dimz-2, ny, dimx, dimy, dimz);
-        DataType *back_east_receive = (DataType*) malloc(ny * sizeof(DataType));
-        MPI_Sendrecv(back_east_send, ny, MPIDataType, problem->rank + problem->npx * problem->npy + 1, BACK_EAST, back_east_receive, ny, MPIDataType, problem->rank + problem->npx * problem->npy + 1, FRONT_WEST, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_Y_to_GPU(x_d, back_east_receive, dimx-1, 1, dimz-1, ny, dimx, dimy, dimz);
-        free(back_east_send);
-        free(back_east_receive);
-    }
-    //exchange back_south if got back_south
-    if(problem->py < problem->npy - 1 && problem->pz < problem->npz-1){
-        DataType *back_south_send = (DataType*) malloc(nx * sizeof(DataType));
-        extract_edge_X_from_GPU(x_d, back_south_send, 1, dimy - 2, dimz-2, nx, dimx, dimy, dimz);
-        DataType *back_south_receive = (DataType*) malloc(nx * sizeof(DataType));
-        MPI_Sendrecv(back_south_send, nx, MPIDataType, problem->rank + problem->npx * (problem->npy+1), BACK_SOUTH, back_south_receive, nx, MPIDataType, problem->rank + problem->npx * (problem->npy+1), FRONT_NORTH, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_X_to_GPU(x_d, back_south_receive, 1, dimy - 1, dimz-1, nx, dimx, dimy, dimz);
-        free(back_south_send);
-        free(back_south_receive);
-    }
-    //exchange back_west if got back_west
-    if(problem->px > 0 && problem->pz < problem->npz-1){
-        DataType *back_west_send = (DataType*) malloc(ny * sizeof(DataType));
-        extract_edge_Y_from_GPU(x_d, back_west_send, 1, 1, dimz-2, ny, dimx, dimy, dimz);
-        DataType *back_west_receive = (DataType*) malloc(ny * sizeof(DataType));
-        MPI_Sendrecv(back_west_send, ny, MPIDataType, problem->rank + problem->npx * problem->npy - 1, BACK_WEST, back_west_receive, ny, MPIDataType, problem->rank + problem->npx * problem->npy - 1, FRONT_EAST, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        inject_edge_Y_to_GPU(x_d, back_west_receive, 0, 1, dimz-1, ny, dimx, dimy, dimz);
-        free(back_west_send);
-        free(back_west_receive);
-    }
-    //exchange front corners
-    if(problem->pz > 0){
-        //exchange front_ne if got front_ne
-        if(problem->py > 0 && problem->px < problem->npx - 1){
-            DataType front_ne_send;
-            CHECK_CUDA(cudaMemcpy(&front_ne_send, x_d + dimx * dimy + dimx + dimx - 2, sizeof(DataType), cudaMemcpyDeviceToHost));
-            DataType front_ne_receive;
-            MPI_Sendrecv(&front_ne_send, 1, MPIDataType, problem->rank - problem->npx * (problem->npy+1) + 1, FRONT_NE, &front_ne_receive, 1, MPIDataType, problem->rank - problem->npx * (problem->npy+1) + 1, BACK_SW, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            CHECK_CUDA(cudaMemcpy(x_d + dimx - 1, &front_ne_receive, sizeof(DataType), cudaMemcpyHostToDevice));
+}
+
+void extract_vertical_plane_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int i = 0; i < gh->length_Z; i++) {
+        for (int j = 0; j < gh->length_Y; j++) {
+            CHECK_CUDA(cudaMemcpy(buff, x_d, sizeof(DataType), cudaMemcpyDeviceToHost));
+            buff++;
+            x_d += gh->dimx;
         }
-        //exchange front_se if got front_se
-        if(problem->py < problem->npy - 1 && problem->px < problem->npx - 1){
-            DataType front_se_send;
-            CHECK_CUDA(cudaMemcpy(&front_se_send, x_d + dimx * dimy + dimx + dimx - 2 + (dimy-3)*dimx, sizeof(DataType), cudaMemcpyDeviceToHost));
-            DataType front_se_receive;
-            MPI_Sendrecv(&front_se_send, 1, MPIDataType, problem->rank - problem->npx * (problem->npy-1) + 1, FRONT_SE, &front_se_receive, 1, MPIDataType, problem->rank - problem->npx * (problem->npy-1) + 1, BACK_NW, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            CHECK_CUDA(cudaMemcpy(x_d + dimx * dimy - 1, &front_se_receive, sizeof(DataType), cudaMemcpyHostToDevice));
+        x_d += gh->dimx * (gh->dimy - gh->length_Y);
+    }
+}
+
+void inject_vertical_plane_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int i = 0; i < gh->length_Z; i++) {
+        for (int j = 0; j < gh->length_Y; j++) {
+            CHECK_CUDA(cudaMemcpy(x_d, buff, sizeof(DataType), cudaMemcpyHostToDevice));
+            x_d += gh->dimx;
+            buff++;
         }
-        //exchange front_sw if got front_sw
-        if(problem->py < problem->npy - 1 && problem->px > 0){
-            DataType front_sw_send;
-            CHECK_CUDA(cudaMemcpy(&front_sw_send, x_d + dimx * dimy + dimx + 1 + (ny-1) * dimx, sizeof(DataType), cudaMemcpyDeviceToHost));
-            DataType front_sw_receive;
-            MPI_Sendrecv(&front_sw_send, 1, MPIDataType, problem->rank - problem->npx * (problem->npy-1) - 1, FRONT_SW, &front_sw_receive, 1, MPIDataType, problem->rank - problem->npx * (problem->npy-1) - 1, BACK_NE, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            CHECK_CUDA(cudaMemcpy(x_d + (dimy -1) * dimx, &front_sw_receive, sizeof(DataType), cudaMemcpyHostToDevice));
+        x_d += gh->dimx * (gh->dimy - gh->length_Y);
+    }
+}
+
+void extract_frontal_plane_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int i = 0; i < gh->length_Y; i++) {
+        CHECK_CUDA(cudaMemcpy(buff, x_d, gh->length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
+        buff += gh->length_X;
+        x_d += gh->dimx;
+    }
+}
+
+void inject_frontal_plane_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int i = 0; i < gh->length_Y; i++) {
+        CHECK_CUDA(cudaMemcpy(x_d, buff, gh->length_X * sizeof(DataType), cudaMemcpyHostToDevice));
+        x_d += gh->dimx;
+        buff += gh->length_X;
+    }
+}
+
+void extract_edge_X_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    CHECK_CUDA(cudaMemcpy(buff, x_d, gh->length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
+}
+
+void inject_edge_X_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    CHECK_CUDA(cudaMemcpy(x_d, buff, gh->length_X * sizeof(DataType), cudaMemcpyHostToDevice));
+}
+
+void extract_edge_Y_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int j = 0; j < gh->length_Y; j++) {
+        CHECK_CUDA(cudaMemcpy(buff, x_d, sizeof(DataType), cudaMemcpyDeviceToHost));
+        buff++;
+        x_d += gh->dimx;
+    }
+}
+
+void inject_edge_Y_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int j = 0; j < gh->length_Y; j++) {
+        CHECK_CUDA(cudaMemcpy(x_d, buff, sizeof(DataType), cudaMemcpyHostToDevice));
+        x_d += gh->dimx;
+        buff++;
+    }
+}
+
+void extract_edge_Z_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int j = 0; j < gh->length_Z; j++) {
+        CHECK_CUDA(cudaMemcpy(buff, x_d, sizeof(DataType), cudaMemcpyDeviceToHost));
+        buff++;
+        x_d += gh->dimx * gh->dimy;
+    }
+}
+
+void inject_edge_Z_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int j = 0; j < gh->length_Z; j++) {
+        CHECK_CUDA(cudaMemcpy(x_d, buff, sizeof(DataType), cudaMemcpyHostToDevice));
+        x_d += gh->dimx * gh->dimy;
+        buff++;
+    }
+}
+
+void extract_corner_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int z = 0; z < gh->length_Z; z++) {
+        for (int y = 0; y < gh->length_Y; y++) {
+            // Copy a contiguous block of length_X elements (one row of the corner)
+            CHECK_CUDA(cudaMemcpy(buff, x_d, gh->length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
+            buff += gh->length_X;
+            x_d += gh->dimx;  // move to the next row in the halo
         }
-        //exchange front_nw if got front_nw
-        if(problem->py > 0 && problem->px > 0){
-            DataType front_nw_send;
-            CHECK_CUDA(cudaMemcpy(&front_nw_send, x_d + dimx * dimy + 1 + dimx, sizeof(DataType), cudaMemcpyDeviceToHost));
-            DataType front_nw_receive;
-            MPI_Sendrecv(&front_nw_send, 1, MPIDataType, problem->rank - problem->npx * (problem->npy+1) - 1, FRONT_NW, &front_nw_receive, 1, MPIDataType, problem->rank - problem->npx * (problem->npy+1) - 1, BACK_SE, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            CHECK_CUDA(cudaMemcpy(x_d, &front_nw_receive, sizeof(DataType), cudaMemcpyHostToDevice));
+        // Jump to the start of the next z-plane:
+        x_d += gh->dimx * (gh->dimy - gh->length_Y);
+    }
+}
+
+void inject_corner_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    for (int z = 0; z < gh->length_Z; z++) {
+        for (int y = 0; y < gh->length_Y; y++) {
+            // Copy a contiguous block of length_X elements (one row of the corner)
+            CHECK_CUDA(cudaMemcpy(x_d, buff, gh->length_X * sizeof(DataType), cudaMemcpyHostToDevice));
+            buff += gh->length_X;
+            x_d += gh->dimx;  // move to the next row in the halo
         }
-    }
-    //exchange back corners
-    if(problem->pz < problem->npz - 1){
-        //exchange back_ne if got back_ne
-        if(problem->py > 0 && problem->px < problem->npx - 1){
-            DataType back_ne_send;
-            CHECK_CUDA(cudaMemcpy(&back_ne_send, x_d + dimx * dimy * (dimz - 2) + dimx - 2 + dimx, sizeof(DataType), cudaMemcpyDeviceToHost));
-            DataType back_ne_receive;
-            MPI_Sendrecv(&back_ne_send, 1, MPIDataType, problem->rank + problem->npx * (problem->npy-1) + 1, BACK_NE, &back_ne_receive, 1, MPIDataType, problem->rank + problem->npx * (problem->npy-1) + 1, FRONT_SW, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            CHECK_CUDA(cudaMemcpy(x_d + dimx - 1 + dimx * dimy * (dimz - 1), &back_ne_receive, sizeof(DataType), cudaMemcpyHostToDevice));
-        }
-        //exchange back_se if got back_se
-        if(problem->py < problem->npy - 1 && problem->px < problem->npx - 1){
-            DataType back_se_send;
-            CHECK_CUDA(cudaMemcpy(&back_se_send, x_d + dimx * dimy * (dimz - 2) + dimx - 2 + dimx + (dimy-3) * dimx, sizeof(DataType), cudaMemcpyDeviceToHost));
-            DataType back_se_receive;
-            MPI_Sendrecv(&back_se_send, 1, MPIDataType, problem->rank + problem->npx * (problem->npy+1) + 1, BACK_SE, &back_se_receive, 1, MPIDataType, problem->rank + problem->npx * (problem->npy+1) + 1, FRONT_NW, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            CHECK_CUDA(cudaMemcpy(x_d + dimx - 1 + (dimy - 1) * dimx + dimx * dimy * (dimz - 1), &back_se_receive, sizeof(DataType), cudaMemcpyHostToDevice));
-        }
-        //exchange back_sw if got back_sw
-        if(problem->py < problem->npy - 1 && problem->px > 0){
-            DataType back_sw_send;
-            CHECK_CUDA(cudaMemcpy(&back_sw_send, x_d + dimx * dimy * (dimz - 2) + 1 + dimx + (ny-1) * dimx, sizeof(DataType), cudaMemcpyDeviceToHost));
-            DataType back_sw_receive;
-            MPI_Sendrecv(&back_sw_send, 1, MPIDataType, problem->rank + problem->npx * (problem->npy+1) - 1, BACK_SW, &back_sw_receive, 1, MPIDataType, problem->rank + problem->npx * (problem->npy+1) - 1, FRONT_NE, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            CHECK_CUDA(cudaMemcpy(x_d + dimx * (dimy - 1) + dimx * dimy * (dimz - 1), &back_sw_receive, sizeof(DataType), cudaMemcpyHostToDevice));
-        }
-        //exchange back_nw if got back_nw
-        if(problem->py > 0 && problem->px > 0){
-            DataType back_nw_send;
-            CHECK_CUDA(cudaMemcpy(&back_nw_send, x_d + dimx * dimy * (dimz - 2) + 1 + dimx, sizeof(DataType), cudaMemcpyDeviceToHost));
-            DataType back_nw_receive;
-            MPI_Sendrecv(&back_nw_send, 1, MPIDataType, problem->rank + problem->npx * (problem->npy-1) - 1, BACK_NW, &back_nw_receive, 1, MPIDataType, problem->rank + problem->npx * (problem->npy-1) - 1, FRONT_SE, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            CHECK_CUDA(cudaMemcpy(x_d + dimx * dimy * (dimz-1), &back_nw_receive, sizeof(DataType), cudaMemcpyHostToDevice));
-        }
-    }
-    
-    MPI_Barrier(MPI_COMM_WORLD);
-}
-
-
-void extract_horizontal_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Z, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int i = 0; i < length_Z; i++){
-        CHECK_CUDA(cudaMemcpy(x_h, x_d, length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
-        x_h += length_X;
-        x_d += dimx * dimy;
-    }
-}
-
-void inject_horizontal_plane_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Z, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int i = 0; i < length_Z; i++){
-        CHECK_CUDA(cudaMemcpy(x_d, x_h, length_X * sizeof(DataType), cudaMemcpyHostToDevice));
-        x_d += dimx * dimy;
-        x_h += length_X;
-    }
-}
-
-void extract_vertical_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Y, int length_Z, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int i = 0; i < length_Z; i++){
-        for(int j = 0; j < length_Y; j++){
-            CHECK_CUDA(cudaMemcpy(x_h, x_d, 1 * sizeof(DataType), cudaMemcpyDeviceToHost));
-            x_h++;
-            x_d += dimx;
-        }
-        x_d += dimx * (dimy - length_Y);
-    }
-}
-
-void inject_vertical_plane_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Y, int length_Z, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int i = 0; i < length_Z; i++){
-        for(int j = 0; j < length_Y; j++){
-            CHECK_CUDA(cudaMemcpy(x_d, x_h, 1 * sizeof(DataType), cudaMemcpyHostToDevice));
-            x_d += dimx;
-            x_h ++;
-        }
-        x_d += dimx * (dimy - length_Y);
-    }
-}
-
-void extract_frontal_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Y, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int i = 0; i < length_Y; i++){
-        CHECK_CUDA(cudaMemcpy(x_h, x_d, length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
-        x_h += length_X;
-        x_d += dimx;
-    }
-}
-
-void inject_frontal_plane_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Y, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int i = 0; i < length_Y; i++){
-        CHECK_CUDA(cudaMemcpy(x_d, x_h, length_X * sizeof(DataType), cudaMemcpyHostToDevice));
-        x_d += dimx;
-        x_h += length_X;
-    }
-
-}
-
-void extract_edge_X_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    CHECK_CUDA(cudaMemcpy(x_h, x_d, length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
-}
-
-void inject_edge_X_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    CHECK_CUDA(cudaMemcpy(x_d, x_h, length_X * sizeof(DataType), cudaMemcpyHostToDevice));
-}
-
-void extract_edge_Y_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Y, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int j = 0; j < length_Y; j++){
-        CHECK_CUDA(cudaMemcpy(x_h, x_d, 1 * sizeof(DataType), cudaMemcpyDeviceToHost));
-        x_h++;
-        x_d += dimx;
-    }
-}
-
-void inject_edge_Y_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Y, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int j = 0; j < length_Y; j++){
-        CHECK_CUDA(cudaMemcpy(x_d, x_h, 1 * sizeof(DataType), cudaMemcpyHostToDevice));
-        x_d += dimx;
-        x_h ++;
-    }
-}
-
-void extract_edge_Z_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Z, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int j = 0; j < length_Z; j++){
-        CHECK_CUDA(cudaMemcpy(x_h, x_d, 1 * sizeof(DataType), cudaMemcpyDeviceToHost));
-        x_h++;
-        x_d += dimx * dimy;
-    }
-}
-
-void inject_edge_Z_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Z, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    for(int j = 0; j < length_Z; j++){
-        CHECK_CUDA(cudaMemcpy(x_d, x_h, 1 * sizeof(DataType), cudaMemcpyHostToDevice));
-        x_d += dimx * dimy;
-        x_h ++;
+        // Jump to the start of the next z-plane:
+        x_d += gh->dimx * (gh->dimy - gh->length_Y);
     }
 }
 
@@ -501,7 +739,6 @@ void SendResult(int rank_recv, Halo *x_d, Problem *problem){
 //correctness verified
 void GatherResult(Halo *x_d, Problem *problem, DataType *result_h){
     DataType *own_data_d = x_d->interior;
-    local_int_t data_paket = 0;
     for(int i = 0; i<problem->gnz; i++){ // go through all gnz layers
         int pz_recv = i / problem->nz;
         for(int j = 0; j<problem->gny; j++){ // go through all gny rows
@@ -557,16 +794,10 @@ void GenerateStripedPartialMatrix(Problem *problem, DataType *A){
     global_int_t gnx = problem->gnx; //global number of points in x
     global_int_t gny = problem->gny; //global number of points in y
     global_int_t gnz = problem->gnz; //global number of points in z
-    global_int_t gi0 = problem->gi0; //global index of local (0,0,0)
-    
-    local_int_t num_rows = nx * ny * nz;
-    local_int_t num_cols = nx * ny * nz;
     
     for(int iz = 0; iz < nz; iz++){
         for(int iy = 0; iy < ny; iy++){
             for(int ix = 0; ix < nx; ix++){
-
-                int i = ix + nx * iy + nx * ny * iz;
 
                 int gx = problem->gx0 + ix; //global x index
                 int gy = problem->gy0 + iy; //global y index

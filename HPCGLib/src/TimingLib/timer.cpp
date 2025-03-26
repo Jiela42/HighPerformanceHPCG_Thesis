@@ -111,5 +111,6 @@ void Timer::writeResultsToCsv() {
     writeCSV(base_filename + "SPMV.csv", base_fileheader + "SPMV," + additional_parameters, SPMV_times);
     writeCSV(base_filename + "Dot.csv", base_fileheader + "Dot," + additional_parameters, Dot_times);
     writeCSV(base_filename + "WAXPBY.csv", base_fileheader + "WAXPBY," + additional_parameters, WAXPBY_times);
+    writeCSV(base_filename + "ExchangeHalo.csv", base_fileheader + "ExchangeHalo," + additional_parameters, ExchangeHalo_times);
     
 }
