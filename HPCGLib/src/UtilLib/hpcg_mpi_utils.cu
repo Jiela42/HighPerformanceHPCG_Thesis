@@ -55,32 +55,32 @@ void GenerateProblem(int npx, int npy, int npz, local_int_t nx, local_int_t ny, 
 
     // initialize neighbors, follows the same order as Comm_Tags
     int tmp_neighbors[NUMBER_NEIGHBORS] = {
-        /* NORTH       */ (problem->py > 0)                          ? problem->rank - problem->npx               : -1,
-        /* EAST        */ (problem->px < problem->npx - 1)             ? problem->rank + 1                          : -1,
-        /* SOUTH       */ (problem->py < problem->npy - 1)             ? problem->rank + problem->npx               : -1,
-        /* WEST        */ (problem->px > 0)                          ? problem->rank - 1                          : -1,
-        /* NE          */ (problem->py > 0 && problem->px < problem->npx - 1) ? problem->rank - problem->npx + 1        : -1,
-        /* SE          */ (problem->py < problem->npy - 1 && problem->px < problem->npx - 1) ? problem->rank + problem->npx + 1 : -1,
-        /* SW          */ (problem->py < problem->npy - 1 && problem->px > 0) ? problem->rank + problem->npx - 1        : -1,
-        /* NW          */ (problem->py > 0 && problem->px > 0)         ? problem->rank - problem->npx - 1             : -1,
-        /* FRONT       */ (problem->pz > 0)                          ? problem->rank - problem->npx * problem->npy  : -1,
-        /* BACK        */ (problem->pz < problem->npz - 1)             ? problem->rank + problem->npx * problem->npy  : -1,
-        /* FRONT_NORTH */ (problem->pz > 0 && problem->py > 0)         ? problem->rank - problem->npx * (problem->npy + 1): -1,
-        /* FRONT_EAST  */ (problem->pz > 0 && problem->px < problem->npx - 1) ? problem->rank - problem->npx * problem->npy + 1 : -1,
-        /* FRONT_SOUTH */ (problem->pz > 0 && problem->py < problem->npy - 1) ? problem->rank - problem->npx * (problem->npy - 1): -1,
-        /* FRONT_WEST  */ (problem->pz > 0 && problem->px > 0)         ? problem->rank - problem->npx * problem->npy - 1 : -1,
-        /* BACK_NORTH  */ (problem->pz < problem->npz - 1 && problem->py > 0) ? problem->rank + problem->npx * (problem->npy - 1) : -1,
-        /* BACK_EAST   */ (problem->pz < problem->npz - 1 && problem->px < problem->npx - 1) ? problem->rank + problem->npx * problem->npy + 1 : -1,
-        /* BACK_SOUTH  */ (problem->pz < problem->npz - 1 && problem->py < problem->npy - 1) ? problem->rank + problem->npx * (problem->npy + 1) : -1,
-        /* BACK_WEST   */ (problem->pz < problem->npz - 1 && problem->px > 0) ? problem->rank + problem->npx * problem->npy - 1 : -1,
-        /* FRONT_NE    */ (problem->pz > 0 && problem->py > 0 && problem->px < problem->npx - 1) ? problem->rank - problem->npx * (problem->npy + 1) + 1 : -1,
-        /* FRONT_SE    */ (problem->pz > 0 && problem->py < problem->npy - 1 && problem->px < problem->npx - 1) ? problem->rank - problem->npx * (problem->npy - 1) + 1 : -1,
-        /* FRONT_SW    */ (problem->pz > 0 && problem->py < problem->npy - 1 && problem->px > 0) ? problem->rank - problem->npx * (problem->npy - 1) - 1 : -1,
-        /* FRONT_NW    */ (problem->pz > 0 && problem->py > 0 && problem->px > 0) ? problem->rank - problem->npx * (problem->npy + 1) - 1 : -1,
-        /* BACK_NE     */ (problem->pz < problem->npz - 1 && problem->py > 0 && problem->px < problem->npx - 1) ? problem->rank + problem->npx * (problem->npy - 1) + 1 : -1,
-        /* BACK_SE     */ (problem->pz < problem->npz - 1 && problem->py < problem->npy - 1 && problem->px < problem->npx - 1) ? problem->rank + problem->npx * (problem->npy + 1) + 1 : -1,
-        /* BACK_SW     */ (problem->pz < problem->npz - 1 && problem->py < problem->npy - 1 && problem->px > 0) ? problem->rank + problem->npx * (problem->npy + 1) - 1 : -1,
-        /* BACK_NW     */ (problem->pz < problem->npz - 1 && problem->py > 0 && problem->px > 0) ? problem->rank + problem->npx * (problem->npy - 1) - 1 : -1
+        /* 0 NORTH       */ (problem->py > 0)                          ? problem->rank - problem->npx               : -1,
+        /* 1 EAST        */ (problem->px < problem->npx - 1)             ? problem->rank + 1                          : -1,
+        /* 2 SOUTH       */ (problem->py < problem->npy - 1)             ? problem->rank + problem->npx               : -1,
+        /* 3 WEST        */ (problem->px > 0)                          ? problem->rank - 1                          : -1,
+        /* 4 NE          */ (problem->py > 0 && problem->px < problem->npx - 1) ? problem->rank - problem->npx + 1        : -1,
+        /* 5 SE          */ (problem->py < problem->npy - 1 && problem->px < problem->npx - 1) ? problem->rank + problem->npx + 1 : -1,
+        /* 6 SW          */ (problem->py < problem->npy - 1 && problem->px > 0) ? problem->rank + problem->npx - 1        : -1,
+        /* 7 NW          */ (problem->py > 0 && problem->px > 0)         ? problem->rank - problem->npx - 1             : -1,
+        /* 8 FRONT       */ (problem->pz > 0)                          ? problem->rank - problem->npx * problem->npy  : -1,
+        /* 9 BACK        */ (problem->pz < problem->npz - 1)             ? problem->rank + problem->npx * problem->npy  : -1,
+        /* 10 FRONT_NORTH */ (problem->pz > 0 && problem->py > 0)         ? problem->rank - problem->npx * (problem->npy + 1): -1,
+        /* 11 FRONT_EAST  */ (problem->pz > 0 && problem->px < problem->npx - 1) ? problem->rank - problem->npx * problem->npy + 1 : -1,
+        /* 12 FRONT_SOUTH */ (problem->pz > 0 && problem->py < problem->npy - 1) ? problem->rank - problem->npx * (problem->npy - 1): -1,
+        /* 13 FRONT_WEST  */ (problem->pz > 0 && problem->px > 0)         ? problem->rank - problem->npx * problem->npy - 1 : -1,
+        /* 14 BACK_NORTH  */ (problem->pz < problem->npz - 1 && problem->py > 0) ? problem->rank + problem->npx * (problem->npy - 1) : -1,
+        /* 15 BACK_EAST   */ (problem->pz < problem->npz - 1 && problem->px < problem->npx - 1) ? problem->rank + problem->npx * problem->npy + 1 : -1,
+        /* 16 BACK_SOUTH  */ (problem->pz < problem->npz - 1 && problem->py < problem->npy - 1) ? problem->rank + problem->npx * (problem->npy + 1) : -1,
+        /* 17 BACK_WEST   */ (problem->pz < problem->npz - 1 && problem->px > 0) ? problem->rank + problem->npx * problem->npy - 1 : -1,
+        /* 18 FRONT_NE    */ (problem->pz > 0 && problem->py > 0 && problem->px < problem->npx - 1) ? problem->rank - problem->npx * (problem->npy + 1) + 1 : -1,
+        /* 19 FRONT_SE    */ (problem->pz > 0 && problem->py < problem->npy - 1 && problem->px < problem->npx - 1) ? problem->rank - problem->npx * (problem->npy - 1) + 1 : -1,
+        /* 20 FRONT_SW    */ (problem->pz > 0 && problem->py < problem->npy - 1 && problem->px > 0) ? problem->rank - problem->npx * (problem->npy - 1) - 1 : -1,
+        /* 21 FRONT_NW    */ (problem->pz > 0 && problem->py > 0 && problem->px > 0) ? problem->rank - problem->npx * (problem->npy + 1) - 1 : -1,
+        /* 22 BACK_NE     */ (problem->pz < problem->npz - 1 && problem->py > 0 && problem->px < problem->npx - 1) ? problem->rank + problem->npx * (problem->npy - 1) + 1 : -1,
+        /* 23 BACK_SE     */ (problem->pz < problem->npz - 1 && problem->py < problem->npy - 1 && problem->px < problem->npx - 1) ? problem->rank + problem->npx * (problem->npy + 1) + 1 : -1,
+        /* 24 BACK_SW     */ (problem->pz < problem->npz - 1 && problem->py < problem->npy - 1 && problem->px > 0) ? problem->rank + problem->npx * (problem->npy + 1) - 1 : -1,
+        /* 25 BACK_NW     */ (problem->pz < problem->npz - 1 && problem->py > 0 && problem->px > 0) ? problem->rank + problem->npx * (problem->npy - 1) - 1 : -1
     };
     memcpy(problem->neighbors, tmp_neighbors, sizeof(tmp_neighbors));
 
@@ -377,6 +377,7 @@ void GenerateProblem(int npx, int npy, int npz, local_int_t nx, local_int_t ny, 
     };
     memcpy(problem->injection_functions, tmp_injection_functions, sizeof(tmp_injection_functions));
 
+
 }
 
 void InitHaloMemGPU(Halo *halo, Problem *problem){
@@ -395,17 +396,21 @@ void InitHaloMemGPU(Halo *halo, Problem *problem){
     
     DataType *x_d;
     CHECK_CUDA(cudaMalloc(&x_d, dimx * dimy * dimz * sizeof(DataType)));
+    CHECK_CUDA(cudaMemset(x_d, 0, dimx * dimy * dimz * sizeof(DataType)));
     halo->x_d = x_d;
     DataType *interior = x_d + dimx * dimy + dimx + 1;
     halo->interior = interior;
 
     //allocate communcation buffers on device
     for(int i = 0; i < NUMBER_NEIGHBORS; i++){
-        if(halo->problem->neighbors_mask[i]){
-            CHECK_CUDA(cudaMalloc(&(halo->send_buff_d[i]), problem->count_exchange[i] * sizeof(DataType)));
-            CHECK_CUDA(cudaMalloc(&(halo->recv_buff_d[i]), problem->count_exchange[i] * sizeof(DataType)));
-        }
+        CHECK_CUDA(cudaMalloc(&(halo->send_buff_d[i]), problem->count_exchange[i] * sizeof(DataType)));
+        CHECK_CUDA(cudaMemset(halo->send_buff_d[i], 0, problem->count_exchange[i] * sizeof(DataType)));
+        CHECK_CUDA(cudaMalloc(&(halo->recv_buff_d[i]), problem->count_exchange[i] * sizeof(DataType)));
+        CHECK_CUDA(cudaMemset(halo->recv_buff_d[i], 0, problem->count_exchange[i] * sizeof(DataType)));
+        
     }
+    // Ensure all device memory setting is complete
+    CHECK_CUDA(cudaDeviceSynchronize());
     
 }
 
@@ -425,10 +430,12 @@ void InitHaloMemCPU(Halo *halo, Problem *problem){
 
     // allocate memory for send and receive buffers on CPU
     for(int i = 0; i < NUMBER_NEIGHBORS; i++){
-        if(halo->problem->neighbors_mask[i]){
-            halo->send_buff_h[i] = (DataType *) malloc(problem->count_exchange[i] * sizeof(DataType));
-            halo->recv_buff_h[i] = (DataType *) malloc(problem->count_exchange[i] * sizeof(DataType));
-        }
+        
+        halo->send_buff_h[i] = (DataType *) malloc(problem->count_exchange[i] * sizeof(DataType));
+        memset(halo->send_buff_h[i], 0, problem->count_exchange[i] * sizeof(DataType));
+        halo->recv_buff_h[i] = (DataType *) malloc(problem->count_exchange[i] * sizeof(DataType));
+        memset(halo->recv_buff_h[i], 0, problem->count_exchange[i] * sizeof(DataType));
+        
     }
 }
 
@@ -436,6 +443,7 @@ void InitHaloMemCPU(Halo *halo, Problem *problem){
 * Initializes the memory for halo on both CPU and GPU and initializes all data memory with zeros.
 */
 void InitHalo(Halo *halo, Problem *problem){
+    halo->problem = problem;
     InitHaloMemGPU(halo, problem);
     InitHaloMemCPU(halo, problem);
     SetHaloZeroGPU(halo);
@@ -540,19 +548,15 @@ void SetHaloRandomGPU(Halo *halo, Problem *problem, int min, int max, int seed){
 void FreeHaloGPU(Halo *halo){
     CHECK_CUDA(cudaFree(halo->x_d));
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
-        if(halo->problem->neighbors_mask[i]){
             CHECK_CUDA(cudaFree(halo->send_buff_d[i]));
             CHECK_CUDA(cudaFree(halo->recv_buff_d[i]));
-        }
     }
 }
 
 void FreeHaloCPU(Halo *halo){
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
-        if(halo->problem->neighbors_mask[i]){
             free(halo->send_buff_h[i]);
             free(halo->recv_buff_h[i]);
-        }
     }
 }
 

@@ -28,9 +28,10 @@ void blocking_mpi_Implementation<T>::ExchangeHaloBlockingMPI(Halo *halo, Problem
     //extract the data into send buffers on the GPU
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
         if(problem->neighbors_mask[i]){
-            (*problem->extraction_functions[i])(halo, halo->send_buff_h[i], problem->extraction_ghost_cells[i]);
+            (*problem->extraction_functions[i])(halo, halo->send_buff_h[i], &(problem->extraction_ghost_cells[i]));
         }
     }
+    
     
     //wait for extraction to finish
     CHECK_CUDA(cudaDeviceSynchronize());
@@ -38,9 +39,9 @@ void blocking_mpi_Implementation<T>::ExchangeHaloBlockingMPI(Halo *halo, Problem
     //do blocking SendRecv
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
         if(problem->neighbors_mask[i]){
-            CHECK_MPI(MPI_Sendrecv(halo->send_buff_h[i], problem->count_exchange[i], MPIDataType,
+            CHECK_MPI(MPI_Sendrecv(halo->send_buff_h[i], problem->count_exchange[i], MPI_DOUBLE,
                                     problem->neighbors[i], 0,
-                                    halo->recv_buff_h[i], problem->count_exchange[i], MPIDataType,
+                                    halo->recv_buff_h[i], problem->count_exchange[i], MPI_DOUBLE,
                                     problem->neighbors[i], 0,
                                     MPI_COMM_WORLD, MPI_STATUS_IGNORE));
         }
@@ -49,7 +50,7 @@ void blocking_mpi_Implementation<T>::ExchangeHaloBlockingMPI(Halo *halo, Problem
     // Now that we received all data, we can inject it back to the halo
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
         if(problem->neighbors_mask[i]){
-            (*problem->injection_functions[i])(halo, halo->recv_buff_h[i], problem->injection_ghost_cells[i]);
+            (*problem->injection_functions[i])(halo, halo->recv_buff_h[i], &(problem->injection_ghost_cells[i]));
         }
     }
 

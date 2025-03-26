@@ -32,7 +32,12 @@ if (r!= ncclSuccess) {                            \
 struct Halo_STRUCT;
 typedef struct Halo_STRUCT Halo;
 
-struct GhostCell_STRUCT;
+/*This is used for extraction and injection from a halo. E.g. extract a plane of size length_X x length_Y at point x, y, z, within halo of size dimx, dimy, dimz and interior size of nx, ny, nz*/
+struct GhostCell_STRUCT{
+    int x, y, z;
+    int dimx, dimy, dimz;
+    int length_X, length_Y, length_Z;
+};
 typedef struct GhostCell_STRUCT GhostCell;
 
 struct Problem_STRUCT{
@@ -47,8 +52,8 @@ struct Problem_STRUCT{
     int neighbors[NUMBER_NEIGHBORS]; // stores the rank of the neighbors, follows the same order as Comm_Tags
     bool neighbors_mask[NUMBER_NEIGHBORS]; // stores if the neighbor is valid, follows the same order as Comm_Tags
     local_int_t count_exchange[NUMBER_NEIGHBORS]; // stores the number of elements to exchange with each neighbor, follows the same order as Comm_Tags
-    GhostCell *extraction_ghost_cells[NUMBER_NEIGHBORS]; // stores the geometry of the boundary with each neighbor for extraction, follows the same order as Comm_Tags
-    GhostCell *injection_ghost_cells[NUMBER_NEIGHBORS]; // stores the geometry of the boundary with each neighbor for injection, follows the same order as Comm_Tags
+    GhostCell extraction_ghost_cells[NUMBER_NEIGHBORS]; // stores the geometry of the boundary with each neighbor for extraction, follows the same order as Comm_Tags
+    GhostCell injection_ghost_cells[NUMBER_NEIGHBORS]; // stores the geometry of the boundary with each neighbor for injection, follows the same order as Comm_Tags
     void(*extraction_functions[NUMBER_NEIGHBORS])(Halo *halo, DataType *buff, GhostCell *gh);
     void(*injection_functions[NUMBER_NEIGHBORS])(Halo *halo, DataType *buff, GhostCell *gh);
 };
@@ -65,22 +70,14 @@ struct Halo_STRUCT{
     DataType *x_d;
     Problem *problem;
 
-    DataType *send_buff_h[26];
-    DataType *recv_buff_h[26];
+    DataType *send_buff_h[NUMBER_NEIGHBORS];
+    DataType *recv_buff_h[NUMBER_NEIGHBORS];
 
-    DataType *send_buff_d[26];
-    DataType *recv_buff_d[26];
+    DataType *send_buff_d[NUMBER_NEIGHBORS];
+    DataType *recv_buff_d[NUMBER_NEIGHBORS];
 
 };
 typedef struct Halo_STRUCT Halo;
-
-/*This is used for extraction and injection from a halo. E.g. extract a plane of size length_X x length_Y at point x, y, z, within halo of size dimx, dimy, dimz and interior size of nx, ny, nz*/
-struct GhostCell_STRUCT{
-    int x, y, z;
-    int dimx, dimy, dimz;
-    int length_X, length_Y, length_Z;
-};
-typedef struct GhostCell_STRUCT GhostCell;
 
 enum Comm_Tags {
     NORTH = 0,

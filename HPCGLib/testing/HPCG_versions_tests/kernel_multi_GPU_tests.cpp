@@ -11,13 +11,13 @@
 #include <time.h>
 
 //number of processes in x, y, z
-#define NPX 3
-#define NPY 3
-#define NPZ 3
+#define NPX 2
+#define NPY 2
+#define NPZ 2
 //each process gets assigned problem size of NX x NY x NZ
-#define NX 8
-#define NY 8
-#define NZ 8
+#define NX 3
+#define NY 3
+#define NZ 3
 
 void test_matrix_distribution(int num_stripes_local, int num_stripes_global, int num_rows_local, int num_rows_global, DataType *striped_A_local_h, DataType *striped_A_global_h, Problem *problem){
     //verfify the partial matrix
@@ -469,16 +469,18 @@ void test_CG(striped_multi_GPU_Implementation<DataType>& implementation_multi_GP
     SetHaloGlobalIndexGPU(halo_b_local_d, problem);
     SetHaloZeroGPU(halo_x_local_d);
 
+    
     //exchange halos so each process starts with the correct data
     implementation_multi_GPU.ExchangeHalo(halo_b_local_d, problem);
     implementation_multi_GPU.ExchangeHalo(halo_x_local_d, problem);
 
+    
     //run SPMV on multi GPU
     int n_iters_local;
     DataType normr_local;
     DataType normr0_local;
     implementation_multi_GPU.compute_CG(*A_local_striped, halo_b_local_d, halo_x_local_d, n_iters_local, normr_local, normr0_local, problem, j_min_i_d); //1st * 2nd = 3rd argument
-
+    
     MPI_Barrier(MPI_COMM_WORLD);
     //if(problem->rank == 0)printf("Rank=%d:\t SPMV Result for multiGPU computed.\n", problem->rank);
     MPI_Barrier(MPI_COMM_WORLD);
@@ -692,26 +694,26 @@ void test_MG(striped_multi_GPU_Implementation<DataType>& implementation_multi_GP
 * Multi GPU result is compared to single GPU result (warp striped version).
 * Result is printed.
 */
-void run_multi_GPU_tests(int argc, char *argv[]){
-
-    blocking_mpi_Implementation<DataType> implementation_multi_GPU_blocking_mpi;
-    Problem problem = *implementation_multi_GPU_blocking_mpi.init_comm(argc, argv, NPX, NPY, NPZ, NX, NY, NZ);
+void run_multi_GPU_tests(int argc, char *argv[], striped_multi_GPU_Implementation<DataType>& implementation_multi_GPU){
 
 
+    Problem problem = *implementation_multi_GPU.init_comm(argc, argv, NPX, NPY, NPZ, NX, NY, NZ);
+    
+    
     MPI_Barrier(MPI_COMM_WORLD);
-    if(problem.rank == 0) printf("Testing started.\n", problem.rank);
+    if(problem.rank == 0) printf("Testing started.\n");
     MPI_Barrier(MPI_COMM_WORLD);
-
+    
     //set Device
     InitGPU(&problem);
     
     //initialize matrix partial matrix A_local
     sparse_CSR_Matrix<DataType> A_local;
     A_local.generateMatrix_onGPU(NX, NY, NZ);
-
+    
     // get the striped matrix
     striped_Matrix<DataType>* A_local_striped = A_local.get_Striped();
-
+    
     //initialize local matrix
     DataType *striped_A_local_d = (*A_local_striped).get_values_d();
     local_int_t num_rows_local = (*A_local_striped).get_num_rows();
@@ -736,50 +738,50 @@ void run_multi_GPU_tests(int argc, char *argv[]){
     InitHaloMemGPU(&halo_p_d, &problem);
     InitHaloMemCPU(&halo_p_d, &problem);
     SetHaloGlobalIndexGPU(&halo_p_d, &problem);
-
+    
     Halo halo_Ap_d;
     InitHaloMemGPU(&halo_Ap_d, &problem);
     InitHaloMemCPU(&halo_Ap_d, &problem);
     SetHaloZeroGPU(&halo_Ap_d);
-
+    
     //initialize b, w, x and y
     Halo halo_w_d;
     InitHaloMemGPU(&halo_w_d, &problem);
     InitHaloMemCPU(&halo_w_d, &problem);
     SetHaloZeroGPU(&halo_w_d);
-
+    
     Halo halo_x_d;
     InitHaloMemGPU(&halo_x_d, &problem);
     InitHaloMemCPU(&halo_x_d, &problem);
     SetHaloGlobalIndexGPU(&halo_x_d, &problem);
-
+    
     Halo halo_y_d;
     InitHaloMemGPU(&halo_y_d, &problem);
     InitHaloMemCPU(&halo_y_d, &problem);
     SetHaloGlobalIndexGPU(&halo_y_d, &problem);
-
+    
     Halo halo_b_d;
     InitHaloMemGPU(&halo_b_d, &problem);
     InitHaloMemCPU(&halo_b_d, &problem);
     SetHaloGlobalIndexGPU(&halo_b_d, &problem);
-
+    
     //test matrix distribution
     test_matrix_distribution(num_stripes_local, num_stripes_global, num_rows_local, num_rows_global, striped_A_local_h, striped_A_global_h, &problem);
-
-    // test SPMV
-    test_SPMV(implementation_multi_GPU_blocking_mpi, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
     
+    // test SPMV
+    test_SPMV(implementation_multi_GPU, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
+
     // test SymGS
-    test_SymGS(implementation_multi_GPU_blocking_mpi, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
+    test_SymGS(implementation_multi_GPU, A_local_striped, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, j_min_i_d);
 
     //test WAXPBY
-    test_WAXPBY(implementation_multi_GPU_blocking_mpi, A_global_striped, &halo_w_d, &halo_x_d, &halo_y_d, &problem);
+    test_WAXPBY(implementation_multi_GPU, A_global_striped, &halo_w_d, &halo_x_d, &halo_y_d, &problem);
 
     //test Dot
-    test_Dot(implementation_multi_GPU_blocking_mpi, A_global_striped, &halo_x_d, &halo_y_d, &problem);
+    test_Dot(implementation_multi_GPU, A_global_striped, &halo_x_d, &halo_y_d, &problem);
     
     //test CG
-    test_CG(implementation_multi_GPU_blocking_mpi, A_local_striped, A_global_striped, &halo_b_d, &halo_x_d, &problem, j_min_i_d);
+    test_CG(implementation_multi_GPU, A_local_striped, A_global_striped, &halo_b_d, &halo_x_d, &problem, j_min_i_d);
     
 
     //uncomment to compare ExchangeHalo implementations
@@ -789,7 +791,7 @@ void run_multi_GPU_tests(int argc, char *argv[]){
     for(int i = 0; i < iters; i++){
         MPI_Barrier(MPI_COMM_WORLD);
         double start = MPI_Wtime();
-        implementation_multi_GPU_blocking_mpi.ExchangeHalo(&halo_p_d, &problem);
+        implementation_multi_GPU.ExchangeHalo(&halo_p_d, &problem);
         MPI_Barrier(MPI_COMM_WORLD);
         double end = MPI_Wtime();
         time_halo_exchange_blocking += (end - start);
@@ -832,8 +834,9 @@ void run_multi_GPU_tests(int argc, char *argv[]){
     MPI_Barrier(MPI_COMM_WORLD);
     if(problem.rank == 0) printf("Testing done.\n", problem.rank);
     MPI_Barrier(MPI_COMM_WORLD);
+    
 
-    implementation_multi_GPU_blocking_mpi.finalize_comm(&problem);
+    implementation_multi_GPU.finalize_comm(&problem);
 
 }
 

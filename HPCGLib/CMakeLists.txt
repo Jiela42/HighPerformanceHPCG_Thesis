@@ -1,11 +1,15 @@
 # Minimum CMake version required
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 
 # Project name
 project(HPCGlib)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
+
+# set(CMAKE_CUDA_ARCHITECTURES 90)
+set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -arch=sm_90")
+include_directories("/user-environment/linux-sles15-neoverse_v2/gcc-13.3.0/nccl-2.22.3-1-4j6h3ffzysukqpqbvriorrzk2lm762dd/include")
 
 # Include directories
 include_directories(include)
