@@ -10,6 +10,8 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     Problem *problem,
     int *j_min_i_d
 ){
+
+    
     // std::cout << "Running CG with striped warp reduction" << std::endl;
     normr = 0.0;
     DataType rtz = 0.0;
@@ -17,13 +19,13 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     DataType alpha = 0.0;
     DataType beta = 0.0;
     DataType pAp = 0.0;
-
+    
     local_int_t rows = A.get_num_rows();
-
+    
     // // print tolerance and max iterations for sanity check
     // std::cout << "CG tolerance: " << this->CG_tolerance << std::endl;
     // std::cout << "Max CG iterations: " << this->max_CG_iterations << std::endl;
-
+    
     // allocate device memory for p, z, Ap,
     // we also need a device copy of normr, pAp, rtz because the dot product is done on the device and writes the result to the device
     Halo p_d;
@@ -33,28 +35,28 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     DataType * normr_d;
     DataType * pAp_d;
     DataType * rtz_d;
-
-    InitHaloMemGPU(&p_d, problem->nx, problem->ny, problem->nz);
-    InitHaloMemCPU(&p_d, p_d.nx, p_d.ny, p_d.nz);
-
-    InitHaloMemGPU(&z_d, problem->nx, problem->ny, problem->nz);
-    InitHaloMemCPU(&z_d, z_d.nx, z_d.ny, z_d.nz);
-
-    InitHaloMemGPU(&Ap_d, problem->nx, problem->ny, problem->nz);
-    InitHaloMemCPU(&Ap_d, Ap_d.nx, Ap_d.ny, Ap_d.nz);
-
-    InitHaloMemGPU(&r_d, problem->nx, problem->ny, problem->nz);
-    InitHaloMemCPU(&r_d, r_d.nx, r_d.ny, r_d.nz);
-
+    
+    InitHaloMemGPU(&p_d, problem);
+    InitHaloMemCPU(&p_d, problem);
+    
+    InitHaloMemGPU(&z_d, problem);
+    InitHaloMemCPU(&z_d, problem);
+    
+    InitHaloMemGPU(&Ap_d, problem);
+    InitHaloMemCPU(&Ap_d, problem);
+    
+    InitHaloMemGPU(&r_d, problem);
+    InitHaloMemCPU(&r_d, problem);
+    
     CHECK_CUDA(cudaMalloc(&normr_d, sizeof(DataType)));
     CHECK_CUDA(cudaMalloc(&pAp_d, sizeof(DataType)));
     CHECK_CUDA(cudaMalloc(&rtz_d, sizeof(DataType)));
     CHECK_CUDA(cudaMemset(normr_d, 0, sizeof(DataType)));
     // std::vector<T> looki(5);
     
-
+    
     // std::cout << "normr_d: " << normr_d << std::endl;
-
+    
     this->compute_WAXPBY(x_d, x_d, &p_d, 1.0, 0.0, problem, false); // p = x
     this->ExchangeHalo(&p_d, problem);
     this->compute_SPMV(A, &p_d, &Ap_d, problem, j_min_i_d); //Ap = A*p
@@ -65,10 +67,10 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     CHECK_CUDA(cudaMemcpy(&normr, normr_d, sizeof(DataType), cudaMemcpyDeviceToHost));
     // std::cout << "Initial residual: " << normr << std::endl;
     normr = sqrt(normr);
-
+    
     // Record initial residual for convergence testing
     normr0 = normr;
-
+    
     // Start iterations
     for(int k = 1; k <= this->max_CG_iterations && normr/normr0 > this->CG_tolerance; k++){
         
@@ -79,7 +81,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
             this->compute_WAXPBY(&r_d, &r_d, &z_d, 1.0, 0.0, problem, false); // z = r
             this->ExchangeHalo(&z_d, problem);
         }
-
+        
         if(k == 1){
             this->compute_WAXPBY(&z_d, &z_d, &p_d, 1.0, 0.0, problem, false); // Copy Mr to p
             this->ExchangeHalo(&p_d, problem);
@@ -93,7 +95,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
             this->compute_WAXPBY(&z_d, &p_d, &p_d, 1.0, beta, problem, false); // p = z + beta*p
             this->ExchangeHalo(&p_d, problem);
         }
-
+        
         this->compute_SPMV(A, &p_d, &Ap_d, problem, j_min_i_d); // Ap = A*p
         this->ExchangeHalo(&Ap_d, problem);
         this->compute_Dot(&p_d, &Ap_d, pAp_d); // pAp = p'*Ap
@@ -108,7 +110,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
         normr = sqrt(normr);
         n_iters = k;
     }
-
+    
     // Free device memory
     FreeHaloGPU(&p_d);
     FreeHaloCPU(&p_d);
