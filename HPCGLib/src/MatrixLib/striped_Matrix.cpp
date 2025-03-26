@@ -3,7 +3,7 @@
 #include "MatrixLib/striped_partial_Matrix.hpp"
 #include "UtilLib/cuda_utils.hpp"
 #include "MatrixLib/coloring.cuh"
-#include "UtilLib/hpcg_mpi_utils.cuh"
+#include "UtilLib/hpcg_multi_GPU_utils.cuh"
 
 #include <vector>
 #include <iostream>
@@ -847,13 +847,13 @@ void striped_partial_Matrix<T>::initialize_coarse_matrix(){
     this->coarse_Matrix->generate_f2c_operator_onGPU();
 
     // allocate halos rc, xc, Axf and set to zero
-    /* InitHaloMemGPU(rc_d, this->problem->nx, this->problem->ny, this->problem->nz);
-    InitHaloMemGPU(xc_d, this->problem->nx, this->problem->ny, this->problem->nz);
-    InitHaloMemGPU(Axf_d, this->problem->nx, this->problem->ny, this->problem->nz);
+    /* InitHalo(this->coarse_Matrix->get_rc_d(), nx_c, ny_c, nz_c);
+    InitHalo(this->coarse_Matrix->get_xc_d(), nx_c, ny_c, nz_c);
+    InitHalo(this->coarse_Matrix->get_Axf_d(), nx_c, ny_c, nz_c);
 
-    SetHaloZeroGPU(rc_d);
-    SetHaloZeroGPU(xc_d);
-    SetHaloZeroGPU(Axf_d); */
+    SetHaloGlobalIndexGPU(this->coarse_Matrix->get_rc_d(), p_c);
+    SetHaloGlobalIndexGPU(this->coarse_Matrix->get_xc_d(), p_c);
+    SetHaloGlobalIndexGPU(this->coarse_Matrix->get_Axf_d(), p_c); */
 }
 
 template <typename T>
@@ -891,7 +891,7 @@ void striped_Matrix<T>::print() const{
     std::cout << "num_rows: " << this->num_rows << " num_cols: " << this->num_cols << std::endl;
     std::cout << "num_stripes: " << this->num_stripes << std::endl;
     std::cout << "j_min_i: ";
-    for (int i = 0; i < this->num_strigenerate_f2c_operator_onGPUpes; i++) {
+    for (int i = 0; i < this->num_stripes; i++) {
         std::cout << this->j_min_i[i] << " ";
     }
     std::cout << std::endl;
