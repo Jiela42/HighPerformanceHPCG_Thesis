@@ -17,7 +17,7 @@ def print_dense_version_of_striped_matrix(num_rows, j_min_i):
 
 def generate_box_coloring(nx, ny, nz, bx, by, bz):
 
-    assert bx > 2 and by > 2 and bz > 2, "Box size must be greater than 2, otherwise dependencies are violated"
+    assert bx >= 2 and by >= 2 and bz >= 2, "Box size must be greater than 2, otherwise dependencies are violated"
 
     x = []
     y = []
@@ -184,7 +184,7 @@ def analyze_general_box_coloring(num_rows, j_min_i, colors):
     for i in range(num_rows):
         for j in range(num_stripes):
             neighbor = i + j_min_i[j]
-            if neighbor < num_rows and neighbor >= 0 and neighbor != i and colors[i] !=-42 and colors[i] != -1:
+            if neighbor < num_rows and neighbor >= 0 and neighbor != i: #and colors[i] !=-42 and colors[i] != -1:
                 
                 assert colors[i] != colors[neighbor], f"Neighbor {neighbor} of node {i} has the same color {colors[i]}"
 
@@ -567,23 +567,23 @@ def compare_colorings(nx, ny, nz, bx, by, bz):
 
 def main():
 
-    bx = 3
-    by = 3
-    bz = 3
+    bx = 2
+    by = 2
+    bz = 2
 
     # generate_box_coloring(4, 4, 4, bx, by, bz)
 
-    # analyze_box_coloring(3, 3, 3, bx, by, bz)
-    # analyze_box_coloring(4, 4, 4, bx, by, bz)
-    # analyze_box_coloring(4,5,6, bx, by, bz)
-    # analyze_box_coloring(6,5,4, bx, by, bz)
-    # analyze_box_coloring(5,4,6, bx, by, bz)
-    # analyze_box_coloring(8, 8, 8, bx, by, bz)
-    # analyze_box_coloring(12, 12, 6, bx, by, bz)
-    # analyze_box_coloring(16, 16, 16, bx, by, bz)
+    analyze_box_coloring(3, 3, 3, bx, by, bz)
+    analyze_box_coloring(4, 4, 4, bx, by, bz)
+    analyze_box_coloring(4,5,6, bx, by, bz)
+    analyze_box_coloring(6,5,4, bx, by, bz)
+    analyze_box_coloring(5,4,6, bx, by, bz)
+    analyze_box_coloring(8, 8, 8, bx, by, bz)
+    analyze_box_coloring(12, 12, 6, bx, by, bz)
+    analyze_box_coloring(16, 16, 16, bx, by, bz)
 
-    print(f"size: {4*4*4}")
-    general_striped_box_coloring_for_3D27pt(4)
+    # print(f"size: {4*4*4}")
+    # general_striped_box_coloring_for_3D27pt(4)
     # print(f"size: {5*5*5}")
     # general_striped_box_coloring_for_3D27pt(5)
 
