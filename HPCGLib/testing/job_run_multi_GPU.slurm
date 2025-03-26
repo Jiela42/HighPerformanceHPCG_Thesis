@@ -1,27 +1,28 @@
 #!/usr/local/bin/bash
 
 ##Resources
-#SBATCH --job-name hpcgTesting
+#SBATCH --job-name=hpcg_test
+#SBATCH --account=a-g200
 #SBATCH --output result.out
-##SBATCH --partition=amdrtx
-#SBATCH --time 01:00:00
+#SBATCH --time 00:05:00
+#SBATCH --partition=debug
 #SBATCH --nodes=1
-#SBATCH --ntasks=4
-#SBATCH --gres=gpu:v100:4
-#SBATCH --distribution=cyclic
-##SBATCH --partition=amdv100
+#SBATCH --ntasks=1
+##SBATCH --gpus-per-task=1
 
 ##Modules
 module purge
 module load cuda
-module load openmpi
-module load cmake/3.21.3
+module load cray-mpich
+module load cmake
+module load nccl
+module load gcc
 
 ##Compile
 ##cd /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/build
 ##cmake .. && make -j8
 ##cd /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/testing
-cd /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/build/testing
+## cd /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/build/testing
 
-##Run
-srun /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/build/testing/run_multi_GPU
+## Run 
+srun /users/nrottstegge/github/HighPerformanceHPCG_Thesis/HPCGLib/build/testing/run_AllTests

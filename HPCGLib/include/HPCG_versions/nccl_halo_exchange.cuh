@@ -1,10 +1,11 @@
-#ifndef BLOCKING_MPI_HALO_EXCHANGE_CUH
-#define BLOCKING_MPI_HALO_EXCHANGE_CUH
+#ifndef NCCL_HALO_EXCHANGE_CUH
+#define NCCL_HALO_EXCHANGE_CUH
 
 #include "HPCG_versions/striped_multi_GPU.cuh"
+#include <nccl.h>
 
 template <typename T>
-class blocking_mpi_Implementation : public striped_multi_GPU_Implementation<T> {
+class NCCL_Implementation : public striped_multi_GPU_Implementation<T> {
 public:
 
     Problem* init_comm(
@@ -12,34 +13,37 @@ public:
         int npx, int npy, int npz,
         int nx, int ny, int nz
     ) override {
-        return init_comm_blocking_MPI(argc, argv, npx, npy, npz, nx, ny, nz);
+        return init_comm_NCCL(argc, argv, npx, npy, npz, nx, ny, nz);
     }
 
     void ExchangeHalo(Halo * halo, Problem * problem
     ) override {
-        ExchangeHaloBlockingMPI(halo, problem);
+        ExchangeHaloNCCL(halo, problem);
     }
 
     void finalize_comm(Problem *problem) override {
-        finalize_comm_blocking_MPI(problem);
+        finalize_comm_NCCL(problem);
     }
 
 private:
 
-    Problem* init_comm_blocking_MPI(
+    cudaStream_t cuda_stream;
+    ncclComm_t nccl_comm;
+
+    Problem* init_comm_NCCL(
         int argc, char *argv[],
         int npx, int npy, int npz,
         int nx, int ny, int nz
     );
 
-    void ExchangeHaloBlockingMPI(
+    void ExchangeHaloNCCL(
         Halo * halo,
         Problem * problem
     );
 
-    void finalize_comm_blocking_MPI(
+    void finalize_comm_NCCL(
         Problem *problem
     );
 };
 
-#endif // BLOCKING_MPI_HALO_EXCHANGE_CUH
+#endif // NCCL_HALO_EXCHANGE_CUH

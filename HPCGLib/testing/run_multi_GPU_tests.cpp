@@ -3,6 +3,7 @@
 #include "HPCG_versions/striped_multi_GPU.cuh"
 #include "HPCG_versions/blocking_mpi_halo_exchange.cuh"
 #include "HPCG_versions/non_blocking_mpi_halo_exchange.cuh"
+#include "HPCG_versions/nccl_halo_exchange.cuh"
 #include "HPCG_versions_tests/kernel_multi_GPU_tests.cpp"
 
 #include <mpi.h>
@@ -15,14 +16,14 @@ using DataType = double;
 
 int main(int argc, char *argv[]){
 
-    MPI_Init( &argc , &argv );
-    int size, rank;
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    //blocking_mpi_Implementation<DataType> implementation_multi_GPU_blocking_mpi;
+    //run_multi_GPU_tests(argc, argv, implementation_multi_GPU_blocking_mpi);
 
-    run_multi_GPU_tests();
+    non_blocking_mpi_Implementation<DataType> implementation_multi_GPU_non_blocking_mpi;
+    run_multi_GPU_tests(argc, argv, implementation_multi_GPU_non_blocking_mpi);
 
-    MPI_Finalize();
+    //NCCL_Implementation<DataType> implementation_multi_GPU_nccl;
+    //run_multi_GPU_tests(argc, argv, implementation_multi_GPU_nccl);
 
     return 0;
 }

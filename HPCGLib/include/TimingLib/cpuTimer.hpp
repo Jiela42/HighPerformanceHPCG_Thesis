@@ -29,12 +29,7 @@ public:
     void stopTimer(std::string method_name) override;
     
 private:
-
-    // @Nils
-    // I declared start & stop variables here
-    // because they were cuda events and I didn't want to create them all the time
-    // If you use floats or another primitive you probably don't need that.
-
+    float t_start;
 
 };
 

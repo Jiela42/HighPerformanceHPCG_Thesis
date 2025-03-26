@@ -44,9 +44,19 @@ public:
 
     }
 
+    virtual Problem* init_comm(
+        int argc, char *argv[],
+        int npx, int npy, int npz,
+        int nx, int ny, int nz
+        ) = 0;
+
     virtual void ExchangeHalo(
         Halo *halo, Problem *problem
-        ) = 0;
+    ) = 0;
+        
+    virtual void finalize_comm(
+        Problem *problem
+    ) = 0;
 
     void compute_CG(
         striped_Matrix<T> & A,
