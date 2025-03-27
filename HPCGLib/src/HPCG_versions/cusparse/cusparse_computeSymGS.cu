@@ -111,7 +111,7 @@ void cuSparse_Implementation<T>::cusparse_computeSymGS(
 
     // std::cout << "stop condition: " << stop_condition << std::endl;
     
-    for(int i = 0; i < this->max_SymGS_iterations && normi/norm0 > this->SymGS_tolerance; i++){
+    for(int i = 0; i < max_iterations && normi/norm0 > this->SymGS_tolerance; i++){
 
         cusparse_SymGS_kernel<<<num_blocks, num_threads>>>(
             num_rows,
@@ -123,7 +123,7 @@ void cuSparse_Implementation<T>::cusparse_computeSymGS(
         CHECK_CUDA(cudaDeviceSynchronize());
 
         // compute the L2 norm (only if we need it!)
-        if(this->max_SymGS_iterations != 1){
+        if(max_iterations != 1){
             normi = L2_norm_for_SymGS(A, x_d, y_d);
         }
     }

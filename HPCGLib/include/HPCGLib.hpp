@@ -134,13 +134,6 @@ class HPCG_functions {
         int getNumberOfIterations() const {
             return num_bench_iter;
     }
-        double get_maxSymGSIters() const {
-            return max_SymGS_iterations;
-        }
-
-        double set_maxSymGSIters(int new_max_iters) {
-            max_SymGS_iterations = new_max_iters;
-        }
 
     double L2_norm_for_SymGS(
         striped_Matrix<double> & A,

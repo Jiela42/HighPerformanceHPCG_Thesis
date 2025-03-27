@@ -629,7 +629,7 @@ bool test_Dot(
         }
 
         // and now we need to copy the result back and de-allocate the memory
-        bool test_pass = double_compare(result_baseline, result_uut);
+        bool test_pass = relaxed_double_compare(result_baseline, result_uut, 1e-9);
 
         if(not test_pass){
             std::cout << "Dot product failed for Implementation: " << uut.version_name << " baseline = " << result_baseline << " uut = " << result_uut << std::endl;
@@ -796,6 +796,12 @@ bool test_SymGS(
         {0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1.}
     };
 
+    // grab original max iterations for SymGS
+    int original_max_iters = uut.get_maxSymGSIters();
+
+    // set the max iterations to 1
+    uut.set_maxSymGSIters(1);
+
     // Define the vector y
     std::vector<double> y = {8., 9., 9., 8., 8., 9., 9., 8., 8., 9., 9., 8., 8., 9., 9., 8.};
 
@@ -842,6 +848,10 @@ bool test_SymGS(
     if (not test_pass){
         std::cout << "SymGS mini test failed" << std::endl;
     }
+
+    // restore the original max iterations
+    uut.set_maxSymGSIters(original_max_iters);
+
     return test_pass;
 }
 

@@ -71,16 +71,33 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeSym
     int num_threads = WARP_SIZE;
     int num_blocks = 1;
 
-    striped_warp_reduction_SymGS_kernel<<<num_blocks, num_threads>>>(
-        num_rows, num_cols,
-        num_stripes,
-        j_min_i,
-        striped_A_d,
-        x_d, y_d
-    );
+    int max_iterations = this->max_SymGS_iterations;
+    // std::cout << "max_iterations = " << max_iterations << std::endl;
+    double norm0 = 1.0;
+    double normi = norm0;
 
-    CHECK_CUDA(cudaDeviceSynchronize());
+    if(max_iterations != 1){
+        // compute the original L2 norm
+        norm0 = this->L2_norm_for_SymGS(A, x_d, y_d);
+    }
 
+    for(int i = 0; i < max_iterations && normi/norm0 > this->SymGS_tolerance; i++){
+
+
+        striped_warp_reduction_SymGS_kernel<<<num_blocks, num_threads>>>(
+            num_rows, num_cols,
+            num_stripes,
+            j_min_i,
+            striped_A_d,
+            x_d, y_d
+        );
+        CHECK_CUDA(cudaDeviceSynchronize());
+
+        if(max_iterations != 1){
+            normi = this->L2_norm_for_SymGS(A, x_d, y_d);
+        }
+    }
+    
 }
 
 // Explicit instantiation of the template

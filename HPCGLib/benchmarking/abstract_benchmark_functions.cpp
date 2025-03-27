@@ -390,7 +390,7 @@ void bench_SPMV(
     // y_d is the output vector, hence we need to store the original and write the original back after the benchmarking
     std::vector<double> y(A.get_num_rows(), 0.0);
 
-    CHECK_CUDA(cudaMemcpy(y_d, y.data(), A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(y.data(), y_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
 
     int num_iterations = implementation.getNumberOfIterations();
 
@@ -421,7 +421,7 @@ void bench_SPMV(
     }
 
     // copy the original vector back
-    CHECK_CUDA(cudaMemcpy(y.data(), y_d, A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
 }
 
 // this SPMV supports multi GPU
@@ -680,6 +680,8 @@ void bench_SymGS(
     // y_d is the output vector, hence we need to store the original and write the original back after the benchmarking
     std::vector<double> x(A.get_num_rows(), 0.0);
 
+    double norm0 = L2_norm_for_SymGS(A, x_d, y_d);
+
     CHECK_CUDA(cudaMemcpy(x.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
 
     if (implementation.test_before_bench){
@@ -708,11 +710,10 @@ void bench_SymGS(
         );
         timer.stopTimer("compute_SymGS");
     }
+    double normPostExe = L2_norm_for_SymGS(A, x_d, y_d);
 
     // greb da norm and store it in additional infos
-    double norm = relative_residual_norm_for_SymGS(
-        A,
-        x_d, y_d);
+    double norm = normPostExe / norm0;
 
     std::ostringstream oss;
     oss << "RR Norm: " << norm;
@@ -757,6 +758,8 @@ void bench_SymGS(
         }
     }
 
+    double norm0 = implementation.L2_norm_for_SymGS(A, x_d, y_d);
+
      // for normbased implementations we need to make sure the maximum number of iterations performed by symGS is enough
      int original_max_symgs_iterations = implementation.get_maxSymGSIters();
      if(implementation.norm_based){
@@ -773,13 +776,13 @@ void bench_SymGS(
         timer.stopTimer("compute_SymGS");
     }
 
+    double normPostExe = implementation.L2_norm_for_SymGS(A, x_d, y_d);
+
     // greb da norm and store it in additional infos
-    double norm = relative_residual_norm_for_SymGS(
-    A,
-    x_d, y_d);
+    double norm = normPostExe / norm0;
 
     std::ostringstream oss;
-    oss << "RR Norm: " << norm;
+    oss << "normi/norm0: " << norm;
     std::string norm_string = oss.str();
     timer.add_additional_parameters(norm_string);
 
@@ -787,9 +790,7 @@ void bench_SymGS(
     // copy the original vector back
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
     // store the original number of iterations
-    if(implementation.norm_based){
-        implementation.set_maxSymGSIters(original_max_symgs_iterations);
-    }
+
 
     // restore the original number of iterations
     implementation.set_maxSymGSIters(original_max_symgs_iterations);
