@@ -443,7 +443,6 @@ void InitHaloMemCPU(Halo *halo, Problem *problem){
 * Initializes the memory for halo on both CPU and GPU and initializes all data memory with zeros.
 */
 void InitHalo(Halo *halo, Problem *problem){
-    halo->problem = problem;
     InitHaloMemGPU(halo, problem);
     InitHaloMemCPU(halo, problem);
     SetHaloZeroGPU(halo);
@@ -610,7 +609,7 @@ __global__ void extract_xy_plane_kernel(DataType *x_d, DataType *slice_d, int le
     
     int y_loc = tid / length_X;
     int x_loc = tid % length_X;
-    if (y_loc<length_Y) slice_d[tid]=x_d[y_loc*slice_Y + x_loc*slice_X];
+    if (y_loc<length_Y) slice_d[tid] = x_d[y_loc*slice_Y + x_loc*slice_X];
 }
 
 __global__ void inject_xy_plane_kernel(DataType *x_d, DataType *slice_d, int length_X, int length_Y, int slice_X, int slice_Y){
@@ -618,7 +617,7 @@ __global__ void inject_xy_plane_kernel(DataType *x_d, DataType *slice_d, int len
     
     int y_loc = tid / length_X;
     int x_loc = tid % length_X;
-    if (y_loc<length_Y) x_d[y_loc*slice_Y + x_loc*slice_X]=slice_d[tid];
+    if (y_loc<length_Y) x_d[y_loc*slice_Y + x_loc*slice_X] = slice_d[tid];
 }
 
 void extract_horizontal_plane_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff){
@@ -710,13 +709,13 @@ void inject_frontal_plane_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool hos
 
     DataType *buff = halo->recv_buff_d[i_buff];
     if(host_buff){
-        CHECK_CUDA(cudaMemcpy(buff, halo->recv_buff_h[i_buff], gh->length_Y*gh->length_Z*sizeof(DataType), cudaMemcpyHostToDevice));
+        CHECK_CUDA(cudaMemcpy(buff, halo->recv_buff_h[i_buff], gh->length_Y*gh->length_X*sizeof(DataType), cudaMemcpyHostToDevice));
     }
 
     // fill x_d with slice_d
     int const nthread=256;
     int const nblock = (gh->length_X*gh->length_Y + nthread - 1) / nthread;
-    inject_xy_plane_kernel<<<nblock,nthread>>>(x_d, buff, gh->length_X, gh->length_Y, 1, gh->dimx);
+    inject_xy_plane_kernel<<<nblock, nthread>>>(x_d, buff, gh->length_X, gh->length_Y, 1, gh->dimx);
 }
 
 __global__ void extract_edge_kernel(DataType *x_d, DataType *slice_d, int length_X, int slice_X){
@@ -753,12 +752,12 @@ void inject_edge_X_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
 
     DataType *buff = halo->recv_buff_d[i_buff];
     if(host_buff){
-        CHECK_CUDA(cudaMemcpy(buff, halo->recv_buff_h[i_buff], gh->length_Y * sizeof(DataType), cudaMemcpyHostToDevice));
+        CHECK_CUDA(cudaMemcpy(buff, halo->recv_buff_h[i_buff], gh->length_X * sizeof(DataType), cudaMemcpyHostToDevice));
     }
 
     int const nthreads = 128;
-    int const nblocks = (gh->length_Y + nthreads - 1)/nthreads;
-    inject_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_Y, gh->dimx);
+    int const nblocks = (gh->length_X + nthreads - 1)/nthreads;
+    inject_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_X, 1);
 }
 
 void extract_edge_Y_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff){

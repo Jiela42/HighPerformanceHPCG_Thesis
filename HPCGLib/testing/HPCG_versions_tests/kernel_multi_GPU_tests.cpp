@@ -16,9 +16,9 @@
 #define NPY 2
 #define NPZ 1
 //each process gets assigned problem size of NX x NY x NZ
-#define NX 8
-#define NY 8
-#define NZ 8
+#define NX 16
+#define NY 16
+#define NZ 16
 
 void test_matrix_distribution(int num_stripes_local, int num_stripes_global, int num_rows_local, int num_rows_global, DataType *striped_A_local_h, DataType *striped_A_global_h, Problem *problem){
     //verfify the partial matrix
@@ -45,6 +45,9 @@ void test_SPMV(striped_multi_GPU_Implementation<DataType>& implementation_multi_
     implementation_multi_GPU.ExchangeHalo(halo_p_d, problem);
     end_halo_exchange = clock();
     double time_halo_exchange = ((double) (end_halo_exchange - start_halo_exchange)) / CLOCKS_PER_SEC;
+
+    // if(problem->rank == 0) PrintHalo(halo_p_d);
+    // exit(0);
 
     //run SPMV on multi GPU
     clock_t start_multi_GPU, end_multi_GPU;
