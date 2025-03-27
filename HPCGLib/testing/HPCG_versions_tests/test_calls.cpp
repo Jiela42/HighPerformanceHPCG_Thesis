@@ -35,10 +35,12 @@ bool test_CG(
     // the file_based tests require a tolerance of zero and a max iteration of 50
     
     double original_tolerance = implementation.get_CGTolerance();
-    int original_max_iters = implementation.get_maxCGIters();
+    int original_CG_max_iters = implementation.get_maxCGIters();
+    int original_SymGS_max_iters = implementation.get_maxSymGSIters();
 
     implementation.set_CGTolerance(0.0);
     implementation.set_maxCGIters(50);
+    implementation.set_maxSymGSIters(1);
 
     // iterate through the test files
     for (const auto& entry : std::filesystem::directory_iterator(test_folder)) {
@@ -253,7 +255,8 @@ bool test_CG(
 
     // restore the original values
     implementation.set_CGTolerance(original_tolerance);
-    implementation.set_maxCGIters(original_max_iters); 
+    implementation.set_maxCGIters(original_CG_max_iters); 
+    implementation.set_maxSymGSIters(original_SymGS_max_iters);
 
     return all_pass;
 }
@@ -266,6 +269,10 @@ bool test_MG(
         std::cerr << "MG norm based tests are not supported" << std::endl;
         return true;
     }
+
+    int original_SymGS_max_iters = implementation.get_maxSymGSIters();
+
+    implementation.set_maxSymGSIters(1);
 
     bool all_pass = true;
     std::string test_folder = HPCG_OUTPUT_TEST_FOLDER;
@@ -458,6 +465,9 @@ bool test_MG(
 
         file.close();
     }
+
+    // restore the original values
+    implementation.set_maxSymGSIters(original_SymGS_max_iters);
     // std::cout << "MG tested for implementation: " << implementation.version_name << std::endl;
     return all_pass;
 }

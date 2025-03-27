@@ -134,6 +134,13 @@ class HPCG_functions {
         int getNumberOfIterations() const {
             return num_bench_iter;
     }
+        double get_maxSymGSIters() const {
+            return max_SymGS_iterations;
+        }
+
+        double set_maxSymGSIters(int new_max_iters) {
+            max_SymGS_iterations = new_max_iters;
+        }
 
     double L2_norm_for_SymGS(
         striped_Matrix<double> & A,
@@ -263,7 +270,7 @@ class HPCG_functions {
     protected:
         int max_CG_iterations = 500;
         double CG_tolerance = 1e-12;
-        int max_SymGS_iterations = 1;
+        int max_SymGS_iterations = 5;
         double SymGS_tolerance = 1e-6;
 };
 

@@ -87,6 +87,7 @@ void cuSparse_Implementation<T>::cusparse_computeSymGS(
     T * A_values_d = A.get_values_d();
 
     int max_iterations = this->max_SymGS_iterations;
+    // std::cout << "max_iterations = " << max_iterations << std::endl;
     double norm0 = 1.0;
     double normi = norm0;
 
@@ -102,14 +103,22 @@ void cuSparse_Implementation<T>::cusparse_computeSymGS(
     // if(x_d == nullptr || y_d == nullptr){
     //     throw std::runtime_error("The vectors are not allocated on the device");
     // }
+
+    // std::cout << "normi/norm0 = " << normi/norm0 << std::endl;
+    // std::cout << "SymGS_tolerance = " << this->SymGS_tolerance << std::endl;
+
+    // bool stop_condition = normi/norm0 < this->SymGS_tolerance;
+
+    // std::cout << "stop condition: " << stop_condition << std::endl;
     
-    for(int i = 0; i < this->max_SymGS_iterations && normi/norm0 < this->SymGS_tolerance; i++){
+    for(int i = 0; i < this->max_SymGS_iterations && normi/norm0 > this->SymGS_tolerance; i++){
 
         cusparse_SymGS_kernel<<<num_blocks, num_threads>>>(
             num_rows,
             A_row_ptr_d, A_col_idx_d, A_values_d,
             x_d, y_d
         );
+        // std::cout << "Iteration " << i << std::endl;
     
         CHECK_CUDA(cudaDeviceSynchronize());
 
