@@ -54,8 +54,8 @@ struct Problem_STRUCT{
     local_int_t count_exchange[NUMBER_NEIGHBORS]; // stores the number of elements to exchange with each neighbor, follows the same order as Comm_Tags
     GhostCell extraction_ghost_cells[NUMBER_NEIGHBORS]; // stores the geometry of the boundary with each neighbor for extraction, follows the same order as Comm_Tags
     GhostCell injection_ghost_cells[NUMBER_NEIGHBORS]; // stores the geometry of the boundary with each neighbor for injection, follows the same order as Comm_Tags
-    void(*extraction_functions[NUMBER_NEIGHBORS])(Halo *halo, DataType *buff, GhostCell *gh);
-    void(*injection_functions[NUMBER_NEIGHBORS])(Halo *halo, DataType *buff, GhostCell *gh);
+    void(*extraction_functions[NUMBER_NEIGHBORS])(Halo *halo, int i_buff, GhostCell *gh, bool host_buff);
+    void(*injection_functions[NUMBER_NEIGHBORS])(Halo *halo, int i_buff, GhostCell *gh, bool host_buff);
 };
 typedef struct Problem_STRUCT Problem;
 
@@ -133,25 +133,25 @@ void GatherResult(Halo *x_d, Problem *problem, DataType *result_h);
 void GenerateStripedPartialMatrix(Problem *problem, DataType *A);
 bool VerifyPartialMatrix(DataType *striped_A_local_h, DataType *striped_A_global_h, int num_stripes, Problem *problem);
 
-void extract_horizontal_plane_from_GPU(Halo *halo, DataType *buff, GhostCell *gh);
-void inject_horizontal_plane_to_GPU(Halo *halo, DataType *buff, GhostCell *gh);
+void extract_horizontal_plane_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff);
+void inject_horizontal_plane_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff);
 
-void extract_vertical_plane_from_GPU(Halo *halo, DataType *buff, GhostCell *gh);
-void inject_vertical_plane_to_GPU(Halo *halo, DataType *buff, GhostCell *gh);
+void extract_vertical_plane_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff);
+void inject_vertical_plane_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff);
 
-void extract_frontal_plane_from_GPU(Halo *halo, DataType *buff, GhostCell *gh);
-void inject_frontal_plane_to_GPU(Halo *halo, DataType *buff, GhostCell *gh);
+void extract_frontal_plane_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff);
+void inject_frontal_plane_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff);
 
-void extract_edge_X_from_GPU(Halo *halo, DataType *buff, GhostCell *gh);
-void inject_edge_X_to_GPU(Halo *halo, DataType *buff, GhostCell *gh);
+void extract_edge_X_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff);
+void inject_edge_X_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff);
 
-void extract_edge_Y_from_GPU(Halo *halo, DataType *buff, GhostCell *gh);
-void inject_edge_Y_to_GPU(Halo *halo, DataType *buff, GhostCell *gh);
+void extract_edge_Y_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff);
+void inject_edge_Y_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff);
 
-void extract_edge_Z_from_GPU(Halo *halo, DataType *buff, GhostCell *gh);
-void inject_edge_Z_to_GPU(Halo *halo, DataType *buff, GhostCell *gh);
+void extract_edge_Z_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff);
+void inject_edge_Z_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff);
 
-void extract_corner_from_GPU(Halo *halo, DataType *buff, GhostCell *gh);
-void inject_corner_to_GPU(Halo *halo, DataType *buff, GhostCell *gh);
+void extract_corner_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff);
+void inject_corner_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff);
 
 #endif

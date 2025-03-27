@@ -317,7 +317,7 @@ void GenerateProblem(int npx, int npy, int npz, local_int_t nx, local_int_t ny, 
     };
     memcpy(problem->injection_ghost_cells, tmp_injection_ghost_cells, sizeof(tmp_injection_ghost_cells));
 
-    void (*tmp_extraction_functions[NUMBER_NEIGHBORS])(Halo *halo, DataType *buff, GhostCell *gh) = {
+    void (*tmp_extraction_functions[NUMBER_NEIGHBORS])(Halo *halo, int i_buff, GhostCell *gh, bool host_buff) = {
         extract_horizontal_plane_from_GPU,
         extract_vertical_plane_from_GPU,
         extract_horizontal_plane_from_GPU,
@@ -347,7 +347,7 @@ void GenerateProblem(int npx, int npy, int npz, local_int_t nx, local_int_t ny, 
     };
     memcpy(problem->extraction_functions, tmp_extraction_functions, sizeof(tmp_extraction_functions));
 
-    void (*tmp_injection_functions[NUMBER_NEIGHBORS])(Halo *halo, DataType *buff, GhostCell *gh) = {
+    void (*tmp_injection_functions[NUMBER_NEIGHBORS])(Halo *halo, int i_buff, GhostCell *gh, bool host_buff) = {
         inject_horizontal_plane_to_GPU,
         inject_vertical_plane_to_GPU,
         inject_horizontal_plane_to_GPU,
@@ -621,185 +621,102 @@ __global__ void inject_xy_plane_kernel(DataType *x_d, DataType *slice_d, int len
     if (y_loc<length_Y) x_d[y_loc*slice_Y + x_loc*slice_X]=slice_d[tid];
 }
 
-void extract_horizontal_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Z, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    /* for(int i = 0; i < length_Z; i++){
-        CHECK_CUDA(cudaMemcpy(x_h, x_d, length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
-        x_h += length_X;
-        x_d += dimx * dimy;
-    } */
-    DataType *slice_d;
-    CHECK_CUDA(cudaMalloc(&slice_d, length_X*length_Z*sizeof(DataType)));
+void extract_horizontal_plane_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff){
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
 
+    DataType *buff = halo->send_buff_d[i_buff];
+    
     // collect halo on device
     int const nthread=256;
-    int const nblock = (length_X*length_Z + nthread - 1) / nthread;
-    extract_xz_plane_kernel<<<nblock,nthread>>>(x_d, slice_d, length_X, length_Z, 1, dimy*dimx);
+    int const nblock = (gh->length_X*gh->length_Z + nthread - 1) / nthread;
+    extract_xz_plane_kernel<<<nblock,nthread>>>(x_d, buff, gh->length_X, gh->length_Z, 1, gh->dimy*gh->dimx);
     
     // copy from device to host
-    CHECK_CUDA(cudaMemcpy(x_h, slice_d, length_X*length_Z*sizeof(DataType), cudaMemcpyDeviceToHost));
-
-void extract_horizontal_plane_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
-    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
-    DataType *x_d = halo->x_d + k;
-    for (int i = 0; i < gh->length_Z; i++) {
-        CHECK_CUDA(cudaMemcpy(buff, x_d, gh->length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
-        buff += gh->length_X;
-        x_d += gh->dimx * gh->dimy;
+    if(host_buff) {
+        CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_X*gh->length_Z*sizeof(DataType), cudaMemcpyDeviceToHost));
     }
 }
 
-void inject_horizontal_plane_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
-    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
-    DataType *x_d = halo->x_d + k;
-    for (int i = 0; i < gh->length_Z; i++) {
-        CHECK_CUDA(cudaMemcpy(x_d, buff, gh->length_X * sizeof(DataType), cudaMemcpyHostToDevice));
-        x_d += gh->dimx * gh->dimy;
-        buff += gh->length_X;
-    }
-void inject_horizontal_plane_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Z, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    /* for(int i = 0; i < length_Z; i++){
-        CHECK_CUDA(cudaMemcpy(x_d, x_h, length_X * sizeof(DataType), cudaMemcpyHostToDevice));
-        x_d += dimx * dimy;
-        x_h += length_X;
-    } */
+void inject_horizontal_plane_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff){
+    local_int_t k = gh->x +  gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType* x_d = halo->x_d + k;
+  
+    DataType *buff = halo->recv_buff_d[i_buff];
 
-    // copy halo to gpu, slice_d
-    DataType *slice_d;
-    CHECK_CUDA(cudaMalloc(&slice_d, length_X*length_Z*sizeof(DataType)));
-    CHECK_CUDA(cudaMemcpy(slice_d, x_h, length_X*length_Z*sizeof(DataType), cudaMemcpyHostToDevice));
+    if (host_buff){
+        CHECK_CUDA(cudaMemcpy(buff, halo->recv_buff_h[i_buff], gh->length_X*gh->length_Z*sizeof(DataType), cudaMemcpyHostToDevice));
+    }
     
-    // fill x_d with slice_d
+    // fill x_d with buffer
     int const nthread=256;
-    int const nblock = (length_X*length_Z + nthread - 1) / nthread;
-    inject_xz_plane_kernel<<<nblock,nthread>>>(x_d, slice_d, length_X, length_Z, 1, dimy*dimx);
+    int const nblock = (gh->length_X*gh->length_Z + nthread - 1) / nthread;
+    inject_xz_plane_kernel<<<nblock,nthread>>>(x_d, buff, gh->length_X, gh->length_Z, 1, gh->dimy*gh->dimx);
 
 }
 
-void extract_vertical_plane_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+
+void extract_vertical_plane_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff){
     local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
-    for (int i = 0; i < gh->length_Z; i++) {
-        for (int j = 0; j < gh->length_Y; j++) {
-            CHECK_CUDA(cudaMemcpy(buff, x_d, sizeof(DataType), cudaMemcpyDeviceToHost));
-            buff++;
-            x_d += gh->dimx;
-void extract_vertical_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Y, int length_Z, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    /* 
-    for(int i = 0; i < length_Z; i++){
-        for(int j = 0; j < length_Y; j++){
-            CHECK_CUDA(cudaMemcpy(x_h, x_d, 1 * sizeof(DataType), cudaMemcpyDeviceToHost));
-            x_h++;
-            x_d += dimx;
-        }
-        x_d += dimx * (dimy - length_Y);
-    } 
-    */
-    // allocate halo on device
-    DataType *slice_d;
-    CHECK_CUDA(cudaMalloc(&slice_d, length_Y*length_Z*sizeof(DataType)));
+
+    DataType *buff = halo->send_buff_d[i_buff];
 
     // collect halo on device
     int nthread=256;
-    int nblock = (length_Y*length_Z + nthread - 1) / nthread;
-    extract_yz_plane_kernel<<<nblock,nthread>>>(x_d, slice_d, length_Y, length_Z, dimx, dimy*dimx);
+    int nblock = (gh->length_Y*gh->length_Z + nthread - 1) / nthread;
+    extract_yz_plane_kernel<<<nblock,nthread>>>(x_d, buff, gh->length_Y, gh->length_Z, gh->dimx, gh->dimy*gh->dimx);
     
     // copy from device to host
-    CHECK_CUDA(cudaMemcpy(x_h, slice_d, length_Y*length_Z*sizeof(DataType), cudaMemcpyDeviceToHost));
-        x_d += gh->dimx * (gh->dimy - gh->length_Y);
+    if (host_buff){
+        CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_Y*gh->length_Z*sizeof(DataType), cudaMemcpyDeviceToHost));
     }
 }
 
-void inject_vertical_plane_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Y, int length_Z, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    /* for(int i = 0; i < length_Z; i++){
-        for(int j = 0; j < length_Y; j++){
-            CHECK_CUDA(cudaMemcpy(x_d, x_h, 1 * sizeof(DataType), cudaMemcpyHostToDevice));
-            x_d += dimx;
-            x_h ++;
-void inject_vertical_plane_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
-    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+void inject_vertical_plane_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff){
+    local_int_t k = gh->x +  gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
-    for (int i = 0; i < gh->length_Z; i++) {
-        for (int j = 0; j < gh->length_Y; j++) {
-            CHECK_CUDA(cudaMemcpy(x_d, buff, sizeof(DataType), cudaMemcpyHostToDevice));
-            x_d += gh->dimx;
-            buff++;
-        }
-        x_d += dimx * (dimy - length_Y);
-    } */
 
-    // copy host x_h to gpu, slice_d
-    DataType *slice_d;
-    CHECK_CUDA(cudaMalloc(&slice_d, length_Y*length_Z*sizeof(DataType)));
-    CHECK_CUDA(cudaMemcpy(slice_d, x_h, length_Y*length_Z*sizeof(DataType), cudaMemcpyHostToDevice));
+    DataType *buff = halo->recv_buff_d[i_buff];
+    if(host_buff){
+        CHECK_CUDA(cudaMemcpy(buff, halo->recv_buff_h[i_buff], gh->length_Y*gh->length_Z*sizeof(DataType), cudaMemcpyHostToDevice));
+    }
     
     // fill x_d with slice_d
     int const nthread=256;
-    int const nblock = (length_Y*length_Z + nthread - 1) / nthread;
-    inject_yz_plane_kernel<<<nblock,nthread>>>(x_d, slice_d, length_Y, length_Z, dimx, dimy*dimx);
-
-        x_d += gh->dimx * (gh->dimy - gh->length_Y);
-    }
+    int const nblock = (gh->length_Y*gh->length_Z + nthread - 1) / nthread;
+    inject_yz_plane_kernel<<<nblock,nthread>>>(x_d, buff, gh->length_Y, gh->length_Z, gh->dimx, gh->dimy*gh->dimx);   
 }
 
-void extract_frontal_plane_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Y, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    /* for(int i = 0; i < length_Y; i++){
-        CHECK_CUDA(cudaMemcpy(x_h, x_d, length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
-        x_h += length_X;
-        x_d += dimx;
-    } */
+void extract_frontal_plane_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff){
+    local_int_t k = gh->x +  gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
 
-    // allocate halo on device
-    DataType *slice_d;
-    CHECK_CUDA(cudaMalloc(&slice_d, length_X*length_Y*sizeof(DataType)));
+    DataType *buff = halo->send_buff_d[i_buff];
 
     // collect halo on device
     int nthread=256;
-    int nblock = (length_X*length_Y + nthread - 1) / nthread;
-    extract_xy_plane_kernel<<<nblock,nthread>>>(x_d, slice_d, length_X, length_Y, 1, dimx);
+    int nblock = (gh->length_X*gh->length_Y + nthread - 1) / nthread;
+    extract_xy_plane_kernel<<<nblock,nthread>>>(x_d, buff, gh->length_X, gh->length_Y, 1, gh->dimx);
     
     // copy from device to host
-    CHECK_CUDA(cudaMemcpy(x_h, slice_d, length_X*length_Y*sizeof(DataType), cudaMemcpyDeviceToHost));
-
-void extract_frontal_plane_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
-    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
-    DataType *x_d = halo->x_d + k;
-    for (int i = 0; i < gh->length_Y; i++) {
-        CHECK_CUDA(cudaMemcpy(buff, x_d, gh->length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
-        buff += gh->length_X;
-        x_d += gh->dimx;
-    }
+    CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_X*gh->length_Y*sizeof(DataType), cudaMemcpyDeviceToHost));
 }
 
-void inject_frontal_plane_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_X, int length_Y, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    /* for(int i = 0; i < length_Y; i++){
-        CHECK_CUDA(cudaMemcpy(x_d, x_h, length_X * sizeof(DataType), cudaMemcpyHostToDevice));
-        x_d += dimx;
-        x_h += length_X;
-    } */
 
-    // copy host x_h to gpu, slice_d
-    DataType *slice_d;
-    CHECK_CUDA(cudaMalloc(&slice_d, length_X*length_Y*sizeof(DataType)));
-    CHECK_CUDA(cudaMemcpy(slice_d, x_h, length_X*length_Y*sizeof(DataType), cudaMemcpyHostToDevice));
-    
+void inject_frontal_plane_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff){
+    local_int_t k = gh->x +  gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+
+    DataType *buff = halo->recv_buff_d[i_buff];
+    if(host_buff){
+        CHECK_CUDA(cudaMemcpy(buff, halo->recv_buff_h[i_buff], gh->length_Y*gh->length_Z*sizeof(DataType), cudaMemcpyHostToDevice));
+    }
+
     // fill x_d with slice_d
     int const nthread=256;
-    int const nblock = (length_X*length_Y + nthread - 1) / nthread;
-    inject_xy_plane_kernel<<<nblock,nthread>>>(x_d, slice_d, length_X, length_Y, 1, dimx);
-
-
+    int const nblock = (gh->length_X*gh->length_Y + nthread - 1) / nthread;
+    inject_xy_plane_kernel<<<nblock,nthread>>>(x_d, buff, gh->length_X, gh->length_Y, 1, gh->dimx);
 }
 
 __global__ void extract_edge_kernel(DataType *x_d, DataType *slice_d, int length_X, int slice_X){
@@ -812,121 +729,104 @@ __global__ void inject_edge_kernel(DataType *x_d, DataType *slice_d, int length_
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     
     if (tid<length_X) x_d[tid*slice_X] = slice_d[tid];
-void inject_frontal_plane_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
-    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
-    DataType *x_d = halo->x_d + k;
-    for (int i = 0; i < gh->length_Y; i++) {
-        CHECK_CUDA(cudaMemcpy(x_d, buff, gh->length_X * sizeof(DataType), cudaMemcpyHostToDevice));
-        x_d += gh->dimx;
-        buff += gh->length_X;
-    }
 }
 
-void extract_edge_X_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+
+void extract_edge_X_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff) {
     local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
-    CHECK_CUDA(cudaMemcpy(buff, x_d, gh->length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
-}
 
-void inject_edge_X_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
-    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
-    DataType *x_d = halo->x_d + k;
-    CHECK_CUDA(cudaMemcpy(x_d, buff, gh->length_X * sizeof(DataType), cudaMemcpyHostToDevice));
-}
-
-void extract_edge_Y_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Y, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    /* for(int j = 0; j < length_Y; j++){
-        CHECK_CUDA(cudaMemcpy(x_h, x_d, 1 * sizeof(DataType), cudaMemcpyDeviceToHost));
-        x_h++;
-        x_d += dimx;
-    } */
-    DataType *arr_d;
-    CHECK_CUDA(cudaMalloc(&arr_d, length_Y * sizeof(DataType)));
+    DataType *buff = halo->send_buff_d[i_buff];
 
     int const nthreads = 128;
-    int const nblocks = (length_Y + nthreads - 1)/nthreads;
-    extract_edge_kernel<<<nblocks, nthreads>>>(x_d, arr_d, length_Y, dimx);
+    int const nblocks = (gh->length_X + nthreads - 1)/nthreads;
+    extract_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_X, 1);
 
-    CHECK_CUDA(cudaMemcpy(x_h, arr_d, length_Y * sizeof(DataType), cudaMemcpyDeviceToHost));
-void extract_edge_Y_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
-    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
-    DataType *x_d = halo->x_d + k;
-    for (int j = 0; j < gh->length_Y; j++) {
-        CHECK_CUDA(cudaMemcpy(buff, x_d, sizeof(DataType), cudaMemcpyDeviceToHost));
-        buff++;
-        x_d += gh->dimx;
+    if(host_buff){
+        CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
     }
 }
 
-void inject_edge_Y_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+void inject_edge_X_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff) {
     local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
-    for (int j = 0; j < gh->length_Y; j++) {
-        CHECK_CUDA(cudaMemcpy(x_d, buff, sizeof(DataType), cudaMemcpyHostToDevice));
-        x_d += gh->dimx;
-        buff++;
-    }
-void inject_edge_Y_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Y, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    /* for(int j = 0; j < length_Y; j++){
-        CHECK_CUDA(cudaMemcpy(x_d, x_h, 1 * sizeof(DataType), cudaMemcpyHostToDevice));
-        x_d += dimx;
-        x_h ++;
-    } */
 
-    DataType *arr_d;
-    CHECK_CUDA(cudaMalloc(&arr_d, length_Y * sizeof(DataType)));
-    CHECK_CUDA(cudaMemcpy(arr_d, x_h, length_Y * sizeof(DataType), cudaMemcpyHostToDevice));
+    DataType *buff = halo->recv_buff_d[i_buff];
+    if(host_buff){
+        CHECK_CUDA(cudaMemcpy(buff, halo->recv_buff_h[i_buff], gh->length_Y * sizeof(DataType), cudaMemcpyHostToDevice));
+    }
 
     int const nthreads = 128;
-    int const nblocks = (length_Y + nthreads - 1)/nthreads;
-    inject_edge_kernel<<<nblocks, nthreads>>>(x_d, arr_d, length_Y, dimx);
+    int const nblocks = (gh->length_Y + nthreads - 1)/nthreads;
+    inject_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_Y, gh->dimx);
 }
 
-void extract_edge_Z_from_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Z, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    /* for(int j = 0; j < length_Z; j++){
-        CHECK_CUDA(cudaMemcpy(x_h, x_d, 1 * sizeof(DataType), cudaMemcpyDeviceToHost));
-        x_h++;
-        x_d += dimx * dimy;
-    } */
+void extract_edge_Y_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff){
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType*x_d = halo->x_d + k;
 
-    DataType *arr_d;
-    CHECK_CUDA(cudaMalloc(&arr_d, length_Z * sizeof(DataType)));
+    DataType *buff = halo->send_buff_d[i_buff];
 
     int const nthreads = 128;
-    int const nblocks = (length_Z + nthreads - 1)/nthreads;
-    extract_edge_kernel<<<nblocks, nthreads>>>(x_d, arr_d, length_Z, dimx*dimy);
+    int const nblocks = (gh->length_Y + nthreads - 1)/nthreads;
+    extract_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_Y, gh->dimx);
 
-    CHECK_CUDA(cudaMemcpy(x_h, arr_d, length_Z * sizeof(DataType), cudaMemcpyDeviceToHost));
-
-void extract_edge_Z_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
-    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
-    DataType *x_d = halo->x_d + k;
-    for (int j = 0; j < gh->length_Z; j++) {
-        CHECK_CUDA(cudaMemcpy(buff, x_d, sizeof(DataType), cudaMemcpyDeviceToHost));
-        buff++;
-        x_d += gh->dimx * gh->dimy;
+    if(host_buff){
+        CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_Y * sizeof(DataType), cudaMemcpyDeviceToHost));
     }
 }
 
-void inject_edge_Z_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+void inject_edge_Y_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff) {
     local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
-    for (int j = 0; j < gh->length_Z; j++) {
-        CHECK_CUDA(cudaMemcpy(x_d, buff, sizeof(DataType), cudaMemcpyHostToDevice));
-        x_d += gh->dimx * gh->dimy;
-        buff++;
+
+    DataType *buff = halo->recv_buff_d[i_buff];
+    if(host_buff){
+        CHECK_CUDA(cudaMemcpy(buff, halo->recv_buff_h[i_buff], gh->length_Y * sizeof(DataType), cudaMemcpyHostToDevice));
+    }
+
+    int const nthreads = 128;
+    int const nblocks = (gh->length_Y + nthreads - 1)/nthreads;
+    inject_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_Y, gh->dimx);
+}
+
+void extract_edge_Z_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff){
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    
+    DataType *buff = halo->send_buff_d[i_buff];
+    
+    int const nthreads = 128;
+    int const nblocks = (gh->length_Z + nthreads - 1)/nthreads;
+    extract_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_Z, gh->dimx*gh->dimy);
+
+    if(host_buff){
+        CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_Z * sizeof(DataType), cudaMemcpyDeviceToHost));
     }
 }
 
-void extract_corner_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+
+void inject_edge_Z_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff) {
     local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
+
+    DataType *buff = halo->recv_buff_d[i_buff];
+    if (host_buff){
+        CHECK_CUDA(cudaMemcpy(buff, halo->recv_buff_h[i_buff], gh->length_Z * sizeof(DataType), cudaMemcpyHostToDevice));
+    }
+
+    int const nthreads = 128;
+    int const nblocks = (gh->length_Z + nthreads - 1)/nthreads;
+    inject_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_Z, gh->dimx*gh->dimy);
+
+}
+
+void extract_corner_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff) {
+    local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
+    DataType *x_d = halo->x_d + k;
+    
+    DataType *buff = halo->send_buff_h[i_buff];
+
     for (int z = 0; z < gh->length_Z; z++) {
         for (int y = 0; y < gh->length_Y; y++) {
             // Copy a contiguous block of length_X elements (one row of the corner)
@@ -937,11 +837,18 @@ void extract_corner_from_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
         // Jump to the start of the next z-plane:
         x_d += gh->dimx * (gh->dimy - gh->length_Y);
     }
+
+    if(!host_buff){
+        CHECK_CUDA(cudaMemcpy(halo->send_buff_d[i_buff], buff, gh->length_X*gh->length_Y*gh->length_Z * sizeof(DataType), cudaMemcpyHostToDevice));
+    }
 }
 
-void inject_corner_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
+void inject_corner_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff) {
     local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
+
+    DataType *buff = halo->recv_buff_h[i_buff];
+
     for (int z = 0; z < gh->length_Z; z++) {
         for (int y = 0; y < gh->length_Y; y++) {
             // Copy a contiguous block of length_X elements (one row of the corner)
@@ -952,23 +859,10 @@ void inject_corner_to_GPU(Halo *halo, DataType *buff, GhostCell *gh) {
         // Jump to the start of the next z-plane:
         x_d += gh->dimx * (gh->dimy - gh->length_Y);
     }
-void inject_edge_Z_to_GPU(DataType *x_d, DataType *x_h, int x, int y, int z, int length_Z, int dimx, int dimy, int dimz){
-    local_int_t k = x +  y * dimx + z * dimx * dimy;
-    x_d += k;
-    /* for(int j = 0; j < length_Z; j++){
-        CHECK_CUDA(cudaMemcpy(x_d, x_h, 1 * sizeof(DataType), cudaMemcpyHostToDevice));
-        x_d += dimx * dimy;
-        x_h ++;
-    } */
 
-    DataType *arr_d;
-    CHECK_CUDA(cudaMalloc(&arr_d, length_Z * sizeof(DataType)));
-    CHECK_CUDA(cudaMemcpy(arr_d, x_h, length_Z * sizeof(DataType), cudaMemcpyHostToDevice));
-
-    int const nthreads = 128;
-    int const nblocks = (length_Z + nthreads - 1)/nthreads;
-    inject_edge_kernel<<<nblocks, nthreads>>>(x_d, arr_d, length_Z, dimx*dimy);
-
+    if(!host_buff){
+        CHECK_CUDA(cudaMemcpy(halo->recv_buff_d[i_buff], buff, gh->length_X*gh->length_Y*gh->length_Z * sizeof(DataType), cudaMemcpyHostToDevice));
+    }    
 }
 
 //correctness verified
