@@ -5,6 +5,7 @@
 #include "HPCG_versions/non_blocking_mpi_halo_exchange.cuh"
 #include "HPCG_versions/nccl_halo_exchange.cuh"
 #include "HPCG_versions_tests/kernel_multi_GPU_tests.cpp"
+#include "MatrixLib/striped_partial_Matrix.hpp"
 
 #include <mpi.h>
 #include <cuda_runtime.h>
