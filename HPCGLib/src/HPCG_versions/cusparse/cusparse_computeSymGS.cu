@@ -1,5 +1,6 @@
 #include "HPCG_versions/cusparse.hpp"
 #include "UtilLib/cuda_utils.hpp"
+#include "UtilLib/utils.cuh"
 #include <iostream>
 
 

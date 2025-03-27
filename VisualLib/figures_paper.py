@@ -2,8 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.table import Table
 
+plot_path = "plots/"
 
-def generate_striped_matrix():
+def generate_striped_matrix_visualization():
 
     n = 8
 
@@ -71,6 +72,8 @@ def generate_striped_matrix():
     for cell in table.get_celld().values():
         cell.get_text().set_fontsize(20)
 
+    plt.tight_layout()
+
     # Save the figure and display it
     plt.savefig('plots/paper_figures/standard_matrix.png')
     plt.savefig('plots/paper_figures/standard_matrix.eps')
@@ -79,7 +82,7 @@ def generate_striped_matrix():
     ##########################################
 
     # Plot the striped matrix
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 12), gridspec_kw={'height_ratios':[1,n]})  # Adjust to stack subfigures vertically
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 11), gridspec_kw={'height_ratios':[1,n]})  # Adjust to stack subfigures vertically
     # fig.suptitle('Striped Representation of a Striped Matrix A', fontsize=25, y=0.95)  # Adjust the vertical position of the title
     
     cell_size = 1 / max(num_stripes, n)
@@ -124,11 +127,137 @@ def generate_striped_matrix():
     # Save the figure and display it
     # plt.tight_layout()
     fig.subplots_adjust(hspace=0)  # Adjust the vertical spacing between subfigures
+    plt.tight_layout()
+
 
     plt.savefig('plots/paper_figures/striped_matrix.png')
     plt.savefig('plots/paper_figures/striped_matrix.eps')
     plt.show()
 
+# Define the function
+def memory_footprint_3d27pt(nx, index_size, value_size):
+    ny = nx
+    nz = nx
+    num_interior_points = (nx - 2) * (ny - 2) * (nz - 2)
+    num_face_points = 2 * ((nx - 2) * (ny - 2) + (nx - 2) * (nz - 2) + (ny - 2) * (nz - 2))
+    num_edge_points = 4 * ((nx - 2) + (ny - 2) + (nz - 2))
+    num_corner_points = 8
+
+    nnz_interior = 27 * num_interior_points
+    nnz_face = 18 * num_face_points
+    nnz_edge = 12 * num_edge_points
+    nnz_corner = 8 * num_corner_points
+
+    nnz = nnz_interior + nnz_face + nnz_edge + nnz_corner
+
+    Striped_footprint = ((27 * nx**3) * value_size)
+    CSR_footprint = (nnz * value_size + (nnz + nx**3) * index_size)
+    return  Striped_footprint / CSR_footprint
+
+def memory_footprint(nnz, num_rows, additional_zeros, num_stripes, index_size, value_size):
+
+    CSR_footprint = (nnz * value_size + (nnz + num_rows) * index_size)
+    Striped_footprint = (nnz + additional_zeros) * value_size + (num_stripes) * index_size
+    striped_based_on_stripes = (num_rows * num_stripes) * value_size + (num_stripes) * index_size
+    # print(f"Striped: {Striped_footprint[0]}")
+    # print(f"Striped based on stripes: {striped_based_on_stripes[0]}")
+
+
+    return Striped_footprint / CSR_footprint
+    
+
+
+def generate_memory_footprint_analysis():
+    # Generate nx values
+    nx = np.linspace(2, 256, 400)  # Generate 400 points between 2 and 1028
+
+    # Calculate y values
+    y = memory_footprint_3d27pt(nx, 4, 8)
+    y2 = memory_footprint_3d27pt(nx, 4, 4)
+
+    # Find the value of nx where y equals 1500
+    # nx_1500 = nx[np.isclose(y, 1.4, atol=1e-2)]
+    # if nx_1500.size > 0:
+    #     nx_1500_value = nx_1500[0]
+    #     y_1500_value = memory_footprint(nx_1500_value)
+    #     print(f'The value of nx where y equals 1500 is approximately: {nx_1500_value}')
+    # else:
+    #     nx_1500_value = None
+    #     print('No value of nx found where y equals 1500.')
+
+
+    # if nx_1500_value is not None:
+    #     plt.plot(nx_1500_value, y_1500_value, 'ro')  # Red circle
+    #     plt.annotate(f'nx={nx_1500_value:.2f}', xy=(nx_1500_value, y_1500_value), xytext=(nx_1500_value+50, y_1500_value+500),
+    #                  arrowprops=dict(facecolor='black', shrink=0.05))
+
+
+    # Create the plot
+    plt.figure(figsize=(10, 6))
+    plt.plot(nx, y, label=r'float64')
+    plt.plot(nx, y2, label=r'float32')
+    plt.xlabel('nx')
+    plt.ylabel('CSR/Striped memory footprint ratio')
+    plt.title('Memory Footprint Ratio')
+    plt.legend()
+    plt.grid(True)
+
+    # Save the plot
+    plt.savefig(plot_path + '/paper_figures/memory_footprint_plot.png')
+    plt.savefig(plot_path + '/paper_figures/memory_footprint_plot.eps')
+
+    nnz = np.linspace(100, 10000, 100)
+
+    # we make some assumptions:
+        # numRows = 1/4 * nnz
+        # we do get all num_rows
+        # there is an additional 1/4 * nnz zeros
+        # we have nnz/50 stripes
+
+    y80 = memory_footprint(nnz, nnz//4, nnz//4, nnz//50, 4, 8)
+    y90 = memory_footprint(nnz, nnz//4, nnz//8, nnz//50, 4, 8)
+    y95 = memory_footprint(nnz, nnz//4, nnz//16, nnz//50, 4, 8)
+
+    ratio80 =  round((nnz[0]//4)/(nnz[0] + (nnz[0]//4)),4)
+    print(f"Ratio 80: {ratio80}")
+    ratio90 = round((nnz[0]//8)/(nnz[0] + (nnz[0]//8)),4)
+    print(f"Ratio 90: {ratio90}")
+    ratio95 = round((nnz[0]//16)/(nnz[0] + (nnz[0]//16)),4)
+    print(f"Ratio 95: {ratio95}")
+
+
+    
+
+    y80_100 = memory_footprint(nnz, nnz//4, nnz//4, nnz//100, 4, 8)
+    y90_100 = memory_footprint(nnz, nnz//4, nnz//8, nnz//100, 4, 8)
+    y95_100 = memory_footprint(nnz, nnz//4, nnz//16, nnz//100, 4, 8)
+
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(nnz, y80, label=f'{ratio80 *100}% zeros')
+    # plt.plot(nnz, y80_100, label=f'{ratio80 *100}% zeros, (nnz/100 stripes)')
+    plt.plot(nnz, y90, label=f'{ratio90 *100}% zeros')
+    # plt.plot(nnz, y90_100, label=f'{ratio90 *100}% zeros, (nnz/100 stripes)')
+    plt.plot(nnz, y95, label=f'{ratio95 *100}% zeros')
+    # plt.plot(nnz, y95_100, label=f'{ratio95 *100}% zeros, (nnz/100 stripes)')
+
+    plt.xlabel('nnz')
+    plt.ylabel('CSR/Striped memory footprint ratio')
+    plt.title('Memory Footprint Ratio')
+    plt.legend(bbox_to_anchor=(0.5, -0.2), loc='lower center', ncol=3)
+    plt.grid(True)
+
+    plt.tight_layout()
+
+    # Save the plot
+    plt.savefig(plot_path + '/paper_figures/memory_footprint_general.png')
+    plt.savefig(plot_path + '/paper_figures/memory_footprint_general.eps')
+
+
+    
+
+
 
 if __name__ == "__main__":
-    generate_striped_matrix()
+    # generate_striped_matrix_visualization()
+    generate_memory_footprint_analysis()
