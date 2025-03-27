@@ -76,9 +76,9 @@ striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
     this->num_MG_post_smooth_steps = 1;
     this->coarse_Matrix = nullptr;
     this->f2c_op_d = nullptr;
-    this->rc_d = nullptr;
-    this->xc_d = nullptr;
-    this->Axf_d = nullptr;
+    this->rc_d = new Halo;
+    this->xc_d = new Halo;
+    this->Axf_d = new Halo;
     //this->f2c_op.clear();
 
     CHECK_CUDA(cudaMalloc(&this->values_d, sizeof(double) * num_rows* 27));
@@ -109,7 +109,7 @@ striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
     }
 
     CHECK_CUDA(cudaMalloc(&this->j_min_i_d, this->num_stripes * sizeof(int)));
-    CHECK_CUDA(cudaMemcpy(this->j_min_i.data(), this->j_min_i_d, this->num_stripes * sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(this->j_min_i_d, this->j_min_i.data(), this->num_stripes * sizeof(int), cudaMemcpyHostToDevice));
 }
 
 template <typename T>
@@ -203,15 +203,15 @@ striped_partial_Matrix<T>::~striped_partial_Matrix(){
         this->f2c_op_d = nullptr;
     }
     if (this->rc_d != nullptr) {
-        CHECK_CUDA(cudaFree(this->rc_d));
+        delete this->rc_d;
         this->rc_d = nullptr;
     }
     if(this->xc_d != nullptr){
-        CHECK_CUDA(cudaFree(this->xc_d));
+        delete this->xc_d;
         this->xc_d = nullptr;
     }
     if(this->Axf_d != nullptr){
-        CHECK_CUDA(cudaFree(this->Axf_d));
+        delete this->Axf_d;
         this->Axf_d = nullptr;
     }
     
@@ -847,13 +847,13 @@ void striped_partial_Matrix<T>::initialize_coarse_matrix(){
     this->coarse_Matrix->generate_f2c_operator_onGPU();
 
     // allocate halos rc, xc, Axf and set to zero
-    /* InitHalo(this->coarse_Matrix->get_rc_d(), nx_c, ny_c, nz_c);
-    InitHalo(this->coarse_Matrix->get_xc_d(), nx_c, ny_c, nz_c);
-    InitHalo(this->coarse_Matrix->get_Axf_d(), nx_c, ny_c, nz_c);
+    InitHalo(this->coarse_Matrix->get_rc_d(), p_c);
+    InitHalo(this->coarse_Matrix->get_xc_d(), p_c);
+    InitHalo(this->coarse_Matrix->get_Axf_d(), p_c);
 
     SetHaloGlobalIndexGPU(this->coarse_Matrix->get_rc_d(), p_c);
     SetHaloGlobalIndexGPU(this->coarse_Matrix->get_xc_d(), p_c);
-    SetHaloGlobalIndexGPU(this->coarse_Matrix->get_Axf_d(), p_c); */
+    SetHaloGlobalIndexGPU(this->coarse_Matrix->get_Axf_d(), p_c);
 }
 
 template <typename T>
