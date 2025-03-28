@@ -2,7 +2,7 @@
 
 ##Resources
 #SBATCH --job-name=HPCG_tests
-#SBATCH --account=a-g34
+#SBATCH --account=a-g200
 #SBATCH --output AllTests_Output.out
 #SBATCH --time 00:15:00
 #SBATCH --partition=debug
@@ -30,7 +30,7 @@ cd build
 
 # # Build the project
 # cmake ..
-# make -j16
+make -j16
 
 
 # Navigate to the testing directory

@@ -636,7 +636,7 @@ void striped_Matrix<T>::generate_box_coloring(){
 
         // also generate the coloring for any coarse matrices
         if(this->coarse_Matrix != nullptr){
-            this->coarse_Matrix->generate_coloring();
+            this->coarse_Matrix->generate_box_coloring();
         }
         
     } else{

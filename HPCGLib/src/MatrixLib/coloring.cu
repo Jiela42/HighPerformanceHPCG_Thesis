@@ -482,6 +482,12 @@ void get_color_row_mapping_for_boxColoring(
     // copy the color pointer to the device
     CHECK_CUDA(cudaMemcpy(color_pointer_d, color_ptr_h.data(), (num_colors+1) * sizeof(int), cudaMemcpyHostToDevice));
     
+    // std::cout << "Color pointer: for size " << nx << " " << ny << " " << nz << std::endl;
+    // for(int i = 0; i <= num_colors; i++){
+    //     std::cout << "color ptr " << i <<": " << color_ptr_h[i] << " ";
+    // }
+    // std::cout << std::endl;
+
     int num_threads = 1024;
     int num_blocks = std::min(ceiling_division(num_colors, num_threads), MAX_NUM_BLOCKS);
 

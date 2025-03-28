@@ -288,9 +288,9 @@ def create_animation(x, y, z, colors, dims):
     output_file = "plots/coloring_plots/dims_" + dims + ".html"
 
     # check if the file already exists
-    if os.path.exists(output_file):
-        print("Skipping file: ", output_file)
-        return
+    # if os.path.exists(output_file):
+    #     print("Skipping file: ", output_file)
+    #     return
 
     min_x = min(x) - 1
     max_x = max(x) + 1

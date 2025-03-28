@@ -263,7 +263,8 @@ class HPCG_functions {
     protected:
         int max_CG_iterations = 500;
         double CG_tolerance = 1e-12;
-        int max_SymGS_iterations = 1;
+        int max_SymGS_iterations = 5;
+        double SymGS_tolerance = 1e-6;
 };
 
 #endif // HPCGLIB_HPP

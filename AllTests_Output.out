@@ -1,363 +1,22 @@
+[  4%] Built target UtilLib
+[ 10%] Built target MatrixLib
+[ 14%] Built target TimingLib
+[ 42%] Built target HPCGLib
+[ 55%] Built target run_coloring
+[ 55%] Built target run_multi_GPU
+[ 55%] Built target run_get_Norm
+[ 55%] Built target run_bench_test
+[ 55%] Built target run_example
+[ 55%] Built target run_multi_GPU_tests
+[ 70%] Built target TestHPCGLib
+[ 71%] Building CXX object testing/CMakeFiles/run_AllTests.dir/run_all_tests.cpp.o
+[ 98%] Built target run_specific_bench
+[ 98%] Built target run_full_bench
+[100%] Linking CXX executable run_AllTests
+[100%] Built target run_AllTests
 Starting Full Tests
-getting striped matrix
-CSR Host calculated l2 norm: 73.4717
-CSR Device calculated l2 norm: 73.4717
-Host calculated l2 norm: 73.4717
-Device calculated l2 norm: 73.4717
-getting striped matrix
-CSR Host calculated l2 norm: 74.8558
-CSR Device calculated l2 norm: 74.8558
-Host calculated l2 norm: 74.8558
-Device calculated l2 norm: 74.8558
-getting striped matrix
-CSR Host calculated l2 norm: 192.891
-CSR Device calculated l2 norm: 192.891
-Host calculated l2 norm: 192.891
-Device calculated l2 norm: 192.891
-getting striped matrix
-CSR Host calculated l2 norm: 514.498
-CSR Device calculated l2 norm: 514.498
-Host calculated l2 norm: 514.498
-Device calculated l2 norm: 514.498
-getting striped matrix
-CSR Host calculated l2 norm: 1415.72
-CSR Device calculated l2 norm: 1415.72
-Host calculated l2 norm: 1415.72
-Device calculated l2 norm: 1415.72
-getting striped matrix
-CSR Host calculated l2 norm: 3982.16
-CSR Device calculated l2 norm: 3982.16
-Host calculated l2 norm: 3982.16
-Device calculated l2 norm: 3982.16
+Current Time: 2025-03-27 10:31:16
 Starting MatrixLib tests
-getting striped matrix
-testing 4x4x4
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting striped matrix
-WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
-WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
-getting striped matrix
-testing 3x4x5
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting striped matrix
-WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
-WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
-getting striped matrix
-testing 4x3x5
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting striped matrix
-WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
-WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
-getting striped matrix
-testing 5x4x3
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting striped matrix
-WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
-WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
-getting striped matrix
-testing 8x8x8
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Comparing coarse matrices
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Comparing coarse matrices
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Comparing coarse matrices
-only compared meta data
-getting striped matrix
-getting striped matrix
-WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
-WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
-getting striped matrix
-testing 16x16x16
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Comparing coarse matrices
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Comparing coarse matrices
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Comparing coarse matrices
-only compared meta data
-getting striped matrix
-getting striped matrix
-WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
-WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
-getting striped matrix
-testing 24x24x24
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Comparing coarse matrices
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Comparing coarse matrices
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Comparing coarse matrices
-only compared meta data
-getting striped matrix
-getting striped matrix
-WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
-WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
-getting striped matrix
-testing 32x32x32
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Comparing coarse matrices
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Comparing coarse matrices
-only compared meta data
-Copying to GPU on purpose
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-Warning: copying a sparse CSR Matrix to the GPU
-WARNING: remove_Matrix_from_GPU called
-If the matrix did not contain relevant data, this is okay
-getting striped matrix
-getting CSR Matrix
-only compared meta data
-Comparing coarse matrices
-only compared meta data
-getting striped matrix
-getting striped matrix
-WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
-WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
 Starting cuSparse tests
 Starting naiveStriped tests
 Starting striped shared memory tests
@@ -405,17 +64,20 @@ getting striped matrix
 getting striped matrix
 getting striped matrix
 getting striped matrix
+Starting stripedBoxColoring tests
 getting striped matrix
 getting striped matrix
 getting striped matrix
 getting striped matrix
 getting striped matrix
+Starting no_store tests
 Skipping test for size 64x64x64 to avoid out of memory during benchmark tests
 Skipping test for size 128x128x128 to avoid out of memory during benchmark tests
 Skipping test for size 32x64x128 to avoid out of memory during benchmark tests
 Skipping test for size 64x32x128 to avoid out of memory during benchmark tests
 Finished MG tests
 getting striped matrix
+Starting COR tests
 *******************************************************************************************
 ********************************FINISHED & PASSED ALL TESTS********************************
 *******************************************************************************************

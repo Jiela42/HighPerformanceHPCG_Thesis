@@ -40,34 +40,52 @@ void striped_coloringPrecomputed_Implementation<T>::striped_coloringPrecomputed_
     int max_color = (nx-1) + 2 * (ny-1) + 4 * (nz-1);
 
     int num_blocks = std::min(ceiling_division(max_num_rows_per_color, 1024/WARP_SIZE), MAX_NUM_BLOCKS);
-    for(int color = 0; color <= max_color; color++){
-        // we need to do a forward pass
-        striped_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
-        color, color_pointer_d, color_sorted_rows_d,
-        num_rows, num_cols,
-        num_stripes, diag_offset,
-        j_min_i,
-        striped_A_d,
-        x_d, y_d
-        );
-        CHECK_CUDA(cudaDeviceSynchronize());
-    }
-
-    // we need to do a backward pass,
-    // the colors for this are the same just in reverse order
     
-    for(int color = max_color; color  >= 0; color--){
+    int max_iterations = this->max_SymGS_iterations;
+    // std::cout << "max_iterations = " << max_iterations << std::endl;
+    double norm0 = 1.0;
+    double normi = norm0;
 
-        striped_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
-        color, color_pointer_d, color_sorted_rows_d,
-        num_rows, num_cols,
-        num_stripes, diag_offset,
-        j_min_i,
-        striped_A_d,
-        x_d, y_d
-        );
-        CHECK_CUDA(cudaDeviceSynchronize());
+    if(max_iterations != 1){
+        // compute the original L2 norm
+        norm0 = this->L2_norm_for_SymGS(A, x_d, y_d);
     }
+
+    for(int i = 0; i < max_iterations && normi/norm0 > this->SymGS_tolerance; i++){
+        for(int color = 0; color <= max_color; color++){
+            // we need to do a forward pass
+            striped_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
+            color, color_pointer_d, color_sorted_rows_d,
+            num_rows, num_cols,
+            num_stripes, diag_offset,
+            j_min_i,
+            striped_A_d,
+            x_d, y_d
+            );
+            CHECK_CUDA(cudaDeviceSynchronize());
+        }
+    
+        // we need to do a backward pass,
+        // the colors for this are the same just in reverse order
+        
+        for(int color = max_color; color  >= 0; color--){
+    
+            striped_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
+            color, color_pointer_d, color_sorted_rows_d,
+            num_rows, num_cols,
+            num_stripes, diag_offset,
+            j_min_i,
+            striped_A_d,
+            x_d, y_d
+            );
+            CHECK_CUDA(cudaDeviceSynchronize());
+        }
+
+        if(max_iterations != 1){
+            normi = this->L2_norm_for_SymGS(A, x_d, y_d);
+        }
+    }
+    
 }
 
 // explicit template instantiation
