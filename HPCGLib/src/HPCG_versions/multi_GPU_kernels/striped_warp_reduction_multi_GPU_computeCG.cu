@@ -70,7 +70,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     for(int k = 1; k <= this->max_CG_iterations && normr/normr0 > this->CG_tolerance; k++){
         
         if(this->doPreconditioning){
-            this->compute_MG(A, r_d, z_d); // Apply preconditioner
+            this->compute_MG(A, r_d, z_d, problem); // Apply preconditioner
         } else {
             this->compute_WAXPBY(&r_d, &r_d, &z_d, 1.0, 0.0, problem, false); // z = r
             this->ExchangeHalo(&z_d, problem);
