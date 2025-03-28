@@ -85,10 +85,9 @@ __global__ void striped_warp_reduction_multi_GPU_SPMV_kernel(
 
 template <typename T>
 void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_computeSPMV(
-        striped_Matrix<T>& A,
+        striped_partial_Matrix<T>& A,
         Halo *x_d, Halo *y_d, // the vectors x and y are already on the device
-        Problem *problem,
-        int *j_min_i_d
+        Problem *problem
     ) {
 
         //std::cout << "Rank="<< problem->rank <<"\t striped_warp_reduction_computeSPMV" << std::endl;
@@ -104,7 +103,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
 
         // call the kernel
         striped_warp_reduction_multi_GPU_SPMV_kernel<<<num_blocks, num_threads>>>(
-            striped_A_d, num_rows, num_stripes, j_min_i_d, x_d->x_d, y_d->x_d, problem->nx, problem->ny, problem->nz,
+            striped_A_d, num_rows, num_stripes, A.get_j_min_i_d(), x_d->x_d, y_d->x_d, problem->nx, problem->ny, problem->nz,
             problem->gnx, problem->gny, problem->gnz, problem->gi0, problem->px, problem->py, problem->pz
         );
 

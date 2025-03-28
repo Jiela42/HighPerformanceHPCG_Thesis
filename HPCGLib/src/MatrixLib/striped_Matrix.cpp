@@ -54,7 +54,7 @@ striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
     //this->ny = 0;
     //this->nz = 0;
     //this->nnz = 0;
-    //this->diag_index = -1;
+    this->diag_index = -1;
     this->problem = p;
     //this->matrix_type = MatrixType::UNKNOWN;
 
@@ -821,6 +821,11 @@ int striped_Matrix<T>::get_diag_index() const{
 }
 
 template <typename T>
+int striped_partial_Matrix<T>::get_diag_index() const{
+    return this->diag_index;
+}
+
+template <typename T>
 MatrixType striped_Matrix<T>::get_matrix_type() const{
     return this->matrix_type;
 }
@@ -966,11 +971,7 @@ void striped_partial_Matrix<T>::initialize_coarse_matrix(){
     // allocate halos rc, xc, Axf and set to zero
     InitHalo(this->coarse_Matrix->get_rc_d(), p_c);
     InitHalo(this->coarse_Matrix->get_xc_d(), p_c);
-    InitHalo(this->coarse_Matrix->get_Axf_d(), p_c);
-
-    SetHaloGlobalIndexGPU(this->coarse_Matrix->get_rc_d(), p_c);
-    SetHaloGlobalIndexGPU(this->coarse_Matrix->get_xc_d(), p_c);
-    SetHaloGlobalIndexGPU(this->coarse_Matrix->get_Axf_d(), p_c);
+    InitHalo(this->coarse_Matrix->get_Axf_d(), this->problem);
 }
 
 template <typename T>
