@@ -388,7 +388,6 @@ void striped_Matrix<T>::Generate_striped_3D27P_Matrix_onGPU(int nx, int ny, int 
     //this->j_min_i.clear();
     //this->values.clear();
     this->j_min_i = std::vector<int>(this->num_stripes, 0);
-    this->j_min_i.clear();
     //this->j_min_i_d = nullptr;
     //this->values_d = nullptr;
 
@@ -431,8 +430,29 @@ void striped_Matrix<T>::Generate_striped_3D27P_Matrix_onGPU(int nx, int ny, int 
         }
     }
 
+    if(this->j_min_i.size() != this->num_stripes){
+        std::cout << "j_min_i size: " << this->j_min_i.size() << std::endl;
+        std::cout << "num_stripes: " << this->num_stripes << std::endl;
+    }
+
+    for(int i = 0; i < this->num_stripes; i++){
+        std::cout << "j_min_i[" << i << "]: " << this->j_min_i[i] << std::endl;
+
+        // now also print the stuff .data points to
+        std::cout << "j_min_i.data[" << i << "]: " << this->j_min_i.data()[i] << std::endl;
+    }
+    size_t free_mem, total_mem;
+    cudaMemGetInfo(&free_mem, &total_mem);
+    std::cout << "Free memory: " << free_mem / (1024 * 1024) << " MB" << std::endl;
+    assert(this->j_min_i.size() == this->num_stripes);
+
     CHECK_CUDA(cudaMalloc(&this->j_min_i_d, this->num_stripes * sizeof(int)));
+    std::cout << "Allocated j_min_i_d with size: " << this->num_stripes * sizeof(int) << " bytes" << std::endl;
     CHECK_CUDA(cudaMemcpy(this->j_min_i_d, this->j_min_i.data(), this->num_stripes * sizeof(int), cudaMemcpyHostToDevice));
+
+    // we don't need the host-side j-min_i anymore
+    this->j_min_i.clear();
+
 }
 
 template <typename T>

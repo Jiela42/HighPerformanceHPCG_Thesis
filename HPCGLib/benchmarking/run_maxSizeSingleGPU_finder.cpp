@@ -34,9 +34,9 @@ int main(){
     striped_coloring_Implementation<double> implementation;
 
     for(int i = 7; i < 50; i++){
-        int nx = i*8;
-        int ny = i*8;
-        int nz = i*8;
+        int nx = i*8*10;
+        int ny = i*8*10;
+        int nz = i*8*10;
 
         std::cout << "Running striped coloring benchmarks for " << nx << " " << ny << " " << nz << std::endl;
         run_striped_coloring_3d27p_benchmarks(nx, ny, nz, folder_path, implementation);

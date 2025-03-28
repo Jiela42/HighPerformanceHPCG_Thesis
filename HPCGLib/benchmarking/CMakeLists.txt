@@ -43,6 +43,7 @@ add_executable(run_specific_bench
 
 add_executable(run_maxSizeSingleGPU_finder
     run_maxSizeSingleGPU_finder.cpp
+    abstract_benchmark_functions.cpp
     benchmark_stripedColoring.cpp
 )
 
