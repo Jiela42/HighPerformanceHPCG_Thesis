@@ -41,6 +41,11 @@ add_executable(run_specific_bench
     benchmark_stripedCORBoxColoring.cpp
 )
 
+add_executable(run_maxSizeSingleGPU_finder
+    run_maxSizeSingleGPU_finder.cpp
+    benchmark_stripedColoring.cpp
+)
+
 
 target_link_libraries(run_bench_test
     HPCGLib
@@ -52,7 +57,6 @@ target_link_libraries(run_full_bench
     TimingLib
     TestHPCGLib
     stdc++fs
-
 )
 
 target_link_libraries(run_specific_bench
@@ -60,5 +64,11 @@ target_link_libraries(run_specific_bench
     TimingLib
     TestHPCGLib
     stdc++fs
+)
 
+target_link_libraries(run_maxSizeSingleGPU_finder
+    HPCGLib
+    TimingLib
+    TestHPCGLib
+    stdc++fs
 )

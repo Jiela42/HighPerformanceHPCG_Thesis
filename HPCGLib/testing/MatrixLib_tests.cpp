@@ -327,6 +327,54 @@ bool run_striped_csr_parallel_conversion_test(int nx, int ny, int nz){
     return all_pass;
 }
 
+bool parallel_striped_generation_test(int nx, int ny, int nz){
+
+    sparse_CSR_Matrix<double> A_csr;
+    A_csr.generateMatrix_onGPU(nx, ny, nz);
+
+    if(nx % 8 == 0 and ny % 8 == 0 and nz % 8 == 0 and nx / 8 > 2 and ny / 8 > 2 and nz / 8 > 2){
+        // we check that it's devisible by 8 and still big enough to be good to do the conversions to striped with no issues
+        // in this case we also initialize the MG data
+
+        sparse_CSR_Matrix<double>* current_matrix = &A_csr;
+
+        for(int i = 0; i < 3; i++){
+            // std::cout << "doing level " << i << std::endl;
+            // we do three levels of MG data
+            current_matrix->initialize_coarse_Matrix();
+            // std::cout << "coarse matrix initialized" << std::endl;
+            current_matrix = current_matrix->get_coarse_Matrix();
+        }
+    }
+
+    striped_Matrix<double>* A = A_csr.get_Striped();
+
+    striped_Matrix<double> A_generated_onGPU;
+    A_generated_onGPU.Generate_striped_3D27P_Matrix_onGPU(nx, ny, nz);
+
+
+    // initialize the coarse striped matrices
+    if(nx % 8 == 0 and ny % 8 == 0 and nz % 8 == 0 and nx / 8 > 2 and ny / 8 > 2 and nz / 8 > 2){
+
+        striped_Matrix<double>* current_Matrix = &A_generated_onGPU;
+
+        for(int i = 0; i < 3; i++){
+            // we do three levels of MG data
+            current_Matrix->initialize_coarse_matrix();
+            current_Matrix = current_Matrix->get_coarse_Matrix();
+        }
+
+    }
+
+    // compare the two
+    bool test_pass = A->compare_to(A_generated_onGPU);
+
+    if (not test_pass){
+        std::cerr << "parallel striped generation test failed for size " << nx << "x" << ny << "x" << nz << std::endl;
+    }
+    return test_pass;
+}
+
 bool coloring_test(striped_Matrix<double>& A){
 
     bool all_pass = true;
@@ -625,7 +673,7 @@ bool run_all_matrixLib_tests(int nx, int ny, int nz){
     A.generateMatrix_onGPU(nx, ny, nz);
 
     striped_Matrix<double>* striped_A = A.get_Striped();
-    std::cout << "getting striped matrix" << std::endl;
+    // std::cout << "getting striped matrix" << std::endl;
     // striped_A.striped_Matrix_from_sparse_CSR(A);
 
     bool all_pass = true;
@@ -660,6 +708,7 @@ bool run_all_matrixLib_tests(int nx, int ny, int nz){
     all_pass = all_pass && run_striped_csr_parallel_conversion_test(nx, ny, nz);
     // std::cout << "striped vs csr parallel conversion test passed for " << dim_info << std::endl;
     all_pass = all_pass && parallel_generation_from_CSR_test(A);
+    all_pass = all_pass && parallel_striped_generation_test(nx, ny, nz);
     all_pass = all_pass && coloring_test(*striped_A);
     all_pass = all_pass && box_coloring_test(*striped_A);
     // std::cout << "coloring test passed for " << dim_info << std::endl;

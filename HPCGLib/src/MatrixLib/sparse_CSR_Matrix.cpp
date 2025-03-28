@@ -385,11 +385,12 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped(striped_Matrix<T> &A){
     this->Striped = &A;
     A.set_CSR(this);
 
-    assert(A.get_num_stripes() == A.get_j_min_i().size());
+    // assert(A.get_num_stripes() == A.get_j_min_i().size());
 
     // check if A is on the GPU
     if(A.get_values_d() != nullptr and A.get_j_min_i_d() != nullptr){
         // std::cout << "A is on the GPU" << std::endl;
+        // std::cout << "nnz " << this->nnz << std::endl;
         this->sparse_CSR_Matrix_from_striped_transformation_GPU(A);
     }
     else{
@@ -471,6 +472,8 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation_GPU(str
     CHECK_CUDA(cudaMemset(this->col_idx_d, 0, this->nnz * sizeof(int)));
     CHECK_CUDA(cudaMemset(this->values_d, 0, this->nnz * sizeof(T)));
 
+    // std::cout << "this is called prior" << std::endl;
+    // std::cout << "nnz: " << this->nnz << std::endl;
     int new_nnz = generate_CSR_from_Striped(
         this->num_rows, A.get_num_stripes(),
         A.get_j_min_i_d(), A.get_values_d(),

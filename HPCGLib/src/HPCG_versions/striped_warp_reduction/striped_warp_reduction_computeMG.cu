@@ -28,6 +28,9 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeMG(
         int num_threads = 1024;
         int num_blocks = std::max(num_coarse_rows / num_threads, 1);
 
+        // std::cout << "num_coarse_rows: " << num_coarse_rows << std::endl;
+        // std::cout << "num_rows: " << A.get_num_rows() << std::endl;
+
         compute_restriction_kernel<<<num_blocks, num_threads>>>(
             num_coarse_rows,
             Axf_d,

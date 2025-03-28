@@ -152,7 +152,7 @@ def memory_footprint_3d27pt(nx, index_size, value_size):
 
     Striped_footprint = ((27 * nx**3) * value_size)
     CSR_footprint = (nnz * value_size + (nnz + nx**3) * index_size)
-    return  Striped_footprint / CSR_footprint
+    return  CSR_footprint / Striped_footprint
 
 def memory_footprint(nnz, num_rows, additional_zeros, num_stripes, index_size, value_size):
 
@@ -194,13 +194,18 @@ def generate_memory_footprint_analysis():
 
     # Create the plot
     plt.figure(figsize=(10, 6))
-    plt.plot(nx, y, label=r'float64')
-    plt.plot(nx, y2, label=r'float32')
+    plt.plot(nx, y, label=r'$s_{idx} =$ int, $s_{val} =$ float64')
+    plt.plot(nx, y2, label=r'$s_{idx} =$ int, $s_{val} =$ float32')
     plt.xlabel('nx')
-    plt.ylabel('CSR/Striped memory footprint ratio')
-    plt.title('Memory Footprint Ratio')
+    plt.ylabel('CSR/Striped memory-footprint ratio')
+    # plt.title('Memory Footprint Ratio')
+
+
     plt.legend()
+    plt.legend(bbox_to_anchor=(0.5, -0.2), loc='lower center', ncol=2)
     plt.grid(True)
+
+    plt.tight_layout()
 
     # Save the plot
     plt.savefig(plot_path + '/paper_figures/memory_footprint_plot.png')
@@ -252,10 +257,6 @@ def generate_memory_footprint_analysis():
     # Save the plot
     plt.savefig(plot_path + '/paper_figures/memory_footprint_general.png')
     plt.savefig(plot_path + '/paper_figures/memory_footprint_general.eps')
-
-
-    
-
 
 
 if __name__ == "__main__":

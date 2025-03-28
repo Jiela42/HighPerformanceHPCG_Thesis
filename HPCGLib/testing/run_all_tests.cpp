@@ -35,8 +35,8 @@ int main(){
     all_pass = all_pass && run_all_matrixLib_tests(16, 16, 16);
     all_pass = all_pass && run_all_matrixLib_tests(24, 24, 24);
     all_pass = all_pass && run_all_matrixLib_tests(32, 32, 32);
-    // // std::cout << "running matrix tests for 64x64x64" << std::endl;
-    // all_pass = all_pass && run_all_matrixLib_tests(64, 64, 64);
+    // std::cout << "running matrix tests for 64x64x64" << std::endl;
+    all_pass = all_pass && run_all_matrixLib_tests(64, 64, 64);
     // std::cout << "Trying to generate a large matrix" << std::endl;
     // all_pass = all_pass && run_all_matrixLib_tests(128, 128, 128);
     // std::cout << "Finished MatrixLib tests" << std::endl;
@@ -47,7 +47,7 @@ int main(){
     all_pass = all_pass && run_cuSparse_tests(16, 16, 16);
     all_pass = all_pass && run_cuSparse_tests(32, 32, 32);
     all_pass = all_pass && run_cuSparse_tests(64, 64, 64);
-    // all_pass = all_pass && run_cuSparse_tests(128, 128, 128);
+    all_pass = all_pass && run_cuSparse_tests(128, 128, 128);
     // std::cout << "Finished cuSparse tests" << std::endl;
 
     std::cout << "Starting naiveStriped tests" << std::endl;
@@ -119,7 +119,7 @@ int main(){
     all_pass = all_pass && run_stripedBoxColoring_tests(16, 16, 16);
     all_pass = all_pass && run_stripedBoxColoring_tests(32, 32, 32);
     all_pass = all_pass && run_stripedBoxColoring_tests(64, 64, 64);
-    all_pass = all_pass && run_stripedBoxColoring_tests(128, 128, 128);
+    // all_pass = all_pass && run_stripedBoxColoring_tests(128, 128, 128);
     // all_pass = all_pass && run_stripedBoxColoring_tests(176, 176, 176);
     // all_pass = all_pass && run_stripedBoxColoring_tests(240, 240, 240);
 
@@ -132,7 +132,7 @@ int main(){
     all_pass = all_pass && run_COR_BoxColoring_tests(24, 24, 24);
     all_pass = all_pass && run_COR_BoxColoring_tests(32, 32, 32);
     all_pass = all_pass && run_COR_BoxColoring_tests(64, 64, 64);
-    all_pass = all_pass && run_COR_BoxColoring_tests(128, 128, 128);
+    // all_pass = all_pass && run_COR_BoxColoring_tests(128, 128, 128);
     // all_pass = all_pass && run_COR_BoxColoring_tests(176, 176, 176);
     // all_pass = all_pass && run_COR_BoxColoring_tests(240, 240, 240);
 

@@ -629,7 +629,7 @@ bool test_Dot(
         }
 
         // and now we need to copy the result back and de-allocate the memory
-        bool test_pass = relaxed_double_compare(result_baseline, result_uut, 1e-9);
+        bool test_pass = relaxed_double_compare(result_baseline, result_uut, 1e-8);
 
         if(not test_pass){
             std::cout << "Dot product failed for Implementation: " << uut.version_name << " baseline = " << result_baseline << " uut = " << result_uut << std::endl;

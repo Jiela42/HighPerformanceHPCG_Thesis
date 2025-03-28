@@ -11,6 +11,17 @@
 
 #include <memory>
 
+// we include this for comparison and being able to print the matrix types.
+std::string string(MatrixType mt){
+    switch (mt) {
+        case MatrixType::Stencil_3D27P:
+            return "Stencil_3D27P";
+        default:
+            return "UNKNOWN";
+    }
+}
+
+
 // #include <stdio.h>
 
 template <typename T>
@@ -349,6 +360,8 @@ void striped_Matrix<T>::Generate_striped_3D27P_Matrix_onGPU(int nx, int ny, int 
     this->ny = ny;
     this->nz = nz;
 
+    this->matrix_type = MatrixType::Stencil_3D27P;
+
     // a single gpu setting
     Problem *p = new Problem;
     GenerateProblem(1, 1, 1, this->nx, this->ny, this->nz, 1, 0, p);
@@ -356,6 +369,20 @@ void striped_Matrix<T>::Generate_striped_3D27P_Matrix_onGPU(int nx, int ny, int 
     this->num_rows = p->nx * p->ny * p->nz; 
     this->num_cols = p->nx * p->ny * p->nz;
     this->num_stripes = 27;
+
+    int num_interior_points = (nx - 2) * (ny - 2) * (nz - 2);
+    int num_face_points = 2 * ((nx - 2) * (ny - 2) + (nx - 2) * (nz - 2) + (ny - 2) * (nz - 2));
+    int num_edge_points = 4 * ((nx - 2) + (ny - 2) + (nz - 2));
+    int num_corner_points = 8;
+
+    int nnz_interior = 27 * num_interior_points;
+    int nnz_face = 18 * num_face_points;
+    int nnz_edge = 12 * num_edge_points;
+    int nnz_corner = 8 * num_corner_points;
+
+    int nnz = nnz_interior + nnz_face + nnz_edge + nnz_corner;
+
+    this->nnz = nnz;
 
 
     //this->j_min_i.clear();
@@ -496,6 +523,11 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T>
     // std::cout << "nnz: " << this->nnz << std::endl;
 
     assert(counted_nnz == this->nnz);
+
+    // since this is the GPU generation the host side buffers need to be empty
+    this->values.clear();
+    this->j_min_i.clear();
+
 
     // if the CSR matrix has a coarse matrix, we also need to generate the coarse matrix for the striped matrix
     if(A.get_coarse_Matrix() != nullptr){
@@ -899,18 +931,24 @@ void striped_Matrix<T>::generate_f2c_operator_onGPU() {
     // set them to zero
     CHECK_CUDA(cudaMemset(this->f2c_op_d, 0, fine_n_rows * sizeof(int)));
 
-    generate_partialf2c_operator(x, y, z, x*2, y*2, z*2, f2c_op_d);
+    generate_f2c_operator(x, y, z, x*2, y*2, z*2, f2c_op_d);
+
+    // generate_partialf2c_operator(x, y, z, x*2, y*2, z*2, f2c_op_d);
 }
 
 template <typename T>
 void striped_Matrix<T>::init_coarse_buffer(){
-    CHECK_CUDA(cudaMalloc(&this->rc_d, this->num_rows * sizeof(T)));
-    CHECK_CUDA(cudaMalloc(&this->xc_d, this->num_rows * sizeof(T)));
-    CHECK_CUDA(cudaMalloc(&this->Axf_d, this->num_rows * sizeof(T)));
 
-    CHECK_CUDA(cudaMemset(this->rc_d, 0, this->num_rows * sizeof(T)));
-    CHECK_CUDA(cudaMemset(this->xc_d, 0, this->num_rows * sizeof(T)));
-    CHECK_CUDA(cudaMemset(this->Axf_d, 0, this->num_rows * sizeof(T)));
+    const int fine_n_rows = this->nx  * this->ny * this->nz;
+    const int coarse_n_rows = this->nx/2 * this->ny/2 * this->nz/2;
+
+    CHECK_CUDA(cudaMalloc(&this->coarse_Matrix->rc_d, this->num_rows * sizeof(T)));
+    CHECK_CUDA(cudaMalloc(&this->coarse_Matrix->xc_d, this->num_rows * sizeof(T)));
+    CHECK_CUDA(cudaMalloc(&this->coarse_Matrix->Axf_d, fine_n_rows * sizeof(T)));
+
+    CHECK_CUDA(cudaMemset(this->coarse_Matrix->rc_d, 0, this->num_rows * sizeof(T)));
+    CHECK_CUDA(cudaMemset(this->coarse_Matrix->xc_d, 0, this->num_rows * sizeof(T)));
+    CHECK_CUDA(cudaMemset(this->coarse_Matrix->Axf_d, 0, fine_n_rows * sizeof(T)));
 }
 
 template <typename T>
@@ -999,6 +1037,252 @@ void striped_Matrix<T>::set_num_rows(int num_rows){
     // std::cout << "random debug prints here:" << std::endl;
     // std::cout << "this->csr: " << this->CSR << std::endl;
     this->num_rows = num_rows;
+}
+
+template<typename T>
+bool striped_Matrix<T>::compare_to(striped_Matrix<T>& other){
+
+    std::cout << "comparing striped matrices of size " << this->nx << "x"<< this->ny << "x" << this->nz << std::endl;
+
+    // check all the single values
+    if(this->nx != other.get_nx()){
+        std::cout << "nx not equal" << std::endl;
+        std::cout << "this->nx: " << this->nx << std::endl;
+        std::cout << "other.get_nx(): " << other.get_nx() << std::endl;
+        return false;
+    }
+    if(this->ny != other.get_ny()){
+        std::cout << "ny not equal" << std::endl;
+        std::cout << "this->ny: " << this->ny << std::endl;
+        std::cout << "other.get_ny(): " << other.get_ny() << std::endl;
+        return false;
+    }
+    if(this->nnz != other.get_nnz()){
+        std::cout << "nnz not equal" << std::endl;
+        std::cout << "this->nnz: " << this->nnz << std::endl;
+        std::cout << "other.get_nnz(): " << other.get_nnz() << std::endl;
+        return false;
+    }
+    if(this->diag_index != other.get_diag_index()){
+        std::cout << "diag_index not equal" << std::endl;
+        std::cout << "this->diag_index: " << this->diag_index << std::endl;
+        std::cout << "other.get_diag_index(): " << other.get_diag_index() << std::endl;
+        return false;
+    }
+    if(this->matrix_type != other.get_matrix_type()){
+        std::cout << "matrix_type not equal" << std::endl;
+        std::cout << "this->matrix_type: " << string(this->matrix_type) << std::endl;
+        std::cout << "other.get_matrix_type(): " << string(other.get_matrix_type()) << std::endl;
+        return false;
+    }
+    if(this->num_MG_pre_smooth_steps != other.get_num_MG_pre_smooth_steps()){
+        std::cout << "num_MG_pre_smooth_steps not equal" << std::endl;
+        std::cout << "this->num_MG_pre_smooth_steps: " << this->num_MG_pre_smooth_steps << std::endl;
+        std::cout << "other.get_num_MG_pre_smooth_steps(): " << other.get_num_MG_pre_smooth_steps() << std::endl;
+        return false;
+    }
+    if(this->num_MG_post_smooth_steps != other.get_num_MG_post_smooth_steps()){
+        std::cout << "num_MG_post_smooth_steps not equal" << std::endl;
+        std::cout << "this->num_MG_post_smooth_steps: " << this->num_MG_post_smooth_steps << std::endl;
+        std::cout << "other.get_num_MG_post_smooth_steps(): " << other.get_num_MG_post_smooth_steps() << std::endl;
+        return false;
+    }
+
+
+    if(this->num_rows != other.get_num_rows()){
+        std::cout << "num_rows not equal" << std::endl;
+        return false;
+    }
+    if(this->num_cols != other.get_num_cols()){
+        std::cout << "num_cols not equal" << std::endl;
+        return false;
+    }
+    if(this->num_stripes != other.get_num_stripes()){
+        std::cout << "num_stripes not equal" << std::endl;
+        return false;
+    }
+    if(this->j_min_i != other.get_j_min_i()){
+        std::cout << "j_min_i not equal" << std::endl;
+        std::cout << "this->j_min_i: ";
+        for(auto i : this->j_min_i){
+            std::cout << i << " ";
+        }
+        std::cout << std::endl;
+        std::cout << "other.get_j_min_i(): ";
+        for(auto i : other.get_j_min_i()){
+            std::cout << i << " ";
+        }
+        std::cout << std::endl;
+        return false;
+    }
+    if(this->values != other.get_values()){
+        std::cout << "values not equal" << std::endl;
+        std::cout << "this->values: ";
+        for(auto i : this->values){
+            std::cout << i << " ";
+        }
+        std::cout << std::endl;
+        std::cout << "other.get_values(): ";
+        for(auto i : other.get_values()){
+            std::cout << i << " ";
+        }
+        std::cout << std::endl;
+
+        return false;
+    }
+
+    if(this->f2c_op != other.get_f2c_op()){
+        std::cout << "f2c_op not equal" << std::endl;
+        return false;
+    }
+
+    // also check if the device stuff is equal (if it exists)
+
+    if(this->j_min_i_d != nullptr && other.get_j_min_i_d() != nullptr){
+        // at least one of them is not null
+        if (!this->j_min_i_d || !other.get_j_min_i_d()){
+            // one of them is null -> one is null the other isn't
+            std::cout << "j_min_i_d not equal" << std::endl;
+            return false;
+        } else {
+            std::vector<int> A_j_min_i(this->num_stripes, 0);
+            std::vector<int> B_j_min_i(this->num_stripes, 0);
+            CHECK_CUDA(cudaMemcpy(A_j_min_i.data(), this->j_min_i_d, this->num_stripes * sizeof(int), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(B_j_min_i.data(), other.get_j_min_i_d(), this->num_stripes * sizeof(int), cudaMemcpyDeviceToHost));
+        
+            if(A_j_min_i != B_j_min_i){
+                std::cout << "j_min_i_d not equal" << std::endl;
+                return false;
+            }
+        }
+    }
+
+    if(this->values_d != nullptr && other.get_values_d() != nullptr){
+        // at least one of them is not null
+        if (!this->values_d || !other.get_values_d()){
+            // one of them is null -> one is null the other isn't
+            std::cout << "values_d not equal" << std::endl;
+            return false;
+        } else {
+            std::vector<T> A_values(this->num_stripes * this->num_rows, 0);
+            std::vector<T> B_values(this->num_stripes * this->num_rows, 0);
+            CHECK_CUDA(cudaMemcpy(A_values.data(), this->values_d, this->num_stripes * this->num_rows * sizeof(T), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(B_values.data(), other.get_values_d(), this->num_stripes * this->num_rows * sizeof(T), cudaMemcpyDeviceToHost));
+        
+            if(A_values != B_values){
+                std::cout << "values_d not equal" << std::endl;
+                return false;
+            }
+        }
+    }
+
+    if(this->f2c_op_d != nullptr && other.get_f2c_op_d() != nullptr){
+        // at least one of them is not null
+        if (!this->f2c_op_d || !other.get_f2c_op_d()){
+            // one of them is null -> one is null the other isn't
+            std::cout << "f2c_op_d not equal" << std::endl;
+            return false;
+        } else {
+
+            std::vector<int> A_f2c_op(this->num_rows, 0);
+            std::vector<int> B_f2c_op(this->num_rows, 0);
+            CHECK_CUDA(cudaMemcpy(A_f2c_op.data(), this->f2c_op_d, this->num_rows * sizeof(int), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(B_f2c_op.data(), other.get_f2c_op_d(), this->num_rows * sizeof(int), cudaMemcpyDeviceToHost));
+        
+            if(A_f2c_op != B_f2c_op){
+                std::cout << "f2c_op_d not equal" << std::endl;
+                return false;
+            }
+        }
+    }
+
+    // check if the rc_d is equal
+    if(this->rc_d != nullptr && other.get_rc_d() != nullptr){
+        // at least one of them is not null
+        if (!this->rc_d || !other.get_rc_d()){
+            // one of them is null -> one is null the other isn't
+            std::cout << "rc_d not equal" << std::endl;
+            return false;
+        }
+        else{
+            std::vector<T> A_rc(this->num_rows, 0);
+            std::vector<T> B_rc(this->num_rows, 0);
+            CHECK_CUDA(cudaMemcpy(A_rc.data(), this->rc_d, this->num_rows * sizeof(T), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(B_rc.data(), other.get_rc_d(), this->num_rows * sizeof(T), cudaMemcpyDeviceToHost));
+        
+            if(A_rc != B_rc){
+                std::cout << "rc_d not equal" << std::endl;
+                return false;
+            }
+        }
+    }
+
+    // check if the xc_d is equal
+    if(this->xc_d != nullptr && other.get_xc_d() != nullptr){
+        // at least one of them is not null
+        if (!this->xc_d || !other.get_xc_d()){
+            // one of them is null -> one is null the other isn't
+            std::cout << "xc_d not equal" << std::endl;
+            return false;
+        }
+        else{
+            std::vector<T> A_xc(this->num_rows, 0);
+            std::vector<T> B_xc(this->num_rows, 0);
+            CHECK_CUDA(cudaMemcpy(A_xc.data(), this->xc_d, this->num_rows * sizeof(T), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(B_xc.data(), other.get_xc_d(), this->num_rows * sizeof(T), cudaMemcpyDeviceToHost));
+        
+            if(A_xc != B_xc){
+                std::cout << "xc_d not equal" << std::endl;
+                return false;
+            }
+        }
+    }
+    // check if the Axf_d is equal
+    if(this->Axf_d != nullptr && other.get_Axf_d() != nullptr){
+        // at least one of them is not null
+        if (!this->Axf_d || !other.get_Axf_d()){
+            // one of them is null -> one is null the other isn't
+            std::cout << "Axf_d not equal" << std::endl;
+            return false;
+        }
+        else{
+            std::vector<T> A_Axf(this->num_rows, 0);
+            std::vector<T> B_Axf(this->num_rows, 0);
+            CHECK_CUDA(cudaMemcpy(A_Axf.data(), this->Axf_d, this->num_rows * sizeof(T), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(B_Axf.data(), other.get_Axf_d(), this->num_rows * sizeof(T), cudaMemcpyDeviceToHost));
+        
+            if(A_Axf != B_Axf){
+                std::cout << "Axf_d not equal" << std::endl;
+                return false;
+            }
+        }
+    }
+
+
+
+    // check if the coarse matrix is equal
+    if(this->coarse_Matrix != nullptr && other.get_coarse_Matrix() != nullptr){
+        // at least one of them is not null
+        if(!this->coarse_Matrix->compare_to(*(other.get_coarse_Matrix()))){
+            std::cout << "coarse matrix not equal" << std::endl;
+            return false;
+        }
+    } else if(this->coarse_Matrix != nullptr && other.get_coarse_Matrix() == nullptr){
+        // one of them is null -> one is null the other isn't
+        std::cout << "one of the coarse matrices is null, the other isn't mmrayu" << std::endl;
+
+        
+        std::cout << "this->coarse_Matrix: " << this->coarse_Matrix << std::endl;
+        std::cout << "other.get_coarse_Matrix(): " << other.get_coarse_Matrix() << std::endl;
+        
+
+        return false;
+    } else if(this->coarse_Matrix == nullptr && other.get_coarse_Matrix() != nullptr){
+        std::cout << "one of the coarse matrices is null, the other isn't" << std::endl;
+        return false;
+    }
+
+    return true;
 }
 
 template <typename T>

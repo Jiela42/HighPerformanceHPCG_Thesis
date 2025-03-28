@@ -362,6 +362,15 @@ int generate_CSR_from_Striped(
     CHECK_CUDA(cudaMemcpy(&num_nnz, row_ptr + num_rows, sizeof(int), cudaMemcpyDeviceToHost));
 
     // now we generate the col_idx and values
+    // std::cout << "j_min_i: " << j_min_i << std::endl;
+    // std::cout << "num_rows: " << num_rows << std::endl;
+    // std::cout << "num_stripes: " << num_stripes << std::endl;
+    // std::cout << "striped_A_d: " << striped_A_d << std::endl;
+    // std::cout << "row_ptr: " << row_ptr << std::endl;
+    // std::cout << "col_idx: " << col_idx << std::endl;
+    // std::cout << "values: " << values << std::endl;
+
+
     col_and_val_from_striped<<<num_blocks, block_size>>>(num_rows, num_stripes, j_min_i, striped_A_d, row_ptr, col_idx, values);
     CHECK_CUDA(cudaDeviceSynchronize());
 

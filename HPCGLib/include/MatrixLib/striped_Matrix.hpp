@@ -70,6 +70,7 @@ class striped_Matrix {
         void initialize_coarse_matrix();
         // void compare_to(striped_Matrix<T>& other) const;
         // void write_to_file() const;
+        bool compare_to(striped_Matrix<T>& other);
         
         
         private:
