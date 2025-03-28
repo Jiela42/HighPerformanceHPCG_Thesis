@@ -16,12 +16,30 @@ __global__ void compute_restriction_kernel(
     int * f2c_operator
 );
 
+__global__ void compute_restriction_multi_GPU_kernel(
+    local_int_t num_rows,
+    DataType * Axf,
+    DataType * rf,
+    DataType * rc,
+    int *f2c_operator,
+    int nx, int ny, int nz
+);
+
 __global__ void compute_prolongation_kernel(
     int num_rows,
     double * xc,
     double * x,
     int * c2f_operator
 );
+
+__global__ void compute_prolongation_multi_GPU_kernel(
+    int num_rows,
+    DataType * xc,
+    DataType * xf,
+    int * f2c_operator,
+    int nx, int ny, int nz
+);
+
 
 double L2_norm_for_SymGS(
     sparse_CSR_Matrix<double> & A,

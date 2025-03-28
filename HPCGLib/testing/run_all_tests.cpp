@@ -1,5 +1,6 @@
 #include <iostream>
-
+#include <ctime>
+#include <iomanip>
 #include "testing.hpp"
 
 // #include "MatrixLib_tests.cpp"
@@ -7,7 +8,15 @@
 
 int main(){
     std::cout << "Starting Full Tests" << std::endl;
+    // print the current time, so we see if the tests are running
 
+    // Get the current time
+    std::time_t now = std::time(nullptr);
+    std::tm* local_time = std::localtime(&now);
+
+    // Print the time of day in a readable format
+    std::cout << "Current Time: " << std::put_time(local_time, "%Y-%m-%d %H:%M:%S") << std::endl;
+ 
     bool all_pass = true;
 
     all_pass = all_pass && run_all_util_tests(4, 4, 4);
@@ -33,11 +42,11 @@ int main(){
     // std::cout << "Finished MatrixLib tests" << std::endl;
 
     std::cout<< "Starting cuSparse tests" << std::endl;
-    // all_pass = all_pass && run_cuSparse_tests(4, 4, 4);
-    // all_pass = all_pass && run_cuSparse_tests(8, 8, 8);
-    // all_pass = all_pass && run_cuSparse_tests(16, 16, 16);
-    // all_pass = all_pass && run_cuSparse_tests(32, 32, 32);
-    // all_pass = all_pass && run_cuSparse_tests(64, 64, 64);
+    all_pass = all_pass && run_cuSparse_tests(4, 4, 4);
+    all_pass = all_pass && run_cuSparse_tests(8, 8, 8);
+    all_pass = all_pass && run_cuSparse_tests(16, 16, 16);
+    all_pass = all_pass && run_cuSparse_tests(32, 32, 32);
+    all_pass = all_pass && run_cuSparse_tests(64, 64, 64);
     // all_pass = all_pass && run_cuSparse_tests(128, 128, 128);
     // std::cout << "Finished cuSparse tests" << std::endl;
 
@@ -101,8 +110,8 @@ int main(){
     // all_pass = all_pass && run_stripedColoringPrecomputed_tests(128, 128, 128);
     // all_pass = all_pass && run_stripedColoringPrecomputed_tests(256, 256, 256);
     // all_pass = all_pass && run_stripedColoringPrecomputed_tests(512, 256, 256);
-    all_pass = all_pass && run_stripedColoringPrecomputed_tests(176, 176, 176);
-    all_pass = all_pass && run_stripedColoringPrecomputed_tests(240, 240, 240);
+    // all_pass = all_pass && run_stripedColoringPrecomputed_tests(176, 176, 176);
+    // all_pass = all_pass && run_stripedColoringPrecomputed_tests(240, 240, 240);
 
     std::cout << "Starting stripedBoxColoring tests" << std::endl;
     all_pass = all_pass && run_stripedBoxColoring_tests(4, 4, 4);
@@ -111,8 +120,8 @@ int main(){
     all_pass = all_pass && run_stripedBoxColoring_tests(32, 32, 32);
     all_pass = all_pass && run_stripedBoxColoring_tests(64, 64, 64);
     all_pass = all_pass && run_stripedBoxColoring_tests(128, 128, 128);
-    //all_pass = all_pass && run_stripedBoxColoring_tests(176, 176, 176);
-    //all_pass = all_pass && run_stripedBoxColoring_tests(240, 240, 240);
+    // all_pass = all_pass && run_stripedBoxColoring_tests(176, 176, 176);
+    // all_pass = all_pass && run_stripedBoxColoring_tests(240, 240, 240);
 
     std::cout << "Starting no_store tests" << std::endl;
     all_pass = all_pass && run_no_store_stripedColoring_filebased_tests();
@@ -124,8 +133,8 @@ int main(){
     all_pass = all_pass && run_COR_BoxColoring_tests(32, 32, 32);
     all_pass = all_pass && run_COR_BoxColoring_tests(64, 64, 64);
     all_pass = all_pass && run_COR_BoxColoring_tests(128, 128, 128);
-    //all_pass = all_pass && run_COR_BoxColoring_tests(176, 176, 176);
-    //all_pass = all_pass && run_COR_BoxColoring_tests(240, 240, 240);
+    // all_pass = all_pass && run_COR_BoxColoring_tests(176, 176, 176);
+    // all_pass = all_pass && run_COR_BoxColoring_tests(240, 240, 240);
 
 
     if (all_pass){

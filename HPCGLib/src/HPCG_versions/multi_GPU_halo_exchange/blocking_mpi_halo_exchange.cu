@@ -28,7 +28,7 @@ void blocking_mpi_Implementation<T>::ExchangeHaloBlockingMPI(Halo *halo, Problem
     //extract the data into send buffers on the GPU
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
         if(problem->neighbors_mask[i]){
-            (*problem->extraction_functions[i])(halo, halo->send_buff_h[i], &(problem->extraction_ghost_cells[i]));
+            (*problem->extraction_functions[i])(halo, i, &(problem->extraction_ghost_cells[i]), 1);
         }
     }
     
@@ -50,7 +50,7 @@ void blocking_mpi_Implementation<T>::ExchangeHaloBlockingMPI(Halo *halo, Problem
     // Now that we received all data, we can inject it back to the halo
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
         if(problem->neighbors_mask[i]){
-            (*problem->injection_functions[i])(halo, halo->recv_buff_h[i], &(problem->injection_ghost_cells[i]));
+            (*problem->injection_functions[i])(halo, i, &(problem->injection_ghost_cells[i]), 1);
         }
     }
 

@@ -4,6 +4,7 @@
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
 #include "MatrixLib/matrix_basics.hpp"
 #include "MatrixLib/generations.cuh"
+#include "UtilLib/hpcg_multi_GPU_utils.cuh"
 
 #include <vector>
 #include <iostream>
@@ -63,6 +64,10 @@ class striped_Matrix {
         void set_num_rows(int num_rows);
         void print_COR_Format();
         void print() const;
+        void Generate_striped_3D27P_Matrix_onGPU(int nx, int ny, int nz);
+        void generate_f2c_operator_onGPU();
+        void init_coarse_buffer();
+        void initialize_coarse_matrix();
         // void compare_to(striped_Matrix<T>& other) const;
         // void write_to_file() const;
         

@@ -5,13 +5,10 @@
 
 template <typename T>
 void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_computeMG(
-    striped_Matrix<T> & A,
+    striped_partial_Matrix<T> & A,
     Halo * r_d, Halo * x_d,
-    Problem *problem,
-    int *j_min_i_d
+    Problem *problem
 ){ 
-    //UNCOMMENT ONCE PARTIAL MATRIX IS IMPLEMENTED
-    /*
     SetHaloZeroGPU(x_d);
 
     if(A.get_coarse_Matrix() != nullptr){ // go to coarser level if it exists
@@ -19,7 +16,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
         int num_presmoother_steps = A.get_num_MG_pre_smooth_steps();
 
         for(int i = 0; i < num_presmoother_steps; i++){
-            this->compute_SymGS(A, x_d, r_d, problem, j_min_i_d);
+            this->compute_SymGS(A, x_d, r_d, problem);
             this->ExchangeHalo(x_d, problem);
         }
 
@@ -27,7 +24,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
         Halo *rc_d = A.get_coarse_Matrix()->get_rc_d(); //coarse number of rows, needs to be halo bc of recursive call
         Halo *xc_d = A.get_coarse_Matrix()->get_xc_d(); //coarse number of rows, needs to be halo bc of recursive call
 
-        this->compute_SPMV(A, x_d, Axf_d, problem, j_min_i_d);
+        this->compute_SPMV(A, x_d, Axf_d, problem);
         this->ExchangeHalo(Axf_d, problem);
 
         int num_threads = 1024;
@@ -43,15 +40,17 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
         );
         CHECK_CUDA(cudaDeviceSynchronize());
         
+        
         Problem coarse_problem;
         GenerateProblem(problem->npx, problem->npy, problem->npz, problem->nx / 2, problem->ny / 2, problem->nz / 2, problem->size, problem->rank, &coarse_problem);
         
         this->ExchangeHalo(rc_d, &coarse_problem);
         this->ExchangeHalo(xc_d, &coarse_problem);
         
-        this->compute_MG(*(A.get_coarse_Matrix()), rc_d, xc_d, &coarse_problem, (A.get_coarse_Matrix()).get_j_min_i_d());
+        this->compute_MG(*(A.get_coarse_Matrix()), rc_d, xc_d, &coarse_problem);
 
-        this->ExchangeHalo(xc_d, problem);
+        this->ExchangeHalo(xc_d, &coarse_problem);
+        
 
         compute_prolongation_multi_GPU_kernel<<<num_blocks, num_threads>>>(
             num_coarse_rows,
@@ -66,14 +65,14 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
 
         int num_post_smoother_steps = A.get_num_MG_post_smooth_steps();
         for(int i = 0; i < num_post_smoother_steps; i++){
-            this->compute_SymGS(A, x_d, r_d, problem, j_min_i_d);
+            this->compute_SymGS(A, x_d, r_d, problem);
             this->ExchangeHalo(x_d, problem);
         }
     
     } else {
-        this->compute_SymGS(A, x_d, r_d);
+        this->compute_SymGS(A, x_d, r_d, problem);
     }
-*/
+
 }
 
 // template instanciation
