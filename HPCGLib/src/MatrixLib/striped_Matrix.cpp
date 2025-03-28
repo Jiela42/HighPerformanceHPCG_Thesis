@@ -344,6 +344,71 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onCPU(sparse_CSR_Matrix<T>
 }
 
 template <typename T>
+void striped_Matrix<T>::Generate_striped_3D27P_Matrix_onGPU(int nx, int ny, int nz) {
+    this->nx = nx;
+    this->ny = ny;
+    this->nz = nz;
+
+    // a single gpu setting
+    Problem *p = new Problem;
+    GenerateProblem(1, 1, 1, this->nx, this->ny, this->nz, 1, 0, p);
+
+    this->num_rows = p->nx * p->ny * p->nz; 
+    this->num_cols = p->nx * p->ny * p->nz;
+    this->num_stripes = 27;
+
+
+    //this->j_min_i.clear();
+    //this->values.clear();
+    this->j_min_i = std::vector<int>(this->num_stripes, 0);
+    this->j_min_i.clear();
+    //this->j_min_i_d = nullptr;
+    //this->values_d = nullptr;
+
+    //this->color_pointer_d = nullptr;
+    //this->color_sorted_rows_d = nullptr;
+
+    this->num_MG_pre_smooth_steps = 1;
+    this->num_MG_post_smooth_steps = 1;
+    this->coarse_Matrix = nullptr;
+    this->f2c_op_d = nullptr;
+    this->rc_d = nullptr;
+    this->xc_d = nullptr;
+    this->Axf_d = nullptr;
+    //this->f2c_op.clear();
+
+    CHECK_CUDA(cudaMalloc(&this->values_d, sizeof(double) * num_rows* 27));
+    GenerateStripedPartialMatrix_GPU(p, this->values_d);
+
+    // fill j_min_i_d
+    int neighbour_offsets [num_stripes][3] = {
+        {-1, -1, -1}, {0, -1, -1}, {1, -1, -1},
+        {-1, 0, -1}, {0, 0, -1}, {1, 0, -1},
+        {-1, 1, -1}, {0, 1, -1}, {1, 1, -1},
+        {-1, -1, 0}, {0, -1, 0}, {1, -1, 0},
+        {-1, 0, 0}, {0, 0, 0}, {1, 0, 0},
+        {-1, 1, 0}, {0, 1, 0}, {1, 1, 0},
+        {-1, -1, 1}, {0, -1, 1}, {1, -1, 1},
+        {-1, 0, 1}, {0, 0, 1}, {1, 0, 1},
+        {-1, 1, 1}, {0, 1, 1}, {1, 1, 1}
+    };
+
+    for (int i = 0; i < this->num_stripes; i++) {
+        int off_x = neighbour_offsets[i][0];
+        int off_y = neighbour_offsets[i][1];
+        int off_z = neighbour_offsets[i][2];
+        
+        this->j_min_i[i] = off_x + off_y * p->gnx + off_z * p->gnx * p->gny;
+        if (this->j_min_i[i] == 0) {
+            this->diag_index = i;
+        }
+    }
+
+    CHECK_CUDA(cudaMalloc(&this->j_min_i_d, this->num_stripes * sizeof(int)));
+    CHECK_CUDA(cudaMemcpy(this->j_min_i_d, this->j_min_i.data(), this->num_stripes * sizeof(int), cudaMemcpyHostToDevice));
+}
+
+template <typename T>
 void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T>& A){
     
     // std::cout << "striped_3D27P_Matrix_from_CSR_onGPU" << std::endl;
@@ -820,6 +885,58 @@ void striped_partial_Matrix<T>::generate_f2c_operator_onGPU() {
 
     generate_partialf2c_operator(x, y, z, x*2, y*2, z*2, f2c_op_d);
 }
+
+template <typename T>
+void striped_Matrix<T>::generate_f2c_operator_onGPU() {
+    const int x = this->nx;
+    const int y = this->ny;
+    const int z = this->nz;
+    const int fine_n_rows = x *2 * y * 2 * z * 2;
+
+    // allocate space for the device pointers
+    CHECK_CUDA(cudaMalloc(&this->f2c_op_d, fine_n_rows * sizeof(int)));
+
+    // set them to zero
+    CHECK_CUDA(cudaMemset(this->f2c_op_d, 0, fine_n_rows * sizeof(int)));
+
+    generate_partialf2c_operator(x, y, z, x*2, y*2, z*2, f2c_op_d);
+}
+
+template <typename T>
+void striped_Matrix<T>::init_coarse_buffer(){
+    CHECK_CUDA(cudaMalloc(&this->rc_d, this->num_rows * sizeof(T)));
+    CHECK_CUDA(cudaMalloc(&this->xc_d, this->num_rows * sizeof(T)));
+    CHECK_CUDA(cudaMalloc(&this->Axf_d, this->num_rows * sizeof(T)));
+
+    CHECK_CUDA(cudaMemset(this->rc_d, 0, this->num_rows * sizeof(T)));
+    CHECK_CUDA(cudaMemset(this->xc_d, 0, this->num_rows * sizeof(T)));
+    CHECK_CUDA(cudaMemset(this->Axf_d, 0, this->num_rows * sizeof(T)));
+}
+
+template <typename T>
+void striped_Matrix<T>::initialize_coarse_matrix(){
+    assert(this->nx % 2 == 0);
+    assert(this->ny % 2 == 0);
+    assert(this->nz % 2 == 0);
+    assert(this->coarse_Matrix == nullptr);
+
+    int nx_f = this->nx;
+    int ny_f = this->ny;
+    int nz_f = this->nz;
+    //int fine_n_rows = this->nx *2 * this->ny * 2 * this->nz * 2;
+    int nx_c = this->nx / 2;
+    int ny_c = this->ny / 2;
+    int nz_c = this->nz / 2;
+
+    // allocate coarse matrix
+    this->coarse_Matrix= new striped_Matrix<T>();
+    this->coarse_Matrix->Generate_striped_3D27P_Matrix_onGPU(nx_c, ny_c, nz_c);
+    this->coarse_Matrix->generate_f2c_operator_onGPU();
+
+    // allocate halos rc, xc, Axf and set to zero
+    init_coarse_buffer();
+}
+
 
 
 template <typename T>
