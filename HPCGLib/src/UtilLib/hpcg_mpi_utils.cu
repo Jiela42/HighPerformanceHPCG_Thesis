@@ -430,12 +430,10 @@ void InitHaloMemCPU(Halo *halo, Problem *problem){
 
     // allocate memory for send and receive buffers on CPU
     for(int i = 0; i < NUMBER_NEIGHBORS; i++){
-        
         halo->send_buff_h[i] = (DataType *) malloc(problem->count_exchange[i] * sizeof(DataType));
         memset(halo->send_buff_h[i], 0, problem->count_exchange[i] * sizeof(DataType));
         halo->recv_buff_h[i] = (DataType *) malloc(problem->count_exchange[i] * sizeof(DataType));
         memset(halo->recv_buff_h[i], 0, problem->count_exchange[i] * sizeof(DataType));
-        
     }
 }
 
@@ -569,7 +567,7 @@ void InitGPU(Problem *problem){
     CHECK_CUDA(cudaGetDeviceCount(&deviceCount));
     assert(deviceCount > 0);
     CHECK_CUDA(cudaSetDevice(problem->rank % deviceCount));
-    //printf("Rank=%d:\t\t Set my device to device=%d, available=%d.\n", problem->rank, problem->rank % deviceCount, deviceCount);
+    // printf("Rank=%d:\t\t Set my device to device=%d, available=%d.\n", problem->rank, problem->rank % deviceCount, deviceCount);
 }
 /* x_d is the pointer to the first element in the slice */
 /* every thread fills an element */
