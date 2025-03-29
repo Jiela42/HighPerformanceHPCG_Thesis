@@ -22,26 +22,26 @@ int next_smaller_power_of_two(int n) {
     return power / 2;
 }
 
-__global__ void matvec_mult_kernel(int num_rows, int *row_ptr, int *col_idx, double *values, double *x, double *Ax) {
+__global__ void matvec_mult_kernel(local_int_t num_rows, local_int_t *row_ptr, local_int_t *col_idx, double *values, double *x, double *Ax) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-    for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x) {
+    for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x) {
         double sum = 0.0;
-        for (int j = row_ptr[row]; j < row_ptr[row + 1]; j++) {
+        for (local_int_t j = row_ptr[row]; j < row_ptr[row + 1]; j++) {
             sum += values[j] * x[col_idx[j]];
         }
         Ax[row] = sum;
     }
 }
 
-__global__ void diff_and_norm_kernel(int num_rows, double *Ax, double *y, double *y_reduced) {
+__global__ void diff_and_norm_kernel(local_int_t num_rows, double *Ax, double *y, double *y_reduced) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     double my_sum = 0;
     int lane = threadIdx.x % WARP_SIZE;
     int warp_id = threadIdx.x / WARP_SIZE;
     __shared__ double intermediate_sums[32];
 
-    for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x) {
+    for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x) {
         double d = Ax[row] - y[row];
         my_sum += d * d;
     }
@@ -81,7 +81,7 @@ __global__ void square_fusedReduction_kernel(int num_rows, double *y, double *y_
 
     // printf("Hello from the kernel\n");
 
-    for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x) {
+    for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x) {
         my_sum += y[row] * y[row];
     }
 
@@ -113,15 +113,15 @@ __global__ void square_fusedReduction_kernel(int num_rows, double *y, double *y_
 }
 
 __global__ void compute_restriction_kernel(
-    int num_rows,
+    local_int_t num_rows,
     double * Axf,
     double * rf,
     double * rc,
-    int * f2c_operator
+    local_int_t * f2c_operator
 ){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-    for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x) {
+    for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x) {
         rc[row] = rf[f2c_operator[row]] - Axf[f2c_operator[row]];
     }
 }
@@ -154,14 +154,14 @@ __global__ void compute_restriction_multi_GPU_kernel(
 
 
 __global__ void compute_prolongation_kernel(
-    int num_rows,
+    local_int_t num_rows,
     double * xc,
     double * xf,
-    int * f2c_operator
+    local_int_t * f2c_operator
 ){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     
-    for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x) {
+    for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x) {
         
         // if(f2c_operator[row] < 0){
             
@@ -207,7 +207,7 @@ __global__ void compute_prolongation_multi_GPU_kernel(
 
 void L2_norm_for_Device_Vector(
     cudaStream_t stream,
-    int num_rows,
+    local_int_t num_rows,
     double * y,
     double * result
 ){
@@ -241,9 +241,9 @@ double L2_norm_for_SymGS(
     double * y
 ){
 
-    int num_rows = A.get_num_rows();
-    int * row_ptr = A.get_row_ptr_d();
-    int * col_idx = A.get_col_idx_d();
+    local_int_t num_rows = A.get_num_rows();
+    local_int_t * row_ptr = A.get_row_ptr_d();
+    local_int_t * col_idx = A.get_col_idx_d();
     double * values = A.get_values_d();
 
     // Allocate memory for Ax on the device
@@ -290,7 +290,7 @@ double L2_norm_for_SymGS(
 ){
 
     striped_warp_reduction_Implementation<double> implementation;
-    int num_rows = A.get_num_rows();
+    local_int_t num_rows = A.get_num_rows();
     
     // Allocate memory for Ax on the device
     double *Ax;
@@ -326,9 +326,9 @@ double relative_residual_norm_for_SymGS(
     double * y
 ){
 
-    int num_rows = A.get_num_rows();
-    int * row_ptr = A.get_row_ptr_d();
-    int * col_idx = A.get_col_idx_d();
+    local_int_t num_rows = A.get_num_rows();
+    local_int_t * row_ptr = A.get_row_ptr_d();
+    local_int_t * col_idx = A.get_col_idx_d();
     double * values = A.get_values_d();
 
     
@@ -352,8 +352,8 @@ double relative_residual_norm_for_SymGS(
     double * y
 ){
 
-    int num_rows = A.get_num_rows();
-    int num_cols = A.get_num_cols();
+    local_int_t num_rows = A.get_num_rows();
+    local_int_t num_cols = A.get_num_cols();
 
     int num_stripes = A.get_num_stripes();
     int * j_min_i = A.get_j_min_i_d();

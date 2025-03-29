@@ -97,7 +97,7 @@ sparse_CSR_Matrix<T>::~sparse_CSR_Matrix(){
 }
 
 template <typename T>
-sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, MatrixType mt, T* vals, int* row_ptr, int* col_idx) {
+sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, local_int_t nnz, MatrixType mt, T* vals, local_int_t* row_ptr, local_int_t* col_idx) {
     
     this->matrix_type = mt;
     
@@ -108,8 +108,8 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, MatrixT
     this->num_rows = nx * ny * nz;
     this->num_cols = nx * ny * nz;
 
-    this->row_ptr = std::vector<int>(row_ptr, row_ptr + this->num_rows + 1);
-    this->col_idx = std::vector<int>(col_idx, col_idx + this->nnz);
+    this->row_ptr = std::vector<local_int_t>(row_ptr, row_ptr + this->num_rows + 1);
+    this->col_idx = std::vector<local_int_t>(col_idx, col_idx + this->nnz);
     this->values = std::vector<T>(vals, vals + this->nnz);
 
     this->row_ptr_d = nullptr;
@@ -129,7 +129,7 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, MatrixT
 }
 
 template <typename T>
-sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, int nnz, MatrixType mt, std::vector<T> vals, std::vector<int> row_ptr, std::vector<int> col_idx) {
+sparse_CSR_Matrix<T>::sparse_CSR_Matrix(int nx, int ny, int nz, local_int_t nnz, MatrixType mt, std::vector<T> vals, std::vector<local_int_t> row_ptr, std::vector<local_int_t> col_idx) {
     
     this->matrix_type = mt;
 
@@ -165,23 +165,23 @@ sparse_CSR_Matrix<T>::sparse_CSR_Matrix(std::vector<std::vector<T>> dense_matrix
     // check that we have two dimensions
     assert(dense_matrix.size() > 0);
 
-    int num_rows = dense_matrix.size();
-    int num_cols = dense_matrix[0].size();
+    local_int_t num_rows = dense_matrix.size();
+    local_int_t num_cols = dense_matrix[0].size();
 
-    for(int i = 0; i < num_rows; i++){
+    for(local_int_t i = 0; i < num_rows; i++){
         assert(dense_matrix[i].size() == num_cols);
     }
 
-    int nnz = 0;
-    std::vector<int> row_ptr;
-    std::vector<int> col_idx;
+    local_int_t nnz = 0;
+    std::vector<local_int_t> row_ptr;
+    std::vector<local_int_t> col_idx;
     std::vector<T> values;
 
     row_ptr.push_back(0);
 
     // now we read the data into the sparse matrix
-    for (int i = 0; i< num_rows; i++){
-        for (int j = 0; j < num_cols; j++){
+    for (local_int_t i = 0; i< num_rows; i++){
+        for (local_int_t j = 0; j < num_cols; j++){
             T val = dense_matrix[i][j];
             if(val != 0){
                 values.push_back(val);
@@ -241,22 +241,22 @@ void sparse_CSR_Matrix<T>::generateMatrix_onCPU(int nx, int ny, int nz){
     this->num_rows = nx * ny * nz;
     this->num_cols = nx * ny * nz;
 
-    int num_rows = nx * ny * nz;
-    int num_cols = nx * ny * nz;
+    local_int_t num_rows = nx * ny * nz;
+    local_int_t num_cols = nx * ny * nz;
 
-    int nnz = 0;
+    local_int_t nnz = 0;
 
-    std::vector<int> nnz_per_row(num_rows);
+    std::vector<local_int_t> nnz_per_row(num_rows);
 
-    std::vector<std::vector<int>> col_idx_per_row(num_rows);
-    std::vector<std::vector<double>> values_per_row(num_rows);
+    std::vector<std::vector<local_int_t>> col_idx_per_row(num_rows);
+    std::vector<std::vector<T>> values_per_row(num_rows);
 
     for(int ix = 0; ix < nx; ix++){
         for(int iy = 0; iy < ny; iy++){
             for(int iz = 0; iz < nz; iz++){
 
-                int i = ix + nx * iy + nx * ny * iz;
-                int nnz_i = 0;
+                local_int_t i = ix + nx * iy + nx * ny * iz;
+                local_int_t nnz_i = 0;
 
                 for (int sz = -1; sz < 2; sz++){
                     if(iz + sz > -1 && iz + sz < nz){
@@ -264,7 +264,7 @@ void sparse_CSR_Matrix<T>::generateMatrix_onCPU(int nx, int ny, int nz){
                             if(iy + sy > -1 && iy + sy < ny){
                                 for(int sx = -1; sx < 2; sx++){
                                     if(ix + sx > -1 && ix + sx < nx){
-                                        int j = ix + sx + nx * (iy + sy) + nx * ny * (iz + sz);
+                                        local_int_t j = ix + sx + nx * (iy + sy) + nx * ny * (iz + sz);
                                         if(i == j){
                                             col_idx_per_row[i].push_back(j);
                                             values_per_row[i].push_back(26.0);
@@ -285,14 +285,14 @@ void sparse_CSR_Matrix<T>::generateMatrix_onCPU(int nx, int ny, int nz){
         }
     }
 
-    this->row_ptr = std::vector<int>(num_rows + 1, 0);
-    this->col_idx = std::vector<int>();
+    this->row_ptr = std::vector<local_int_t>(num_rows + 1, 0);
+    this->col_idx = std::vector<local_int_t>();
     this->values = std::vector<T>();
 
-    for (int i = 0; i < num_rows; i++){
+    for (local_int_t i = 0; i < num_rows; i++){
         this->row_ptr[i + 1] = this->row_ptr[i] + nnz_per_row[i];
 
-        for (int j = 0; j < nnz_per_row[i]; j++){
+        for (local_int_t j = 0; j < nnz_per_row[i]; j++){
             this->col_idx.push_back(col_idx_per_row[i][j]);
             this->values.push_back(values_per_row[i][j]);
         }
@@ -324,34 +324,34 @@ void sparse_CSR_Matrix<T>::generateMatrix_onGPU(int nx, int ny, int nz)
     this->ny = ny;
     this->nz = nz;
 
-    int num_nodes = nx * ny * nz;
+    local_int_t num_nodes = nx * ny * nz;
 
     this->num_rows = num_nodes;
     this->num_cols = num_nodes;
 
-    int num_interior_points = (nx - 2) * (ny - 2) * (nz - 2);
-    int num_face_points = 2 * ((nx - 2) * (ny - 2) + (nx - 2) * (nz - 2) + (ny - 2) * (nz - 2));
-    int num_edge_points = 4 * ((nx - 2) + (ny - 2) + (nz - 2));
-    int num_corner_points = 8;
+    local_int_t num_interior_points = (nx - 2) * (ny - 2) * (nz - 2);
+    local_int_t num_face_points = 2 * ((nx - 2) * (ny - 2) + (nx - 2) * (nz - 2) + (ny - 2) * (nz - 2));
+    local_int_t num_edge_points = 4 * ((nx - 2) + (ny - 2) + (nz - 2));
+    local_int_t num_corner_points = 8;
 
-    int nnz_interior = 27 * num_interior_points;
-    int nnz_face = 18 * num_face_points;
-    int nnz_edge = 12 * num_edge_points;
-    int nnz_corner = 8 * num_corner_points;
+    local_int_t nnz_interior = 27 * num_interior_points;
+    local_int_t nnz_face = 18 * num_face_points;
+    local_int_t nnz_edge = 12 * num_edge_points;
+    local_int_t nnz_corner = 8 * num_corner_points;
 
-    int nnz = nnz_interior + nnz_face + nnz_edge + nnz_corner;
+    local_int_t nnz = nnz_interior + nnz_face + nnz_edge + nnz_corner;
 
     this->nnz = nnz;
 
     // allocate space for the device pointers
-    CHECK_CUDA(cudaMalloc(&this->row_ptr_d, (num_nodes + 1) * sizeof(int)));
-    CHECK_CUDA(cudaMalloc(&this->col_idx_d, nnz * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&this->row_ptr_d, (num_nodes + 1) * sizeof(local_int_t)));
+    CHECK_CUDA(cudaMalloc(&this->col_idx_d, nnz * sizeof(local_int_t)));
     CHECK_CUDA(cudaMalloc(&this->values_d, nnz * sizeof(T)));
 
     // set them to zero
     // std::cout << "row_ptr_d: " << row_ptr_d << std::endl;
-    CHECK_CUDA(cudaMemset(this->row_ptr_d, 0, (num_nodes + 1) * sizeof(int)));
-    CHECK_CUDA(cudaMemset(this->col_idx_d, 0, nnz * sizeof(int)));
+    CHECK_CUDA(cudaMemset(this->row_ptr_d, 0, (num_nodes + 1) * sizeof(local_int_t)));
+    CHECK_CUDA(cudaMemset(this->col_idx_d, 0, nnz * sizeof(local_int_t)));
     CHECK_CUDA(cudaMemset(this->values_d, 0, nnz * sizeof(T)));
 
     // std::cout << "generating CSR Matrix on GPU" << std::endl;
@@ -405,8 +405,8 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation_CPU(str
     this->Striped = &A;
     A.set_CSR(this);
     
-    this->row_ptr = std::vector<int>(this->num_rows + 1, 0);
-    this->col_idx = std::vector<int>(this->nnz, 0);
+    this->row_ptr = std::vector<local_int_t>(this->num_rows + 1, 0);
+    this->col_idx = std::vector<local_int_t>(this->nnz, 0);
     this->values = std::vector<T>(this->nnz, 0);
 
     // for(int i =0; i< A.get_num_stripes(); i++){
@@ -418,12 +418,12 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation_CPU(str
     // for(int i=0; i< A.get_num_stripes(); i++){
     //     std::cout << "striped_vals: " << striped_vals[i] << std::endl;
     // }
-    int elem_count = 0;
+    local_int_t elem_count = 0;
 
-    for(int i = 0; i < this->num_rows; i++){
-        int nnz_i = 0;
+    for(local_int_t i = 0; i < this->num_rows; i++){
+        local_int_t nnz_i = 0;
         for(int stripe_j = 0; stripe_j < A.get_num_stripes(); stripe_j++){
-            int j = A.get_j_min_i()[stripe_j] + i;
+            local_int_t j = A.get_j_min_i()[stripe_j] + i;
             double val = striped_vals[i*A.get_num_stripes() + stripe_j];
             // int val = A.get_element(i, j);
             // if(elem_count == 0 && i == 0){
@@ -463,18 +463,18 @@ template <typename T>
 void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation_GPU(striped_Matrix<T> & A){
 
     // allocate space for the device pointers
-    CHECK_CUDA(cudaMalloc(&this->row_ptr_d, (this->num_rows + 1) * sizeof(int)));
-    CHECK_CUDA(cudaMalloc(&this->col_idx_d, this->nnz * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&this->row_ptr_d, (this->num_rows + 1) * sizeof(local_int_t)));
+    CHECK_CUDA(cudaMalloc(&this->col_idx_d, this->nnz * sizeof(local_int_t)));
     CHECK_CUDA(cudaMalloc(&this->values_d, this->nnz * sizeof(T)));
 
     // set them to zero
-    CHECK_CUDA(cudaMemset(this->row_ptr_d, 0, (this->num_rows + 1) * sizeof(int)));
-    CHECK_CUDA(cudaMemset(this->col_idx_d, 0, this->nnz * sizeof(int)));
+    CHECK_CUDA(cudaMemset(this->row_ptr_d, 0, (this->num_rows + 1) * sizeof(local_int_t)));
+    CHECK_CUDA(cudaMemset(this->col_idx_d, 0, this->nnz * sizeof(local_int_t)));
     CHECK_CUDA(cudaMemset(this->values_d, 0, this->nnz * sizeof(T)));
 
     // std::cout << "this is called prior" << std::endl;
     // std::cout << "nnz: " << this->nnz << std::endl;
-    int new_nnz = generate_CSR_from_Striped(
+    local_int_t new_nnz = generate_CSR_from_Striped(
         this->num_rows, A.get_num_stripes(),
         A.get_j_min_i_d(), A.get_values_d(),
         this->row_ptr_d, this->col_idx_d, this->values_d
@@ -484,8 +484,8 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation_GPU(str
     assert(new_nnz == A.get_nnz());
 
     if(A.get_f2c_op_d() != nullptr){
-        CHECK_CUDA(cudaMalloc(&this->f2c_op_d, this->num_rows * sizeof(int)));
-        CHECK_CUDA(cudaMemcpy(this->f2c_op_d, A.get_f2c_op_d(), this->num_rows * sizeof(int), cudaMemcpyDeviceToDevice));
+        CHECK_CUDA(cudaMalloc(&this->f2c_op_d, this->num_rows * sizeof(local_int_t)));
+        CHECK_CUDA(cudaMemcpy(this->f2c_op_d, A.get_f2c_op_d(), this->num_rows * sizeof(local_int_t), cudaMemcpyDeviceToDevice));
     }
     if(A.get_rc_d() != nullptr){
         CHECK_CUDA(cudaMalloc(&this->rc_d, this->num_rows * sizeof(T)));
@@ -529,7 +529,7 @@ void sparse_CSR_Matrix<T>::iterative_values(){
 
     double val = 0.1;
 
-    for (int i = 0; i < this->nnz; i++) {
+    for (local_int_t i = 0; i < this->nnz; i++) {
         this->values[i] = val;
         val += 0.1;
         if (val > 10.0) {
@@ -544,7 +544,7 @@ void sparse_CSR_Matrix<T>::iterative_values(){
 template <typename T>
 void sparse_CSR_Matrix<T>::random_values(int seed){
     srand(seed);
-    for (int i = 0; i < this->nnz; i++) {
+    for (local_int_t i = 0; i < this->nnz; i++) {
         T val = (T)rand() / RAND_MAX;
         // if(i==0){
         //     std::cout << "val: " << val << std::endl;
@@ -555,7 +555,7 @@ void sparse_CSR_Matrix<T>::random_values(int seed){
 }
 
 template <typename T>
-std::vector<int>& sparse_CSR_Matrix<T>::get_row_ptr(){
+std::vector<local_int_t>& sparse_CSR_Matrix<T>::get_row_ptr(){
 
     // these assume that the matrix is on the CPU, so if they are not, we need to copy them to the CPU
     if(this->row_ptr_d != nullptr or this->col_idx_d != nullptr or this->values_d != nullptr){
@@ -566,7 +566,7 @@ std::vector<int>& sparse_CSR_Matrix<T>::get_row_ptr(){
 }
 
 template <typename T>
-std::vector<int>& sparse_CSR_Matrix<T>::get_col_idx(){
+std::vector<local_int_t>& sparse_CSR_Matrix<T>::get_col_idx(){
     // these assume that the matrix is on the CPU, so if they are not, we need to copy them to the CPU
     if(this->row_ptr_d != nullptr or this->col_idx_d != nullptr or this->values_d != nullptr){
         this->copy_Matrix_toCPU();
@@ -584,7 +584,7 @@ std::vector<T>& sparse_CSR_Matrix<T>::get_values(){
 }
 
 template <typename T>
-int* sparse_CSR_Matrix<T>::get_row_ptr_d(){
+local_int_t* sparse_CSR_Matrix<T>::get_row_ptr_d(){
 
     // these assume that the matrix is on the GPU, so if they are not, we need to copy them to the GPU
     // if(this->row_ptr_d == nullptr or this->col_idx_d == nullptr or this->values_d == nullptr){
@@ -594,7 +594,7 @@ int* sparse_CSR_Matrix<T>::get_row_ptr_d(){
 }
 
 template <typename T>
-int* sparse_CSR_Matrix<T>::get_col_idx_d(){
+local_int_t* sparse_CSR_Matrix<T>::get_col_idx_d(){
     // these assume that the matrix is on the GPU, so if they are not, we need to copy them to the GPU
     // if(this->row_ptr_d == nullptr or this->col_idx_d == nullptr or this->values_d == nullptr){
     //     this->copy_Matrix_toGPU();
@@ -635,19 +635,19 @@ void sparse_CSR_Matrix<T>::copy_Matrix_toGPU(){
     this->remove_Matrix_from_GPU();
 
     // allocate space for the device pointers
-    CHECK_CUDA(cudaMalloc(&this->row_ptr_d, (this->num_rows + 1) * sizeof(int)));
-    CHECK_CUDA(cudaMalloc(&this->col_idx_d, this->nnz * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&this->row_ptr_d, (this->num_rows + 1) * sizeof(local_int_t)));
+    CHECK_CUDA(cudaMalloc(&this->col_idx_d, this->nnz * sizeof(local_int_t)));
     CHECK_CUDA(cudaMalloc(&this->values_d, this->nnz * sizeof(T)));
     
     // copy the data to the GPU
-    CHECK_CUDA(cudaMemcpy(this->row_ptr_d, this->row_ptr.data(), (this->num_rows + 1) * sizeof(int), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(this->col_idx_d, this->col_idx.data(), this->nnz * sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(this->row_ptr_d, this->row_ptr.data(), (this->num_rows + 1) * sizeof(local_int_t), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(this->col_idx_d, this->col_idx.data(), this->nnz * sizeof(local_int_t), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(this->values_d, this->values.data(), this->nnz * sizeof(T), cudaMemcpyHostToDevice));
     
     // not every matrix has a f2c operator
     if(not this->f2c_op.empty()){
-        CHECK_CUDA(cudaMalloc(&this->f2c_op_d, this->num_rows * sizeof(int)));
-        CHECK_CUDA(cudaMemcpy(this->f2c_op_d, this->f2c_op.data(), this->num_rows * sizeof(int), cudaMemcpyHostToDevice));
+        CHECK_CUDA(cudaMalloc(&this->f2c_op_d, this->num_rows * sizeof(local_int_t)));
+        CHECK_CUDA(cudaMemcpy(this->f2c_op_d, this->f2c_op.data(), this->num_rows * sizeof(local_int_t), cudaMemcpyHostToDevice));
     }
 
     // we also need to copy the coarse matrix if it exists
@@ -667,7 +667,7 @@ void sparse_CSR_Matrix<T>::copy_Matrix_toCPU(){
     // we do not assert this, because not every Matrix has a fine to coarse operator
     if(this->f2c_op_d != nullptr){
         this->f2c_op.resize(this->num_rows);
-        CHECK_CUDA(cudaMemcpy(this->f2c_op.data(), this->f2c_op_d, this->num_rows * sizeof(int), cudaMemcpyDeviceToHost));
+        CHECK_CUDA(cudaMemcpy(this->f2c_op.data(), this->f2c_op_d, this->num_rows * sizeof(local_int_t), cudaMemcpyDeviceToHost));
     }
 
     // Resize the vectors to the appropriate size
@@ -676,8 +676,8 @@ void sparse_CSR_Matrix<T>::copy_Matrix_toCPU(){
     this->values.resize(this->nnz);
     
     // copy the data to the CPU
-    CHECK_CUDA(cudaMemcpy(this->row_ptr.data(), this->row_ptr_d, (this->num_rows + 1) * sizeof(int), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(this->col_idx.data(), this->col_idx_d, this->nnz * sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(this->row_ptr.data(), this->row_ptr_d, (this->num_rows + 1) * sizeof(local_int_t), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(this->col_idx.data(), this->col_idx_d, this->nnz * sizeof(local_int_t), cudaMemcpyDeviceToHost));
     CHECK_CUDA(cudaMemcpy(this->values.data(), this->values_d, this->nnz * sizeof(T), cudaMemcpyDeviceToHost));
     
 
@@ -732,13 +732,13 @@ void sparse_CSR_Matrix<T>::remove_Matrix_from_GPU(){
 template <typename T>
 void sparse_CSR_Matrix<T>::generate_f2c_operator_onGPU(){
 
-    int fine_n_rows = this->nx *2 * this->ny * 2 * this->nz * 2;
+    local_int_t fine_n_rows = this->nx *2 * this->ny * 2 * this->nz * 2;
 
     // allocate space for the device pointers
-    CHECK_CUDA(cudaMalloc(&this->f2c_op_d, fine_n_rows * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&this->f2c_op_d, fine_n_rows * sizeof(local_int_t)));
 
     // set them to zero
-    CHECK_CUDA(cudaMemset(this->f2c_op_d, 0, fine_n_rows * sizeof(int)));
+    CHECK_CUDA(cudaMemset(this->f2c_op_d, 0, fine_n_rows * sizeof(local_int_t)));
 
     generate_f2c_operator(
         this->nx, this->ny, this->nz,
@@ -757,7 +757,7 @@ void sparse_CSR_Matrix<T>::generate_f2c_operator_onCPU(){
     int nyc = this->ny;
     int nzc = this->nz;
 
-    this->f2c_op = std::vector<int>(nxf*nyf*nzf, 0);
+    this->f2c_op = std::vector<local_int_t>(nxf*nyf*nzf, 0);
 
     for (int izc=0; izc<nzc; ++izc) {
         int izf = 2*izc;
@@ -765,8 +765,8 @@ void sparse_CSR_Matrix<T>::generate_f2c_operator_onCPU(){
             int iyf = 2*iyc;
             for (int ixc=0; ixc<nxc; ++ixc) {
                 int ixf = 2*ixc;
-                int currentCoarseRow = izc*nxc*nyc+iyc*nxc+ixc;
-                int currentFineRow = izf*nxf*nyf+iyf*nxf+ixf;
+                local_int_t currentCoarseRow = izc*nxc*nyc+iyc*nxc+ixc;
+                local_int_t currentFineRow = izf*nxf*nyf+iyf*nxf+ixf;
                 this->f2c_op[currentCoarseRow] = currentFineRow;
             } // end iy loop
         } // end even iz if statement
@@ -785,13 +785,13 @@ void sparse_CSR_Matrix<T>::initialize_coarse_Matrix(){
     // currently we only support 3D 27pt stencils
     assert(this->matrix_type == MatrixType::Stencil_3D27P);
 
-    int nx_c = this->nx / 2;
-    int ny_c = this->ny / 2;
-    int nz_c = this->nz / 2;
+    local_int_t nx_c = this->nx / 2;
+    local_int_t ny_c = this->ny / 2;
+    local_int_t nz_c = this->nz / 2;
 
-    int nx_f = this->nx;
-    int ny_f = this->ny;
-    int nz_f = this->nz;
+    local_int_t nx_f = this->nx;
+    local_int_t ny_f = this->ny;
+    local_int_t nz_f = this->nz;
 
     // std::cout << "Initializing coarse matrix with nx: " << nx_c << " ny: " << ny_c << " nz: " << nz_c << std::endl;
 
@@ -843,12 +843,12 @@ MatrixType sparse_CSR_Matrix<T>::get_matrix_type() const{
 }
 
 template <typename T>
-int sparse_CSR_Matrix<T>::get_num_rows() const{
+local_int_t sparse_CSR_Matrix<T>::get_num_rows() const{
     return this->num_rows;
 }
 
 template <typename T>
-int sparse_CSR_Matrix<T>::get_num_cols() const{
+local_int_t sparse_CSR_Matrix<T>::get_num_cols() const{
     return this->num_cols;
 }
 
@@ -868,7 +868,7 @@ int sparse_CSR_Matrix<T>::get_nz() const{
 }
 
 template <typename T>
-int sparse_CSR_Matrix<T>::get_nnz() const{
+local_int_t sparse_CSR_Matrix<T>::get_nnz() const{
     return this->nnz;
 }
 
@@ -888,24 +888,24 @@ sparse_CSR_Matrix<T>* sparse_CSR_Matrix<T>::get_coarse_Matrix(){
 }
 
 template <typename T>
-int* sparse_CSR_Matrix<T>::get_f2c_op_d(){
+local_int_t* sparse_CSR_Matrix<T>::get_f2c_op_d(){
     return this->f2c_op_d;
 }
 
 template <typename T>
-std::vector<int> sparse_CSR_Matrix<T>::get_f2c_op(){
+std::vector<local_int_t> sparse_CSR_Matrix<T>::get_f2c_op(){
     // std::cout << "from sparse_matrix size of f2c_op: " << this->f2c_op.size() << std::endl;
     return this->f2c_op;
 }
 
 template <typename T>
-T sparse_CSR_Matrix<T>::get_element(int row, int col) const{
+T sparse_CSR_Matrix<T>::get_element(local_int_t row, local_int_t col) const{
     // this currently only works if the matrix is on the CPU
     this->sanity_check_Matrix_on_CPU();
     
-    int start = this->row_ptr[row];
-    int end = this->row_ptr[row + 1];
-    for (int i = start; i < end; i++) {
+    local_int_t start = this->row_ptr[row];
+    local_int_t end = this->row_ptr[row + 1];
+    for (local_int_t i = start; i < end; i++) {
         if (this->col_idx[i] == col) {
             return this->values[i];
         }
@@ -923,19 +923,19 @@ void sparse_CSR_Matrix<T>::print() const{
     this->sanity_check_Matrix_on_CPU();
 
     std::cout << "Row Pointer: ";
-    for (int i = 0; i < this->num_rows + 1; i++) {
+    for (local_int_t i = 0; i < this->num_rows + 1; i++) {
         std::cout << this->row_ptr[i] << " ";
     }
     std::cout << std::endl;
 
     std::cout << "Column Index: ";
-    for (int i = 0; i < this->nnz; i++) {
+    for (local_int_t i = 0; i < this->nnz; i++) {
         std::cout << this->col_idx[i] << " ";
     }
     std::cout << std::endl;
 
     std::cout << "Values: ";
-    for (int i = 0; i < this->nnz; i++) {
+    for (local_int_t i = 0; i < this->nnz; i++) {
         std::cout << this->values[i] << " ";
     }
     std::cout << std::endl;
@@ -974,18 +974,18 @@ bool sparse_CSR_Matrix<T>::compare_to(sparse_CSR_Matrix<T>& other, std::string i
     
     if (same && this->development) {
         std::cout << "Comparing row by row" << std::endl;
-        for (int i = 0; i < this->num_rows; i++) {
-            int start = this->row_ptr[i];
-            int end = this->row_ptr[i + 1];
-            int other_start = other.get_row_ptr()[i];
-            int other_end = other.get_row_ptr()[i + 1];
+        for (local_int_t i = 0; i < this->num_rows; i++) {
+            local_int_t start = this->row_ptr[i];
+            local_int_t end = this->row_ptr[i + 1];
+            local_int_t other_start = other.get_row_ptr()[i];
+            local_int_t other_end = other.get_row_ptr()[i + 1];
             std::cout << "compared row " << i << std::endl;
             if (end - start != other_end - other_start) {
                 printf("Row %d has different number of non-zero elements for %s\n", i, info.c_str());
                 // printf("This has %d, other has %d\n", end - start, other_end - other_start);
                 same = false;
             }
-            for (int j = start; j < end; j++) {
+            for (local_int_t j = start; j < end; j++) {
                 if (this->col_idx[j] != other.get_col_idx()[j] || this->values[j] != other.get_values()[j]) {
                     printf("Element at row %d, col %d is different for %s\n", i, this->col_idx[j], info.c_str());
                     same = false;
@@ -1002,14 +1002,14 @@ bool sparse_CSR_Matrix<T>::compare_to(sparse_CSR_Matrix<T>& other, std::string i
             printf("One matrix has a f2c operator and the other does not for %s\n", info.c_str());
             same = false;
     } else if(not this->f2c_op.empty() and not other.get_f2c_op().empty()){
-        std::vector<int> other_f2c = other.get_f2c_op();
+        std::vector<local_int_t> other_f2c = other.get_f2c_op();
 
         if(not other_f2c.size() == this->f2c_op.size()){
             printf("f2c operators have different sizes for %s\n", info.c_str());
             same = false;
         }
 
-        for(int i = 0; i < other_f2c.size(); i++){
+        for(local_int_t i = 0; i < other_f2c.size(); i++){
             if(other_f2c[i] != this->f2c_op[i]){
                 printf("f2c operators are different for %s\n", info.c_str());
                 same = false;
@@ -1056,7 +1056,7 @@ void sparse_CSR_Matrix<T>::write_to_file()const{
     }
 
     fprintf(file, "Row Pointer: ");
-    for (int i = 0; i < this->num_rows + 1; i++) {
+    for (local_int_t i = 0; i < this->num_rows + 1; i++) {
         if (i >= this->row_ptr.size()) {
             std::cerr << "Error: Accessing row_ptr out of bounds at index " << i << std::endl;
             fclose(file);
@@ -1067,7 +1067,7 @@ void sparse_CSR_Matrix<T>::write_to_file()const{
     fprintf(file, "\n");
 
     fprintf(file, "Column Index: ");
-    for (int i = 0; i < this->nnz; i++) {
+    for (local_int_t i = 0; i < this->nnz; i++) {
         if (i >= this->col_idx.size()) {
             std::cerr << "Error: Accessing col_idx out of bounds at index " << i << std::endl;
             fclose(file);
@@ -1078,7 +1078,7 @@ void sparse_CSR_Matrix<T>::write_to_file()const{
     fprintf(file, "\n");
 
     fprintf(file, "Values: ");
-    for (int i = 0; i < this->nnz; i++) {
+    for (local_int_t i = 0; i < this->nnz; i++) {
         if (i >= this->values.size()) {
             std::cerr << "Error: Accessing values out of bounds at index " << i << std::endl;
             fclose(file);
@@ -1107,8 +1107,8 @@ void sparse_CSR_Matrix<T>::read_from_file(std::string nx, std::string ny, std::s
     this->num_cols = int_nx * int_ny * int_nz;
 
     // we make a new set of pointers and then reassign before we end
-    std::vector<int> row_ptr;
-    std::vector<int> col_idx;
+    std::vector<local_int_t> row_ptr;
+    std::vector<local_int_t> col_idx;
     std::vector<T> values;
 
     std::string dim_str = nx + "x" + ny + "x" + nz;
@@ -1126,7 +1126,7 @@ void sparse_CSR_Matrix<T>::read_from_file(std::string nx, std::string ny, std::s
     // Read the row pointers
     std::getline(file, line);
     std::istringstream row_ptr_stream(line.substr(std::string("Row Pointer: ").length()));
-    int value;
+    local_int_t value;
     while (row_ptr_stream >> value) {
         row_ptr.push_back(value);
         this->nnz += 1;

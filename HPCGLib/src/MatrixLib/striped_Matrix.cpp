@@ -324,10 +324,10 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onCPU(sparse_CSR_Matrix<T>
         }
     }
 
-    int elem_ctr = 0;
+    local_int_t elem_ctr = 0;
 
     // now that we have the static offsets which define i & j, we can make the actual matrix
-    for (int i = 0; i < this->num_rows; i++) {
+    for (local_int_t i = 0; i < this->num_rows; i++) {
         for (int stripe_j = 0; stripe_j < this->num_stripes; stripe_j++) {
             int j = this->j_min_i[stripe_j] + i;
             // check if j is in bounds (since not every point has all 27 neighbours)
@@ -370,17 +370,17 @@ void striped_Matrix<T>::Generate_striped_3D27P_Matrix_onGPU(int nx, int ny, int 
     this->num_cols = p->nx * p->ny * p->nz;
     this->num_stripes = 27;
 
-    int num_interior_points = (nx - 2) * (ny - 2) * (nz - 2);
-    int num_face_points = 2 * ((nx - 2) * (ny - 2) + (nx - 2) * (nz - 2) + (ny - 2) * (nz - 2));
-    int num_edge_points = 4 * ((nx - 2) + (ny - 2) + (nz - 2));
-    int num_corner_points = 8;
+    local_int_t num_interior_points = (nx - 2) * (ny - 2) * (nz - 2);
+    local_int_t num_face_points = 2 * ((nx - 2) * (ny - 2) + (nx - 2) * (nz - 2) + (ny - 2) * (nz - 2));
+    local_int_t num_edge_points = 4 * ((nx - 2) + (ny - 2) + (nz - 2));
+    local_int_t num_corner_points = 8;
 
-    int nnz_interior = 27 * num_interior_points;
-    int nnz_face = 18 * num_face_points;
-    int nnz_edge = 12 * num_edge_points;
-    int nnz_corner = 8 * num_corner_points;
+    local_int_t nnz_interior = 27 * num_interior_points;
+    local_int_t nnz_face = 18 * num_face_points;
+    local_int_t nnz_edge = 12 * num_edge_points;
+    local_int_t nnz_corner = 8 * num_corner_points;
 
-    int nnz = nnz_interior + nnz_face + nnz_edge + nnz_corner;
+    local_int_t nnz = nnz_interior + nnz_face + nnz_edge + nnz_corner;
 
     this->nnz = nnz;
 
@@ -465,7 +465,7 @@ void striped_Matrix<T>::Generate_striped_3D27P_Matrix_onGPU(int nx, int ny, int 
     CHECK_CUDA(cudaMemcpy(this->j_min_i_d, this->j_min_i.data(), this->num_stripes * sizeof(int), cudaMemcpyHostToDevice));
 
     // we don't need the host-side j_min_i anymore
-    // this->j_min_i.clear();
+    this->j_min_i.clear();
 
 }
 
@@ -545,7 +545,7 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T>
     CHECK_CUDA(cudaMemset(this->values_d, 0, this->num_stripes * this->num_rows * sizeof(T)));
 
     // call a function to generate the values on the GPU
-    int counted_nnz = generate_striped_3D27P_Matrix_from_CSR(
+    local_int_t counted_nnz = generate_striped_3D27P_Matrix_from_CSR(
         this->nx, this->ny, this->nz,
         A.get_row_ptr_d(), A.get_col_idx_d(), A.get_values_d(),
         this->num_stripes, this->j_min_i_d, this->values_d);
@@ -570,8 +570,8 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T>
     }
 
     if(A.get_f2c_op_d() != nullptr){
-        CHECK_CUDA(cudaMalloc(&this->f2c_op_d, this->num_rows * sizeof(int)));
-        CHECK_CUDA(cudaMemcpy(this->f2c_op_d, A.get_f2c_op_d(), this->num_rows * sizeof(int), cudaMemcpyDeviceToDevice));
+        CHECK_CUDA(cudaMalloc(&this->f2c_op_d, this->num_rows * sizeof(local_int_t)));
+        CHECK_CUDA(cudaMemcpy(this->f2c_op_d, A.get_f2c_op_d(), this->num_rows * sizeof(local_int_t), cudaMemcpyDeviceToDevice));
     } else{
         this->f2c_op_d = nullptr;
     }
@@ -588,7 +588,7 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T>
         this->xc_d = nullptr;
     }
 
-    int num_fine_rows = this->nx * 2 * this->ny * 2 * this->nz * 2;
+    local_int_t num_fine_rows = this->nx * 2 * this->ny * 2 * this->nz * 2;
     if(A.get_Axf_d() != nullptr){
         CHECK_CUDA(cudaMalloc(&this->Axf_d, num_fine_rows * sizeof(T)));
         CHECK_CUDA(cudaMemcpy(this->Axf_d, A.get_Axf_d(), num_fine_rows * sizeof(T), cudaMemcpyDeviceToDevice));
@@ -760,8 +760,8 @@ void striped_Matrix<T>::generate_box_coloring(){
         }
 
         // now we can safely allocate the space for the pointers
-        CHECK_CUDA(cudaMalloc(&this->color_pointer_d, (num_colors + 1) * sizeof(int)));
-        CHECK_CUDA(cudaMalloc(&this->color_sorted_rows_d, this->num_rows * sizeof(int)));
+        CHECK_CUDA(cudaMalloc(&this->color_pointer_d, (num_colors + 1) * sizeof(local_int_t)));
+        CHECK_CUDA(cudaMalloc(&this->color_sorted_rows_d, this->num_rows * sizeof(local_int_t)));
 
         get_color_row_mapping_for_boxColoring(this->nx, this->ny, this->nz, this->color_pointer_d, this->color_sorted_rows_d);
 
@@ -778,40 +778,40 @@ void striped_Matrix<T>::generate_box_coloring(){
 }
 
 template <typename T>
-int* striped_Matrix<T>::get_color_pointer_d(){
+local_int_t* striped_Matrix<T>::get_color_pointer_d(){
     return this->color_pointer_d;
 }
 
 template <typename T>
-int* striped_Matrix<T>::get_color_sorted_rows_d(){
+local_int_t* striped_Matrix<T>::get_color_sorted_rows_d(){
     return this->color_sorted_rows_d;
 }
 
 template <typename T>
 std::vector<int> striped_Matrix<T>::get_color_pointer_vector(){
 
-    int num_colors = (this->nx-1) + 2 * (this->ny -1) + 4 *(this->nz-1) + 1;
-    std::vector<int> color_pointer(num_colors + 1, 0);
-    CHECK_CUDA(cudaMemcpy(color_pointer.data(), this->color_pointer_d, (num_colors + 1) * sizeof(int), cudaMemcpyDeviceToHost));
+    local_int_t num_colors = (this->nx-1) + 2 * (this->ny -1) + 4 *(this->nz-1) + 1;
+    std::vector<local_int_t> color_pointer(num_colors + 1, 0);
+    CHECK_CUDA(cudaMemcpy(color_pointer.data(), this->color_pointer_d, (num_colors + 1) * sizeof(local_int_t), cudaMemcpyDeviceToHost));
     return color_pointer;
 }
 
 template <typename T>
 std::vector<int> striped_Matrix<T>::get_color_sorted_rows_vector(){
 
-    std::vector<int> color_sorted_rows(this->num_rows, 0);
-    CHECK_CUDA(cudaMemcpy(color_sorted_rows.data(), this->color_sorted_rows_d, this->num_rows * sizeof(int), cudaMemcpyDeviceToHost));
+    std::vector<local_int_t> color_sorted_rows(this->num_rows, 0);
+    CHECK_CUDA(cudaMemcpy(color_sorted_rows.data(), this->color_sorted_rows_d, this->num_rows * sizeof(local_int_t), cudaMemcpyDeviceToHost));
     return color_sorted_rows;
 }
 
 template <typename T>
 void striped_Matrix<T>::print_COR_Format(){
-    int max_color = (this->nx-1) + 2 * (this->ny-1) + 4 * (this->nz -1) + 1;
+    local_int_t max_color = (this->nx-1) + 2 * (this->ny-1) + 4 * (this->nz -1) + 1;
     ::print_COR_Format(max_color, this->num_rows, this->color_pointer_d, this->color_sorted_rows_d);
 }
 
 template <typename T>
-int striped_Matrix<T>::get_num_rows() const{
+local_int_t striped_Matrix<T>::get_num_rows() const{
     return this->num_rows;
 }
 
@@ -821,7 +821,7 @@ int striped_partial_Matrix<T>::get_num_rows() const{
 }
 
 template <typename T>
-int striped_Matrix<T>::get_num_cols() const{
+local_int_t striped_Matrix<T>::get_num_cols() const{
     return this->num_cols;
 }
 
@@ -831,7 +831,7 @@ int striped_partial_Matrix<T>::get_num_cols() const{
 }
 
 template <typename T>
-int striped_Matrix<T>::get_num_stripes() const{
+local_int_t striped_Matrix<T>::get_num_stripes() const{
     return this->num_stripes;
 }
 
@@ -857,7 +857,7 @@ int striped_Matrix<T>::get_nz() const{
 
 
 template <typename T>
-int striped_Matrix<T>::get_nnz() const{
+local_int_t striped_Matrix<T>::get_nnz() const{
     return this->nnz;
 }
 
@@ -922,12 +922,12 @@ T * striped_partial_Matrix<T>::get_values_d(){
 }
 
 template <typename T>
-std::vector<int> striped_Matrix<T>::get_f2c_op(){
+std::vector<local_int_t> striped_Matrix<T>::get_f2c_op(){
     return this->f2c_op;
 }
 
 template <typename T>
-int * striped_Matrix<T>::get_f2c_op_d(){
+local_int_t * striped_Matrix<T>::get_f2c_op_d(){
     return this->f2c_op_d;
 }
 
@@ -957,13 +957,13 @@ void striped_Matrix<T>::generate_f2c_operator_onGPU() {
     const int x = this->nx;
     const int y = this->ny;
     const int z = this->nz;
-    const int fine_n_rows = x *2 * y * 2 * z * 2;
+    const local_int_t fine_n_rows = x *2 * y * 2 * z * 2;
 
     // allocate space for the device pointers
-    CHECK_CUDA(cudaMalloc(&this->f2c_op_d, fine_n_rows * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&this->f2c_op_d, fine_n_rows * sizeof(local_int_t)));
 
     // set them to zero
-    CHECK_CUDA(cudaMemset(this->f2c_op_d, 0, fine_n_rows * sizeof(int)));
+    CHECK_CUDA(cudaMemset(this->f2c_op_d, 0, fine_n_rows * sizeof(local_int_t)));
 
     generate_f2c_operator(x, y, z, x*2, y*2, z*2, f2c_op_d);
 
@@ -973,8 +973,8 @@ void striped_Matrix<T>::generate_f2c_operator_onGPU() {
 template <typename T>
 void striped_Matrix<T>::init_coarse_buffer(){
 
-    const int fine_n_rows = this->nx  * this->ny * this->nz;
-    const int coarse_n_rows = this->nx/2 * this->ny/2 * this->nz/2;
+    const local_int_t fine_n_rows = this->nx  * this->ny * this->nz;
+    const local_int_t coarse_n_rows = this->nx/2 * this->ny/2 * this->nz/2;
 
     CHECK_CUDA(cudaMalloc(&this->coarse_Matrix->rc_d, this->num_rows * sizeof(T)));
     CHECK_CUDA(cudaMalloc(&this->coarse_Matrix->xc_d, this->num_rows * sizeof(T)));
@@ -1052,7 +1052,7 @@ void striped_partial_Matrix<T>::generateMatrix_onGPU(){
 }
 
 template <typename T>
-T striped_Matrix<T>::get_element(int i, int j) const{
+T striped_Matrix<T>::get_element(local_int_t i, local_int_t j) const{
 
     // check if j is in bounds (since not every point has all 27 neighbours)
     if (j >= 0 && j < this->num_cols) {
@@ -1067,7 +1067,7 @@ T striped_Matrix<T>::get_element(int i, int j) const{
 }
 
 template <typename T>
-void striped_Matrix<T>::set_num_rows(int num_rows){
+void striped_Matrix<T>::set_num_rows(local_int_t num_rows){
     // std::cout << "random debug prints here:" << std::endl;
     // std::cout << "this->csr: " << this->CSR << std::endl;
     this->num_rows = num_rows;
@@ -1218,10 +1218,10 @@ bool striped_Matrix<T>::compare_to(striped_Matrix<T>& other){
             return false;
         } else {
 
-            std::vector<int> A_f2c_op(this->num_rows, 0);
-            std::vector<int> B_f2c_op(this->num_rows, 0);
-            CHECK_CUDA(cudaMemcpy(A_f2c_op.data(), this->f2c_op_d, this->num_rows * sizeof(int), cudaMemcpyDeviceToHost));
-            CHECK_CUDA(cudaMemcpy(B_f2c_op.data(), other.get_f2c_op_d(), this->num_rows * sizeof(int), cudaMemcpyDeviceToHost));
+            std::vector<local_int_t> A_f2c_op(this->num_rows, 0);
+            std::vector<local_int_t> B_f2c_op(this->num_rows, 0);
+            CHECK_CUDA(cudaMemcpy(A_f2c_op.data(), this->f2c_op_d, this->num_rows * sizeof(local_int_t), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(B_f2c_op.data(), other.get_f2c_op_d(), this->num_rows * sizeof(local_int_t), cudaMemcpyDeviceToHost));
         
             if(A_f2c_op != B_f2c_op){
                 std::cout << "f2c_op_d not equal" << std::endl;
@@ -1331,8 +1331,8 @@ void striped_Matrix<T>::print() const{
     }
     std::cout << std::endl;
     std::cout << "Values: ";
-    for (int i = 0; i < this->num_rows; i++) {
-        for (int j = 0; j < this->num_stripes; j++) {
+    for (local_int_t i = 0; i < this->num_rows; i++) {
+        for (local_int_t j = 0; j < this->num_stripes; j++) {
             std::cout << this->values[i * this->num_stripes + j] << " ";
         }
         std::cout << std::endl;

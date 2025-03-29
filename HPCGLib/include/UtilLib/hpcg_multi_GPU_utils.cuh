@@ -3,7 +3,7 @@
 
 #include "cuda_runtime.h"
 
-typedef int local_int_t;
+typedef long local_int_t;
 typedef int global_int_t;
 
 using DataType = double;

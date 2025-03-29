@@ -10,6 +10,12 @@
 template <typename T>
 class sparse_CSR_Matrix;
 
+// Define the local and global integer types
+typedef long local_int_t;
+typedef int global_int_t;
+
+using DataType = double;
+
 // Define a constant for error tolerance
 const double error_tolerance = 1e-12;
 
