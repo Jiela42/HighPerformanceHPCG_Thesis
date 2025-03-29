@@ -50,9 +50,9 @@ striped_Matrix<T>::striped_Matrix() {
 
 template <typename T>
 striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
-    //this->nx = 0;
-    //this->ny = 0;
-    //this->nz = 0;
+    this->nx = p->nx;
+    this->ny = p->ny;
+    this->nz = p->nz;
     //this->nnz = 0;
     this->diag_index = -1;
     this->problem = p;
@@ -203,14 +203,17 @@ striped_partial_Matrix<T>::~striped_partial_Matrix(){
         this->f2c_op_d = nullptr;
     }
     if (this->rc_d != nullptr) {
+        FreeHalo(this->rc_d);
         delete this->rc_d;
         this->rc_d = nullptr;
     }
     if(this->xc_d != nullptr){
+        FreeHalo(this->xc_d);
         delete this->xc_d;
         this->xc_d = nullptr;
     }
     if(this->Axf_d != nullptr){
+        FreeHalo(this->Axf_d);
         delete this->Axf_d;
         this->Axf_d = nullptr;
     }
@@ -786,6 +789,21 @@ int striped_Matrix<T>::get_ny() const{
 
 template <typename T>
 int striped_Matrix<T>::get_nz() const{
+    return this->nz;
+}
+
+template <typename T>
+int striped_partial_Matrix<T>::get_nx() const{
+    return this->nx;
+}
+
+template <typename T>
+int striped_partial_Matrix<T>::get_ny() const{
+    return this->ny;
+}
+
+template <typename T>
+int striped_partial_Matrix<T>::get_nz() const{
     return this->nz;
 }
 

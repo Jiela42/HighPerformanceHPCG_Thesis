@@ -4,7 +4,7 @@
 
 #include "TimingLib/timer.hpp"
 #include "TimingLib/cudaTimer.hpp"
-#include "TimingLib/cpuTimer.hpp"
+#include "TimingLib/MPITimer.hpp"
 #include "testing.hpp"
 #include "HPCG_versions/striped_box_coloring.cuh"
 
@@ -43,6 +43,8 @@ void run_striped_box_coloring_3d27p_CG_benchmark(int nx, int ny, int nz, std::st
 
 void run_striped_COR_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path, striped_COR_box_coloring_Implementation<double>& implementation);
 
+void run_multi_GPU_benchmarks(int npx, int npy, int npz, int nx, int ny, int nz, std::string folder_path, striped_multi_GPU_Implementation<DataType>& implementation, Problem *problem, const std::string& benchFilter);
+
 // this function allows us to run the whole abstract benchmark
 // we have method overloading to support different matrix types
 
@@ -66,6 +68,18 @@ void bench_Implementation(
     double alpha, double beta
     );
 
+// multi GPU version
+void bench_Implementation(
+    striped_multi_GPU_Implementation<DataType>& implementation,
+    Timer& timer,
+    striped_partial_Matrix<DataType> & A, // we need to pass the CSR matrix for metadata and potential testing
+    Halo * a_d, Halo * b_d, // a & b are random vectors
+    Halo * x_d, Halo * y_d, // x & y are vectors as used in HPCG
+    DataType * result_d,  // result is used for the dot product (it is a scalar)
+    DataType alpha, DataType beta,
+    Problem *problem,
+    const std::string& benchFilter
+    );
 
 // these functions actually call the functions to be tested
 // we have method overloading to support different matrix types

@@ -31,11 +31,11 @@ class striped_partial_Matrix {
         int get_num_rows() const;
         int get_num_cols() const;
         int get_num_stripes() const;
-        //int get_nx() const;
-        //int get_ny() const;
-        //int get_nz() const;
-        //int get_nnz() const;
+        int get_nx() const;
+        int get_ny() const;
+        int get_nz() const;
         int get_diag_index() const;
+        //int get_nnz() const;
         //MatrixType get_matrix_type() const;
 
         //sparse_CSR_Matrix<T> *get_CSR();
@@ -69,9 +69,9 @@ class striped_partial_Matrix {
         private:
         //friend class sparse_CSR_Matrix<T>;
         Problem *problem;
-        //int nx;
-        //int ny;
-        //int nz;
+        int nx;
+        int ny;
+        int nz;
         //int nnz;
         int diag_index;
         int num_rows;
