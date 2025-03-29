@@ -906,11 +906,11 @@ template <typename T>
 void striped_Matrix<T>::init_coarse_buffer(){
     CHECK_CUDA(cudaMalloc(&this->rc_d, this->num_rows * sizeof(T)));
     CHECK_CUDA(cudaMalloc(&this->xc_d, this->num_rows * sizeof(T)));
-    CHECK_CUDA(cudaMalloc(&this->Axf_d, this->num_rows * sizeof(T)));
+    CHECK_CUDA(cudaMalloc(&this->Axf_d, this->num_rows*8 * sizeof(T)));
 
     CHECK_CUDA(cudaMemset(this->rc_d, 0, this->num_rows * sizeof(T)));
     CHECK_CUDA(cudaMemset(this->xc_d, 0, this->num_rows * sizeof(T)));
-    CHECK_CUDA(cudaMemset(this->Axf_d, 0, this->num_rows * sizeof(T)));
+    CHECK_CUDA(cudaMemset(this->Axf_d, 0, this->num_rows*8 * sizeof(T)));
 }
 
 template <typename T>
@@ -937,47 +937,6 @@ void striped_Matrix<T>::initialize_coarse_matrix(){
     init_coarse_buffer();
 }
 
-
-
-template <typename T>
-void striped_partial_Matrix<T>::initialize_coarse_matrix(){
-    assert(this->problem->nx % 2 == 0);
-    assert(this->problem->ny % 2 == 0);
-    assert(this->problem->nz % 2 == 0);
-    assert(this->problem->gnx % 2 == 0);
-    assert(this->problem->gny % 2 == 0);
-    assert(this->problem->gnz % 2 == 0);
-    assert(this->coarse_Matrix == nullptr);
-
-    int nx_f = this->problem->nx;
-    int ny_f = this->problem->ny;
-    int nz_f = this->problem->nz;
-    //int fine_n_rows = this->nx *2 * this->ny * 2 * this->nz * 2;
-    int nx_c = this->problem->nx / 2;
-    int ny_c = this->problem->ny / 2;
-    int nz_c = this->problem->nz / 2;
-
-    // allocate coarse matrix
-    Problem *p_c = new Problem;
-    GenerateProblem(this->problem->npx, this->problem->npy, this->problem->npz, nx_c, ny_c, nz_c, this->problem->size, this->problem->rank, p_c);
-    this->coarse_Matrix= new striped_partial_Matrix<T>(p_c);
-    this->coarse_Matrix->generate_f2c_operator_onGPU();
-
-    // allocate halos rc, xc, Axf and set to zero
-    InitHalo(this->coarse_Matrix->get_rc_d(), p_c);
-    InitHalo(this->coarse_Matrix->get_xc_d(), p_c);
-    InitHalo(this->coarse_Matrix->get_Axf_d(), p_c);
-
-    SetHaloGlobalIndexGPU(this->coarse_Matrix->get_rc_d(), p_c);
-    SetHaloGlobalIndexGPU(this->coarse_Matrix->get_xc_d(), p_c);
-    SetHaloGlobalIndexGPU(this->coarse_Matrix->get_Axf_d(), p_c);
-}
-
-template <typename T>
-void striped_partial_Matrix<T>::generateMatrix_onGPU(){
-    CHECK_CUDA(cudaMalloc(&this->values_d, sizeof(T)*this->num_stripes*this->num_rows));
-    GenerateStripedPartialMatrix_GPU(this->problem, this->values_d);
-}
 
 template <typename T>
 T striped_Matrix<T>::get_element(int i, int j) const{
@@ -1024,4 +983,3 @@ void striped_Matrix<T>::print() const{
 
 // explicit template instantiation
 template class striped_Matrix<double>;
-template class striped_partial_Matrix<double>;
