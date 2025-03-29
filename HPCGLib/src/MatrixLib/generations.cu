@@ -398,17 +398,17 @@ void generate_f2c_operator(
 }
 
 
-__global__ void GenerateStripedPartialMatrix_kernel(int nx, int ny, int nz, int gnx, int gny, int gnz, int offset_x, int offset_y, int offset_z, double *A){
+__global__ void GenerateStripedPartialMatrix_kernel(int nx, int ny, int nz, global_int_t gnx, global_int_t gny, global_int_t gnz, global_int_t offset_x, global_int_t offset_y, global_int_t offset_z, DataType *A){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     
-    int num_rows = nx * ny * nz;
+    local_int_t num_rows = nx * ny * nz;
     
-    for (int i=tid; i<num_rows; i += blockDim.x * gridDim.x) {
-        int gx = i % nx + offset_x;
-        int gy = (i / nx) % ny + offset_y;
-        int gz = i / (nx * ny) + offset_z;
+    for (local_int_t i=tid; i<num_rows; i += blockDim.x * gridDim.x) {
+        global_int_t gx = i % nx + offset_x;
+        global_int_t gy = (i / nx) % ny + offset_y;
+        global_int_t gz = i / (nx * ny) + offset_z;
 
-        int id=i*27;
+        local_int_t id=i*27;
         for (int sz = -1; sz < 2; sz++){
             for(int sy = -1; sy < 2; sy++){
                 for(int sx = -1; sx < 2; sx++){
@@ -439,15 +439,15 @@ __global__ void GenerateStripedPartialMatrix_kernel(int nx, int ny, int nz, int 
 __global__ void generate_partialf2c_operator_kernel(
     int nxf, int nyf, int nzf,
     int nxc, int nyc, int nzc,
-    int * f2c_op_d
+    local_int_t * f2c_op_d
 ){
 
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
     // int num_fine_rows = nxf * nyf * nzf;
-    int num_coarse_rows = nxc * nyc * nzc;
+    local_int_t num_coarse_rows = nxc * nyc * nzc;
 
-    for(int coarse_idx = tid; coarse_idx < num_coarse_rows; coarse_idx += blockDim.x * gridDim.x){
+    for(local_int_t coarse_idx = tid; coarse_idx < num_coarse_rows; coarse_idx += blockDim.x * gridDim.x){
         int izc = coarse_idx / (nxc * nyc);
         int iyc = (coarse_idx % (nxc * nyc)) / nxc;
         int ixc = coarse_idx % nxc;
@@ -456,7 +456,7 @@ __global__ void generate_partialf2c_operator_kernel(
         int iyf = iyc * 2;
         int ixf = ixc * 2;
 
-        int fine_idx = ixf + nxf * iyf + nxf * nyf * izf;
+        local_int_t fine_idx = ixf + nxf * iyf + nxf * nyf * izf;
         f2c_op_d[coarse_idx] = fine_idx;
 
         // if(coarse_idx < 5){
@@ -466,7 +466,7 @@ __global__ void generate_partialf2c_operator_kernel(
 }
 
 
-void GenerateStripedPartialMatrix_GPU(Problem *problem, double *A_d) {
+void GenerateStripedPartialMatrix_GPU(Problem *problem, DataType *A_d) {
     int nx = problem->nx;
     int ny = problem->ny;
     int nz = problem->nz;
@@ -481,10 +481,10 @@ void GenerateStripedPartialMatrix_GPU(Problem *problem, double *A_d) {
 void generate_partialf2c_operator(
     int nxc, int nyc, int nzc,
     int nxf, int nyf, int nzf,
-    int * f2c_op_d
+    local_int_t * f2c_op_d
 ){
 
-    int num_coarse_rows = nxc * nyc * nzc;
+    local_int_t num_coarse_rows = nxc * nyc * nzc;
 
     int num_threads = 1024;
     int num_blocks = (num_coarse_rows+num_threads-1)/num_threads;
@@ -494,13 +494,13 @@ void generate_partialf2c_operator(
 }
 
 
-__global__ void generate_y_vector_for_HPCG_problem_kernel(int gnx, int gny, int gnz, int nx, int ny, int nz, int gx0, int gy0, int gz0, double *y){
+__global__ void generate_y_vector_for_HPCG_problem_kernel(global_int_t gnx, global_int_t gny, global_int_t gnz, int nx, int ny, int nz, global_int_t gx0, global_int_t gy0, global_int_t gz0, DataType *y){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     
-    for (int i = tid; i < nx*ny*nz; i += blockDim.x * gridDim.x){
-        int iz = i / (nx*ny) + gz0;
-        int iy = i % (nx*ny) / nx + gy0;
-        int ix = i - iz * (nx*ny) - iy * nx + gx0;
+    for (local_int_t i = tid; i < nx*ny*nz; i += blockDim.x * gridDim.x){
+        global_int_t iz = i / (nx*ny) + gz0;
+        global_int_t iy = i % (nx*ny) / nx + gy0;
+        global_int_t ix = i - iz * (nx*ny) - iy * nx + gx0;
 
         int nnz_i=0;
 
@@ -525,15 +525,15 @@ __global__ void generate_y_vector_for_HPCG_problem_kernel(int gnx, int gny, int 
 
 
 
-void generate_y_vector_for_HPCG_problem_onGPU(Problem *problem, double *y_d){
-    int num_rows = problem->nx * problem->ny * problem->nz;
-    int num_cols = problem->nx * problem->ny * problem->nz;
+void generate_y_vector_for_HPCG_problem_onGPU(Problem *problem, DataType*y_d){
+    local_int_t num_rows = problem->nx * problem->ny * problem->nz;
+    local_int_t num_cols = problem->nx * problem->ny * problem->nz;
 
     CHECK_CUDA(cudaMalloc(&y_d, sizeof(double)*num_rows));
     CHECK_CUDA(cudaMemset(y_d, 0., sizeof(double)*num_rows));
 
     int nthread=256;
-    int nblocks=(num_rows+nthread-1) / nthread;
+    local_int_t nblocks=(num_rows+nthread-1) / nthread;
     generate_y_vector_for_HPCG_problem_kernel<<<nblocks, nthread>>>(problem->gnx, problem->gny, problem->gnz, problem->nx, problem->ny, problem->nz, problem->gx0, problem->gy0, problem->gz0, y_d);
 }
 

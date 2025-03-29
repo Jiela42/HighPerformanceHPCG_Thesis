@@ -19,6 +19,7 @@ target_compile_options(MatrixLib PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:
 
 target_sources(MatrixLib PRIVATE
     sparse_CSR_Matrix.cpp
+    striped_partial_Matrix.cpp
     striped_Matrix.cpp
     generations.cpp
     generations.cu

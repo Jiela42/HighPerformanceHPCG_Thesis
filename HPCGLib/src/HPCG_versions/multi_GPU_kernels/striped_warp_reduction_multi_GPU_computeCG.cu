@@ -4,11 +4,10 @@
 
 template <typename T>
 void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_computeCG(
-    striped_Matrix<T> & A,
+    striped_partial_Matrix<T> & A,
     Halo * b_d, Halo * x_d,
     int & n_iters, T& normr, T& normr0,
-    Problem *problem,
-    int *j_min_i_d
+    Problem *problem
 ){
 
     
@@ -36,17 +35,13 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     DataType * pAp_d;
     DataType * rtz_d;
     
-    InitHaloMemGPU(&p_d, problem);
-    InitHaloMemCPU(&p_d, problem);
+    InitHalo(&p_d, problem);
     
-    InitHaloMemGPU(&z_d, problem);
-    InitHaloMemCPU(&z_d, problem);
+    InitHalo(&z_d, problem);
     
-    InitHaloMemGPU(&Ap_d, problem);
-    InitHaloMemCPU(&Ap_d, problem);
+    InitHalo(&Ap_d, problem);
     
-    InitHaloMemGPU(&r_d, problem);
-    InitHaloMemCPU(&r_d, problem);
+    InitHalo(&r_d, problem);
     
     CHECK_CUDA(cudaMalloc(&normr_d, sizeof(DataType)));
     CHECK_CUDA(cudaMalloc(&pAp_d, sizeof(DataType)));
@@ -59,7 +54,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     
     this->compute_WAXPBY(x_d, x_d, &p_d, 1.0, 0.0, problem, false); // p = x
     this->ExchangeHalo(&p_d, problem);
-    this->compute_SPMV(A, &p_d, &Ap_d, problem, j_min_i_d); //Ap = A*p
+    this->compute_SPMV(A, &p_d, &Ap_d, problem); //Ap = A*p
     this->ExchangeHalo(&Ap_d, problem);
     this->compute_WAXPBY(b_d, &Ap_d, &r_d, 1.0, -1.0, problem, false); // r = b - Ax (x stored in p)
     this->ExchangeHalo(&r_d, problem);
@@ -75,8 +70,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     for(int k = 1; k <= this->max_CG_iterations && normr/normr0 > this->CG_tolerance; k++){
         
         if(this->doPreconditioning){
-            assert(false); //Needs to be adapted once MG is implemented
-            //this->compute_MG(A, r_d, z_d); // Apply preconditioner
+            this->compute_MG(A, &r_d, &z_d, problem); // Apply preconditioner
         } else {
             this->compute_WAXPBY(&r_d, &r_d, &z_d, 1.0, 0.0, problem, false); // z = r
             this->ExchangeHalo(&z_d, problem);
@@ -96,7 +90,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
             this->ExchangeHalo(&p_d, problem);
         }
         
-        this->compute_SPMV(A, &p_d, &Ap_d, problem, j_min_i_d); // Ap = A*p
+        this->compute_SPMV(A, &p_d, &Ap_d, problem); // Ap = A*p
         this->ExchangeHalo(&Ap_d, problem);
         this->compute_Dot(&p_d, &Ap_d, pAp_d); // pAp = p'*Ap
         CHECK_CUDA(cudaMemcpy(&pAp, pAp_d, sizeof(DataType), cudaMemcpyDeviceToHost));

@@ -4,6 +4,7 @@
 #include "MatrixLib/matrix_basics.hpp"
 #include "MatrixLib/generations.cuh"
 #include "UtilLib/hpcg_multi_GPU_utils.cuh"
+#include "UtilLib/utils.hpp"
 
 #include <vector>
 #include <iostream>
@@ -28,14 +29,14 @@ class striped_partial_Matrix {
         //std::vector<int> get_color_pointer_vector();
         //std::vector<int> get_color_sorted_rows_vector();
         
-        int get_num_rows() const;
-        int get_num_cols() const;
+        local_int_t get_num_rows() const;
+        local_int_t get_num_cols() const;
         int get_num_stripes() const;
         //int get_nx() const;
         //int get_ny() const;
         //int get_nz() const;
         //int get_nnz() const;
-        //int get_diag_index() const;
+        int get_diag_index() const;
         //MatrixType get_matrix_type() const;
 
         //sparse_CSR_Matrix<T> *get_CSR();
@@ -44,11 +45,11 @@ class striped_partial_Matrix {
         striped_partial_Matrix<T> *get_coarse_Matrix();
         int get_num_MG_pre_smooth_steps() const;
         int get_num_MG_post_smooth_steps() const;
-        int *get_f2c_op_d();
-        Halo * get_rc_d();
+        local_int_t* get_f2c_op_d();
+        Halo* get_rc_d();
         Halo* get_xc_d();
-        Halo * get_Axf_d();
-        std::vector<int> get_f2c_op();
+        Halo* get_Axf_d();
+        std::vector<local_int_t> get_f2c_op();
 
         // T get_element(int i, int j) const;
         //std::vector <int>& get_j_min_i();
@@ -74,8 +75,8 @@ class striped_partial_Matrix {
         //int nz;
         //int nnz;
         int diag_index;
-        int num_rows;
-        int num_cols;
+        local_int_t num_rows;
+        local_int_t num_cols;
         int num_stripes;
         std::vector<int> j_min_i;
         // std::vector<T> values;
@@ -95,7 +96,7 @@ class striped_partial_Matrix {
         int num_MG_post_smooth_steps;
         striped_partial_Matrix<T> *coarse_Matrix;
         // std::vector<int> f2c_op;
-        int *f2c_op_d;
+        local_int_t *f2c_op_d;
         // since we only have the MG routines run on the GPU, we only have the coarse matrix data (except f2c_op) on the GPU
         // (they are all vectors)
         Halo* rc_d;
