@@ -67,7 +67,7 @@ class striped_Matrix {
         void Generate_striped_3D27P_Matrix_onGPU(int nx, int ny, int nz);
         void generate_f2c_operator_onGPU();
         void init_coarse_buffer();
-        void initialize_coarse_matrix();
+        void initialize_coarse_Matrix();
         // void compare_to(striped_Matrix<T>& other) const;
         // void write_to_file() const;
         bool compare_to(striped_Matrix<T>& other);

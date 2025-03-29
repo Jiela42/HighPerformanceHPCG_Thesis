@@ -1,84 +1,23 @@
 [  4%] Built target UtilLib
-[  5%] Building CXX object src/MatrixLib/CMakeFiles/MatrixLib.dir/striped_Matrix.cpp.o
-[  6%] Linking CXX static library libMatrixLib.a
 [ 10%] Built target MatrixLib
 [ 14%] Built target TimingLib
 [ 41%] Built target HPCGLib
-[ 47%] Linking CXX executable run_coloring
-[ 47%] Linking CXX executable run_multi_GPU_tests
-[ 47%] Linking CXX executable run_example
-[ 47%] Linking CXX executable run_get_Norm
-[ 47%] Linking CXX executable run_bench_test
-[ 47%] Linking CXX executable run_multi_GPU
-[ 62%] Built target TestHPCGLib
-[ 63%] Linking CXX executable run_AllTests
-[ 64%] Linking CXX executable run_maxSizeSingleGPU_finder
-[ 66%] Linking CXX executable run_full_bench
-[ 66%] Linking CXX executable run_specific_bench
-[ 67%] Built target run_bench_test
-[ 72%] Built target run_coloring
-[ 72%] Built target run_get_Norm
-[ 72%] Built target run_example
-[ 72%] Built target run_multi_GPU_tests
-[ 72%] Built target run_multi_GPU
-[ 76%] Built target run_AllTests
-[ 76%] Built target run_maxSizeSingleGPU_finder
-[ 97%] Built target run_full_bench
+[ 49%] Built target run_bench_test
+[ 53%] Built target run_multi_GPU
+[ 53%] Built target run_multi_GPU_tests
+[ 53%] Built target run_get_Norm
+[ 53%] Built target run_coloring
+[ 53%] Built target run_example
+[ 68%] Built target TestHPCGLib
+[ 70%] Built target run_AllTests
+[ 71%] Building CXX object benchmarking/CMakeFiles/run_maxSizeSingleGPU_finder.dir/benchmark_stripedColoring.cpp.o
+[ 73%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedColoring.cpp.o
+[ 73%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedColoring.cpp.o
+[ 76%] Linking CXX executable run_maxSizeSingleGPU_finder
+[ 76%] Linking CXX executable run_full_bench
+[ 76%] Linking CXX executable run_specific_bench
+[ 84%] Built target run_maxSizeSingleGPU_finder
+[100%] Built target run_full_bench
 [100%] Built target run_specific_bench
-Running striped coloring benchmarks for 560 560 560
-j_min_i[0]: -314161
-j_min_i.data[0]: -314161
-j_min_i[1]: -314160
-j_min_i.data[1]: -314160
-j_min_i[2]: -314159
-j_min_i.data[2]: -314159
-j_min_i[3]: -313601
-j_min_i.data[3]: -313601
-j_min_i[4]: -313600
-j_min_i.data[4]: -313600
-j_min_i[5]: -313599
-j_min_i.data[5]: -313599
-j_min_i[6]: -313041
-j_min_i.data[6]: -313041
-j_min_i[7]: -313040
-j_min_i.data[7]: -313040
-j_min_i[8]: -313039
-j_min_i.data[8]: -313039
-j_min_i[9]: -561
-j_min_i.data[9]: -561
-j_min_i[10]: -560
-j_min_i.data[10]: -560
-j_min_i[11]: -559
-j_min_i.data[11]: -559
-j_min_i[12]: -1
-j_min_i.data[12]: -1
-j_min_i[13]: 0
-j_min_i.data[13]: 0
-j_min_i[14]: 1
-j_min_i.data[14]: 1
-j_min_i[15]: 559
-j_min_i.data[15]: 559
-j_min_i[16]: 560
-j_min_i.data[16]: 560
-j_min_i[17]: 561
-j_min_i.data[17]: 561
-j_min_i[18]: 313039
-j_min_i.data[18]: 313039
-j_min_i[19]: 313040
-j_min_i.data[19]: 313040
-j_min_i[20]: 313041
-j_min_i.data[20]: 313041
-j_min_i[21]: 313599
-j_min_i.data[21]: 313599
-j_min_i[22]: 313600
-j_min_i.data[22]: 313600
-j_min_i[23]: 313601
-j_min_i.data[23]: 313601
-j_min_i[24]: 314159
-j_min_i.data[24]: 314159
-j_min_i[25]: 314160
-j_min_i.data[25]: 314160
-j_min_i[26]: 314161
-j_min_i.data[26]: 314161
-Free memory: 59823 MB
-CUDA error in file '/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/MatrixLib/striped_Matrix.cpp' in line 449: an illegal memory access was encountered.
+Running striped coloring benchmarks for 432 432 432
+CUDA error in file '/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/MatrixLib/striped_Matrix.cpp' in line 465: an illegal memory access was encountered.

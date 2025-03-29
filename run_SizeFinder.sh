@@ -4,7 +4,7 @@
 #SBATCH --job-name=HPCG_SizeFinder
 #SBATCH --account=a-g34
 #SBATCH --output SizeFinder.out
-#SBATCH --time 03:00:00
+#SBATCH --time 00:30:00
 #SBATCH --partition=debug
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
