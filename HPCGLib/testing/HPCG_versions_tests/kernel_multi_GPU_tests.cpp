@@ -16,9 +16,9 @@
 #define NPY 2
 #define NPZ 1
 //each process gets assigned problem size of NX x NY x NZ
-#define NX 16
-#define NY 16
-#define NZ 16
+#define NX 8
+#define NY 8
+#define NZ 8
 
 void test_matrix_distribution(int num_stripes_local, int num_stripes_global, int num_rows_local, int num_rows_global, DataType *striped_A_local_h, DataType *striped_A_global_h, Problem *problem){
     //verfify the partial matrix
@@ -792,6 +792,7 @@ void run_multi_GPU_tests(int argc, char *argv[], striped_multi_GPU_Implementatio
     test_CG(implementation_multi_GPU, A_local_striped, A_global_striped, &halo_b_d, &halo_x_d, &problem, j_min_i_d);
     
 
+    // test partial matrix
     striped_partial_Matrix<DataType> A_part(&problem);
     DataType *x = (DataType*)malloc (sizeof(DataType) * num_rows_local * 27);
     CHECK_CUDA(cudaMemcpy(x, A_part.get_values_d(), sizeof(DataType) * num_rows_local * 27, cudaMemcpyDeviceToHost));
@@ -840,7 +841,51 @@ void run_multi_GPU_tests(int argc, char *argv[], striped_multi_GPU_Implementatio
 
     free(x);
     free(x_c);
+ 
+    // single GPU A_single 
+    /* striped_Matrix<DataType> A_single;
+    A_single.Generate_striped_3D27P_Matrix_onGPU(NX*NPX, NY*NPY, NZ*NPZ);
+    DataType *a = (DataType*)malloc (sizeof(DataType) * num_rows_global * 27);
+    CHECK_CUDA(cudaMemcpy(a, A_single.get_values_d(), sizeof(DataType) * num_rows_global * 27, cudaMemcpyDeviceToHost));
+    int flag_=1;
+    for (int i=0; i<NX*NPX; i++)
+    for (int j=0; j<NY*NPY; j++)
+    for (int k=0; k<NZ*NPZ; k++) {
+        int row_global = i + j* NX*NPX + k* NX*NPX*NY*NPY;
+        for (int l=0; l<27; l++)
+        {
+            int idx_global = row_global*27+l;
+            if((a[idx_global] - striped_A_global_h[idx_global]) * (a[idx_global] - striped_A_global_h[idx_global]) > 1e-26)
+            {
+                flag_=0;
+                printf("Error at location (%d, %d), %e, %e\n", idx_global, l, a[idx_global], striped_A_global_h[idx_global]);
+                break;
+            }
+        }
+    }
+    if (problem.rank == 0) {if(flag_) printf("Striped matrix correctly generated.\n");}
+    A_single.initialize_coarse_matrix();
 
+    DataType *a_c = (DataType*)malloc (sizeof(DataType) * num_rows_global * 27);
+    CHECK_CUDA(cudaMemcpy(a_c, A_single.get_values_d(), sizeof(DataType) * num_rows_global * 27, cudaMemcpyDeviceToHost));
+    flag_=1;
+    for (int i=0; i<NX*NPX/2; i++)
+    for (int j=0; j<NY*NPY/2; j++)
+    for (int k=0; k<NZ*NPZ/2; k++) {
+        int row_global = i + j* NX*NPX/2 + k* NX*NPX/2*NY*NPY/2;
+        for (int l=0; l<27; l++)
+        {
+            int idx_global = row_global*27+l;
+            if((a_c[idx_global] - striped_A_global_h[idx_global]) * (a_c[idx_global] - striped_A_global_h[idx_global]) > 1e-26)
+            {
+                flag_=0;
+                printf("Error at location (%d, %d), %e, %e\n", idx_global, l, a_c[idx_global], striped_A_global_h[idx_global]);
+                break;
+            }
+        }
+    }
+    if (problem.rank == 0) {if(flag_) printf("Striped coarse matrix correctly generated.\n");}
+ */
     //uncomment to compare ExchangeHalo implementations
     /* if (problem.rank==0) {printf("BEFORE\n"); PrintHalo(&halo_p_d);}
     implementation_multi_GPU.ExchangeHalo(&halo_p_d, &problem);
