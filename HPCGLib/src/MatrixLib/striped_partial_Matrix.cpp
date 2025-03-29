@@ -158,6 +158,11 @@ int striped_partial_Matrix<T>::get_num_stripes() const{
 }
 
 template <typename T>
+int striped_partial_Matrix<T>::get_diag_index() const{
+    return this->diag_index;
+}
+
+template <typename T>
 int striped_partial_Matrix<T>::get_num_MG_post_smooth_steps() const{
     return this->num_MG_post_smooth_steps;
 }
