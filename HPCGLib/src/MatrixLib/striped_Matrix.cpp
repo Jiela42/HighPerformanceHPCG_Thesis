@@ -458,11 +458,11 @@ void striped_Matrix<T>::Generate_striped_3D27P_Matrix_onGPU(int nx, int ny, int 
     // std::cout << "Free memory: " << free_mem / (1024 * 1024) << " MB" << std::endl;
     assert(this->j_min_i.size() == this->num_stripes);
     // this->j_min_i.resize(this->num_stripes);
-    CHECK_CUDA(cudaMalloc(&this->j_min_i_d, this->num_stripes * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&this->j_min_i_d, this->num_stripes * sizeof(local_int_t)));
     // std::cout << "Device pointer j_min_i_d: " << this->j_min_i_d << std::endl;
 
     // std::cout << "Allocated j_min_i_d with size: " << this->num_stripes * sizeof(int) << " bytes" << std::endl;
-    CHECK_CUDA(cudaMemcpy(this->j_min_i_d, this->j_min_i.data(), this->num_stripes * sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(this->j_min_i_d, this->j_min_i.data(), this->num_stripes * sizeof(local_int_t), cudaMemcpyHostToDevice));
 
     // we don't need the host-side j_min_i anymore
     this->j_min_i.clear();
@@ -535,11 +535,11 @@ void striped_Matrix<T>::striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T>
     }
 
     // now we allocate the space on the GPU
-    CHECK_CUDA(cudaMalloc(&this->j_min_i_d, this->num_stripes * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&this->j_min_i_d, this->num_stripes * sizeof(local_int_t)));
     CHECK_CUDA(cudaMalloc(&this->values_d, this->num_stripes * this->num_rows * sizeof(T)));
 
     // we copy the j_min_i onto the GPU
-    CHECK_CUDA(cudaMemcpy(this->j_min_i_d, this->j_min_i.data(), this->num_stripes * sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(this->j_min_i_d, this->j_min_i.data(), this->num_stripes * sizeof(local_int_t), cudaMemcpyHostToDevice));
 
     // set the values on the GPU to zero
     CHECK_CUDA(cudaMemset(this->values_d, 0, this->num_stripes * this->num_rows * sizeof(T)));
@@ -605,8 +605,8 @@ void striped_Matrix<T>::copy_Matrix_toGPU(){
     this->remove_Matrix_from_GPU();
     
     // we copy the j_min_i to the GPU
-    CHECK_CUDA(cudaMalloc(&this->j_min_i_d, this->num_stripes * sizeof(int)));
-    CHECK_CUDA(cudaMemcpy(this->j_min_i_d, this->j_min_i.data(), this->num_stripes * sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMalloc(&this->j_min_i_d, this->num_stripes * sizeof(local_int_t)));
+    CHECK_CUDA(cudaMemcpy(this->j_min_i_d, this->j_min_i.data(), this->num_stripes * sizeof(local_int_t), cudaMemcpyHostToDevice));
 
     // we copy the values to the GPU
     CHECK_CUDA(cudaMalloc(&this->values_d, this->num_stripes * this->num_rows * sizeof(T)));
@@ -617,8 +617,8 @@ void striped_Matrix<T>::copy_Matrix_toGPU(){
     }
 
     if(this->f2c_op_d != nullptr){
-        CHECK_CUDA(cudaMalloc(&this->f2c_op_d, this->num_rows * sizeof(int)));
-        CHECK_CUDA(cudaMemcpy(this->f2c_op_d, this->f2c_op.data(), this->num_rows * sizeof(int), cudaMemcpyHostToDevice));
+        CHECK_CUDA(cudaMalloc(&this->f2c_op_d, this->num_rows * sizeof(local_int_t)));
+        CHECK_CUDA(cudaMemcpy(this->f2c_op_d, this->f2c_op.data(), this->num_rows * sizeof(local_int_t), cudaMemcpyHostToDevice));
     }
 
 }
