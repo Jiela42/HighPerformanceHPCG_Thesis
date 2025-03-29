@@ -5,6 +5,10 @@
 #include <iostream>
 #include <cmath>
 // #include "MatrixLib/sparse_CSR_Matrix.hpp"
+typedef int local_int_t;
+typedef int global_int_t;
+
+using DataType = double;
 
 // Forward declaration of sparse_CSR_Matrix
 template <typename T>

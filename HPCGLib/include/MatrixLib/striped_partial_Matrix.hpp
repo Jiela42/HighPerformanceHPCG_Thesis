@@ -4,13 +4,14 @@
 #include "MatrixLib/matrix_basics.hpp"
 #include "MatrixLib/generations.cuh"
 #include "UtilLib/hpcg_multi_GPU_utils.cuh"
+#include "UtilLib/utils.hpp"
 
 #include <vector>
 #include <iostream>
 #include <string>
 #include <cassert>
 
-template <typename DataType, typename local_int_t, typename global_int_t>
+template <typename T>
 class striped_partial_Matrix {
     public:
         striped_partial_Matrix(Problem *problem);
@@ -28,8 +29,8 @@ class striped_partial_Matrix {
         //std::vector<int> get_color_pointer_vector();
         //std::vector<int> get_color_sorted_rows_vector();
         
-        loc_int_t get_num_rows() const;
-        loc_int_t get_num_cols() const;
+        local_int_t get_num_rows() const;
+        local_int_t get_num_cols() const;
         int get_num_stripes() const;
         //int get_nx() const;
         //int get_ny() const;
@@ -41,20 +42,20 @@ class striped_partial_Matrix {
         //sparse_CSR_Matrix<T> *get_CSR();
         //void set_CSR(sparse_CSR_Matrix<T> *A);
 
-        striped_partial_Matrix<DataType, local_int_t, global_int_t> *get_coarse_Matrix();
+        striped_partial_Matrix<T> *get_coarse_Matrix();
         int get_num_MG_pre_smooth_steps() const;
         int get_num_MG_post_smooth_steps() const;
-        local_int_t*get_f2c_op_d();
+        local_int_t* get_f2c_op_d();
         Halo* get_rc_d();
         Halo* get_xc_d();
         Halo* get_Axf_d();
-        std::vector<loc_int_t> get_f2c_op();
+        std::vector<local_int_t> get_f2c_op();
 
         // T get_element(int i, int j) const;
         //std::vector <int>& get_j_min_i();
         //std::vector <T>& get_values();
         int * get_j_min_i_d();
-        DataType * get_values_d();
+        T * get_values_d();
         //void set_num_rows(int num_rows);
         //void print_COR_Format();
         //void print() const;
@@ -85,7 +86,7 @@ class striped_partial_Matrix {
         // void striped_3D27P_Matrix_from_CSR_onCPU(sparse_CSR_Matrix<T> & A);
         // void striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T> & A);
         int *j_min_i_d;
-        DataType *values_d;
+        T *values_d;
         // int* color_pointer_d;
         // int* color_sorted_rows_d;
 
@@ -93,9 +94,9 @@ class striped_partial_Matrix {
 
         int num_MG_pre_smooth_steps;
         int num_MG_post_smooth_steps;
-        striped_partial_Matrix<DataType, local_int_t, global_int_t> *coarse_Matrix;
+        striped_partial_Matrix<T> *coarse_Matrix;
         // std::vector<int> f2c_op;
-        int *f2c_op_d;
+        local_int_t *f2c_op_d;
         // since we only have the MG routines run on the GPU, we only have the coarse matrix data (except f2c_op) on the GPU
         // (they are all vectors)
         Halo* rc_d;

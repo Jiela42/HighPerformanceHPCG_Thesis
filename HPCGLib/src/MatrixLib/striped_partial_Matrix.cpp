@@ -1,7 +1,7 @@
-#include "MatrixLib/striped_Matrix.hpp"
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
 #include "MatrixLib/striped_partial_Matrix.hpp"
 #include "UtilLib/cuda_utils.hpp"
+#include "UtilLib/utils.hpp"
 #include "MatrixLib/coloring.cuh"
 #include "UtilLib/hpcg_multi_GPU_utils.cuh"
 
@@ -45,7 +45,7 @@ striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
     this->Axf_d = new Halo;
     //this->f2c_op.clear();
 
-    CHECK_CUDA(cudaMalloc(&this->values_d, sizeof(double) * num_rows* 27));
+    CHECK_CUDA(cudaMalloc(&this->values_d, sizeof(T) * num_rows* 27));
     GenerateStripedPartialMatrix_GPU(this->problem, this->values_d);
 
     // fill j_min_i_d
@@ -143,12 +143,12 @@ Halo* striped_partial_Matrix<T>::get_Axf_d(){
 }
 
 template <typename T>
-int striped_partial_Matrix<T>::get_num_rows() const{
+local_int_t striped_partial_Matrix<T>::get_num_rows() const{
     return this->num_rows;
 }
 
 template <typename T>
-int striped_partial_Matrix<T>::get_num_cols() const{
+local_int_t striped_partial_Matrix<T>::get_num_cols() const{
     return this->num_cols;
 }
 
@@ -173,7 +173,7 @@ T * striped_partial_Matrix<T>::get_values_d(){
 }
 
 template <typename T>
-int * striped_partial_Matrix<T>::get_f2c_op_d(){
+local_int_t * striped_partial_Matrix<T>::get_f2c_op_d(){
     return this->f2c_op_d;
 }
 
@@ -182,7 +182,7 @@ void striped_partial_Matrix<T>::generate_f2c_operator_onGPU() {
     const int x = this->problem->nx;
     const int y = this->problem->ny;
     const int z = this->problem->nz;
-    const int fine_n_rows = x *2 * y * 2 * z * 2;
+    const local_int_t fine_n_rows = x *2 * y * 2 * z * 2;
 
     // allocate space for the device pointers
     CHECK_CUDA(cudaMalloc(&this->f2c_op_d, fine_n_rows * sizeof(int)));
