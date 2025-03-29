@@ -2,23 +2,19 @@
 
 void run_naiveStriped_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path, naiveStriped_Implementation<double>& implementation){
 
-    std::pair<sparse_CSR_Matrix<double>, std::vector<double>> problem = generate_HPCG_Problem(nx, ny, nz);
-    sparse_CSR_Matrix<double> A;
-    A.generateMatrix_onGPU(nx, ny, nz);
+    striped_Matrix<double> striped_A;
+    striped_A.Generate_striped_3D27P_Matrix_onGPU(nx, ny, nz);
+
     std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
     std::vector<double> x (nx*ny*nz, 0.0);
     std::vector<double> a = generate_random_vector(nx*ny*nz, RANDOM_SEED);
     std::vector<double> b = generate_random_vector(nx*ny*nz, RANDOM_SEED);
 
-    striped_Matrix<double>* striped_A = A.get_Striped();
-    std::cout << "getting striped matrix" << std::endl;
-    // striped_A.striped_Matrix_from_sparse_CSR(A);
+    int num_rows = striped_A.get_num_rows();
+    int num_cols = striped_A.get_num_cols();
+    int nnz = striped_A.get_nnz();
+    int num_stripes = striped_A.get_num_stripes();
 
-    int num_rows = striped_A->get_num_rows();
-    int num_cols = striped_A->get_num_cols();
-    int nnz = striped_A->get_nnz();
-    int num_stripes = striped_A->get_num_stripes();
-    
     std::string implementation_name = implementation.version_name;
     std::string additional_params = implementation.additional_parameters;
     std::string ault_node = implementation.ault_nodes;
@@ -43,7 +39,7 @@ void run_naiveStriped_3d27p_benchmarks(int nx, int ny, int nz, std::string folde
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
 
     // run the benchmarks (without the copying back and forth)
-    bench_Implementation(implementation, *timer, *striped_A, a_d, b_d, x_d, y_d, result_d, 1.0, 1.0);
+    bench_Implementation(implementation, *timer, striped_A, a_d, b_d, x_d, y_d, result_d, 1.0, 1.0);
 
     // free the memory
     cudaFree(a_d);

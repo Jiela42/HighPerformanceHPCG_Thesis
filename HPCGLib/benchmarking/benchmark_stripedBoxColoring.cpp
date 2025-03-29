@@ -3,17 +3,16 @@
 
 void run_striped_box_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path, striped_box_coloring_Implementation<double>& implementation){
     
-    sparse_CSR_Matrix<double> A;
-    A.generateMatrix_onGPU(nx, ny, nz);
     std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
     std::vector<double> x (nx*ny*nz, 0.0);
 
-    striped_Matrix<double>* striped_A = A.get_Striped();
+    striped_Matrix<double> striped_A;
+    striped_A.Generate_striped_3D27P_Matrix_onGPU(nx, ny, nz);
 
-    int num_rows = striped_A->get_num_rows();
-    int num_cols = striped_A->get_num_cols();
-    int nnz = striped_A->get_nnz();
-    int num_stripes = striped_A->get_num_stripes();
+    int num_rows = striped_A.get_num_rows();
+    int num_cols = striped_A.get_num_cols();
+    int nnz = striped_A.get_nnz();
+    int num_stripes = striped_A.get_num_stripes();
     
     // Allocate the memory on the device
     double * x_d;
@@ -42,7 +41,7 @@ void run_striped_box_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std:
 
         // std::cout << "Running the SymGS benchmark for the implementation: " << implementation_name << std::endl;
 
-        bench_SymGS(implementation, *timer, *striped_A, x_d, y_d);
+        bench_SymGS(implementation, *timer, striped_A, x_d, y_d);
     
         delete timer;
     }
@@ -54,29 +53,58 @@ void run_striped_box_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std:
 }
 
 void run_striped_box_coloring_3d27p_CG_benchmark(int nx, int ny, int nz, std::string folder_path, striped_box_coloring_Implementation<double>& implementation){
-    sparse_CSR_Matrix<double> A;
-    A.generateMatrix_onGPU(nx, ny, nz);
+
     std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
     std::vector<double> x (nx*ny*nz, 0.0);
     std::vector<double> a = generate_random_vector(nx*ny*nz, RANDOM_SEED);
     std::vector<double> b = generate_random_vector(nx*ny*nz, RANDOM_SEED);
 
-    if(nx % 8 == 0 && ny % 8 == 0 && nz % 8 == 0 && nx / 8 > 2 && ny / 8 > 2 && nz / 8 > 2){
-        // initialize the MG data
-        sparse_CSR_Matrix <double>* current_matrix = &A;
-        for(int i = 0; i < 3; i++){
-            current_matrix->initialize_coarse_Matrix();
-            current_matrix = current_matrix->get_coarse_Matrix();
+    bool include_conversion = false;
+    
+    sparse_CSR_Matrix<double> A;
+    striped_Matrix<double> striped_A;
+    int num_rows;
+    int nnz;
+    if(include_conversion){
+
+        A.generateMatrix_onGPU(nx, ny, nz);
+        std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
+        std::vector<double> x (nx*ny*nz, 0.0);
+        std::vector<double> a = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+        std::vector<double> b = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+    
+        if(nx % 8 == 0 && ny % 8 == 0 && nz % 8 == 0 && nx / 8 > 2 && ny / 8 > 2 && nz / 8 > 2){
+            // initialize the MG data
+            sparse_CSR_Matrix <double>* current_matrix = &A;
+            for(int i = 0; i < 3; i++){
+                current_matrix->initialize_coarse_Matrix();
+                current_matrix = current_matrix->get_coarse_Matrix();
+            }
         }
+
+        num_rows = A.get_num_rows();
+        nnz = A.get_nnz();
+    } else {
+        striped_A.Generate_striped_3D27P_Matrix_onGPU(nx, ny, nz);
+
+        std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
+        std::vector<double> x (nx*ny*nz, 0.0);
+        std::vector<double> a = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+        std::vector<double> b = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+
+        if(nx % 8 == 0 && ny % 8 == 0 && nz % 8 == 0 && nx / 8 > 2 && ny / 8 > 2 && nz / 8 > 2){
+            // initialize the MG data
+            striped_Matrix <double>* current_matrix = &striped_A;
+            for(int i = 0; i < 3; i++){
+                current_matrix->initialize_coarse_matrix();
+                current_matrix = current_matrix->get_coarse_Matrix();
+            }
+        }
+        num_rows = striped_A.get_num_rows();
+        nnz = striped_A.get_nnz();
     }
 
-    bool include_conversion = true;
-
     // if we want to measure the time it takes CG, we now need to delete the data between runs (heul heul)
-    // striped_Matrix<double>* striped_A = A.get_Striped();
-
-    int num_rows = A.get_num_rows();
-    int nnz = A.get_nnz();
 
     std::string implementation_name = implementation.version_name;
     if(include_conversion){
@@ -98,7 +126,7 @@ void run_striped_box_coloring_3d27p_CG_benchmark(int nx, int ny, int nz, std::st
 
     int num_iteration = include_conversion ? 10: 1;
 
-    for(int i = 0; i< 10; i++){
+    for(int i = 0; i< implementation.getNumberOfIterations(); i++){
         
         if(include_conversion){
             std::cout << "we include the conversion to striped in this run" << std::endl;
@@ -123,11 +151,10 @@ void run_striped_box_coloring_3d27p_CG_benchmark(int nx, int ny, int nz, std::st
             }
         } else {
             // get the striped version and run that
-            striped_Matrix<double>* striped_A = A.get_Striped();
             bench_CG(
                 implementation,
                 *timer,
-                *striped_A,
+                striped_A,
                 x_d, y_d
             );
         }
@@ -143,8 +170,9 @@ void run_striped_box_coloring_3d27p_CG_benchmark(int nx, int ny, int nz, std::st
 
 void run_striped_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path, striped_box_coloring_Implementation<double>& implementation){
 
-    sparse_CSR_Matrix<double> A;
-    A.generateMatrix_onGPU(nx, ny, nz);
+    striped_Matrix<double> striped_A;
+    striped_A.Generate_striped_3D27P_Matrix_onGPU(nx, ny, nz);
+
     std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
     std::vector<double> x (nx*ny*nz, 0.0);
     std::vector<double> a = generate_random_vector(nx*ny*nz, RANDOM_SEED);
@@ -152,19 +180,17 @@ void run_striped_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::stri
 
     if(nx % 8 == 0 && ny % 8 == 0 && nz % 8 == 0 && nx / 8 > 2 && ny / 8 > 2 && nz / 8 > 2){
         // initialize the MG data
-        sparse_CSR_Matrix <double>* current_matrix = &A;
+        striped_Matrix <double>* current_matrix = &striped_A;
         for(int i = 0; i < 3; i++){
-            current_matrix->initialize_coarse_Matrix();
+            current_matrix->initialize_coarse_matrix();
             current_matrix = current_matrix->get_coarse_Matrix();
         }
-    } 
+    }
 
-    striped_Matrix<double>* striped_A = A.get_Striped();
-
-    int num_rows = striped_A->get_num_rows();
-    int num_cols = striped_A->get_num_cols();
-    int nnz = striped_A->get_nnz();
-    int num_stripes = striped_A->get_num_stripes();
+    int num_rows = striped_A.get_num_rows();
+    int num_cols = striped_A.get_num_cols();
+    int nnz = striped_A.get_nnz();
+    int num_stripes = striped_A.get_num_stripes();
     
     // std::string box_dims = std::to_string(implementation.bx) + "x" + std::to_string(implementation.by) + "x" + std::to_string(implementation.bz);
     // std::string implementation_name = implementation.version_name + "_box: " + box_dims;
@@ -195,7 +221,7 @@ void run_striped_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::stri
     // we don't want to bench the implementation for the SymGS
     // (yet, because that has a bunch of parameters, specific to that, so we do an extra call to bench_SymGS)
     implementation.SymGS_implemented = false;
-    bench_Implementation(implementation, *timer, *striped_A, a_d, b_d, x_d, y_d, result_d, 1.0, 1.0);
+    bench_Implementation(implementation, *timer, striped_A, a_d, b_d, x_d, y_d, result_d, 1.0, 1.0);
 
     // free the memory
     cudaFree(a_d);

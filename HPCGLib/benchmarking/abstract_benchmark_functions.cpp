@@ -350,7 +350,7 @@ void bench_SPMV(
     // y_d is the output vector, hence we need to store the original and write the original back after the benchmarking
     std::vector<double> y(A.get_num_rows(), 0.0);
 
-    CHECK_CUDA(cudaMemcpy(y.data(), y_d, A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y.data(), y_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
 
     int num_iterations = implementation.getNumberOfIterations();
 
@@ -376,7 +376,7 @@ void bench_SPMV(
     }
 
     // copy the original vector back
-    CHECK_CUDA(cudaMemcpy(y_d, y.data(), A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
 }
 
 // this SPMV supports striped matrixes which requires CSR for metadata and testing

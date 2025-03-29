@@ -63,20 +63,18 @@ void run_striped_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::string f
 
 void run_striped_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path, striped_coloring_Implementation<double>& implementation){
     
-    sparse_CSR_Matrix<double> A;
-    A.generateMatrix_onGPU(nx, ny, nz);
+    striped_Matrix<double> striped_A;
+    striped_A.Generate_striped_3D27P_Matrix_onGPU(nx, ny, nz);
+
     std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
     std::vector<double> x (nx*ny*nz, 0.0);
+    std::vector<double> a = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+    std::vector<double> b = generate_random_vector(nx*ny*nz, RANDOM_SEED);
 
-    striped_Matrix<double>* striped_A = A.get_Striped();
-    std::cout << "getting striped matrix" << std::endl;
-
-    // striped_A.striped_Matrix_from_sparse_CSR(A);
-
-    int num_rows = striped_A->get_num_rows();
-    int num_cols = striped_A->get_num_cols();
-    int nnz = striped_A->get_nnz();
-    int num_stripes = striped_A->get_num_stripes();
+    int num_rows = striped_A.get_num_rows();
+    int num_cols = striped_A.get_num_cols();
+    int nnz = striped_A.get_nnz();
+    int num_stripes = striped_A.get_num_stripes();
 
     // const double * matrix_data = striped_A->get_values().data();
     // const int * j_min_i_data = striped_A->get_j_min_i().data();
@@ -96,7 +94,7 @@ void run_striped_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::str
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
 
-    bench_SymGS(implementation, *timer, *striped_A, x_d, y_d);
+    bench_SymGS(implementation, *timer, striped_A, x_d, y_d);
 
     // free the memory
     CHECK_CUDA(cudaFree(x_d));
