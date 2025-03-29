@@ -360,7 +360,7 @@ bool parallel_striped_generation_test(int nx, int ny, int nz){
 
         for(int i = 0; i < 3; i++){
             // we do three levels of MG data
-            current_Matrix->initialize_coarse_matrix();
+            current_Matrix->initialize_coarse_Matrix();
             current_Matrix = current_Matrix->get_coarse_Matrix();
         }
 

@@ -9,7 +9,7 @@
 #include "cuda_runtime.h"
 
 // define number of iterations we want to have
-#define num_bench_iter 10
+#define num_bench_iter 1
 
 enum class Implementation_Type {
     STRIPED,
@@ -20,7 +20,7 @@ enum class Implementation_Type {
 template <typename T>
 class HPCG_functions {
     public:
-        bool test_before_bench = true;
+        bool test_before_bench = false;
         std::string version_name = "unknown";
         const std::string ault_nodes = "GH200";
         // this string is used when small changes are benchmarked to see their effect
