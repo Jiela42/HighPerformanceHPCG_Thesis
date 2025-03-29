@@ -29,18 +29,18 @@ class striped_Matrix {
 
         void remove_Matrix_from_GPU();
         
-        int *get_color_pointer_d();
-        int *get_color_sorted_rows_d();
-        std::vector<int> get_color_pointer_vector();
-        std::vector<int> get_color_sorted_rows_vector();
+        local_int_t *get_color_pointer_d();
+        local_int_t *get_color_sorted_rows_d();
+        std::vector<local_int_t> get_color_pointer_vector();
+        std::vector<local_int_t> get_color_sorted_rows_vector();
         
-        int get_num_rows() const;
-        int get_num_cols() const;
+        local_int_t get_num_rows() const;
+        local_int_t get_num_cols() const;
         int get_num_stripes() const;
         int get_nx() const;
         int get_ny() const;
         int get_nz() const;
-        int get_nnz() const;
+        local_int_t get_nnz() const;
         int get_diag_index() const;
         MatrixType get_matrix_type() const;
 
@@ -50,18 +50,18 @@ class striped_Matrix {
         striped_Matrix<T> *get_coarse_Matrix();
         int get_num_MG_pre_smooth_steps() const;
         int get_num_MG_post_smooth_steps() const;
-        int *get_f2c_op_d();
+        local_int_t *get_f2c_op_d();
         T * get_rc_d();
         T * get_xc_d();
         T * get_Axf_d();
-        std::vector<int> get_f2c_op();
+        std::vector<local_int_t> get_f2c_op();
 
-        T get_element(int i, int j) const;
-        std::vector <local_int_t>& get_j_min_i();
+        T get_element(local_int_t i, local_int_t j) const;
+        std::vector<local_int_t>& get_j_min_i();
         std::vector <T>& get_values();
-        int * get_j_min_i_d();
+        local_int_t * get_j_min_i_d();
         T * get_values_d();
-        void set_num_rows(int num_rows);
+        void set_num_rows(local_int_t num_rows);
         void print_COR_Format();
         void print() const;
         void Generate_striped_3D27P_Matrix_onGPU(int nx, int ny, int nz);
@@ -78,22 +78,22 @@ class striped_Matrix {
         int nx;
         int ny;
         int nz;
-        int nnz;
+        local_int_t nnz;
         int diag_index;
-        int num_rows;
-        int num_cols;
+        local_int_t num_rows;
+        local_int_t num_cols;
         int num_stripes;
-        std::vector<int> j_min_i;
+        std::vector<local_int_t> j_min_i;
         std::vector<T> values;
         MatrixType matrix_type;
         // friend void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped(striped_Matrix<T> & A);
         void striped_Matrix_from_sparse_CSR(sparse_CSR_Matrix<T> & A);
         void striped_3D27P_Matrix_from_CSR_onCPU(sparse_CSR_Matrix<T> & A);
         void striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T> & A);
-        int *j_min_i_d;
+        local_int_t *j_min_i_d;
         T *values_d;
-        int* color_pointer_d;
-        int* color_sorted_rows_d;
+        local_int_t* color_pointer_d;
+        local_int_t* color_sorted_rows_d;
 
         sparse_CSR_Matrix<T> *CSR;
 
@@ -101,7 +101,7 @@ class striped_Matrix {
         int num_MG_post_smooth_steps;
         striped_Matrix<T> *coarse_Matrix;
         std::vector<local_int_t> f2c_op;
-        int *f2c_op_d;
+        local_int_t *f2c_op_d;
         // since we only have the MG routines run on the GPU, we only have the coarse matrix data (except f2c_op) on the GPU
         // (they are all vectors)
         T* rc_d;

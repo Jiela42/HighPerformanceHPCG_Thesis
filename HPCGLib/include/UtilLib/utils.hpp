@@ -5,7 +5,7 @@
 #include <iostream>
 #include <cmath>
 // #include "MatrixLib/sparse_CSR_Matrix.hpp"
-typedef int local_int_t;
+typedef long local_int_t;
 typedef int global_int_t;
 
 using DataType = double;

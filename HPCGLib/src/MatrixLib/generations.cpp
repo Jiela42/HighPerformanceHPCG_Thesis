@@ -6,28 +6,28 @@
 #include <random>
 #include <utility> // for std::pair
 
-std::pair<sparse_CSR_Matrix<double>, std::vector<double>> generate_HPCG_Problem(int nx, int ny, int nz){
+std::pair<sparse_CSR_Matrix<DataType>, std::vector<DataType>> generate_HPCG_Problem(int nx, int ny, int nz){
 
-    int num_rows = nx * ny * nz;
-    int num_cols = nx * ny * nz;
+    local_int_t num_rows = nx * ny * nz;
+    local_int_t num_cols = nx * ny * nz;
 
-    int nnz = 0;
+    local_int_t nnz = 0;
 
-    std::vector<int> row_ptr(num_rows + 1, 0);
-    std::vector<int> nnz_per_row(num_rows);
-    std::vector<int> col_idx;
-    std::vector<double> values;
-    std::vector<double> y(num_rows, 0.0);
+    std::vector<local_int_t> row_ptr(num_rows + 1, 0);
+    std::vector<local_int_t> nnz_per_row(num_rows);
+    std::vector<local_int_t> col_idx;
+    std::vector<DataType> values;
+    std::vector<DataType> y(num_rows, 0.0);
 
-    std::vector<std::vector<int>> col_idx_per_row(num_rows);
-    std::vector<std::vector<double>> values_per_row(num_rows);
+    std::vector<std::vector<local_int_t>> col_idx_per_row(num_rows);
+    std::vector<std::vector<DataType>> values_per_row(num_rows);
 
     for(int ix = 0; ix < nx; ix++){
         for(int iy = 0; iy < ny; iy++){
             for(int iz = 0; iz < nz; iz++){
 
-                int i = ix + nx * iy + nx * ny * iz;
-                int nnz_i = 0;
+                local_int_t i = ix + nx * iy + nx * ny * iz;
+                local_int_t nnz_i = 0;
 
                 for (int sz = -1; sz < 2; sz++){
                     if(iz + sz > -1 && iz + sz < nz){
@@ -35,7 +35,7 @@ std::pair<sparse_CSR_Matrix<double>, std::vector<double>> generate_HPCG_Problem(
                             if(iy + sy > -1 && iy + sy < ny){
                                 for(int sx = -1; sx < 2; sx++){
                                     if(ix + sx > -1 && ix + sx < nx){
-                                        int j = ix + sx + nx * (iy + sy) + nx * ny * (iz + sz);
+                                        local_int_t j = ix + sx + nx * (iy + sy) + nx * ny * (iz + sz);
                                         if(i == j){
                                             col_idx_per_row[i].push_back(j);
                                             values_per_row[i].push_back(26.0);
@@ -57,22 +57,22 @@ std::pair<sparse_CSR_Matrix<double>, std::vector<double>> generate_HPCG_Problem(
         }
     }
 
-    for (int i = 0; i < num_rows; i++){
+    for (local_int_t i = 0; i < num_rows; i++){
         row_ptr[i + 1] = row_ptr[i] + nnz_per_row[i];
 
-        for (int j = 0; j < nnz_per_row[i]; j++){
+        for (local_int_t j = 0; j < nnz_per_row[i]; j++){
             col_idx.push_back(col_idx_per_row[i][j]);
             values.push_back(values_per_row[i][j]);
         }
     }
 
     // Create the sparse matrix
-    sparse_CSR_Matrix<double> A(nx, ny, nz, nnz, MatrixType::Stencil_3D27P, values, row_ptr, col_idx);
+    sparse_CSR_Matrix<DataType> A(nx, ny, nz, nnz, MatrixType::Stencil_3D27P, values, row_ptr, col_idx);
 
     return std::make_pair(A, y);
 }
 
-std::pair<sparse_CSR_Matrix<double>, std::vector<int>> generate_coarse_HPCG_Problem(int nxf, int nyf, int nzf){
+std::pair<sparse_CSR_Matrix<DataType>, std::vector<local_int_t>> generate_coarse_HPCG_Problem(int nxf, int nyf, int nzf){
 
     assert(nxf % 2 == 0);
     assert(nyf % 2 == 0);
@@ -82,10 +82,10 @@ std::pair<sparse_CSR_Matrix<double>, std::vector<int>> generate_coarse_HPCG_Prob
     int nyc = nyf / 2;
     int nzc = nzf / 2;
 
-    int num_fine_rows = nxf * nyf * nzf;
-    int num_fine_cols = nxf * nyf * nzf;
+    local_int_t num_fine_rows = nxf * nyf * nzf;
+    local_int_t num_fine_cols = nxf * nyf * nzf;
 
-    std::vector<int>f2c_op(num_fine_rows, 0.0);
+    std::vector<local_int_t>f2c_op(num_fine_rows, 0.0);
 
     for (int izc=0; izc<nzc; ++izc) {
         int izf = 2*izc;
@@ -93,8 +93,8 @@ std::pair<sparse_CSR_Matrix<double>, std::vector<int>> generate_coarse_HPCG_Prob
             int iyf = 2*iyc;
             for (int ixc=0; ixc<nxc; ++ixc) {
                 int ixf = 2*ixc;
-                int currentCoarseRow = izc*nxc*nyc+iyc*nxc+ixc;
-                int currentFineRow = izf*nxf*nyf+iyf*nxf+ixf;
+                local_int_t currentCoarseRow = izc*nxc*nyc+iyc*nxc+ixc;
+                local_int_t currentFineRow = izf*nxf*nyf+iyf*nxf+ixf;
                 f2c_op[currentCoarseRow] = currentFineRow;
             } // end iy loop
         } // end even iz if statement
@@ -103,15 +103,15 @@ std::pair<sparse_CSR_Matrix<double>, std::vector<int>> generate_coarse_HPCG_Prob
     // sparse_CSR_Matrix<double> Ac;
     // std::vector<double> yc;
 
-    std::pair<sparse_CSR_Matrix<double>, std::vector<double>> cProblem = generate_HPCG_Problem(nxc, nyc, nzc);
+    std::pair<sparse_CSR_Matrix<DataType>, std::vector<DataType>> cProblem = generate_HPCG_Problem(nxc, nyc, nzc);
     return std::make_pair(cProblem.first, f2c_op);
 
 }
 
 // Also make a generation for the striped matrix in here (at some point)
 
-std::vector<double> generate_random_vector(int size, int seed){
-    std::vector<double> vec(size, 0.0);
+std::vector<DataType> generate_random_vector(local_int_t size, int seed){
+    std::vector<DataType> vec(size, 0.0);
     srand(seed);
     for (int i = 0; i < size; i++){
         vec[i] = (double)rand() / RAND_MAX;
@@ -121,33 +121,33 @@ std::vector<double> generate_random_vector(int size, int seed){
 }
 
 // Function to generate a random vector with values between min_val and max_val
-std::vector<double> generate_random_vector(int size, double min_val, double max_val, int seed) {
-    std::vector<double> vec(size);
+std::vector<DataType> generate_random_vector(local_int_t size, DataType min_val, DataType max_val, int seed) {
+    std::vector<DataType> vec(size);
 
     // Initialize random number generator with the given seed
     std::mt19937 gen(seed);
     std::uniform_real_distribution<> dis(min_val, max_val);
 
     // Fill the vector with random values between min_val and max_val
-    for (double &val : vec) {
+    for (DataType &val : vec) {
         val = dis(gen);
     }
 
     return vec;
 }
 
-std::vector<double> generate_y_vector_for_HPCG_problem(int nx, int ny, int nz){
-    int num_rows = nx * ny * nz;
-    int num_cols = nx * ny * nz;
+std::vector<DataType> generate_y_vector_for_HPCG_problem(int nx, int ny, int nz){
+    local_int_t num_rows = nx * ny * nz;
+    local_int_t num_cols = nx * ny * nz;
 
-    std::vector<double> y(num_rows, 0.0);
+    std::vector<DataType> y(num_rows, 0.0);
 
     for(int ix = 0; ix < nx; ix++){
         for(int iy = 0; iy < ny; iy++){
             for(int iz = 0; iz < nz; iz++){
 
-                int i = ix + nx * iy + nx * ny * iz;
-                int nnz_i = 0;
+                local_int_t i = ix + nx * iy + nx * ny * iz;
+                local_int_t nnz_i = 0;
 
                 for (int sz = -1; sz < 2; sz++){
                     if(iz + sz > -1 && iz + sz < nz){

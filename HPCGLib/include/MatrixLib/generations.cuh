@@ -5,32 +5,32 @@
 
 void generateHPCGProblem(
     int nx, int ny, int nz,
-    int * row_ptr, int * col_idx, double * values,
-    double * y    
+    local_int_t * row_ptr, local_int_t * col_idx, DataType * values,
+    DataType * y    
 );
 
 void generateHPCGMatrix(
     int nx, int ny, int nz,
-    int * row_ptr, int * col_idx, double * values
+    local_int_t * row_ptr, local_int_t * col_idx, DataType * values
 );
 
-int generate_striped_3D27P_Matrix_from_CSR(
+local_int_t generate_striped_3D27P_Matrix_from_CSR(
     int nx, int ny, int nz,
-    int * row_ptr, int * col_idx, double * values,
-    int num_stripes, int * j_min_i,
-    double * striped_A_d
+    local_int_t * row_ptr, local_int_t * col_idx, DataType * values,
+    int num_stripes, local_int_t * j_min_i,
+    DataType * striped_A_d
 );
 
-int generate_CSR_from_Striped(
-    int num_rows, int num_stripes,
-    int * j_min_i, double * striped_A_d,
-    int * row_ptr, int * col_idx, double * values
+local_int_t generate_CSR_from_Striped(
+    local_int_t num_rows, int num_stripes,
+    local_int_t * j_min_i, DataType * striped_A_d,
+    local_int_t * row_ptr, local_int_t * col_idx, DataType * values
 );
 
 void generate_f2c_operator(
     int nxf, int nyf, int nzf,
     int nxc, int nyc, int nzc,
-    int * f2c_operator
+    local_int_t * f2c_operator
 );
 
 void GenerateStripedPartialMatrix_GPU(

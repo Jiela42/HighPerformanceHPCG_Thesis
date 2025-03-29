@@ -72,7 +72,7 @@ __global__ void diff_and_norm_kernel(local_int_t num_rows, double *Ax, double *y
     }
 }
 
-__global__ void square_fusedReduction_kernel(int num_rows, double *y, double *y_reduced) {
+__global__ void square_fusedReduction_kernel(local_int_t num_rows, double *y, double *y_reduced) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     double my_sum = 0;
     int lane = threadIdx.x % WARP_SIZE;
@@ -356,7 +356,7 @@ double relative_residual_norm_for_SymGS(
     local_int_t num_cols = A.get_num_cols();
 
     int num_stripes = A.get_num_stripes();
-    int * j_min_i = A.get_j_min_i_d();
+    local_int_t * j_min_i = A.get_j_min_i_d();
     double * striped_A_d = A.get_values_d();
 
     // std::cout << "relative_residual_norm_for_SymGS" << std::endl;
