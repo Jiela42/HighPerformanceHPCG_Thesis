@@ -1,13 +1,13 @@
-#ifndef CPUTIMER_HPP
-#define CPUTIMER_HPP
+#ifndef MPITIMER_HPP
+#define MPITIMER_HPP
 
 #include "timer.hpp"
 #include <cuda_runtime.h>
 
-class cpuTimer : public Timer {
+class MPITimer : public Timer {
 public:
     // Constructor
-    cpuTimer(
+    MPITimer(
         int nx,
         int ny,
         int nz,
@@ -20,7 +20,7 @@ public:
     );
 
     // Destructor
-    ~cpuTimer();
+    ~MPITimer();
 
     // Function to start the timer
     void startTimer() override;
@@ -33,4 +33,4 @@ private:
 
 };
 
-#endif // CPUTIMER_HPP
+#endif // MPITIMER_HPP

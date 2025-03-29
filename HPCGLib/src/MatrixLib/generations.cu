@@ -520,9 +520,6 @@ void generate_y_vector_for_HPCG_problem_onGPU(Problem *problem, double *y_d){
     int num_rows = problem->nx * problem->ny * problem->nz;
     int num_cols = problem->nx * problem->ny * problem->nz;
 
-    CHECK_CUDA(cudaMalloc(&y_d, sizeof(double)*num_rows));
-    CHECK_CUDA(cudaMemset(y_d, 0., sizeof(double)*num_rows));
-
     int nthread=256;
     int nblocks=(num_rows+nthread-1) / nthread;
     generate_y_vector_for_HPCG_problem_kernel<<<nblocks, nthread>>>(problem->gnx, problem->gny, problem->gnz, problem->nx, problem->ny, problem->nz, problem->gx0, problem->gy0, problem->gz0, y_d);

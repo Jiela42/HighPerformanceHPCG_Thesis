@@ -1,74 +1,61 @@
 #include "benchmark.hpp"
+#include "UtilLib/hpcg_multi_GPU_utils.cuh"
+#include "mpi.h"
 
-#define RANDM_MIN 0
+#define RANDOM_MIN 0
 #define RANDOM_MAX 1000
 
-void run_multi_GPU_benchmarks(int npx, int npy, int npz, int nx, int ny, int nz, std::string folder_path, striped_multi_GPU_Implementation<DataType>& implementation){
+void run_multi_GPU_benchmarks(int npx, int npy, int npz, int nx, int ny, int nz, std::string folder_path, striped_multi_GPU_Implementation<DataType>& implementation, Problem *problem, const std::string& benchFilter){
 
-    int size, rank;
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    //initialize problem struct
-    Problem problem; //holds geometric data about the problem
-    GenerateProblem(npx, npy, npz, nx, ny, nz, size, rank, &problem);
-
-    //set Device
-    InitGPU(&problem);
+    local_int_t n = nx * ny * nz;
 
     //initialize matrix partial matrix A_local
-    striped_partial_Matrix<DataType> A;
-    A.generateMatrix_onGPU(nx, ny, nz);
+    striped_partial_Matrix<DataType> A(problem);
 
     //Initialize data
     Halo y;
-    InitHalo(&y, nx, ny, nz);
-    std::vector<double> y_vector= generate_partial_y_vector_for_HPCG_problem(nx, ny, nz);
-    InjectDataToHalo(&y, y_vector); //TODO: Check correctness of Inject Data to halo
+    InitHalo(&y, problem);
+    DataType *y_vector_d;
+    CHECK_CUDA(cudaMalloc(&y_vector_d, n * sizeof(DataType)));
+    generate_y_vector_for_HPCG_problem_onGPU(problem, y_vector_d);
+    InjectDataToHalo(&y, y_vector_d);
+    CHECK_CUDA(cudaFree(y_vector_d));
     
     Halo x;
-    InitHalo(&x, nx, ny, nz);
-    SetHaloZeroGPU(&x);
+    InitHalo(&x, problem);
 
     Halo a;
-    InitHalo(&a, nx, ny, nz);
+    InitHalo(&a, problem);
     SetHaloRandomGPU(&a, problem, RANDOM_MIN, RANDOM_MAX, RANDOM_SEED);
 
     Halo b;
-    InitHalo(&b, nx, ny, nz);
+    InitHalo(&b, problem);
     SetHaloRandomGPU(&b, problem, RANDOM_MIN, RANDOM_MAX, RANDOM_SEED);
 
     srand(RANDOM_SEED);
 
     DataType *result_d;
     CHECK_CUDA(cudaMalloc(&result_d, sizeof(DataType)));
-    double alpha = (double)rand() / RAND_MAX;
-    double beta = (double)rand() / RAND_MAX;
+    DataType alpha = (DataType)rand() / RAND_MAX;
+    DataType beta = (DataType)rand() / RAND_MAX;
 
     if(nx % 8 == 0 && ny % 8 == 0 && nz % 8 == 0 && nx / 8 > 2 && ny / 8 > 2 && nz / 8 > 2){
         // initialize the MG data
-        striped_partial_Matrix<double>* current_matrix = &A;
+        striped_partial_Matrix<DataType>* current_matrix = &A;
         for(int i = 0; i < 3; i++){
-            current_matrix->initialize_coarse_Matrix();
+            current_matrix->initialize_coarse_matrix();
             current_matrix = current_matrix->get_coarse_Matrix();
         }
     } 
 
-    striped_partial_Matrix<double> * striped_A = A.get_Striped();
-
-    int num_rows = striped_A->get_num_rows();
-    int num_cols = striped_A->get_num_cols();
-    int nnz = striped_A->get_nnz(); //TODO: Is this implemented?
-    int num_stripes = striped_A->get_num_stripes();
-    
     std::string implementation_name = implementation.version_name;
     std::string additional_params = implementation.additional_parameters;
     std::string ault_node = implementation.ault_nodes;
-    //TODO: my MPI timer
-    CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);
+ 
+    MPITimer* timer = new MPITimer(nx, ny, nz, 0, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);
 
-    // run the benchmarks (without the copying back and forth)
-    bench_Implementation(implementation, *timer, *striped_A, &a, &b, &x, &y, result_d, alpha, beta);
+    // run the benchmarks
+    bench_Implementation(implementation, *timer, A, &a, &b, &x, &y, result_d, alpha, beta, problem, benchFilter);
 
     // free the memory
     FreeHalo(&y);
@@ -80,6 +67,8 @@ void run_multi_GPU_benchmarks(int npx, int npy, int npz, int nx, int ny, int nz,
     delete timer;
 }
 
+
+/*
 void run_multi_GPU_Dot_benchmark(int npx, int npy, int npz, int nx, int ny, int nz, std::string folder_path, striped_multi_GPU_Implementation<DataType>& implementation){
 
     int size, rank;
@@ -122,7 +111,7 @@ void run_multi_GPU_Dot_benchmark(int npx, int npy, int npz, int nx, int ny, int 
         CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);
     
         // run the benchmark
-        bench_Dot(implementation, *timer, A_striped, &x, &y, &result_d);
+        bench_Dot(implementation, *timer, A, &x, &y, &result_d);
 
         delete timer;    
     // }
@@ -248,6 +237,7 @@ void run_multi_GPU_SymGS_benchmark(int npx, int npy, int npz, int nx, int ny, in
     Halo y;
     InitHalo(&y, nx, ny, nz);
     GeneratePartialYVectorForHPCGProblem(nx, ny, nz, &y);
+
     
     Halo x;
     InitHalo(&x, nx, ny, nz);
@@ -308,3 +298,4 @@ void run_multi_GPU_Exchange_Halo_benchmark(int npx, int npy, int npz, int nx, in
 
     delete timer;
 }
+*/
