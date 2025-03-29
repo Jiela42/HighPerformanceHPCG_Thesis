@@ -36,7 +36,7 @@ class striped_partial_Matrix {
         //int get_ny() const;
         //int get_nz() const;
         //int get_nnz() const;
-        //int get_diag_index() const;
+        int get_diag_index() const;
         //MatrixType get_matrix_type() const;
 
         //sparse_CSR_Matrix<T> *get_CSR();

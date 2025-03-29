@@ -6,8 +6,8 @@
 #SBATCH --output result.out
 #SBATCH --time 00:05:00
 #SBATCH --partition=debug
-#SBATCH --nodes=1
-#SBATCH --ntasks=1
+#SBATCH --nodes=2
+#SBATCH --ntasks=8
 ##SBATCH --gpus-per-task=1
 
 ##Modules
@@ -25,4 +25,4 @@ module load gcc
 ## cd /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/build/testing
 
 ## Run 
-srun /users/nrottstegge/github/HighPerformanceHPCG_Thesis/HPCGLib/build/testing/run_AllTests
+srun /users/nrottstegge/github/HighPerformanceHPCG_Thesis/HPCGLib/build/testing/run_multi_GPU_tests

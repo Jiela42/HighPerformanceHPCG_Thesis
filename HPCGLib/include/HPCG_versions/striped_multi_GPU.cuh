@@ -4,6 +4,7 @@
 #include "HPCGLib.hpp"
 #include "MatrixLib/sparse_CSR_Matrix.hpp"
 #include "MatrixLib/striped_Matrix.hpp"
+#include "MatrixLib/striped_partial_Matrix.hpp"
 #include "UtilLib/cuda_utils.hpp"
 #include "UtilLib/hpcg_multi_GPU_utils.cuh"
 
@@ -31,7 +32,7 @@ public:
         this->SymGS_implemented = true;
         this->WAXPBY_implemented = true;
         this->CG_implemented = true;
-        this->MG_implemented = false;
+        this->MG_implemented = true;
         this->norm_based = false;
 
         // default box size for coloring
@@ -67,13 +68,12 @@ public:
     }
 
     void compute_CG(
-        striped_Matrix<T> & A,
+        striped_partial_Matrix<T> & A,
         Halo * b_d, Halo * x_d,
         int & n_iters, T& normr, T& normr0,
-        Problem *problem,
-        int *j_min_i_d
+        Problem *problem
     ) {
-        striped_warp_reduction_multi_GPU_computeCG(A, b_d, x_d, n_iters, normr, normr0, problem, j_min_i_d);
+        striped_warp_reduction_multi_GPU_computeCG(A, b_d, x_d, n_iters, normr, normr0, problem);
     }
 
     void compute_MG(
@@ -84,12 +84,11 @@ public:
     }
     
     void compute_MG(
-        striped_Matrix<T> & A,
+        striped_partial_Matrix<T> & A,
         Halo * x_d, Halo * y_d, // the vectors x and y are already on the device
-        Problem *problem,
-        int *j_min_i_d
+        Problem *problem
         ) {
-            striped_warp_reduction_multi_GPU_computeMG(A, x_d, y_d, problem, j_min_i_d);
+            striped_warp_reduction_multi_GPU_computeMG(A, x_d, y_d, problem);
     }
 
     void compute_SymGS(
@@ -107,12 +106,11 @@ public:
     }
 
     void compute_SymGS(
-        striped_Matrix<T> & A,
+        striped_partial_Matrix<T> & A,
         Halo * x_d, Halo * b_d, // the vectors x and y are already on the device
-        Problem *problem,
-        int *j_min_i_d
+        Problem *problem
     ) {
-        striped_box_coloring_multi_GPU_computeSymGS(A, x_d, b_d, problem, j_min_i_d);
+        striped_box_coloring_multi_GPU_computeSymGS(A, x_d, b_d, problem);
     }
     
     void compute_SPMV(
@@ -130,12 +128,11 @@ public:
     }
 
     void compute_SPMV(
-        striped_Matrix<T>& A,
+        striped_partial_Matrix<T>& A,
         Halo * x_d, Halo * b_d, // the vectors x and y are already on the device
-        Problem *problem,
-        int *j_min_i_d
+        Problem *problem
         ) {
-        striped_warp_reduction_multi_GPU_computeSPMV(A, x_d, b_d, problem, j_min_i_d);
+        striped_warp_reduction_multi_GPU_computeSPMV(A, x_d, b_d, problem);
     }
 
     void compute_WAXPBY(
@@ -192,25 +189,22 @@ public:
 private:
 
     void striped_warp_reduction_multi_GPU_computeCG(
-        striped_Matrix<T> & A,
+        striped_partial_Matrix<T> & A,
         Halo * b_d, Halo * x_d,
         int & n_iters, T& normr, T& normr0,
-        Problem *problem,
-        int *j_min_i_d
+        Problem *problem
     );
 
     void striped_warp_reduction_multi_GPU_computeMG(
-        striped_Matrix<T> & A,
+        striped_partial_Matrix<T> & A,
         Halo * x_d, Halo * y_d, // the vectors x and y are already on the device
-        Problem *problem,
-        int *j_min_i_d
+        Problem *problem
     );
 
     void striped_warp_reduction_multi_GPU_computeSPMV(
-        striped_Matrix<T>& A,
+        striped_partial_Matrix<T>& A,
         Halo *x_d, Halo *y_d, // the vectors x and y are already on the device
-        Problem *problem,
-        int *j_min_i_d
+        Problem *problem
     );
 
     void striped_warp_reduction_multi_GPU_computeDot(
@@ -218,10 +212,9 @@ private:
     );
 
     void striped_box_coloring_multi_GPU_computeSymGS(
-        striped_Matrix<T> & A,
+        striped_partial_Matrix<T> & A,
         Halo *x_d, Halo *b_d, // the vectors x and y are already on the device
-        Problem *problem,
-        int *j_min_i
+        Problem *problem
     );
 
     void striped_warp_reduction_multi_GPU_computeWAXPBY(

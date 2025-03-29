@@ -122,10 +122,9 @@ __global__ void striped_box_coloring_half_SymGS_kernel(
 
 template <typename T>
 void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_computeSymGS(
-    striped_Matrix<T> & A,
+    striped_partial_Matrix<T> & A,
     Halo *x_d, Halo *b_d, // the vectors x and y are already on the device
-    Problem *problem,
-    int *j_min_i
+    Problem *problem
 ){
     //some geometrical information
     int nx = problem->nx;
@@ -199,7 +198,7 @@ void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_compute
             nx, ny, nz,
             num_rows, num_cols,
             num_stripes, diag_offset,
-            j_min_i,
+            A.get_j_min_i_d(),
             striped_A_d,
             x_d->x_d, b_d->x_d,
             gnx, gny, gnz, gi0, px, py, pz
@@ -218,7 +217,7 @@ void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_compute
         nx, ny, nz,
         num_rows, num_cols,
         num_stripes, diag_offset,
-        j_min_i,
+        A.get_j_min_i_d(),
         striped_A_d,
         x_d->x_d, b_d->x_d,
         gnx, gny, gnz, gi0, px, py, pz

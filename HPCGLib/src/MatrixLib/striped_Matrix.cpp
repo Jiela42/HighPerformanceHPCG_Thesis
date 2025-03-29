@@ -661,10 +661,8 @@ int striped_Matrix<T>::get_num_MG_post_smooth_steps() const{
 }
 
 
-template <typename T>
-int striped_Matrix<T>::get_diag_index() const{
-    return this->diag_index;
-}
+
+
 
 template <typename T>
 MatrixType striped_Matrix<T>::get_matrix_type() const{
@@ -751,7 +749,6 @@ void striped_Matrix<T>::initialize_coarse_matrix(){
     // allocate halos rc, xc, Axf and set to zero
     init_coarse_buffer();
 }
-
 
 template <typename T>
 T striped_Matrix<T>::get_element(int i, int j) const{
