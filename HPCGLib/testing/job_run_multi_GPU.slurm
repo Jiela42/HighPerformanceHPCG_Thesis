@@ -4,7 +4,7 @@
 #SBATCH --job-name=hpcg_test
 #SBATCH --account=a-g200
 #SBATCH --output result.out
-#SBATCH --time 00:10:00
+#SBATCH --time 00:30:00
 #SBATCH --partition=debug
 #SBATCH --nodes=1
 #SBATCH --ntasks=4

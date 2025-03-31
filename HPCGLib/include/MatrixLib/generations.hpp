@@ -10,8 +10,11 @@
 std::pair<sparse_CSR_Matrix<DataType>, std::vector<DataType>> generate_HPCG_Problem(int nx, int ny, int nz);
 std::pair<sparse_CSR_Matrix<DataType>, std::vector<local_int_t>> generate_coarse_HPCG_Problem(int nxf, int nyf, int nzf);
 
-std::vector<DataType> generate_random_vector(int size, int seed);
-std::vector<DataType> generate_random_vector(int size, DataType min_val, DataType max_val, int seed);
+template <typename t>
+std::vector<DataType> generate_random_vector(t size, int seed);
+
+template <typename t>
+std::vector<DataType> generate_random_vector(t size, DataType min_val, DataType max_val, int seed);
 
 std::vector<DataType> generate_y_vector_for_HPCG_problem(int nx, int ny, int nz);
 

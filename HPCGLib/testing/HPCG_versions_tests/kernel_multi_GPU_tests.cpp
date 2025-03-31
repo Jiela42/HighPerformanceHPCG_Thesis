@@ -16,9 +16,9 @@
 #define NPY 2
 #define NPZ 1
 //each process gets assigned problem size of NX x NY x NZ
-#define NX 32
-#define NY 32
-#define NZ 32
+#define NX 512
+#define NY 512
+#define NZ 512
 
 void test_matrix_distribution(int num_stripes_local, int num_stripes_global, int num_rows_local, int num_rows_global, DataType *striped_A_local_h, DataType *striped_A_global_h, Problem *problem){
     //verfify the partial matrix

@@ -15,7 +15,7 @@ void run_striped_preprocessed_3d27p_benchmarks(int nx, int ny, int nz, std::stri
         // initialize the MG data
         striped_Matrix <double>* current_matrix = &striped_A;
         for(int i = 0; i < 3; i++){
-            current_matrix->initialize_coarse_matrix();
+            current_matrix->initialize_coarse_Matrix();
             current_matrix = current_matrix->get_coarse_Matrix();
         }
     }
@@ -78,7 +78,7 @@ void run_striped_preprocessed_3d27p_SymGS_benchmark(int nx, int ny, int nz, std:
         // initialize the MG data
         striped_Matrix <double>* current_matrix = &striped_A;
         for(int i = 0; i < 3; i++){
-            current_matrix->initialize_coarse_matrix();
+            current_matrix->initialize_coarse_Matrix();
             current_matrix = current_matrix->get_coarse_Matrix();
         }
     }

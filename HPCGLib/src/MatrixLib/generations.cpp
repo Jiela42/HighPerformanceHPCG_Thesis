@@ -109,8 +109,8 @@ std::pair<sparse_CSR_Matrix<DataType>, std::vector<local_int_t>> generate_coarse
 }
 
 // Also make a generation for the striped matrix in here (at some point)
-
-std::vector<DataType> generate_random_vector(local_int_t size, int seed){
+template <typename t>
+std::vector<DataType> generate_random_vector(t size, int seed){
     std::vector<DataType> vec(size, 0.0);
     srand(seed);
     for (int i = 0; i < size; i++){
@@ -121,7 +121,8 @@ std::vector<DataType> generate_random_vector(local_int_t size, int seed){
 }
 
 // Function to generate a random vector with values between min_val and max_val
-std::vector<DataType> generate_random_vector(local_int_t size, DataType min_val, DataType max_val, int seed) {
+template <typename t>
+std::vector<DataType> generate_random_vector(t size, DataType min_val, DataType max_val, int seed) {
     std::vector<DataType> vec(size);
 
     // Initialize random number generator with the given seed
@@ -169,3 +170,11 @@ std::vector<DataType> generate_y_vector_for_HPCG_problem(int nx, int ny, int nz)
     }
     return y;
 }
+
+template std::vector<double> generate_random_vector<int>(int, int);
+template std::vector<double> generate_random_vector<long>(long, int);
+template std::vector<double> generate_random_vector<long long>(long long, int);
+
+template std::vector<double> generate_random_vector<int>(int, double, double, int);
+template std::vector<double> generate_random_vector<long>(long, double, double, int);
+template std::vector<double> generate_random_vector<long long>(long long, double, double, int);

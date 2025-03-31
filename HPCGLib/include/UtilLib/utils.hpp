@@ -31,7 +31,8 @@ bool relaxed_double_compare(double a, double b, double tolerance);
 // Function to compare two vectors of doubles with a tolerance
 bool vector_compare(const std::vector<double>& a, const std::vector<double>& b);
 
-bool vector_compare(const std::vector<int>& a, const std::vector<int>& b, std::string info);
+template <typename t>
+bool vector_compare(const std::vector<t>& a, const std::vector<t>& b, std::string info);
 
 double L2_norm_for_SymGS(sparse_CSR_Matrix<double>& A, std::vector<double> & x_solution, std::vector<double>& true_solution);
 

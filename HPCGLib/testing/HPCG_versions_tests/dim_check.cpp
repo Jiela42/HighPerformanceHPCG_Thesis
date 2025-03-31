@@ -45,7 +45,7 @@ void dimension_tests(int argc, char *argv[], striped_multi_GPU_Implementation<Da
 
     striped_partial_Matrix<DataType> *A_local_current = &A_local;
     for(int i = 0; i < 3; i++){
-        A_local_current->initialize_coarse_matrix();
+        A_local_current->initialize_coarse_Matrix();
         A_local_current = A_local_current->get_coarse_Matrix();
     } 
     
