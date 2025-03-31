@@ -6,21 +6,21 @@
 __device__ void print_values_cooperatively(DataType * array, local_int_t num_elements){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     for (local_int_t i = tid; i < num_elements; i += blockDim.x * gridDim.x){
-        printf("array[%d]: %f\n", i, array[i]);
+        printf("array[%ld]: %f\n", i, array[i]);
     }
 }
 
 __device__ void print_values_thread(DataType * array, local_int_t num_elements){
 
     for (local_int_t i = 0; i < num_elements; i++){
-        printf("array[%d]: %f\n", i, array[i]);
+        printf("array[%ld]: %f\n", i, array[i]);
     }
 }
 
 __device__ void print_offsets_thread(int * array, local_int_t num_elements){
 
     for (local_int_t i = 0; i < num_elements; i++){
-        printf("array[%d]: %d\n", i, array[i]);
+        printf("array[%ld]: %d\n", i, array[i]);
     }
 }
 
@@ -28,7 +28,7 @@ __device__ void test_val_cooperatively(DataType * array, local_int_t num_element
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     for (local_int_t i = tid; i < num_elements; i += blockDim.x * gridDim.x){
        if(array[i] != test_val){
-           printf("array[%d]: %f\n", i, array[i]);
+           printf("array[%ld]: %f\n", i, array[i]);
        }
        
     }
@@ -36,10 +36,7 @@ __device__ void test_val_cooperatively(DataType * array, local_int_t num_element
 
 __global__ void striped_shared_memory_SPMV_kernel(
         local_int_t rows_per_sm, local_int_t num_x_elem, int num_consecutive_memory_regions,
-        int* min_j, int* max_j,
-        DataType* striped_A,
-        local_int_t num_rows, int num_stripes, local_int_t * j_min_i,
-        DataType* x, DataType* y
+        local_int_t* min_j, local_int_t* max_j,
         DataType* striped_A,
         local_int_t num_rows, int num_stripes, local_int_t * j_min_i,
         DataType* x, DataType* y
@@ -55,10 +52,10 @@ __global__ void striped_shared_memory_SPMV_kernel(
     }
     extern __shared__ local_int_t shared_mem[];
     local_int_t* shared_j_min_i = shared_mem;
-    local_int_t* shared_j_min = (int*)& shared_j_min_i[num_stripes];
-    local_int_t* shared_j_max = (int*)& shared_j_min[num_consecutive_memory_regions];
+    local_int_t* shared_j_min = (local_int_t*)& shared_j_min_i[num_stripes];
+    local_int_t* shared_j_max = (local_int_t*)& shared_j_min[num_consecutive_memory_regions];
     // we need to explain why the sum_x_elem_per_conseq_mem is +1 -> basically the same reason why we get num_rows+1 many rowpointers in csr format
-    local_int_t * sum_x_elem_per_conseq_mem = (int*)& shared_j_max[num_consecutive_memory_regions];
+    local_int_t * sum_x_elem_per_conseq_mem = (local_int_t*)& shared_j_max[num_consecutive_memory_regions];
     DataType* shared_x = (DataType*)& sum_x_elem_per_conseq_mem[num_consecutive_memory_regions + 1 + necessary_pad];  
 
     local_int_t sum_x_elem = 0;
@@ -148,7 +145,7 @@ __global__ void striped_shared_memory_SPMV_kernel(
     
 
 
-void eliminate_overlap(int* min_j, int* max_j, int num_thick_stripes, int* num_x_elem, int* num_consecutive_memory_regions){
+void eliminate_overlap(local_int_t* min_j, local_int_t* max_j, int num_thick_stripes, local_int_t* num_x_elem, int* num_consecutive_memory_regions){
 
     int ctr_consecutive_memory_regions = 1;
     // int nx = 0;
@@ -205,7 +202,7 @@ void Striped_Shared_Memory_Implementation<T>::striped_shared_memory_computeSPMV(
         int shared_mem_doubles = shared_mem_bytes / sizeof(DataType);
         int shared_mem_doubles_for_x = shared_mem_doubles - 2*num_stripes;
 
-        int rows_per_sm = (shared_mem_doubles_for_x -  2 * num_stripes) / new_elem_per_row;
+        local_int_t rows_per_sm = (shared_mem_doubles_for_x -  2 * num_stripes) / new_elem_per_row;
         // rows_per_sm = next_smaller_power_of_two(rows_per_sm);
         int num_threads = 1024;
         int num_blocks = std::min(MAX_NUM_BLOCKS, ceiling_division(num_rows, rows_per_sm));
@@ -213,7 +210,7 @@ void Striped_Shared_Memory_Implementation<T>::striped_shared_memory_computeSPMV(
         local_int_t max_j [num_stripes];
         int num_thick_stripes = 1;
         int num_conseq_mem_reg = 0;
-        int num_x_elem = 0;
+        local_int_t num_x_elem = 0;
                 
         if(shared_mem_doubles - num_stripes - 2 > num_rows){
             rows_per_sm = num_rows;
@@ -247,10 +244,10 @@ void Striped_Shared_Memory_Implementation<T>::striped_shared_memory_computeSPMV(
         }
 
 
-        int size_shared_j_min_i = num_stripes * sizeof(local_int_t);
-        int size_x_offsets = 3*num_conseq_mem_reg * sizeof(local_int_t);
-        int size_shared_x = num_x_elem * sizeof(DataType);
-        int size_shared_memory = size_shared_j_min_i  + size_x_offsets + size_shared_x;
+        local_int_t size_shared_j_min_i = num_stripes * sizeof(local_int_t);
+        local_int_t size_x_offsets = 3*num_conseq_mem_reg * sizeof(local_int_t);
+        local_int_t size_shared_x = num_x_elem * sizeof(DataType);
+        local_int_t size_shared_memory = size_shared_j_min_i  + size_x_offsets + size_shared_x;
 
         assert(size_shared_memory < shared_mem_bytes);
         // move the offsets to the device

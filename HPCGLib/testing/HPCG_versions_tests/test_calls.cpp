@@ -554,6 +554,10 @@ bool test_SPMV(
 
     bool test_pass = vector_compare(y_baseline, y_uut);
 
+    if(not test_pass){
+        std::cout << "SPMV failed for implementation: "<< uut.version_name << std::endl;
+    }
+
     return test_pass;
 }
 
@@ -562,7 +566,7 @@ bool test_Dot(
     striped_Matrix<DataType> & A, // we pass A for the metadata
     DataType * x_d, DataType * y_d // the vectors x, y and result are already on the device
     ){
-
+    
     // sparse_CSR_Matrix<DataType> A_CSR;
     // A_CSR.sparse_CSR_Matrix_from_striped(A);
 
@@ -645,27 +649,29 @@ bool test_Dot(
     int nx, int ny, int nz
 ){
 
+    local_int_t num_rows = static_cast<local_int_t>(nx) * static_cast<local_int_t>(ny) * static_cast<local_int_t>(nz);
+
     // make a matrix (for some reason we need it) (num_rows is the only thing we need to get from the matrix)
     striped_Matrix<DataType> A_striped;
-    A_striped.set_num_rows(nx * ny * nz);
+    A_striped.set_num_rows(num_rows);
     
 
     // create two vectors
-    std::vector<DataType> x(nx * ny * nz, 2.0);
-    std::vector<DataType> y(nx * ny * nz, 0.5);
+    std::vector<DataType> x(num_rows, 2.0);
+    std::vector<DataType> y(num_rows, 0.5);
     // std::cout << "we use this function" << std::endl;
 
     DataType result = 0.0;
 
     srand(RANDOM_SEED);
 
-    for(local_int_t i = 0; i < nx * ny * nz; i++){
-        DataType a = (DataType)rand() / RAND_MAX;
-        DataType b = (DataType)rand() / RAND_MAX;
-        x[i] = a;
-        y[i] = b;
-        result += a * b;
-        // result += x[i] * y[i];
+    for(local_int_t i = 0; i < num_rows; i++){
+        // DataType a = (DataType)rand() / RAND_MAX;
+        // DataType b = (DataType)rand() / RAND_MAX;
+        // x[i] = a;
+        // y[i] = b;
+        // result += a * b;
+        result += x[i] * y[i];
     }
 
     // allocate x and y on the device
@@ -673,12 +679,12 @@ bool test_Dot(
     DataType * y_d;
     DataType * result_d;
 
-    CHECK_CUDA(cudaMalloc(&x_d, nx * ny * nz * sizeof(DataType)));
-    CHECK_CUDA(cudaMalloc(&y_d, nx * ny * nz * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&x_d, num_rows * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&y_d, num_rows * sizeof(DataType)));
     CHECK_CUDA(cudaMalloc(&result_d, sizeof(DataType)));
 
-    CHECK_CUDA(cudaMemcpy(x_d, x.data(), nx * ny * nz * sizeof(DataType), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(y_d, y.data(), nx * ny * nz * sizeof(DataType), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
 
     uut.compute_Dot(A_striped, x_d, y_d, result_d);
 

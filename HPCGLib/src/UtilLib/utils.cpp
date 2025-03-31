@@ -71,6 +71,26 @@ bool vector_compare(const std::vector<int>& a, const std::vector<int>& b, std::s
     return test_result;
 }
 
+bool vector_compare(const std::vector<local_int_t>& a, const std::vector<local_int_t>& b, std::string info){
+    bool test_result = true;
+    if (a.size() != b.size()){
+        std::cout << "Vector sizes do not match for " << info << " size a = " << a.size() << " size b = " << b.size() << std::endl;
+         test_result = false;
+    }
+
+    int fault_ctr = 0;
+
+    for(local_int_t i = 0; i < a.size(); i++){
+        if (a[i] != b[i] && fault_ctr < 10){
+            std::cout << "Error at index " << i << " should be " << a[i] << " but was " << b[i] << " for " << info << std::endl;
+            test_result = false;
+            fault_ctr++;
+        }
+    }
+    return test_result;
+}
+
+
 double L2_norm_for_SymGS(sparse_CSR_Matrix<double>& A, std::vector<double> & x_solution, std::vector<double>& true_solution){
 
     // this thing expects A, to be on the gpu

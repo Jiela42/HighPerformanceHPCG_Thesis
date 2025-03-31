@@ -8,7 +8,7 @@
 #include <iostream>
 #include <cublas_v2.h>
 
-__global__ void elem_wise_mult_of_vectors_kernel(int local_int_t, DataType *x, DataType *y, DataType *z){
+__global__ void elem_wise_mult_of_vectors_kernel(local_int_t num_rows, DataType *x, DataType *y, DataType *z){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
     for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x){

@@ -13,13 +13,17 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<DataType>& A){
     cuSparse_Implementation<DataType> cuSparse;
     striped_warp_reduction_Implementation<DataType> striped_warp_reduction;
     
+    local_int_t num_rows = A.get_num_rows();
+    local_int_t num_cols = A.get_num_cols();
+    local_int_t nnz = A.get_nnz();
+    
     int nx = A.get_nx();
     int ny = A.get_ny();
     int nz = A.get_nz();
     
     // random seeded x vector
-    std::vector<DataType> a = generate_random_vector(nx*ny*nz, RANDOM_SEED);
-    std::vector<DataType> b = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+    std::vector<DataType> a = generate_random_vector(num_rows, RANDOM_SEED);
+    std::vector<DataType> b = generate_random_vector(num_rows, RANDOM_SEED);
     std::vector<DataType> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
 
     striped_Matrix<DataType>* A_striped = A.get_Striped();
@@ -34,10 +38,6 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<DataType>& A){
     //     std::cout << j_min_i[i] << " ";
     // }
     // std::cout << std::endl;
-
-    local_int_t num_rows = A.get_num_rows();
-    local_int_t num_cols = A.get_num_cols();
-    local_int_t nnz = A.get_nnz();
 
     DataType * a_d;
     DataType * b_d;
@@ -58,6 +58,7 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<DataType>& A){
 
     CHECK_CUDA(cudaMemset(x_d, 0, num_cols * sizeof(DataType)));
 
+    // std::cout << "testing SPMV" << std::endl;
     // test the SPMV function
     all_pass = all_pass && test_SPMV(
         cuSparse, striped_warp_reduction,
@@ -65,7 +66,7 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<DataType>& A){
         a_d
         );
 
-
+    // std::cout << "testing Dot" << std::endl;
     // test the Dot function
     all_pass = all_pass && test_Dot(
         striped_warp_reduction,
@@ -73,12 +74,15 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<DataType>& A){
         );
 
     
+    // std::cout << "testing symgs" << std::endl;
     // test the SymGS function (minitest, does not work with striped matrices)
     all_pass = all_pass && test_SymGS(
         cuSparse, striped_warp_reduction,
         *A_striped,
         y_d
     );
+    
+    // std::cout << "testing WAXPBY" << std::endl;
 
     all_pass = all_pass && test_WAXPBY(
         striped_warp_reduction,

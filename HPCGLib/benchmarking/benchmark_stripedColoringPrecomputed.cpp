@@ -20,7 +20,7 @@ void run_striped_coloringPrecomputed_3d27p_benchmarks(int nx, int ny, int nz, st
         // initialize the MG data
         striped_Matrix <DataType>* current_matrix = &striped_A;
         for(int i = 0; i < 3; i++){
-            current_matrix->initialize_coarse_matrix();
+            current_matrix->initialize_coarse_Matrix();
             current_matrix = current_matrix->get_coarse_Matrix();
         }
     }
@@ -69,14 +69,14 @@ void run_striped_coloringPrecomputed_3d27p_SymGS_benchmark(int nx, int ny, int n
     striped_Matrix<DataType> striped_A;
     striped_A.Generate_striped_3D27P_Matrix_onGPU(nx, ny, nz);
 
-    std::vector<DataType> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
-    std::vector<DataType> x (num_rows, 0.0);
-
     local_int_t num_rows = striped_A.get_num_rows();
     local_int_t num_cols = striped_A.get_num_cols();
     local_int_t nnz = striped_A.get_nnz();
     int num_stripes = striped_A.get_num_stripes();
     
+    std::vector<DataType> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
+    std::vector<DataType> x (num_rows, 0.0);
+
     striped_A.generate_coloring();
 
     std::string implementation_name = implementation.version_name;

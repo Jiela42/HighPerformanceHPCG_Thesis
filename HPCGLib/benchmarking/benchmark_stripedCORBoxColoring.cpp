@@ -73,7 +73,7 @@ void run_striped_COR_box_coloring_3d27p_CG_benchmark(int nx, int ny, int nz, std
         // initialize the MG data
         striped_Matrix <DataType>* current_matrix = &striped_A;
         for(int i = 0; i < 3; i++){
-            current_matrix->initialize_coarse_matrix();
+            current_matrix->initialize_coarse_Matrix();
             current_matrix = current_matrix->get_coarse_Matrix();
         }
     }
@@ -130,7 +130,7 @@ void run_striped_COR_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::
         // initialize the MG data
         striped_Matrix <DataType>* current_matrix = &striped_A;
         for(int i = 0; i < 3; i++){
-            current_matrix->initialize_coarse_matrix();
+            current_matrix->initialize_coarse_Matrix();
             current_matrix = current_matrix->get_coarse_Matrix();
         }
     }

@@ -324,14 +324,18 @@ void sparse_CSR_Matrix<T>::generateMatrix_onGPU(int nx, int ny, int nz)
     this->ny = ny;
     this->nz = nz;
 
-    local_int_t num_nodes = nx * ny * nz;
+    local_int_t big_nx = static_cast<local_int_t>(nx);
+    local_int_t big_ny = static_cast<local_int_t>(ny);
+    local_int_t big_nz = static_cast<local_int_t>(nz);
+
+    local_int_t num_nodes = big_nx * big_ny * big_nz;
 
     this->num_rows = num_nodes;
     this->num_cols = num_nodes;
 
-    local_int_t num_interior_points = (nx - 2) * (ny - 2) * (nz - 2);
-    local_int_t num_face_points = 2 * ((nx - 2) * (ny - 2) + (nx - 2) * (nz - 2) + (ny - 2) * (nz - 2));
-    local_int_t num_edge_points = 4 * ((nx - 2) + (ny - 2) + (nz - 2));
+    local_int_t num_interior_points = (big_nx - 2) * (big_ny - 2) * (big_nz - 2);
+    local_int_t num_face_points = 2 * ((big_nx - 2) * (big_ny - 2) + (big_nx - 2) * (big_nz - 2) + (big_ny - 2) * (big_nz - 2));
+    local_int_t num_edge_points = 4 * ((big_nx - 2) + (big_ny - 2) + (big_nz - 2));
     local_int_t num_corner_points = 8;
 
     local_int_t nnz_interior = 27 * num_interior_points;
@@ -369,7 +373,6 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped(striped_Matrix<T> &A){
     if(A.get_matrix_type() == MatrixType::Stencil_3D27P){
         assert(A.get_num_stripes() == 27);
         assert(A.get_num_rows() == A.get_num_cols());
-        assert(A.get_num_rows() == A.get_nx() * A.get_ny() * A.get_nz());
     }
 
     this->matrix_type = A.get_matrix_type();
@@ -509,9 +512,14 @@ void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped_transformation_GPU(str
 
 template <typename T>
 void sparse_CSR_Matrix<T>::sanity_check_3D27P(){
+
+    local_int_t big_nx = static_cast<local_int_t>(this->nx);
+    local_int_t big_ny = static_cast<local_int_t>(this->ny);
+    local_int_t big_nz = static_cast<local_int_t>(this->nz);
+
     assert(this->matrix_type == MatrixType::Stencil_3D27P);
     assert(this->num_rows == this->num_cols);
-    assert(this->num_rows == this->nx * this->ny * this->nz);
+    assert(this->num_rows == big_nx * big_ny * big_nz);
     assert(this->row_ptr.size() == this->num_rows + 1);
     assert(this->col_idx.size() == this->nnz);
     assert(this->nnz == this->row_ptr[this->num_rows]);
@@ -732,7 +740,11 @@ void sparse_CSR_Matrix<T>::remove_Matrix_from_GPU(){
 template <typename T>
 void sparse_CSR_Matrix<T>::generate_f2c_operator_onGPU(){
 
-    local_int_t fine_n_rows = this->nx *2 * this->ny * 2 * this->nz * 2;
+    local_int_t big_nx = static_cast<local_int_t>(this->nx);
+    local_int_t big_ny = static_cast<local_int_t>(this->ny);
+    local_int_t big_nz = static_cast<local_int_t>(this->nz);
+
+    local_int_t fine_n_rows = big_nx *2 * big_ny * 2 * big_nz * 2;
 
     // allocate space for the device pointers
     CHECK_CUDA(cudaMalloc(&this->f2c_op_d, fine_n_rows * sizeof(local_int_t)));
@@ -765,8 +777,12 @@ void sparse_CSR_Matrix<T>::generate_f2c_operator_onCPU(){
             int iyf = 2*iyc;
             for (int ixc=0; ixc<nxc; ++ixc) {
                 int ixf = 2*ixc;
-                local_int_t currentCoarseRow = izc*nxc*nyc+iyc*nxc+ixc;
-                local_int_t currentFineRow = izf*nxf*nyf+iyf*nxf+ixf;
+
+                local_int_t currentCoarseRow = static_cast<local_int_t>(izc) * static_cast<local_int_t>(nxc) * static_cast<local_int_t>(nyc) +
+                                                static_cast<local_int_t>(iyc) * static_cast<local_int_t>(nxc) + static_cast<local_int_t>(ixc);
+                local_int_t currentFineRow = static_cast<local_int_t>(izf) * static_cast<local_int_t>(nxf) * static_cast<local_int_t>(nyf) +
+                                             static_cast<local_int_t>(iyf) * static_cast<local_int_t>(nxf) + static_cast<local_int_t>(ixf);
+
                 this->f2c_op[currentCoarseRow] = currentFineRow;
             } // end iy loop
         } // end even iz if statement
@@ -802,15 +818,19 @@ void sparse_CSR_Matrix<T>::initialize_coarse_Matrix(){
         // std::cout << "generating coarse matrix on the GPU" << std::endl;
         this->coarse_Matrix->generateMatrix_onGPU(nx_c, ny_c, nz_c);
         this->coarse_Matrix->generate_f2c_operator_onGPU();
+
+        local_int_t coarse_num_rows = static_cast<local_int_t>(nx_c) * static_cast<local_int_t>(ny_c) * static_cast<local_int_t>(nz_c);
+        local_int_t fine_num_rows = static_cast<local_int_t>(nx_f) * static_cast<local_int_t>(ny_f) * static_cast<local_int_t>(nz_f);
+
         // initialize the pointers
-        CHECK_CUDA(cudaMalloc(&this->coarse_Matrix->rc_d, nx_c * ny_c * nz_c * sizeof(T)));
-        CHECK_CUDA(cudaMalloc(&this->coarse_Matrix->xc_d, nx_c * ny_c * nz_c * sizeof(T)));
-        CHECK_CUDA(cudaMalloc(&this->coarse_Matrix->Axf_d, nx_f * ny_f * nz_f * sizeof(T)));
+        CHECK_CUDA(cudaMalloc(&this->coarse_Matrix->rc_d, coarse_num_rows * sizeof(T)));
+        CHECK_CUDA(cudaMalloc(&this->coarse_Matrix->xc_d, coarse_num_rows * sizeof(T)));
+        CHECK_CUDA(cudaMalloc(&this->coarse_Matrix->Axf_d, fine_num_rows* sizeof(T)));
 
         // set them to zero
-        CHECK_CUDA(cudaMemset(this->coarse_Matrix->rc_d, 0, nx_c * ny_c * nz_c * sizeof(T)));
-        CHECK_CUDA(cudaMemset(this->coarse_Matrix->xc_d, 0, nx_c * ny_c * nz_c * sizeof(T)));
-        CHECK_CUDA(cudaMemset(this->coarse_Matrix->Axf_d, 0, nx_f * ny_f * nz_f * sizeof(T)));
+        CHECK_CUDA(cudaMemset(this->coarse_Matrix->rc_d, 0, coarse_num_rows * sizeof(T)));
+        CHECK_CUDA(cudaMemset(this->coarse_Matrix->xc_d, 0, coarse_num_rows * sizeof(T)));
+        CHECK_CUDA(cudaMemset(this->coarse_Matrix->Axf_d, 0, fine_num_rows * sizeof(T)));
 
         // std::cout << "coarse matrix generated on the GPU" << std::endl;
     }
