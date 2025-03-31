@@ -2,7 +2,7 @@
 #define NCCL_HALO_EXCHANGE_CUH
 
 #include "HPCG_versions/striped_multi_GPU.cuh"
-// #include <nccl.h>
+#include <nccl.h>
 
 template <typename T>
 class NCCL_Implementation : public striped_multi_GPU_Implementation<T> {
@@ -27,8 +27,8 @@ public:
 
 private:
 
-    //cudaStream_t cuda_stream;
-    //ncclComm_t nccl_comm;
+    cudaStream_t cuda_stream;
+    ncclComm_t nccl_comm;
 
     Problem* init_comm_NCCL(
         int argc, char *argv[],

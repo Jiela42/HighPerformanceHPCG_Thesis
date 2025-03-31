@@ -61,8 +61,8 @@ bool parallel_CSR_generation_test(sparse_CSR_Matrix<double>& A_copy){
     A = problem.first;
 
     // copy data from GPU to CPU
-    std::vector<int> row_ptr_host(nx*ny*nz + 1, 0);
-    std::vector<int> col_idx_host(A_copy.get_nnz(), 0);
+    std::vector<local_int_t> row_ptr_host(nx*ny*nz + 1, 0);
+    std::vector<local_int_t> col_idx_host(A_copy.get_nnz(), 0);
     std::vector<double> values_host(A_copy.get_nnz(), 0);
 
     if(A.get_nnz() != A_copy.get_nnz()){
@@ -71,8 +71,8 @@ bool parallel_CSR_generation_test(sparse_CSR_Matrix<double>& A_copy){
         return false;
     }
 
-    CHECK_CUDA(cudaMemcpy(row_ptr_host.data(), A_copy.get_row_ptr_d(), (nx*ny*nz + 1) * sizeof(int), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(col_idx_host.data(), A_copy.get_col_idx_d(), A_copy.get_nnz() * sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(row_ptr_host.data(), A_copy.get_row_ptr_d(), (nx*ny*nz + 1) * sizeof(local_int_t), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(col_idx_host.data(), A_copy.get_col_idx_d(), A_copy.get_nnz() * sizeof(local_int_t), cudaMemcpyDeviceToHost));
     CHECK_CUDA(cudaMemcpy(values_host.data(), A_copy.get_values_d(), A_copy.get_nnz() * sizeof(double), cudaMemcpyDeviceToHost));
 
 
@@ -132,10 +132,10 @@ bool parallel_generation_from_CSR_test(sparse_CSR_Matrix<double>& A){
     // }
 
     // grab the values from the GPU
-    std::vector<int> j_min_i_host(striped_A->get_num_stripes(), 0);
+    std::vector<local_int_t> j_min_i_host(striped_A->get_num_stripes(), 0);
     std::vector<double> values_host(striped_A->get_num_stripes() * nx * ny * nz, 0);
 
-    CHECK_CUDA(cudaMemcpy(j_min_i_host.data(), striped_A->get_j_min_i_d(), striped_A->get_num_stripes() * sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(j_min_i_host.data(), striped_A->get_j_min_i_d(), striped_A->get_num_stripes() * sizeof(local_int_t), cudaMemcpyDeviceToHost));
     CHECK_CUDA(cudaMemcpy(values_host.data(), striped_A->get_values_d(), striped_A->get_num_stripes() * nx * ny * nz * sizeof(double), cudaMemcpyDeviceToHost));
 
     // since we cannot just generate from j_min_i and values we do the comparison manually
@@ -381,14 +381,14 @@ bool coloring_test(striped_Matrix<double>& A){
     // std::cout << "coloring test" << std::endl;
 
     // first we get the long hand computed colors
-    std::vector<int> colors_dynamically = color_for_forward_pass(A);
+    std::vector<local_int_t> colors_dynamically = color_for_forward_pass(A);
 
     // std::cout << "dynamic colors done" << std::endl;
 
     // then we get the colors from the matrix
-    std::vector<int> colors_statically (A.get_num_rows(), 0);
+    std::vector<local_int_t> colors_statically (A.get_num_rows(), 0);
 
-    for (int i = 0 ; i < A.get_num_rows(); i++){
+    for (local_int_t i = 0 ; i < A.get_num_rows(); i++){
         int x = i % A.get_nx();
         int y = (i / A.get_nx()) % A.get_ny();
         int z = i / (A.get_nx() * A.get_ny());
@@ -401,19 +401,19 @@ bool coloring_test(striped_Matrix<double>& A){
     }
     all_pass = all_pass && colors_stat_vs_dym_test;
 
-    int max_col_dyn = *std::max_element(colors_dynamically.begin(), colors_dynamically.end());
-    int max_col_stat = *std::max_element(colors_statically.begin(), colors_statically.end());
+    local_int_t max_col_dyn = *std::max_element(colors_dynamically.begin(), colors_dynamically.end());
+    local_int_t max_col_stat = *std::max_element(colors_statically.begin(), colors_statically.end());
 
     // std::cout << "num colors " << max_col_dyn + 1 << std::endl;
 
     // std::cout << "size: " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz() << std::endl;
 
 
-    std::vector<int> color_ptr_dyn(max_col_dyn+2, 0);
-    std::vector<int> color_ptr_stat(max_col_stat+2, 0);
+    std::vector<local_int_t> color_ptr_dyn(max_col_dyn+2, 0);
+    std::vector<local_int_t> color_ptr_stat(max_col_stat+2, 0);
 
-    for(int i = 0; i <= max_col_dyn; i++){
-        int color_ct_i = count(colors_dynamically.begin(), colors_dynamically.end(), i);
+    for(local_int_t i = 0; i <= max_col_dyn; i++){
+        local_int_t color_ct_i = count(colors_dynamically.begin(), colors_dynamically.end(), i);
         color_ptr_dyn[i+1] = color_ptr_dyn[i] + count(colors_dynamically.begin(), colors_dynamically.end(), i);
         color_ptr_stat[i+1] = color_ptr_dyn[i] + std::count(colors_statically.begin(), colors_statically.end(), i);
         // std::cout << "color " << i << " has " << color_ct_i << " rows" << std::endl;
@@ -427,14 +427,14 @@ bool coloring_test(striped_Matrix<double>& A){
     all_pass = all_pass && color_ptr_stat_vs_dyn_test;
 
     // now we check the color sorted rows
-    std::vector<int> color_sorted_rows_stat (A.get_num_rows(), 0);
-    std::vector<int> color_sorted_rows_dyn (A.get_num_rows(), 0);
+    std::vector<local_int_t> color_sorted_rows_stat (A.get_num_rows(), 0);
+    std::vector<local_int_t> color_sorted_rows_dyn (A.get_num_rows(), 0);
 
     int colors_sorted_dyn = 0;
     int colors_sorted_stat = 0;
 
-    for(int color = 0; color <= max_col_dyn; color++){
-        for(int row = 0; row < A.get_num_rows(); row++){
+    for(local_int_t color = 0; color <= max_col_dyn; color++){
+        for(local_int_t row = 0; row < A.get_num_rows(); row++){
             if (colors_dynamically[row] == color){
                 color_sorted_rows_dyn[colors_sorted_dyn] = row;
                 colors_sorted_dyn++;
@@ -455,8 +455,8 @@ bool coloring_test(striped_Matrix<double>& A){
 
     A.generate_coloring();
     // now come the comparisons with the parallel computed COR Format
-    std::vector<int> parallel_color_ptr = A.get_color_pointer_vector();
-    std::vector<int> parallel_color_sorted_rows = A.get_color_sorted_rows_vector();
+    std::vector<local_int_t> parallel_color_ptr = A.get_color_pointer_vector();
+    std::vector<local_int_t> parallel_color_sorted_rows = A.get_color_sorted_rows_vector();
 
     bool parallel_col_ptr_test = vector_compare(color_ptr_stat, parallel_color_ptr, "parallel color ptr test");
     if (not parallel_col_ptr_test){
@@ -466,14 +466,14 @@ bool coloring_test(striped_Matrix<double>& A){
     all_pass = all_pass && parallel_col_ptr_test;
 
     bool parallel_col_sorted_rows_test = true;
-    for(int i = 0; i <= max_col_dyn; i++){
-        int begin = parallel_color_ptr[i];
-        int end = parallel_color_ptr[i+1];
+    for(local_int_t i = 0; i <= max_col_dyn; i++){
+        local_int_t begin = parallel_color_ptr[i];
+        local_int_t end = parallel_color_ptr[i+1];
 
-        for(int i = begin; i < end; i++){
-            int row = parallel_color_sorted_rows[i];
+        for(local_int_t i = begin; i < end; i++){
+            local_int_t row = parallel_color_sorted_rows[i];
 
-            for(int j = begin; j < end; j++){
+            for(local_int_t j = begin; j < end; j++){
                 if (color_sorted_rows_stat[j] == row){
                     break;
                 }
@@ -520,11 +520,11 @@ bool box_coloring_test(striped_Matrix<double>& A){
     int bz = 3;
 
     // now we get the colors from the matrix
-    std::vector<int> color_idx_ptr(num_colors + 1, 0);
-    std::vector<int> color_sorted_rows(A.get_num_rows(), 0);
+    std::vector<local_int_t> color_idx_ptr(num_colors + 1, 0);
+    std::vector<local_int_t> color_sorted_rows(A.get_num_rows(), 0);
 
-    CHECK_CUDA(cudaMemcpy(color_idx_ptr.data(), A.get_color_pointer_d(), 28 * sizeof(int), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(color_sorted_rows.data(), A.get_color_sorted_rows_d(), A.get_num_rows() * sizeof(int), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(color_idx_ptr.data(), A.get_color_pointer_d(), 28 * sizeof(local_int_t), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(color_sorted_rows.data(), A.get_color_sorted_rows_d(), A.get_num_rows() * sizeof(local_int_t), cudaMemcpyDeviceToHost));
 
     for(int i = 1; i <= num_colors; i ++){
         int color = i-1;
@@ -620,8 +620,8 @@ bool run_MG_data_tests(sparse_CSR_Matrix<double>& A){
 
     while(current_matrix->get_coarse_Matrix() != nullptr){
 
-        int coarse_n_rows = current_matrix->get_coarse_Matrix()->get_num_rows();
-        int fine_n_rows = current_matrix->get_num_rows();
+        local_int_t coarse_n_rows = current_matrix->get_coarse_Matrix()->get_num_rows();
+        local_int_t fine_n_rows = current_matrix->get_num_rows();
         // A is on the GPU and should have an c2f operator
 
         current_matrix = current_matrix->get_coarse_Matrix();
@@ -629,15 +629,15 @@ bool run_MG_data_tests(sparse_CSR_Matrix<double>& A){
         host_matrix.initialize_coarse_Matrix();
         host_matrix = *(host_matrix.get_coarse_Matrix());
 
-        std::vector<int> c2f_device(fine_n_rows, 0);
+        std::vector<local_int_t> c2f_device(fine_n_rows, 0);
 
         CHECK_CUDA(cudaMemcpy(c2f_device.data(), current_matrix->get_f2c_op_d(), fine_n_rows * sizeof(int), cudaMemcpyDeviceToHost));
 
 
-        std::vector<int> c2f_host = host_matrix.get_f2c_op();
+        std::vector<local_int_t> c2f_host = host_matrix.get_f2c_op();
 
         // check if any of the c2f values are negative
-        for(int i = 0; i < fine_n_rows; i++){
+        for(local_int_t i = 0; i < fine_n_rows; i++){
             if(c2f_device[i] < 0){
                 std::cerr << "c2f device has negative value at index " << i << std::endl;
                 c2f_test = false;

@@ -6,11 +6,11 @@
 
 #define BAND_PREPED_SYMGS_COOP_NUM 16
 
-__device__ void forward_loop_body(int lane, int i, int num_cols, int num_stripes, int diag_index, int * j_min_i, double * striped_A, double * x, double * y, double * shared_diag){
+__device__ void forward_loop_body(int lane, local_int_t i, local_int_t num_cols, int num_stripes, int diag_index, local_int_t * j_min_i, double * striped_A, DataType * x, double * y, double * shared_diag){
     
     double my_sum = 0.0;
     for (int stripe = lane; stripe < diag_index; stripe += BAND_PREPED_SYMGS_COOP_NUM){
-        int col = j_min_i[stripe] + i;
+        local_int_t col = j_min_i[stripe] + i;
         double val = striped_A[i * num_stripes + stripe];
         if (col < num_cols && col >= 0){
             // printf("Col: %d\n", col);
@@ -41,11 +41,11 @@ __device__ void forward_loop_body(int lane, int i, int num_cols, int num_stripes
 }
 
 
-__device__ void backward_loop_body(int lane, int i, int num_cols, int num_stripes, int diag_index, int * j_min_i, double * striped_A, double * x, double * y, double * shared_diag){
+__device__ void backward_loop_body(int lane, local_int_t i, local_int_t num_cols, int num_stripes, int diag_index, local_int_t * j_min_i, double * striped_A, double * x, double * y, double * shared_diag){
     
     double my_sum = 0.0;
     for (int stripe = lane + diag_index+1; stripe < num_stripes; stripe += BAND_PREPED_SYMGS_COOP_NUM){
-        int col = j_min_i[stripe] + i;
+        local_int_t col = j_min_i[stripe] + i;
         double val = striped_A[i * num_stripes + stripe];
         if (col < num_cols && col >= 0){
             my_sum -= val * x[col];
@@ -73,10 +73,10 @@ __device__ void backward_loop_body(int lane, int i, int num_cols, int num_stripe
 
 // this does half a matrix-vector multiplication (only the upper diag parts are multiplied)
 __global__ void preprocessing_forward(
-    int num_rows, int num_cols,
+    local_int_t num_rows, local_int_t num_cols,
     int num_stripes, int diag_index,
-    int min_row, int max_row,
-    int * j_min_i, double * striped_A,
+    local_int_t min_row, local_int_t max_row,
+    local_int_t * j_min_i, DataType * striped_A,
     double * x, double * y){
     
     // calculate Ax = y
@@ -84,12 +84,12 @@ __global__ void preprocessing_forward(
     int tid = blockDim.x*blockIdx.x + threadIdx.x;
     int lane = threadIdx.x % BAND_PREPED_SYMGS_COOP_NUM;
     
-    for (int i = tid/BAND_PREPED_SYMGS_COOP_NUM + min_row; i < max_row; i += (blockDim.x * gridDim.x)/BAND_PREPED_SYMGS_COOP_NUM) {
+    for (local_int_t i = tid/BAND_PREPED_SYMGS_COOP_NUM + min_row; i < max_row; i += (blockDim.x * gridDim.x)/BAND_PREPED_SYMGS_COOP_NUM) {
         // compute the matrix-vector product for the ith row
         double sum_i = 0;
         for (int stripe = lane + diag_index; stripe < num_stripes; stripe += BAND_PREPED_SYMGS_COOP_NUM) {
-            int j = i + j_min_i[stripe];
-            int current_row = i * num_stripes;
+            local_int_t j = i + j_min_i[stripe];
+            local_int_t current_row = i * num_stripes;
             if (j >= 0 && j < num_rows) {
                 sum_i += striped_A[current_row + stripe] * x[j];
             }
@@ -109,10 +109,10 @@ __global__ void preprocessing_forward(
 }
 
 __global__ void preprocessing_backward(
-    int num_rows, int num_cols,
+    local_int_t num_rows, local_int_t num_cols,
     int num_stripes, int diag_index,
-    int min_row, int max_row,
-    int * j_min_i, double * striped_A,
+    local_int_t min_row, local_int_t max_row,
+    local_int_t * j_min_i, double * striped_A,
     double * x, double * y){
     
      // calculate Ax = y
@@ -120,12 +120,12 @@ __global__ void preprocessing_backward(
     int tid = blockDim.x*blockIdx.x + threadIdx.x;
     int lane = threadIdx.x % BAND_PREPED_SYMGS_COOP_NUM;
     
-    for (int i = tid/BAND_PREPED_SYMGS_COOP_NUM + min_row; i < max_row; i += (blockDim.x * gridDim.x)/BAND_PREPED_SYMGS_COOP_NUM) {
+    for (local_int_t i = tid/BAND_PREPED_SYMGS_COOP_NUM + min_row; i < max_row; i += (blockDim.x * gridDim.x)/BAND_PREPED_SYMGS_COOP_NUM) {
         // compute the matrix-vector product for the ith row
         double sum_i = 0;
         for (int stripe = lane; stripe <= diag_index; stripe += BAND_PREPED_SYMGS_COOP_NUM) {
-            int j = i + j_min_i[stripe];
-            int current_row = i * num_stripes;
+            local_int_t j = i + j_min_i[stripe];
+            local_int_t current_row = i * num_stripes;
             if (j >= 0 && j < num_rows) {
                 sum_i += striped_A[current_row + stripe] * x[j];
             }
@@ -145,29 +145,29 @@ __global__ void preprocessing_backward(
 }
 
 __global__ void striped_forward_SymGS(
-    int num_rows, int num_cols,
+    local_int_t num_rows, local_int_t num_cols,
     int num_stripes, int diag_index,
-    int min_row, int max_row,
-    int * j_min_i,
+    local_int_t min_row, local_int_t max_row,
+    local_int_t * j_min_i,
     double * striped_A,
     double * x, double * y
 ){
     __shared__ double diag_value[1];
-    for(int i = min_row; i < max_row; i++){
+    for(local_int_t i = min_row; i < max_row; i++){
         forward_loop_body(threadIdx.x, i, num_cols, diag_index, num_stripes, j_min_i, striped_A, x, y, diag_value);
     }
 }
 
 __global__ void striped_backward_SymGS(
-    int num_rows, int num_cols,
+    local_int_t num_rows, local_int_t num_cols,
     int num_stripes, int diag_index,
-    int min_row, int max_row,
-    int * j_min_i,
+    local_int_t min_row, local_int_t max_row,
+    local_int_t * j_min_i,
     double * striped_A,
     double * x, double * y
 ){
     __shared__ double diag_value[1];
-    for(int i = max_row-1; i >= min_row; i--){
+    for(local_int_t i = max_row-1; i >= min_row; i--){
         backward_loop_body(threadIdx.x, i, num_cols, num_stripes, diag_index, j_min_i, striped_A, x, y, diag_value);
     }
 }
@@ -180,10 +180,10 @@ void striped_preprocessed_Implementation<T>::striped_preprocessed_computeSymGS(
 ){
     std::vector<T> looki(5);
 
-    int num_rows = A.get_num_rows();
-    int num_cols = A.get_num_cols();
+    local_int_t num_rows = A.get_num_rows();
+    local_int_t num_cols = A.get_num_cols();
     int num_stripes = A.get_num_stripes();
-    int * j_min_i = A.get_j_min_i_d();
+    local_int_t * j_min_i = A.get_j_min_i_d();
     T * striped_A_d = A.get_values_d();
 
     int diag_index = A.get_diag_index();
@@ -237,7 +237,7 @@ void striped_preprocessed_Implementation<T>::striped_preprocessed_computeSymGS(
 
     // backward pass
     // first we do preprocessing and a few rows simultaneously
-    int num_rows_left = num_rows - num_rows_while_preprocessing;
+    local_int_t num_rows_left = num_rows - num_rows_while_preprocessing;
 
     preprocessing_backward<<<num_blocks_preprocessing, num_threads_preprocessing>>>(
         num_rows, num_cols,

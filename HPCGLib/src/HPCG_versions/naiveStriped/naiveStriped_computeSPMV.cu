@@ -4,20 +4,20 @@
 
 
 __global__ void naiveStriped_SPMV_kernel(
-        double* striped_A,
-        int num_rows, int num_stripes, int * j_min_i,
-        double* x, double* y
+        DataType* striped_A,
+        local_int_t num_rows, int num_stripes, local_int_t * j_min_i,
+        DataType* x, DataType* y
     )
 {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
     // every thread computes one or more rows of the matrix
-    for (int i = tid; i < num_rows; i += blockDim.x * gridDim.x) {
+    for (local_int_t i = tid; i < num_rows; i += blockDim.x * gridDim.x) {
         // compute the matrix-vector product for the ith row
         double sum_i = 0;
         for (int stripe = 0; stripe < num_stripes; stripe++) {
-            int j = i + j_min_i[stripe];
-            int current_row = i * num_stripes;
+            local_int_t j = i + j_min_i[stripe];
+            local_int_t current_row = i * num_stripes;
             if (j >= 0 && j < num_rows) {
                 sum_i += striped_A[current_row + stripe] * x[j];
             }
@@ -33,9 +33,9 @@ void naiveStriped_Implementation<T>::naiveStriped_computeSPMV(
         T * x_d, T * y_d // the vectors x and y are already on the device
     ) {
 
-        int num_rows = A.get_num_rows();
+        local_int_t num_rows = A.get_num_rows();
         int num_stripes = A.get_num_stripes();
-        int * j_min_i = A.get_j_min_i_d();
+        local_int_t * j_min_i = A.get_j_min_i_d();
         T * striped_A_d = A.get_values_d();
 
         // call the kernel for the naive striped SPMV

@@ -8,9 +8,9 @@
 __global__ void no_store_striped_coloring_half_SymGS_kernel(
     int color,
     int nx, int ny, int nz,
-    int num_rows, int num_cols,
+    local_int_t num_rows, local_int_t num_cols,
     int num_stripes, int diag_offset,
-    int * j_min_i,
+    local_int_t * j_min_i,
     double * striped_A,
     double * x, double * y
 ){
@@ -34,11 +34,11 @@ __global__ void no_store_striped_coloring_half_SymGS_kernel(
         int zi = enumerator / 4;
 
         if (zi < nz){
-            int row = xi + yi * nx + zi * nx * ny;
+            local_int_t row = xi + yi * nx + zi * nx * ny;
             double my_sum = 0.0;
             for(int stripe = lane_id; stripe < num_stripes; stripe += WARP_SIZE){
 
-                int col = j_min_i[stripe] + row;
+                local_int_t col = j_min_i[stripe] + row;
                 double val = striped_A[row * num_stripes + stripe];
                 if(col < num_cols && col >= 0){
                     my_sum -= val * x[col];
@@ -69,11 +69,11 @@ void no_store_striped_coloring_Implementation<T>::no_store_striped_coloring_comp
     T * x_d, T * y_d // the vectors x and y are already on the device
 ){
 
-    int num_rows = A.get_num_rows();
-    int num_cols = A.get_num_cols();
+    local_int_t num_rows = A.get_num_rows();
+    local_int_t num_cols = A.get_num_cols();
     int num_stripes = A.get_num_stripes();
-    int * j_min_i = A.get_j_min_i_d();
-    double * striped_A_d = A.get_values_d();
+    local_int_t * j_min_i = A.get_j_min_i_d();
+    T * striped_A_d = A.get_values_d();
 
     int diag_offset = A.get_diag_index();
 

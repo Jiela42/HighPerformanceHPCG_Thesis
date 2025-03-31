@@ -35,11 +35,11 @@ __device__ void test_val_cooperatively(double * array, int num_elements, double 
 }
 
 __global__ void striped_shared_memory_SPMV_kernel(
-        int rows_per_sm, int num_x_elem, int num_consecutive_memory_regions,
+        local_int_t rows_per_sm, local_int_t num_x_elem, int num_consecutive_memory_regions,
         int* min_j, int* max_j,
-        double* striped_A,
-        int num_rows, int num_stripes, int * j_min_i,
-        double* x, double* y
+        DataType* striped_A,
+        local_int_t num_rows, int num_stripes, local_int_t * j_min_i,
+        DataType* x, DataType* y
     )
 {
     // int tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -180,15 +180,15 @@ void Striped_Shared_Memory_Implementation<T>::striped_shared_memory_computeSPMV(
         // dynamically calculate how many rows can be handled at the same time
         // i.e. how many doubles are required per row
 
-        int num_rows = A.get_num_rows();
-        int num_stripes = A.get_num_stripes();
-        int * j_min_i = A.get_j_min_i_d();
+        local_int_t num_rows = A.get_num_rows();
+        local_int_t num_stripes = A.get_num_stripes();
+        local_int_t* j_min_i = A.get_j_min_i_d();
         T * striped_A_d = A.get_values_d();
 
-        std::vector<int> j_min_i_host(num_stripes);
+        std::vector<local_int_t> j_min_i_host(num_stripes);
 
         // copy j_min_i to the host
-        CHECK_CUDA(cudaMemcpy(j_min_i_host.data(), j_min_i, num_stripes * sizeof(int), cudaMemcpyDeviceToHost));
+        CHECK_CUDA(cudaMemcpy(j_min_i_host.data(), j_min_i, num_stripes * sizeof(local_int_t), cudaMemcpyDeviceToHost));
 
         int new_elem_per_row = 1;
 

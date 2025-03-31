@@ -23,7 +23,7 @@ void print_COR_Format(int nx, int ny, int nz){
 
 }
 
-void write_coloring_to_file(std::vector<int> colors, std::string filename){
+void write_coloring_to_file(std::vector<local_int_t> colors, std::string filename){
    std::ofstream outfile(filename);
     if (!outfile.is_open()) {
         std::cerr << "Error opening file: " << filename << std::endl;
@@ -54,7 +54,7 @@ void print_coloring(int nx, int ny, int nz){
     // A_striped.striped_Matrix_from_sparse_CSR(A_csr);   
 
     // pass matrix to coloring
-    std::vector<int> colors = color_for_forward_pass(*A_striped);
+    std::vector<local_int_t> colors = color_for_forward_pass(*A_striped);
 
 
     // print colors
@@ -80,14 +80,14 @@ void compare_backward_forward_coloring(int nx, int ny, int nz){
     // A_striped.striped_Matrix_from_sparse_CSR(A_csr);   
 
     // pass matrix to coloring
-    std::vector<int> forward_colors = color_for_forward_pass(*A_striped);
-    std::vector<int> backward_colors = color_for_backward_pass(*A_striped);
+    std::vector<local_int_t> forward_colors = color_for_forward_pass(*A_striped);
+    std::vector<local_int_t> backward_colors = color_for_backward_pass(*A_striped);
 
     for(int i = 0; i < forward_colors.size(); i++){
-        int forward_color = forward_colors[i];
-        int backward_color = backward_colors[i];
+        local_int_t forward_color = forward_colors[i];
+        local_int_t backward_color = backward_colors[i];
 
-        int backward_color_based_on_forward = forward_colors[forward_colors.size()-1-i]; 
+        local_int_t backward_color_based_on_forward = forward_colors[forward_colors.size()-1-i]; 
         if (backward_color != backward_color_based_on_forward){
             std::cout << "For nx = " << nx << " ny = " << ny << " nz = " << nz << " Row " << i << " has forward color " << forward_color << " and backward color " << backward_color << std::endl;
         }

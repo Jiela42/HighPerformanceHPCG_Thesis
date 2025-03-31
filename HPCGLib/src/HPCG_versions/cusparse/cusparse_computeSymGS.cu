@@ -5,9 +5,9 @@
 
 
 __global__ void cusparse_SymGS_kernel(
-    int num_rows,
-    int * A_row_ptr, int * A_col_idx, double * A_values,
-    double * x, double * y
+    local_int_t num_rows,
+    local_int_t * A_row_ptr, local_int_t * A_col_idx, DataType * A_values,
+    DataType * x, DataType * y
 ){
     // note that here x is the result vector and y is the input vector
 
@@ -16,11 +16,11 @@ __global__ void cusparse_SymGS_kernel(
 
 
     // forward pass
-    for (int i = 0; i < num_rows; i++){
-        double my_sum = 0.0;
-        for (int j = A_row_ptr[i] + lane; j < A_row_ptr[i+1]; j += WARP_SIZE){
-            int col = A_col_idx[j];
-            double val = A_values[j];
+    for (local_int_t i = 0; i < num_rows; i++){
+        DataType my_sum = 0.0;
+        for (local_int_t j = A_row_ptr[i] + lane; j < A_row_ptr[i+1]; j += WARP_SIZE){
+            local_int_t col = A_col_idx[j];
+            DataType val = A_values[j];
             my_sum -= val * x[col];
             if(i == col){
                 diag_value[0] = val;
@@ -34,8 +34,8 @@ __global__ void cusparse_SymGS_kernel(
 
         __syncthreads();
         if (lane == 0){
-            double diag = diag_value[0];
-            double sum = diag * x[i] + y[i] + my_sum;
+            DataType diag = diag_value[0];
+            DataType sum = diag * x[i] + y[i] + my_sum;
             x[i] = sum / diag;           
         }
     }
@@ -43,11 +43,11 @@ __global__ void cusparse_SymGS_kernel(
     __syncthreads();
 
     // backward pass
-        for (int i = num_rows-1; i >= 0; i--){
-        double my_sum = 0.0;
-        for (int j = A_row_ptr[i] + lane; j < A_row_ptr[i+1]; j += WARP_SIZE){
-            int col = A_col_idx[j];
-            double val = A_values[j];
+        for (local_int_t i = num_rows-1; i >= 0; i--){
+        DataType my_sum = 0.0;
+        for (local_int_t j = A_row_ptr[i] + lane; j < A_row_ptr[i+1]; j += WARP_SIZE){
+            local_int_t col = A_col_idx[j];
+            DataType val = A_values[j];
             my_sum -= val * x[col];
             if(i == col){
                 diag_value[0] = val;
@@ -61,8 +61,8 @@ __global__ void cusparse_SymGS_kernel(
 
         __syncthreads();
         if (lane == 0){
-            double diag = diag_value[0];
-            double sum = diag * x[i] + y[i] + my_sum;
+            DataType diag = diag_value[0];
+            DataType sum = diag * x[i] + y[i] + my_sum;
             x[i] = sum / diag;
             // printf("x[%d] = %f\n", i, x[i]);           
         }
@@ -76,14 +76,14 @@ void cuSparse_Implementation<T>::cusparse_computeSymGS(
         
 ){
 
-    int num_rows = A.get_num_rows();
+    local_int_t num_rows = A.get_num_rows();
 
     // because this is sequential, we only spawn one warp
     int num_threads = WARP_SIZE;
     int num_blocks = 1;
 
-    int * A_row_ptr_d = A.get_row_ptr_d();
-    int * A_col_idx_d = A.get_col_idx_d();
+    local_int_t* A_row_ptr_d = A.get_row_ptr_d();
+    local_int_t * A_col_idx_d = A.get_col_idx_d();
     T * A_values_d = A.get_values_d();
 
     int max_iterations = this->max_SymGS_iterations;

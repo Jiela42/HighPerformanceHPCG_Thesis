@@ -14,15 +14,15 @@ void striped_coloringPrecomputed_Implementation<T>::striped_coloringPrecomputed_
 ){
     int diag_offset = A.get_diag_index();
 
-    int num_rows = A.get_num_rows();
-    int num_cols = A.get_num_cols();
+    local_int_t num_rows = A.get_num_rows();
+    local_int_t num_cols = A.get_num_cols();
     int num_stripes = A.get_num_stripes();
-    int * j_min_i = A.get_j_min_i_d();
+    local_int_t * j_min_i = A.get_j_min_i_d();
     T * striped_A_d = A.get_values_d();
 
     // the coloring was already computed, we can grab the pointers from the striped matrix object
-    int * color_pointer_d = A.get_color_pointer_d();
-    int * color_sorted_rows_d = A.get_color_sorted_rows_d();
+    local_int_t * color_pointer_d = A.get_color_pointer_d();
+    local_int_t * color_sorted_rows_d = A.get_color_sorted_rows_d();
 
     assert(diag_offset >= 0);
     // this assertion is here such that we don't benchmark the coloring computation
@@ -89,4 +89,4 @@ void striped_coloringPrecomputed_Implementation<T>::striped_coloringPrecomputed_
 }
 
 // explicit template instantiation
-template class striped_coloringPrecomputed_Implementation<double>;
+template class striped_coloringPrecomputed_Implementation<DataType>;

@@ -163,6 +163,11 @@ int striped_partial_Matrix<T>::get_diag_index() const{
 }
 
 template <typename T>
+int striped_partial_Matrix<T>::get_num_MG_pre_smooth_steps() const{
+    return this->num_MG_pre_smooth_steps;
+}
+
+template <typename T>
 int striped_partial_Matrix<T>::get_num_MG_post_smooth_steps() const{
     return this->num_MG_post_smooth_steps;
 }
@@ -195,7 +200,7 @@ void striped_partial_Matrix<T>::generate_f2c_operator_onGPU() {
     // set them to zero
     CHECK_CUDA(cudaMemset(this->f2c_op_d, 0, fine_n_rows * sizeof(int)));
 
-    generate_partialf2c_operator(x, y, z, x*2, y*2, z*2, f2c_op_d);
+    generate_partialf2c_operator(x, y, z, x*2, y*2, z*2, this->f2c_op_d);
 }
 
 template <typename T>
@@ -239,4 +244,4 @@ void striped_partial_Matrix<T>::generateMatrix_onGPU(){
 }
 
 // explicit template instantiation
-template class striped_partial_Matrix<double>;
+template class striped_partial_Matrix<DataType>;

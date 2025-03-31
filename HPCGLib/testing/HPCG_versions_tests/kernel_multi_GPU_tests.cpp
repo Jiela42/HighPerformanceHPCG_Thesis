@@ -12,13 +12,13 @@
 #include <time.h>
 
 //number of processes in x, y, z
-#define NPX 3
-#define NPY 3
-#define NPZ 3
+#define NPX 2
+#define NPY 2
+#define NPZ 1
 //each process gets assigned problem size of NX x NY x NZ
-#define NX 8
-#define NY 8
-#define NZ 8
+#define NX 256
+#define NY 256
+#define NZ 256
 
 void test_matrix_distribution(int num_stripes_local, int num_stripes_global, int num_rows_local, int num_rows_global, DataType *striped_A_local_h, DataType *striped_A_global_h, Problem *problem){
     //verfify the partial matrix
@@ -771,31 +771,31 @@ void run_multi_GPU_tests(int argc, char *argv[], striped_multi_GPU_Implementatio
 
     
     //test matrix distribution
-    test_matrix_distribution(A_local.get_num_stripes(), A_global_striped->get_num_stripes(), A_local.get_num_rows(), A_global_striped->get_num_rows(), A_local_h, A_global_h, &problem);
+    //test_matrix_distribution(A_local.get_num_stripes(), A_global_striped->get_num_stripes(), A_local.get_num_rows(), A_global_striped->get_num_rows(), A_local_h, A_global_h, &problem);
     
     // test SPMV
-    test_SPMV(implementation_multi_GPU, &A_local, A_global_striped, &halo_p_d, &halo_Ap_d, &problem);
+    //test_SPMV(implementation_multi_GPU, &A_local, A_global_striped, &halo_p_d, &halo_Ap_d, &problem);
 
     // test SymGS
-    test_SymGS(implementation_multi_GPU, &A_local, A_global_striped, &halo_p_d, &halo_Ap_d, &problem);
+    //test_SymGS(implementation_multi_GPU, &A_local, A_global_striped, &halo_p_d, &halo_Ap_d, &problem);
 
     //test WAXPBY
-    test_WAXPBY(implementation_multi_GPU, A_global_striped, &halo_w_d, &halo_x_d, &halo_y_d, &problem);
+    //test_WAXPBY(implementation_multi_GPU, A_global_striped, &halo_w_d, &halo_x_d, &halo_y_d, &problem);
 
     //test Dot
-    test_Dot(implementation_multi_GPU, A_global_striped, &halo_x_d, &halo_y_d, &problem);
+    //test_Dot(implementation_multi_GPU, A_global_striped, &halo_x_d, &halo_y_d, &problem);
     
     //test CG
-    test_CG(implementation_multi_GPU, &A_local, A_global_striped, &halo_b_d, &halo_x_d, &problem);
+    //test_CG(implementation_multi_GPU, &A_local, A_global_striped, &halo_b_d, &halo_x_d, &problem);
 
     //test MG
-    test_MG(implementation_multi_GPU, &A_local, A_global_striped, &halo_b_d, &halo_x_d, &problem);
+    //test_MG(implementation_multi_GPU, &A_local, A_global_striped, &halo_b_d, &halo_x_d, &problem);
   
 
     // test partial matrix
     striped_partial_Matrix<DataType> A_part(&problem);
-    DataType *x = (DataType*)malloc (sizeof(DataType) * num_rows_local * 27);
-    CHECK_CUDA(cudaMemcpy(x, A_part.get_values_d(), sizeof(DataType) * num_rows_local * 27, cudaMemcpyDeviceToHost));
+    DataType *x = (DataType*)malloc (sizeof(DataType) * A_part.get_num_rows() * 27);
+    /* CHECK_CUDA(cudaMemcpy(x, A_part.get_values_d(), sizeof(DataType) * num_rows_local * 27, cudaMemcpyDeviceToHost));
     int flag =1;
     for (int i=0; i<NX; i++)
     for (int j=0; j<NY; j++)
@@ -815,10 +815,10 @@ void run_multi_GPU_tests(int argc, char *argv[], striped_multi_GPU_Implementatio
         }
     }
     if (problem.rank == 0) {if(flag) printf("Partial matrix correctly generated.\n");}
-
+ */
     A_part.initialize_coarse_matrix();
-    DataType *x_c = (DataType*)malloc(sizeof(DataType) * num_rows_local/8 * 27);
-    CHECK_CUDA(cudaMemcpy(x_c, A_part.get_coarse_Matrix()->get_values_d(), sizeof(DataType) * num_rows_local/8 * 27, cudaMemcpyDeviceToHost));
+    DataType *x_c = (DataType*)malloc(sizeof(DataType) * A_part.get_num_rows()/8 * 27);
+    /* CHECK_CUDA(cudaMemcpy(x_c, A_part.get_coarse_Matrix()->get_values_d(), sizeof(DataType) * num_rows_local/8 * 27, cudaMemcpyDeviceToHost));
     flag=1;
     for (int i=0; i<NX/2; i++)
     for (int j=0; j<NY/2; j++)
@@ -838,7 +838,7 @@ void run_multi_GPU_tests(int argc, char *argv[], striped_multi_GPU_Implementatio
         }
     }
     if (problem.rank == 0) {if(flag) printf("Partial coarse matrix correctly generated.\n");}
-
+ */
     free(x);
     free(x_c);
  

@@ -9,11 +9,11 @@ void cuSparse_Implementation<T>::cusparse_computeSPMV(
     T * x_d, T * y_d // the vectors x and y are already on the device
     ) {
 
-    int num_rows = A.get_num_rows();
-    int num_cols = A.get_num_cols();
-    int nnz = A.get_nnz();
-    int * A_row_ptr_d = A.get_row_ptr_d();
-    int * A_col_idx_d = A.get_col_idx_d();
+    local_int_t num_rows = A.get_num_rows();
+    local_int_t num_cols = A.get_num_cols();
+    global_int_t nnz = A.get_nnz();
+    local_int_t * A_row_ptr_d = A.get_row_ptr_d();
+    local_int_t * A_col_idx_d = A.get_col_idx_d();
     T * A_values_d = A.get_values_d();
 
     cusparseHandle_t handle;

@@ -6,33 +6,33 @@
 // #include <cuda_runtime.h>
 
 __global__ void striped_coloring_half_SymGS_kernel(
-    int color, int * color_pointer, int * color_sorted_rows,
-    int num_rows, int num_cols,
+    int color, local_int_t * color_pointer, local_int_t * color_sorted_rows,
+    local_int_t num_rows, local_int_t num_cols,
     int num_stripes, int diag_offset,
-    int * j_min_i,
-    double * striped_A,
-    double * x, double * y
+    local_int_t * j_min_i,
+    DataType * striped_A,
+    DataType * x, DataType * y
 ){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     int warp_id = tid / WARP_SIZE;
     int lane_id = tid % WARP_SIZE;
     int num_warps = blockDim.x * gridDim.x / WARP_SIZE;
 
-    int start = color_pointer[color];
-    int end = color_pointer[color+1];
+    local_int_t start = color_pointer[color];
+    local_int_t end = color_pointer[color+1];
     // if (tid == 0 && color == 26){
 
         // printf("start = %d, end = %d\n", start, end);
     // }
 
     for(int i = warp_id + start; i < end; i += num_warps){
-        int row = color_sorted_rows[i];
+        local_int_t row = color_sorted_rows[i];
         // if(row < 0 || row >= num_rows){
         //     printf("threadid: %d, color %d, start %d, end %d, row = %d, num_rows = %d\n", tid, color, start, end, row, num_rows);
         // }
             double my_sum = 0.0;
             for(int stripe = lane_id; stripe < num_stripes; stripe += WARP_SIZE){
-                int col = j_min_i[stripe] + row;
+                local_int_t col = j_min_i[stripe] + row;
                 double val = striped_A[row * num_stripes + stripe];
                 if(col < num_cols && col >= 0){
                     my_sum -= val * x[col];
@@ -57,24 +57,24 @@ __global__ void striped_coloring_half_SymGS_kernel(
 
 
 __global__ void striped_coloring_SymGS_backward_kernel(
-    int color, int * colors,
-    int num_rows, int num_cols,
+    int color, local_int_t * colors,
+    local_int_t num_rows, local_int_t num_cols,
     int num_stripes, int diag_offset,
-    int * j_min_i,
-    double * striped_A,
-    double * x, double * y
+    local_int_t * j_min_i,
+    DataType * striped_A,
+    DataType * x, DataType * y
 ){
 
-     int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
     int warp_id = tid / WARP_SIZE;
     int lane_id = tid % WARP_SIZE;
     int num_warps = blockDim.x * gridDim.x / WARP_SIZE;
 
-    for(int i = num_rows-1-warp_id; i >= 0; i += num_warps){
+    for(local_int_t i = num_rows-1-warp_id; i >= 0; i += num_warps){
         if(colors[i] == color){
             double my_sum = 0.0;
             for(int stripe = lane_id; stripe < num_stripes; stripe += WARP_SIZE){
-                int col = j_min_i[stripe] + i;
+                local_int_t col = j_min_i[stripe] + i;
                 double val = striped_A[i * num_stripes + stripe];
                 if(col < num_cols && col >= 0){
                     my_sum -= val * x[col];
@@ -97,7 +97,7 @@ __global__ void striped_coloring_SymGS_backward_kernel(
     }
 }
 
-__global__ void compute_num_colors_per_row(int num_rows, int max_num_colors, int * colors, int * num_colors_per_row){
+__global__ void compute_num_colors_per_row(local_int_t num_rows, int max_num_colors, local_int_t * colors, local_int_t * num_colors_per_row){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
     for(int i = tid; i < max_num_colors; i += gridDim.x * blockDim.x){
@@ -116,12 +116,12 @@ void striped_coloring_Implementation<T>::striped_coloring_computeSymGS(
     striped_Matrix<T> & A,
     T * x_d, T * y_d // the vectors x and y are already on the device
 ){
-    int diag_offset = A.get_diag_index();
+    local_int_t diag_offset = A.get_diag_index();
 
-    int num_rows = A.get_num_rows();
-    int num_cols = A.get_num_cols();
+    local_int_t num_rows = A.get_num_rows();
+    local_int_t num_cols = A.get_num_cols();
     int num_stripes = A.get_num_stripes();
-    int * j_min_i = A.get_j_min_i_d();
+    local_int_t * j_min_i = A.get_j_min_i_d();
     T * striped_A_d = A.get_values_d();
 
     int nx = A.get_nx();
@@ -130,8 +130,8 @@ void striped_coloring_Implementation<T>::striped_coloring_computeSymGS(
 
     // first we need to color the matrix
     // we make a device vector for the colors
-    int * color_pointer_d;
-    int * color_sorted_rows_d;
+    local_int_t * color_pointer_d;
+    local_int_t * color_sorted_rows_d;
 
     // we allocate the memory for the colors
     CHECK_CUDA(cudaMalloc(&color_pointer_d, (num_rows+1) * sizeof(int)));
@@ -201,4 +201,4 @@ void striped_coloring_Implementation<T>::striped_coloring_computeSymGS(
 }
 
 // explicit template instantiation
-template class striped_coloring_Implementation<double>;
+template class striped_coloring_Implementation<DataType>;

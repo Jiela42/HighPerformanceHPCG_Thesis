@@ -125,9 +125,9 @@ void NCCL_Implementation<T>::ExchangeHaloNCCL(Halo *halo, Problem *problem) {
     
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
         CHECK_NCCL(ncclRecv(halo->recv_buff_d[i], problem->count_exchange[i], NCCL_TYPE,
-                    problem->neighbors[i], nccl_comm, cuda_stream));
+                    problem->neighbors[i], this->nccl_comm, cuda_stream));
         CHECK_NCCL(ncclSend(halo->send_buff_d[i], problem->count_exchange[i], NCCL_TYPE,
-                    problem->neighbors[i], nccl_comm, cuda_stream));
+                    problem->neighbors[i], this->nccl_comm, cuda_stream));
     }
 
     ncclGroupEnd();

@@ -10,10 +10,10 @@ __global__ void striped_box_coloring_half_SymGS_kernel(
     int cooperation_number,
     int color, int bx, int by, int bz,
     int nx, int ny, int nz,
-    int num_rows, int num_cols,
+    local_int_t num_rows, local_int_t num_cols,
     int num_stripes, int diag_offset,
-    int * j_min_i,
-    double * striped_A,
+    local_int_t * j_min_i,
+    DataType * striped_A,
     double * x, double * y
 ){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -56,7 +56,7 @@ __global__ void striped_box_coloring_half_SymGS_kernel(
 
         double my_sum = 0.0;
         for(int stripe = lane; stripe < num_stripes; stripe += cooperation_number){
-            int col = j_min_i[stripe] + row;
+            local_int_t col = j_min_i[stripe] + row;
             double val = striped_A[row * num_stripes + stripe];
             if(col < num_cols && col >= 0){
                 my_sum -= val * x[col];
@@ -86,11 +86,11 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
 ){
     int diag_offset = A.get_diag_index();
 
-    int num_rows = A.get_num_rows();
-    int num_cols = A.get_num_cols();
+    local_int_t num_rows = A.get_num_rows();
+    local_int_t num_cols = A.get_num_cols();
     int num_stripes = A.get_num_stripes();
-    int * j_min_i = A.get_j_min_i_d();
-    double * striped_A_d = A.get_values_d();
+    local_int_t * j_min_i = A.get_j_min_i_d();
+    T * striped_A_d = A.get_values_d();
 
     assert(diag_offset >= 0);
 
@@ -254,4 +254,4 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
 }
 
 // explicit template instantiation
-template class striped_box_coloring_Implementation<double>;
+template class striped_box_coloring_Implementation<DataType>;

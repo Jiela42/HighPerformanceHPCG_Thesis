@@ -834,6 +834,11 @@ T striped_Matrix<T>::get_element(local_int_t i, local_int_t j) const{
 }
 
 template <typename T>
+int striped_Matrix<T>::get_diag_index() const{
+    return this->diag_index;
+}
+
+template <typename T>
 void striped_Matrix<T>::set_num_rows(local_int_t num_rows){
     // std::cout << "random debug prints here:" << std::endl;
     // std::cout << "this->csr: " << this->CSR << std::endl;
