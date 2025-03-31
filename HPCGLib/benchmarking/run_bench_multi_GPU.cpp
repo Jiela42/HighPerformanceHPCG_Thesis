@@ -7,17 +7,7 @@
 #include <filesystem>
 
 #include "HPCG_versions/non_blocking_mpi_halo_exchange.cuh"
-#include "benchmark_multi_GPU.cpp"
 #include "UtilLib/hpcg_multi_GPU_utils.cuh"
-
-//number of processes in x, y, z
-#define NPX 2
-#define NPY 2
-#define NPZ 2
-//each process gets assigned problem size of NX x NY x NZ
-#define NX 3
-#define NY 3
-#define NZ 3
 
 using DataType = double;
 
@@ -43,6 +33,38 @@ std::string createTimestampedFolder(const std::string base_folder){
 
 int main(int argc, char *argv[]) {
 
+    int NPX = 2;
+    int NPY = 2;
+    int NPZ = 2;
+    int NX = 16;
+    int NY = 16;
+    int NZ = 16;
+
+    //read input from console
+    std::vector<int*> argVars = {&NPX, &NPY, &NPZ, &NX, &NY, &NZ};
+    std::vector<std::string> argNames = {"NPX", "NPY", "NPZ", "NX", "NY", "NZ"};
+    for (size_t i = 0; i < argVars.size(); i++) {
+        if (argc > static_cast<int>(i + 1)) {
+            try {
+                *argVars[i] = std::stoi(argv[i + 1]);
+            } catch (...) {
+                std::cerr << "Invalid " << argNames[i] << " argument, using default value " << *argVars[i] << std::endl;
+            }
+        }
+    }
+
+    // Now, process additional arguments for benchmark selection.
+    // Default is "ALL". If additional arguments exist, join them into a string.
+    std::string benchFilter = "ALL";
+    if (argc > 7) {
+        std::ostringstream oss;
+        for (int i = 7; i < argc; i++) {
+            if (i > 7) oss << " ";
+            oss << argv[i];
+        }
+        benchFilter = oss.str();
+    }
+
     // generate a timestamped folder
     std::string base_path = "../../../timing_results/";
     base_path = "../../../dummy_timing_results/";
@@ -51,40 +73,42 @@ int main(int argc, char *argv[]) {
     folder_path += "/";
 
     //start timer
-    std::cout << "Starting Benchmark" << std::endl;
     auto total_start = std::chrono::high_resolution_clock::now();
-
-    non_blocking_mpi_Implementation<DataType> MGPU_implementation;
-    Problem problem = MGPU_implementation.init_comm(argc, argv, NPX, NPY, NPZ, NX, NY, NZ);
+    
+    non_blocking_mpi_Implementation<DataType> MGPU_Implementation;
+    Problem *problem = MGPU_Implementation.init_comm(argc, argv, NPX, NPY, NPZ, NX, NY, NZ);
+    if(problem->rank == 0) std::cout << "Starting Benchmark" << std::endl;
     
     //set Device
-    InitGPU(&problem);
+    InitGPU(problem);
     
     //start timer
-    std::cout << "Starting multi GPU Benchmarks" << std::endl;
-    start = std::chrono::high_resolution_clock::now();
+    if(problem->rank == 0) std::cout << "Starting multi GPU Benchmarks" << std::endl;
+    auto start = std::chrono::high_resolution_clock::now();
+
     non_blocking_mpi_Implementation<double> MGPU_implementation;
 
     //run
-    run_multi_GPU_benchmarks(2, 2, 1, 16, 16, 16, folder_path, MGPU_implementation, &problem);
+    run_multi_GPU_benchmarks(NPX, NPY, NPZ, NX, NY, NZ, folder_path, MGPU_Implementation, problem, benchFilter);
     
     //end timer
-    end = std::chrono::high_resolution_clock::now();
-    elapsed_seconds = end-start;
-    minutes = static_cast<int>(elapsed_seconds.count()) / 60;
-    seconds = static_cast<int>(elapsed_seconds.count()) % 60;
-    std::cout << "Multi GPU Benchmarks took: " << minutes << "m" << seconds << "s" << std::endl;
+    auto end = std::chrono::high_resolution_clock::now();
+    // Convert to seconds;
+    std::chrono::duration<double> elapsed_seconds = end - start;
+    int minutes = static_cast<int>(elapsed_seconds.count()) / 60;
+    int seconds = static_cast<int>(elapsed_seconds.count()) % 60;
+    if(problem->rank == 0) std::cout << "Multi GPU Benchmarks took: " << minutes << "m" << seconds << "s" << std::endl;
 
-    MPGU_implementation.finalize_comm(&problem);
+    MGPU_Implementation.finalize_comm(problem);
 
     //end timer
     auto total_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> duration = total_end - total_start;
     minutes = static_cast<int>(duration.count()) / 60;
     seconds = static_cast<int>(duration.count()) % 60;
-    std::cout << "Total benchmark duration: " << minutes << " minutes and " << seconds << " seconds." << std::endl;
+    if(problem->rank == 0) std::cout << "Total benchmark duration: " << minutes << " minutes and " << seconds << " seconds." << std::endl;
 
-    std::cout << "Finished Benchmark" << std::endl;
+    if(problem->rank == 0) std::cout << "Finished Benchmark" << std::endl;
 
 
     return 0;

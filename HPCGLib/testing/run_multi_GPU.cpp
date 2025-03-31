@@ -17,11 +17,15 @@ using DataType = double;
 #define NPY 2
 #define NPZ 2
 //each process gets assigned problem size of NX x NY x NZ
-#define NX 256
-#define NY 256
-#define NZ 256
+#define NX 3
+#define NY 3
+#define NZ 3
 
 int main(int argc, char *argv[]){
+
+    int nx = NX;
+    int ny = NY;
+    int nz = NZ;
 
     // create an instance of the version to run the functions on
     non_blocking_mpi_Implementation<DataType> implementation_multi_GPU_non_blocking_mpi;
@@ -41,6 +45,14 @@ int main(int argc, char *argv[]){
     Halo Ap;
     InitHalo(&Ap, problem);
     SetHaloZeroGPU(&Ap);
+
+    DataType *y_vector_d;
+    CHECK_CUDA(cudaMalloc(&y_vector_d, nx * ny * nz * sizeof(DataType)));
+    generate_y_vector_for_HPCG_problem_onGPU(problem, y_vector_d);
+
+    InjectDataToHalo(&p, y_vector_d);
+    CHECK_CUDA(cudaDeviceSynchronize());
+    if(problem->rank == 0) PrintHalo(&p);
 
 
     //run SPMV on multi GPU

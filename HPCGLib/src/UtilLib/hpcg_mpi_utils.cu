@@ -18,10 +18,10 @@ __inline__ __device__ global_int_t local_i_to_halo_i(
 }
 
 __global__ void inject_data_to_halo_kernel(DataType *x_d, DataType *data, int nx, int ny, int nz, int dimx, int dimy){
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    int n = nx * ny * nz;
-    for(int i = tid; i < n; i += blockDim.x * gridDim.x){
-            int hi = local_i_to_halo_i(i, nx, ny, nz, dimx, dimy);
+    local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+    local_int_t n = nx * ny * nz;
+    for(local_int_t i = tid; i < n; i += blockDim.x * gridDim.x){
+            local_int_t hi = local_i_to_halo_i(i, nx, ny, nz, dimx, dimy);
             x_d[hi] = data[i];
     }
 }
@@ -450,11 +450,16 @@ void SetHaloZeroGPU(Halo *halo){
     CHECK_CUDA(cudaMemset(halo->x_d, 0, halo->dimx * halo->dimy * halo->dimz * sizeof(DataType)));
 }
 
+// correctness verified
 void InjectDataToHalo(Halo *halo, DataType *data){
     int n = halo->nx * halo->ny * halo->nz;
     int num_threads = 1024;
-    int num_blocks = std::min(MAX_NUM_BLOCKS, ceiling_division(n, num_threads));
+    int num_blocks = (n + num_threads - 1) / num_threads;
     inject_data_to_halo_kernel<<<num_blocks, num_threads>>>(halo->x_d, data, halo->nx, halo->ny, halo->nz, halo->dimx, halo->dimy);
+    cudaError_t err = cudaGetLastError();
+    if(err != cudaSuccess) {
+        printf("Kernel launch error: %s\n", cudaGetErrorString(err));
+    }
 }
 
 /*

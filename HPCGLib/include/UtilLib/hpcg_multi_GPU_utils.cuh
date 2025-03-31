@@ -2,6 +2,7 @@
 #define HPCG_multiGPU_UTILS_CUH
 
 #include "cuda_runtime.h"
+#include "cuda_utils.hpp"
 
 typedef long local_int_t;
 typedef long global_int_t;

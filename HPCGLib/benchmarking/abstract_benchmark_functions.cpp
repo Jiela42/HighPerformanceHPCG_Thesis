@@ -155,7 +155,7 @@ void bench_CG(
 void bench_CG(
     striped_multi_GPU_Implementation<DataType>& implementation,
     Timer& timer,
-    striped_Matrix<DataType> & A,
+    striped_partial_Matrix<DataType> & A,
     Halo * x_d, Halo * y_d, Problem *problem
     )
 {
@@ -165,21 +165,6 @@ void bench_CG(
     local_int_t size_halo = y_d->dimx * y_d->dimy * y_d->dimz;
     std::vector<DataType> x_original(size_halo, 0.0);
     CHECK_CUDA(cudaMemcpy(x_original.data(), x_d->x_d, size_halo * sizeof(DataType), cudaMemcpyDeviceToHost));
-
-    //not possible for multi GPU
-    /*
-    if(implementation.test_before_bench and not implementation.CG_file_based_tests_passed){
-        // we do not have a baseline for CG
-        // therefore we run the filebased tests
-        bool test_passed = test_CG(implementation);
-        implementation.CG_file_based_tests_passed = test_passed;
-
-        // std::cout << "CG tested for implementation " << implementation.version_name << std::endl;
-
-        if (not test_passed){
-            num_iterations = 0;
-        }
-    }*/
 
     // we need a few more parameters for the CG function
     int n_iters = 0;
@@ -199,30 +184,30 @@ void bench_CG(
         implementation.doPreconditioning = true;
         for(int i = 0; i < num_iterations; i++){
             timer.startTimer();
-            // implementation.compute_CG(
-            //     A,
-            //     y_d, x_d,
-            //     n_iters, normr, normr0,
-            //     problem
-            // );
+            implementation.compute_CG(
+                A,
+                y_d, x_d,
+                n_iters, normr, normr0,
+                problem
+            );
             timer.stopTimer("compute_CG");
-            std::cout << "CG took " << n_iters << " iterations for size " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz()<< " and implementation " << implementation.version_name << std::endl;
+            if(problem->rank == 0)std::cout << "CG took " << n_iters << " iterations for size " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz()<< " and implementation " << implementation.version_name << std::endl;
             // restore original x
             CHECK_CUDA(cudaMemcpy(x_d->x_d, x_original.data(), size_halo * sizeof(DataType), cudaMemcpyHostToDevice));
         }
     } else{
-        std::cout << "Skipping CG Preconditioned bench for matrix with dimensions " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz() << " not divisible by 8 or too small for MG" << std::endl;
+        if(problem->rank == 0)std::cout << "Skipping CG Preconditioned bench for matrix with dimensions " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz() << " not divisible by 8 or too small for MG" << std::endl;
     }
 
     // now without preconditioning (can always be done)
     implementation.doPreconditioning = false;
     for(int i = 0; i < num_iterations; i++){
         timer.startTimer();
-        // implementation.compute_CG(
-        //     A,
-        //     y_d, x_d,
-        //     n_iters, normr, normr0, problem
-        // );
+        implementation.compute_CG(
+            A,
+            y_d, x_d,
+            n_iters, normr, normr0, problem
+        );
         timer.stopTimer("compute_CG_noPreconditioning");
         // restore original x
         CHECK_CUDA(cudaMemcpy(x_d->x_d, x_original.data(), size_halo * sizeof(DataType), cudaMemcpyHostToDevice));
@@ -234,7 +219,7 @@ void bench_CG(
 void bench_MG(
     striped_multi_GPU_Implementation<DataType>& implementation,
     Timer& timer,
-    striped_Matrix<DataType> & A,
+    striped_partial_Matrix<DataType> & A,
     Halo * x_d, Halo * y_d,
     Problem *problem
     )
@@ -251,35 +236,22 @@ void bench_MG(
         A.get_ny() / 8 < 3 or
         A.get_nz() / 8 < 3
     ){
-        std::cout << "Skipping MG bench for matrix with dimensions " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz() << " not divisible by 8 or too small for MG" << std::endl;
+        if(problem->rank == 0)std::cout << "Skipping MG bench for matrix with dimensions " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz() << " not divisible by 8 or too small for MG" << std::endl;
         return;
     }
 
     // obtain the original x vector
     local_int_t size_halo = y_d->dimx * y_d->dimy * y_d->dimz;
-    std::vector<DataType> x_original(A.get_num_rows(), 0.0);
+    std::vector<DataType> x_original(size_halo, 0.0);
     CHECK_CUDA(cudaMemcpy(x_original.data(), x_d->x_d, size_halo * sizeof(DataType), cudaMemcpyDeviceToHost));
-
-    //not possible for multi GPU
-    /*
-    if (implementation.test_before_bench and not implementation.MG_file_based_tests_passed){
-        
-        // there is no MG baseline so we test against the filebased tests
-        bool test_passed = test_MG(implementation);
-        implementation.MG_file_based_tests_passed = test_passed;
-
-        if (not test_passed){
-            num_iterations = 0;
-        }
-    }*/
 
     for(int i = 0; i < num_iterations; i++){
         timer.startTimer();
-        // implementation.compute_MG(
-        //     A,
-        //     y_d, x_d,
-        //     problem
-        // );
+        implementation.compute_MG(
+            A,
+            y_d, x_d,
+            problem
+        );
         timer.stopTimer("compute_MG");
     }
 
@@ -428,7 +400,7 @@ void bench_SPMV(
 void bench_SPMV(
     striped_multi_GPU_Implementation<DataType>& implementation,
     Timer& timer,
-    striped_Matrix<DataType> & A,
+    striped_partial_Matrix<DataType> & A,
     Halo * x_d, Halo * y_d,
     Problem *problem
     ){
@@ -441,31 +413,12 @@ void bench_SPMV(
 
     int num_iterations = implementation.getNumberOfIterations();
 
-    // testing not possible for multi GPU
-    /*
-    if (implementation.test_before_bench){
-    // we always test against cusparse
-        cuSparse_Implementation<double> baseline;
-    
-        // test the SPMV function
-        bool test_failed = !test_SPMV(
-            baseline, implementation,
-            A,
-            x_d
-            );
-
-        if (test_failed)
-        {
-            num_iterations = 0;
-        }
-    } */
-
     for(int i = 0; i < num_iterations; i++){
         timer.startTimer();
-        // implementation.compute_SPMV(
-        //     A,
-        //     x_d, y_d, problem
-        // );
+        implementation.compute_SPMV(
+            A,
+            x_d, y_d, problem
+        );
         timer.stopTimer("compute_SPMV");
     }
 
@@ -510,34 +463,16 @@ void bench_Dot(
 void bench_Dot(
     striped_multi_GPU_Implementation<DataType>& implementation,
     Timer& timer,
-    striped_Matrix<DataType> & A,
-    Halo * x_d, Halo * y_d, DataType * result_d
+    Halo * x_d, Halo * y_d, DataType * result_d,
+    Problem *problem
     ){
     int num_iterations = implementation.getNumberOfIterations();
 
-    //not possible for multi GPU
-    /*
-    if (implementation.test_before_bench){
-        // note that for the dot product the cuSparse implementation is an instanciation of warp reduction. ehem.
-        cuSparse_Implementation<double> baseline;
-        bool test_failed = !test_Dot(
-            baseline, implementation,
-            A,
-            x_d, y_d
-        );
-
-        if (test_failed){
-            num_iterations = 0;
-        }            
-    }
-    */
-
     for(int i = 0; i < num_iterations; i++){
         timer.startTimer();
-        // implementation.compute_Dot(
-        //     A,
-        //     x_d, y_d, result_d
-        // );
+        implementation.compute_Dot(
+            x_d, y_d, result_d
+        );
         timer.stopTimer("compute_Dot");
     }
     
@@ -621,7 +556,6 @@ void bench_WAXPBY(
 void bench_WAXPBY(
     striped_multi_GPU_Implementation<DataType>& implementation,
     Timer& timer,
-    striped_Matrix<DataType> & A,
     Halo * x_d, Halo * y_d, Halo * w_d,
     DataType alpha, DataType beta,
     Problem *problem
@@ -633,29 +567,12 @@ void bench_WAXPBY(
     local_int_t size_halo = w_d->dimx * w_d->dimy * w_d->dimz;
     std::vector<DataType> w(size_halo, 0.0);
     CHECK_CUDA(cudaMemcpy(w.data(), w_d->x_d, size_halo * sizeof(DataType), cudaMemcpyDeviceToHost));
-
-    //not possible for multi GPU
-    /*
-    if(implementation.test_before_bench){
-
-        bool test_failed = !test_WAXPBY(
-            implementation, A, x_d, y_d, alpha, beta
-        );
-
-        // restore original value of w_d
-        CHECK_CUDA(cudaMemcpy(w_d, w.data(), A.get_num_rows() * sizeof(DataType), cudaMemcpyHostToDevice));
-
-        if (test_failed){
-            num_iterations = 0;
-        }
-    }*/
     
     for(int i = 0; i < num_iterations; i++){
         timer.startTimer();
-        // implementation.compute_WAXPBY(
-        //     A,
-        //     x_d, y_d, w_d, alpha, beta, problem, false
-        // );
+        implementation.compute_WAXPBY(
+            x_d, y_d, w_d, alpha, beta, problem, false
+        );
         timer.stopTimer("compute_WAXPBY");
 
         // restore original value of w_d
@@ -800,7 +717,7 @@ void bench_SymGS(
 void bench_SymGS(
     striped_multi_GPU_Implementation<DataType>& implementation,
     Timer& timer,
-    striped_Matrix<DataType> & A,
+    striped_partial_Matrix<DataType> & A,
     Halo * x_d, Halo * y_d,
     Problem *problem
     )
@@ -815,22 +732,6 @@ void bench_SymGS(
 
     CHECK_CUDA(cudaMemcpy(x.data(), x_d->x_d, size_halo * sizeof(DataType), cudaMemcpyDeviceToHost));   
 
-    //not possible for multi GPU
-    /*
-    if(implementation.test_before_bench){
-
-        cuSparse_Implementation<double> baseline;           
-
-        bool test_failed = !test_SymGS(
-            baseline, implementation,
-            A,
-            y_d);
-
-        if (test_failed){
-            num_iterations = 0;
-        }
-    }*/
-
      // for normbased implementations we need to make sure the maximum number of iterations performed by symGS is enough
      int original_max_symgs_iterations = implementation.get_maxSymGSIters();
      if(implementation.norm_based){
@@ -843,7 +744,7 @@ void bench_SymGS(
         // copy original x into x_d
         CHECK_CUDA(cudaMemcpy(x_d->x_d, x.data(), size_halo * sizeof(DataType), cudaMemcpyHostToDevice));
         timer.startTimer();
-        // implementation.compute_SymGS( A, x_d, y_d, problem);
+        implementation.compute_SymGS( A, x_d, y_d, problem);
         timer.stopTimer("compute_SymGS");
     }
 
@@ -1002,63 +903,65 @@ void bench_Implementation(
 void bench_Implementation(
     striped_multi_GPU_Implementation<DataType>& implementation,
     Timer& timer,
-    striped_Matrix<DataType> & A, // we need to pass the CSR matrix for metadata and potential testing
+    striped_partial_Matrix<DataType> & A, // we need to pass the CSR matrix for metadata and potential testing
     Halo * a_d, Halo * b_d, // a & b are random vectors
     Halo * x_d, Halo * y_d, // x & y are vectors as used in HPCG
     DataType * result_d,  // result is used for the dot product (it is a scalar)
     DataType alpha, DataType beta,
-    Problem *problem
+    Problem *problem,
+    const std::string& benchFilter
 ){
-   
-    // we want to make sure the vectors are not changed, so we grab the first 100 elements
-    int num_sanity_elements = 100;
-    std::vector<double> a_original(num_sanity_elements);
-    std::vector<double> b_original(num_sanity_elements);
-    std::vector<double> x_original(num_sanity_elements);
-    std::vector<double> y_original(num_sanity_elements);
 
-    // copy the first 100 elements of the vectors
-    CHECK_CUDA(cudaMemcpy(a_original.data(), a_d->interior, num_sanity_elements * sizeof(DataType), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(b_original.data(), b_d->interior, num_sanity_elements * sizeof(DataType), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(x_original.data(), x_d->interior, num_sanity_elements * sizeof(DataType), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(y_original.data(), y_d->interior, num_sanity_elements * sizeof(DataType), cudaMemcpyDeviceToHost));
-    
-    // make a vector of vectors
-    std::vector<std::vector<double>> original_vectors = {a_original, b_original, x_original, y_original};
-    std::vector<double*> vectors_d = {a_d->interior, b_d->interior, x_d->interior, y_d->interior};
-    
-    // we do one sanity check prior to the benchmarking (just for my sanity and to make debugging easier)
-    sanity_check_vectors(vectors_d, original_vectors);
+    // Helper lambda: if benchFilter equals "ALL" or contains the given benchmark name, return true.
+    auto runBenchmark = [&benchFilter](const std::string& name) -> bool {
+        return (benchFilter == "ALL" || benchFilter.find(name) != std::string::npos);
+    };
 
-    std::cout << "Bench SPMV" << std::endl;
-    if(implementation.SPMV_implemented){
-        bench_SPMV(implementation, timer, A, a_d, y_d, problem);
-        sanity_check_vectors(vectors_d, original_vectors);
+    if (runBenchmark("SPMV")) {
+        if(problem->rank == 0) std::cout << "Bench SPMV" << std::endl;
+        if(implementation.SPMV_implemented){
+            bench_SPMV(implementation, timer, A, a_d, y_d, problem);
+        }
     }
 
-    std::cout << "Bench Dot" << std::endl;
-    if(implementation.Dot_implemented){
-        bench_Dot(implementation, timer, A, a_d, b_d, result_d);
-        sanity_check_vectors(vectors_d, original_vectors);
+    if (runBenchmark("DOT")) {
+        if(problem->rank == 0) std::cout << "Bench Dot" << std::endl;
+        if(implementation.Dot_implemented){
+            bench_Dot(implementation, timer, a_d, b_d, result_d, problem);
+        }
     }
-    std::cout << "Bench SymGS" << std::endl;
-    if(implementation.SymGS_implemented){
-        bench_SymGS(implementation, timer, A, x_d, y_d, problem);
-        sanity_check_vectors(vectors_d, original_vectors);
+
+    if (runBenchmark("SYMGS")) {
+        if(problem->rank == 0) std::cout << "Bench SymGS" << std::endl;
+        if(implementation.SymGS_implemented){
+            bench_SymGS(implementation, timer, A, x_d, y_d, problem);
+        }
     }
-    std::cout << "Bench WAXPBY" << std::endl;
-    if(implementation.WAXPBY_implemented){
-        bench_WAXPBY(implementation, timer, A, a_d, b_d, y_d, alpha, beta, problem);
-        sanity_check_vectors(vectors_d, original_vectors);
+
+    if (runBenchmark("WAXPBY")) {
+        if(problem->rank == 0) std::cout << "Bench WAXPBY" << std::endl;
+        if(implementation.WAXPBY_implemented){
+            bench_WAXPBY(implementation, timer, a_d, b_d, y_d, alpha, beta, problem);
+        }
     }
-    std::cout << "Bench CG" << std::endl;
-    if(implementation.CG_implemented){
-        bench_CG(implementation, timer, A, x_d, y_d, problem);
-        sanity_check_vectors(vectors_d, original_vectors);
+
+    if (runBenchmark("CG")) {
+        if(problem->rank == 0) std::cout << "Bench CG" << std::endl;
+        if(implementation.CG_implemented){
+            bench_CG(implementation, timer, A, x_d, y_d, problem);
+        }
     }
-    std::cout << "Bench MG" << std::endl;
-    if(implementation.MG_implemented){
-        bench_MG(implementation, timer, A, x_d, y_d, problem);
-        sanity_check_vectors(vectors_d, original_vectors);
+
+    if (runBenchmark("MG")) {
+        if(problem->rank == 0) std::cout << "Bench MG" << std::endl;
+        if(implementation.MG_implemented){
+            bench_MG(implementation, timer, A, x_d, y_d, problem);
+        }
     }
+
+    if (runBenchmark("HALO")) {
+        if(problem->rank == 0) std::cout << "Bench Halo Exchange" << std::endl;
+        bench_ExchangeHalo(implementation, timer, x_d, problem);
+    }
+
 }

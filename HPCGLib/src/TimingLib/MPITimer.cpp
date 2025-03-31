@@ -9,12 +9,13 @@
 #include <sstream>
 
 #include "mpi.h"
+#include "time.h"
 
 // #include "TimingLib/timer.hpp"
-#include "TimingLib/cpuTimer.hpp"
+#include "TimingLib/MPITimer.hpp"
 #include "UtilLib/cuda_utils.hpp"
 
-cpuTimer::cpuTimer(
+MPITimer::MPITimer(
         int nx,
         int ny,
         int nz,
@@ -48,7 +49,7 @@ cpuTimer::cpuTimer(
      }
 }
 
-cpuTimer::~cpuTimer() {
+MPITimer::~MPITimer() {
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -69,13 +70,12 @@ cpuTimer::~cpuTimer() {
 }
 
 
-void cpuTimer::startTimer() {
+void MPITimer::startTimer() {
     CHECK_CUDA(cudaDeviceSynchronize());
     this->t_start = MPI_Wtime();
 }
 
-void cpuTimer::stopTimer(std::string method_name) {
-    CHECK_CUDA(cudaDeviceSynchronize());
+void MPITimer::stopTimer(std::string method_name) {
     float t_end = MPI_Wtime();
 
     float milliseconds = (t_end - this->t_start) * 1000.0;
