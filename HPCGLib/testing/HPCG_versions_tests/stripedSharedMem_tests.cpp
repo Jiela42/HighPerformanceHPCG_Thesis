@@ -2,34 +2,34 @@
 
 #include "UtilLib/cuda_utils.hpp"
 
-bool run_stripedSharedMem_tests_on_matrix(sparse_CSR_Matrix<double>& A){
+bool run_stripedSharedMem_tests_on_matrix(sparse_CSR_Matrix<DataType>& A){
     // the output will be allocated by the test function
     // but any inputs need to be allocated and copied over to the device here
     // and is then passed to the test function
     bool all_pass = true;
     
     // create the baseline and the UUT
-    cuSparse_Implementation<double> cuSparse;
-    Striped_Shared_Memory_Implementation<double> stripedSharedMem;
+    cuSparse_Implementation<DataType> cuSparse;
+    Striped_Shared_Memory_Implementation<DataType> stripedSharedMem;
     
     int nx = A.get_nx();
     int ny = A.get_ny();
     int nz = A.get_nz();
     
     // random seeded x vector
-    std::vector<double> x = generate_random_vector(nx*ny*nz, RANDOM_SEED);
-    // std::vector<double> x (nx*ny*nz, 1.0);
+    std::vector<DataType> x = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+    // std::vector<DataType> x (nx*ny*nz, 1.0);
     // for(int i = 0; i < x.size(); i++){
     //     x[i] = i%10;
     // }
 
-    striped_Matrix<double>* A_striped = A.get_Striped();
+    striped_Matrix<DataType>* A_striped = A.get_Striped();
     std::cout << "getting striped matrix" << std::endl;
 
     // A_striped.striped_Matrix_from_sparse_CSR(A);
 
     // for(int i =0; i < A_striped.get_num_stripes(); i++){
-    //     double val = A_striped.get_values()[i];
+    //     DataType val = A_striped.get_values()[i];
     //     if (val != 0.0){
         //     std::cout << val << std::endl;
     //     }
@@ -37,20 +37,20 @@ bool run_stripedSharedMem_tests_on_matrix(sparse_CSR_Matrix<double>& A){
 
     // std::cout << "num_rows: " << A.get_num_rows() << std::endl;
 
-    int num_rows = A.get_num_rows();
-    int num_cols = A.get_num_cols();
-    int nnz = A.get_nnz();
+    local_int_t num_rows = A.get_num_rows();
+    local_int_t num_cols = A.get_num_cols();
+    local_int_t nnz = A.get_nnz();
 
     int num_stripes = A_striped->get_num_stripes();
 
-    double * x_d;
+    DataType * x_d;
 
     // Allocate the memory on the device
 
-    CHECK_CUDA(cudaMalloc(&x_d, num_cols * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&x_d, num_cols * sizeof(DataType)));
 
     // Copy the data to the device
-    CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(DataType), cudaMemcpyHostToDevice));
 
     // test the SPMV function
     all_pass = all_pass && test_SPMV(
@@ -77,7 +77,7 @@ bool run_stripedSharedMem_tests(int nx, int ny, int nz){
     // standard 3d27pt matrix tests
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    sparse_CSR_Matrix<double> A;
+    sparse_CSR_Matrix<DataType> A;
     A.generateMatrix_onGPU(nx, ny, nz);
 
     current_pass = run_stripedSharedMem_tests_on_matrix(A);

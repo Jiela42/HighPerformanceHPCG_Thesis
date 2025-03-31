@@ -14,15 +14,15 @@ void striped_coloringPrecomputed_Implementation<T>::striped_coloringPrecomputed_
 ){
     int diag_offset = A.get_diag_index();
 
-    int num_rows = A.get_num_rows();
-    int num_cols = A.get_num_cols();
+    local_int_t num_rows = A.get_num_rows();
+    local_int_t num_cols = A.get_num_cols();
     int num_stripes = A.get_num_stripes();
-    int * j_min_i = A.get_j_min_i_d();
+    local_int_t * j_min_i = A.get_j_min_i_d();
     T * striped_A_d = A.get_values_d();
 
     // the coloring was already computed, we can grab the pointers from the striped matrix object
-    int * color_pointer_d = A.get_color_pointer_d();
-    int * color_sorted_rows_d = A.get_color_sorted_rows_d();
+    local_int_t * color_pointer_d = A.get_color_pointer_d();
+    local_int_t * color_sorted_rows_d = A.get_color_sorted_rows_d();
 
     assert(diag_offset >= 0);
     // this assertion is here such that we don't benchmark the coloring computation
@@ -36,8 +36,8 @@ void striped_coloringPrecomputed_Implementation<T>::striped_coloringPrecomputed_
 
     // the number of blocks is now dependent on the maximum number of rows per color
 
-    int max_num_rows_per_color = std::min(nx * ny / 4, std::min(nx * nz / 2, ny * nz));
-    int max_color = (nx-1) + 2 * (ny-1) + 4 * (nz-1);
+    local_int_t max_num_rows_per_color = std::min(nx * ny / 4, std::min(nx * nz / 2, ny * nz));
+    local_int_t max_color = (nx-1) + 2 * (ny-1) + 4 * (nz-1);
 
     int num_blocks = std::min(ceiling_division(max_num_rows_per_color, 1024/WARP_SIZE), MAX_NUM_BLOCKS);
     
@@ -52,7 +52,7 @@ void striped_coloringPrecomputed_Implementation<T>::striped_coloringPrecomputed_
     }
 
     for(int i = 0; i < max_iterations && normi/norm0 > this->SymGS_tolerance; i++){
-        for(int color = 0; color <= max_color; color++){
+        for(local_int_t color = 0; color <= max_color; color++){
             // we need to do a forward pass
             striped_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
             color, color_pointer_d, color_sorted_rows_d,
@@ -68,7 +68,7 @@ void striped_coloringPrecomputed_Implementation<T>::striped_coloringPrecomputed_
         // we need to do a backward pass,
         // the colors for this are the same just in reverse order
         
-        for(int color = max_color; color  >= 0; color--){
+        for(local_int_t color = max_color; color  >= 0; color--){
     
             striped_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
             color, color_pointer_d, color_sorted_rows_d,
@@ -89,4 +89,4 @@ void striped_coloringPrecomputed_Implementation<T>::striped_coloringPrecomputed_
 }
 
 // explicit template instantiation
-template class striped_coloringPrecomputed_Implementation<double>;
+template class striped_coloringPrecomputed_Implementation<DataType>;

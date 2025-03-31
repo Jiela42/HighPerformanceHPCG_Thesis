@@ -8,10 +8,10 @@
 #include <iostream>
 #include <cublas_v2.h>
 
-__global__ void elem_wise_mult_of_vectors_kernel(int num_rows, double *x, double *y, double *z){
+__global__ void elem_wise_mult_of_vectors_kernel(int local_int_t, DataType *x, DataType *y, DataType *z){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-    for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x){
+    for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x){
         z[row] = x[row] * y[row];
     }
 }
@@ -33,7 +33,7 @@ void cuSparse_Implementation<T>::cusparse_computeDot(
 
     int incx = 1;
     int incy = 1;
-    double result_host = 0.0;
+    DataType result_host = 0.0;
 
     CHECK_CUBLAS(cublasDdot(handle, num_rows, x_d, incx, y_d, incy, &result_host));
 
@@ -48,4 +48,4 @@ void cuSparse_Implementation<T>::cusparse_computeDot(
 
 }
 
-template class cuSparse_Implementation<double>;
+template class cuSparse_Implementation<DataType>;
