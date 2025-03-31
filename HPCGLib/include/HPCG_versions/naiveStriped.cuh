@@ -112,9 +112,9 @@ private:
 
 // we expose the kernels in case we need to call them from a different method
 __global__ void naiveStriped_SPMV_kernel(
-    double* striped_A,
-    int num_rows, int num_stripes, int * j_min_i,
-    double* x, double* y
+    DataType* striped_A,
+    local_int_t num_rows, int num_stripes, local_int_t * j_min_i,
+    DataType* x, DataType* y
     );
 
 

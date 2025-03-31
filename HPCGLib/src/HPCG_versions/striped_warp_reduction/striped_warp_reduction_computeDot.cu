@@ -2,17 +2,17 @@
 #include "UtilLib/cuda_utils.hpp"
 #include <iostream>
 
-__global__ void reduce_sums(double * array, int num_elements, double * result_d){
+__global__ void reduce_sums(DataType * array, local_int_t num_elements, DataType * result_d){
 
-    __shared__ double intermediate_sums[32];
+    __shared__ DataType intermediate_sums[32];
     
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     int lane = threadIdx.x % 32;
     int warp_id = threadIdx.x / 32;
 
-    double my_sum = 0.0;
+    DataType my_sum = 0.0;
 
-    for (int i = tid; i < num_elements; i += blockDim.x * gridDim.x){
+    for (local_int_t i = tid; i < num_elements; i += blockDim.x * gridDim.x){
         my_sum += array[i];
     }
 
@@ -43,13 +43,13 @@ __global__ void reduce_sums(double * array, int num_elements, double * result_d)
 }
 
 __global__ void striped_warp_reduction_dot_kernel(
-    int num_rows,
-    double * x_d,
-    double * y_d,
-    double * result_d
+    local_int_t num_rows,
+    DataType * x_d,
+    DataType * y_d,
+    DataType * result_d
 ){
 
-    __shared__ double intermediate_sums[32];
+    __shared__ DataType intermediate_sums[32];
 
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     int lane = threadIdx.x % 32;
@@ -57,9 +57,9 @@ __global__ void striped_warp_reduction_dot_kernel(
     int warp_id = threadIdx.x / 32;
 
     // first we reduce as much as we can without cooperation
-    double my_sum = 0.0;
+    DataType my_sum = 0.0;
 
-    for (int i = tid; i < num_rows; i += blockDim.x * gridDim.x){
+    for (local_int_t i = tid; i < num_rows; i += blockDim.x * gridDim.x){
         // if (y_d[i] != 0.0){
         //     printf("y_d[%d] = %f\n", i, y_d[i]);
         // }
@@ -143,7 +143,7 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeDot
     // std::cout << "Running dot product with striped warp reduction" << std::endl;
     // we compute z = xy
 
-    int num_rows = A.get_num_rows();
+    local_int_t num_rows = A.get_num_rows();
     int num_threads = 1024;
     int max_threads = NUM_PHYSICAL_CORES;
     int max_blocks = 4 * max_threads / num_threads + 1;
@@ -154,11 +154,11 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeDot
     bool seperate_reduction_needed = num_blocks > 1;
 
     // allocate memory for the intermediate vector if needed
-    double *intermediate_sums_d;
+    T *intermediate_sums_d;
     if (seperate_reduction_needed){
         // std::cout << "seperate reduction needed" << std::endl;
         // std::cout << "num_blocks = " << num_blocks << std::endl;
-        CHECK_CUDA(cudaMalloc(&intermediate_sums_d, num_blocks * sizeof(double)));
+        CHECK_CUDA(cudaMalloc(&intermediate_sums_d, num_blocks * sizeof(T)));
     } else{
         intermediate_sums_d = result_d;
         // std::cout << "no seperate reduction needed we write to result_d directly" << std::endl;
@@ -211,4 +211,4 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeDot
 
 }
 
-template class striped_warp_reduction_Implementation<double>;
+template class striped_warp_reduction_Implementation<DataType>;

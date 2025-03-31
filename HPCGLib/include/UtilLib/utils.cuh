@@ -10,10 +10,10 @@ int next_smaller_power_of_two(int n);
 
 __global__ void compute_restriction_kernel(
     int num_rows,
-    double * Axf,
-    double * rf,
-    double * rc,
-    int * f2c_operator
+    DataType * Axf,
+    DataType * rf,
+    DataType * rc,
+    local_int_t * f2c_operator
 );
 
 __global__ void compute_restriction_multi_GPU_kernel(
@@ -26,10 +26,10 @@ __global__ void compute_restriction_multi_GPU_kernel(
 );
 
 __global__ void compute_prolongation_kernel(
-    int num_rows,
+    local_int_t num_rows,
     double * xc,
     double * x,
-    int * c2f_operator
+    local_int_t * c2f_operator
 );
 
 __global__ void compute_prolongation_multi_GPU_kernel(
@@ -42,9 +42,9 @@ __global__ void compute_prolongation_multi_GPU_kernel(
 
 
 double L2_norm_for_SymGS(
-    sparse_CSR_Matrix<double> & A,
-    double * x,
-    double * y
+    sparse_CSR_Matrix<DataType> & A,
+    DataType * x,
+    DataType * y
 );
 
 // double L2_norm_for_SymGS(
@@ -54,22 +54,22 @@ double L2_norm_for_SymGS(
 // );
 
 double relative_residual_norm_for_SymGS(
-    sparse_CSR_Matrix<double> & A,
-    double * x,
-    double * y
+    sparse_CSR_Matrix<DataType> & A,
+    DataType * x,
+    DataType * y
 );
 
 double relative_residual_norm_for_SymGS(
-    striped_Matrix<double> & A,
-    double * x,
-    double * y
+    striped_Matrix<DataType> & A,
+    DataType * x,
+    DataType * y
 );
 
 void L2_norm_for_Device_Vector(
     cudaStream_t stream,
     int num_rows,
-    double * y_d,
-    double * L2_norm
+    DataType * y_d,
+    DataType * L2_norm
 );
 
 

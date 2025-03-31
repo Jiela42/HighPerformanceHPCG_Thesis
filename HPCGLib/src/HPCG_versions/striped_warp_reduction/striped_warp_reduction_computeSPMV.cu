@@ -4,9 +4,9 @@
 
 
 __global__ void striped_warp_reduction_SPMV_kernel(
-        double* striped_A,
-        int num_rows, int num_stripes, int * j_min_i,
-        double* x, double* y
+        DataType* striped_A,
+        local_int_t num_rows, int num_stripes, local_int_t * j_min_i,
+        DataType* x, DataType* y
     )
 {
     // printf("striped_warp_reduction_SPMV_kernel\n");
@@ -15,12 +15,12 @@ __global__ void striped_warp_reduction_SPMV_kernel(
     int lane = threadIdx.x % cooperation_number;
 
     // every thread computes one or more rows of the matrix
-    for (int i = tid/cooperation_number; i < num_rows; i += (blockDim.x * gridDim.x)/cooperation_number) {
+    for (local_int_t i = tid/cooperation_number; i < num_rows; i += (blockDim.x * gridDim.x)/cooperation_number) {
         // compute the matrix-vector product for the ith row
-        double sum_i = 0;
+        DataType sum_i = 0;
         for (int stripe = lane; stripe < num_stripes; stripe += cooperation_number) {
-            int j = i + j_min_i[stripe];
-            int current_row = i * num_stripes;
+            local_int_t j = i + j_min_i[stripe];
+            local_int_t current_row = i * num_stripes;
             if (j >= 0 && j < num_rows) {
                 sum_i += striped_A[current_row + stripe] * x[j];
             }
@@ -47,9 +47,9 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeSPM
 
         // std::cout << "striped_warp_reduction_computeSPMV" << std::endl;
 
-        int num_rows = A.get_num_rows();
+        local_int_t num_rows = A.get_num_rows();
         int num_stripes = A.get_num_stripes();
-        int * j_min_i = A.get_j_min_i_d();
+        local_int_t * j_min_i = A.get_j_min_i_d();
         T * striped_A_d = A.get_values_d();
 
         // since every thread is working on one or more rows we need to base the number of threads on that
@@ -70,4 +70,4 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeSPM
     }
 
 // explicit template instantiation
-template class striped_warp_reduction_Implementation<double>;
+template class striped_warp_reduction_Implementation<DataType>;

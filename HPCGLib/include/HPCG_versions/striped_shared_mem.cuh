@@ -112,10 +112,10 @@ private:
 
 // we expose the kernels in case we need them in other methods
 __global__ void striped_shared_memory_SPMV_kernel(
-        int rows_per_sm, int num_x_elem, int num_consecutive_memory_regions,
+        local_int_t rows_per_sm, local_int_t num_x_elem, local_int_t num_consecutive_memory_regions,
         int* min_j, int* max_j,
         double* striped_A,
-        int num_rows, int num_stripes, int * j_min_i,
+        local_int_t num_rows, int num_stripes, local_int_t * j_min_i,
         double* x, double* y
     );
 #endif // STRIPED_SHARED_MEM_CUH

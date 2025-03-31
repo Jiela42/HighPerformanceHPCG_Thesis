@@ -239,12 +239,12 @@ __global__ void print_COR_Format_kernel(
     if (tid == 0){
         printf("COLOR POINTER\n");
         for(local_int_t i = 0; i <= max_colors; i++){
-            printf("%d\n", color_pointer[i]);
+            printf("%ld\n", color_pointer[i]);
         }
         // printf("\n");
         printf("COLOR SORTED ROWS\n");
         for(local_int_t i = 0; i < num_rows; i++){
-            printf("%d\n", color_sorted_rows[i]);
+            printf("%ld\n", color_sorted_rows[i]);
         }
     }
 }
