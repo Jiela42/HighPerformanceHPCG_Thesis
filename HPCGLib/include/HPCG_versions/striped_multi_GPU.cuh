@@ -228,14 +228,14 @@ private:
 // we expose the kernel in case we need to call it from another method
 __global__ void striped_warp_reduction_multi_GPU_SPMV_kernel(
     double* striped_A,
-    int num_rows, int num_stripes, int * j_min_i,
+    local_int_t num_rows, int num_stripes, local_int_t * j_min_i,
     double* x, double* y, int nx, int ny, int nz, 
     global_int_t gnx, global_int_t gny, global_int_t gnz, 
     global_int_t gi0,
     int px, int py, int pz
     );
 __global__ void striped_warp_reduction_multi_GPU_dot_kernel(
-    int num_rows,
+    local_int_t num_rows,
     double * x_d,
     double * y_d,
     double * result_d,
