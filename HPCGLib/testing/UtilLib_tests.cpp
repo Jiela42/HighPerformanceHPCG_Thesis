@@ -2,9 +2,9 @@
 
 // this tests the l2 norm calculation on CSR matrices and striped matrices
 bool test_l2_norm(
-    sparse_CSR_Matrix<double>& A,
-    striped_Matrix<double>& striped_A,
-    std::vector<double>& x_solution, std::vector<double>& y
+    sparse_CSR_Matrix<DataType>& A,
+    striped_Matrix<DataType>& striped_A,
+    std::vector<DataType>& x_solution, std::vector<DataType>& y
 ){
 
     double l2_norm_host_calculated = L2_norm_for_SymGS(A, x_solution, y);
@@ -13,21 +13,21 @@ bool test_l2_norm(
     // put A_striped, x, y on the device
 
     int num_stripes = striped_A.get_num_stripes();
-    int num_rows = A.get_num_rows();
-    int num_cols = A.get_num_cols();
+    local_int_t num_rows = A.get_num_rows();
+    local_int_t num_cols = A.get_num_cols();
 
-    double * x_d;
-    double * y_d;
+    DataType * x_d;
+    DataType * y_d;
 
-    CHECK_CUDA(cudaMalloc(&x_d, x_solution.size() * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&y_d, y.size() * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&x_d, x_solution.size() * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&y_d, y.size() * sizeof(DataType)));
 
-    CHECK_CUDA(cudaMemcpy(x_d, x_solution.data(), x_solution.size() * sizeof(double), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(y_d, y.data(), y.size() * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(x_d, x_solution.data(), x_solution.size() * sizeof(DataType), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), y.size() * sizeof(DataType), cudaMemcpyHostToDevice));
 
     // calculate the l2 norm on the device
     // we made this a function of the HPCGLib of the implementation, so we need an instance of an implementation
-    striped_box_coloring_Implementation<double> impl;
+    striped_box_coloring_Implementation<DataType> impl;
 
     double l2_norm_device_calculated = impl.L2_norm_for_SymGS(
                                             striped_A,
@@ -52,7 +52,7 @@ bool test_l2_norm(
 
 
 // this tests the l2 norm calculation on only CSR matrices
-bool test_l2_norm(sparse_CSR_Matrix<double>& A, std::vector<double>& x_solution, std::vector<double>& y){
+bool test_l2_norm(sparse_CSR_Matrix<DataType>& A, std::vector<DataType>& x_solution, std::vector<DataType>& y){
     
     // host calculated solution
     double l2_norm_host_calculated = L2_norm_for_SymGS(A, x_solution, y);
@@ -60,20 +60,20 @@ bool test_l2_norm(sparse_CSR_Matrix<double>& A, std::vector<double>& x_solution,
     // device calculated solution
 
     // copy A, x, y to device
-    int * A_row_ptr_d;
-    int * A_col_idx_d;
-    double * A_values_d;
-    double * x_d;
-    double * y_d;
+    local_int_t * A_row_ptr_d;
+    local_int_t * A_col_idx_d;
+    DataType * A_values_d;
+    DataType * x_d;
+    DataType * y_d;
 
-    CHECK_CUDA(cudaMalloc(&x_d, x_solution.size() * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&y_d, y.size() * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&x_d, x_solution.size() * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&y_d, y.size() * sizeof(DataType)));
 
-    CHECK_CUDA(cudaMemcpy(x_d, x_solution.data(), x_solution.size() * sizeof(double), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(y_d, y.data(), y.size() * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(x_d, x_solution.data(), x_solution.size() * sizeof(DataType), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), y.size() * sizeof(DataType), cudaMemcpyHostToDevice));
 
-    int num_rows = A.get_num_rows();
-    int num_cols = A.get_num_cols();
+    local_int_t num_rows = A.get_num_rows();
+    local_int_t num_cols = A.get_num_cols();
 
     // calculate the l2 norm on the device
     double l2_norm_device_calculated = L2_norm_for_SymGS(
@@ -94,7 +94,7 @@ bool test_l2_norm(sparse_CSR_Matrix<double>& A, std::vector<double>& x_solution,
 
 }
 
-bool test_rr_norm(sparse_CSR_Matrix<double>& A, std::vector<double>& x_solution, std::vector<double>& y){
+bool test_rr_norm(sparse_CSR_Matrix<DataType>& A, std::vector<DataType>& x_solution, std::vector<DataType>& y){
     
     // host calculated solution
     double rr_norm_host_calculated = relative_residual_norm_for_SymGS(A, x_solution, y);
@@ -103,17 +103,17 @@ bool test_rr_norm(sparse_CSR_Matrix<double>& A, std::vector<double>& x_solution,
 
     // copy x, y to device
 
-    double * x_d;
-    double * y_d;
+    DataType * x_d;
+    DataType * y_d;
 
-    CHECK_CUDA(cudaMalloc(&x_d, x_solution.size() * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&y_d, y.size() * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&x_d, x_solution.size() * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&y_d, y.size() * sizeof(DataType)));
 
-    CHECK_CUDA(cudaMemcpy(x_d, x_solution.data(), x_solution.size() * sizeof(double), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(y_d, y.data(), y.size() * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(x_d, x_solution.data(), x_solution.size() * sizeof(DataType), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), y.size() * sizeof(DataType), cudaMemcpyHostToDevice));
 
-    int num_rows = A.get_num_rows();
-    int num_cols = A.get_num_cols();
+    local_int_t num_rows = A.get_num_rows();
+    local_int_t num_cols = A.get_num_cols();
 
     // calculate the l2 norm on the device
     double rr_norm_device_calculated = relative_residual_norm_for_SymGS(
@@ -135,9 +135,9 @@ bool test_rr_norm(sparse_CSR_Matrix<double>& A, std::vector<double>& x_solution,
 
 
 bool test_rr_norm(
-    sparse_CSR_Matrix<double>& A,
-    striped_Matrix<double>& striped_A,
-    std::vector<double>& x_solution, std::vector<double>& y
+    sparse_CSR_Matrix<DataType>& A,
+    striped_Matrix<DataType>& striped_A,
+    std::vector<DataType>& x_solution, std::vector<DataType>& y
 ){
 
     double rr_norm_host_calculated = relative_residual_norm_for_SymGS(A, x_solution, y);
@@ -146,19 +146,19 @@ bool test_rr_norm(
     // put A_striped, x, y on the device
 
     int num_stripes = striped_A.get_num_stripes();
-    int num_rows = A.get_num_rows();
-    int num_cols = A.get_num_cols();
+    local_int_t num_rows = A.get_num_rows();
+    local_int_t num_cols = A.get_num_cols();
 
-    double * striped_A_d;
-    int * j_min_i_d;
-    double * x_d;
-    double * y_d;
+    DataType * striped_A_d;
+    local_int_t * j_min_i_d;
+    DataType * x_d;
+    DataType * y_d;
 
-    CHECK_CUDA(cudaMalloc(&x_d, x_solution.size() * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&y_d, y.size() * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&x_d, x_solution.size() * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&y_d, y.size() * sizeof(DataType)));
 
-    CHECK_CUDA(cudaMemcpy(x_d, x_solution.data(), x_solution.size() * sizeof(double), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(y_d, y.data(), y.size() * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(x_d, x_solution.data(), x_solution.size() * sizeof(DataType), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), y.size() * sizeof(DataType), cudaMemcpyHostToDevice));
 
     // calculate the l2 norm on the device
 
@@ -179,20 +179,17 @@ bool test_rr_norm(
 bool run_all_util_tests(int nx, int ny, int nz){
 
     // make CSR matrix
-    sparse_CSR_Matrix<double> A;
+    sparse_CSR_Matrix<DataType> A;
     A.generateMatrix_onGPU(nx, ny, nz);
-    std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
+    std::vector<DataType> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
 
     // std::cout << "CSR Matrix is generated" << std::endl;
     // make striped matrix
     std::cout << "getting striped matrix" << std::endl;
-    striped_Matrix<double>* striped_A = A.get_Striped();
-    // striped_A.striped_Matrix_from_sparse_CSR(A);
-
-    // std::cout << "Striped Matrix is generated" << std::endl;
+    striped_Matrix<DataType>* striped_A = A.get_Striped();
 
     // make fake solution
-    std::vector<double> x_solution = generate_random_vector(A.get_num_rows(), 0.0, 1.0, RANDOM_SEED);
+    std::vector<DataType> x_solution = generate_random_vector(A.get_num_rows(), 0.0, 1.0, RANDOM_SEED);
 
     // std::cout << "Running tests for size " << nx << "x" << ny << "x" << nz << std::endl;
 
