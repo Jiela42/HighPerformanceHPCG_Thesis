@@ -76,6 +76,7 @@ void MPITimer::startTimer() {
 }
 
 void MPITimer::stopTimer(std::string method_name) {
+    CHECK_CUDA(cudaDeviceSynchronize());
     float t_end = MPI_Wtime();
 
     float milliseconds = (t_end - this->t_start) * 1000.0;
