@@ -691,22 +691,18 @@ local_int_t striped_Matrix<T>::get_num_cols() const{
 }
 
 template <typename T>
-int striped_Matrix<T>::get_ny() const{
-    return this->ny;
-}
-
-template <typename T>
-int striped_partial_Matrix<T>::get_nx() const{
+int striped_Matrix<T>::get_nx() const{
     return this->nx;
 }
 
 template <typename T>
-int striped_partial_Matrix<T>::get_ny() const{
+int striped_Matrix<T>::get_ny() const{
     return this->ny;
 }
 
+
 template <typename T>
-int striped_partial_Matrix<T>::get_nz() const{
+int striped_Matrix<T>::get_nz() const{
     return this->nz;
 }
 
@@ -714,6 +710,11 @@ int striped_partial_Matrix<T>::get_nz() const{
 template <typename T>
 local_int_t striped_Matrix<T>::get_nnz() const{
     return this->nnz;
+}
+
+template <typename T>
+int striped_Matrix<T>::get_num_stripes() const{
+    return this->num_stripes;
 }
 
 template <typename T>
@@ -1114,4 +1115,4 @@ void striped_Matrix<T>::print() const{
 }
 
 // explicit template instantiation
-template class striped_Matrix<double>;
+template class striped_Matrix<DataType>;

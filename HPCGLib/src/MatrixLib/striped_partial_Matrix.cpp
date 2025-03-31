@@ -76,6 +76,23 @@ striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
     CHECK_CUDA(cudaMemcpy(this->j_min_i_d, this->j_min_i.data(), this->num_stripes * sizeof(local_int_t), cudaMemcpyHostToDevice));
 }
 
+template<typename T>
+int striped_partial_Matrix<T>::get_nx() const{
+    return this->problem->nx;
+}
+
+template<typename T>
+int striped_partial_Matrix<T>::get_ny() const{
+    return this->problem->nx;
+}
+
+template<typename T>
+int striped_partial_Matrix<T>::get_nz() const{
+    return this->problem->nx;
+}
+
+
+
 template <typename T>
 striped_partial_Matrix<T>::~striped_partial_Matrix(){
 

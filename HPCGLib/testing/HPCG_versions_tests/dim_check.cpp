@@ -98,9 +98,25 @@ void dimension_tests(int argc, char *argv[], striped_multi_GPU_Implementation<Da
     InitHalo(&halo_b_d, &problem);
     SetHaloGlobalIndexGPU(&halo_b_d, &problem);
 
+    //initialize halos with random data
+    SetHaloRandomGPU(&halo_x_d, &problem, 0, 1, RANDOM_SEED);
+    SetHaloRandomGPU(&halo_y_d, &problem, 0, 1, RANDOM_SEED);
+    DataType *result_multi_GPU_d;
+    CHECK_CUDA(cudaMalloc(&result_multi_GPU_d, sizeof(DataType)));
+    CHECK_CUDA(cudaMemset(result_multi_GPU_d, 0, sizeof(DataType)));
+
+    //run Dot on multi GPU
+    implementation_multi_GPU.compute_Dot(&halo_x_d, &halo_y_d, result_multi_GPU_d); 
+
+    striped_Matrix<DataType> A_striped;
+    A_striped.Generate_striped_3D27P_Matrix_onGPU(NX, NY, NZ);
+
     // test partial matrix
     striped_partial_Matrix<DataType> A_part(&problem);
     DataType *x = (DataType*)malloc (sizeof(DataType) * A_part.get_num_rows()* 27);
+
+    implementation_multi_GPU.compute_SPMV(A_part, &halo_p_d, &halo_Ap_d, &problem); //1st * 2nd = 3rd argument
+    
     /* CHECK_CUDA(cudaMemcpy(x, A_part.get_values_d(), sizeof(DataType) * num_rows_local * 27, cudaMemcpyDeviceToHost));
     int flag =1;
     for (int i=0; i<NX; i++)
