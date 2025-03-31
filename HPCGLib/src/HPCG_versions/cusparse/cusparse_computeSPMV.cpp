@@ -11,7 +11,7 @@ void cuSparse_Implementation<T>::cusparse_computeSPMV(
 
     local_int_t num_rows = A.get_num_rows();
     local_int_t num_cols = A.get_num_cols();
-    local_int_t nnz = A.get_nnz();
+    global_int_t nnz = A.get_nnz();
     local_int_t * A_row_ptr_d = A.get_row_ptr_d();
     local_int_t * A_col_idx_d = A.get_col_idx_d();
     T * A_values_d = A.get_values_d();

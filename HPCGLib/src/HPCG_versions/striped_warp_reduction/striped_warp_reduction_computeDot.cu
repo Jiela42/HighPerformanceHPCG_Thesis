@@ -147,7 +147,7 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeDot
     int num_threads = 1024;
     int max_threads = NUM_PHYSICAL_CORES;
     int max_blocks = 4 * max_threads / num_threads + 1;
-    int num_blocks = std::min(num_rows/(num_threads*coop_num), max_blocks);
+    int num_blocks = std::min((int)(num_rows/(num_threads*coop_num)), max_blocks);
     // we need at least one block
     num_blocks = max(num_blocks, 1);
 

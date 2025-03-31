@@ -140,7 +140,7 @@ __global__ void compute_restriction_multi_GPU_kernel(
     DataType * Axf, //halo access, fine number of rows
     DataType * rf, //halo access, fine number of rows
     DataType * rc, //halo access, coarse number of rows
-    int *f2c_operator, //normal access
+    local_int_t *f2c_operator, //normal access
     int nx, int ny, int nz
 ){
     local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -179,15 +179,15 @@ __global__ void compute_prolongation_kernel(
 }
 
 __global__ void compute_prolongation_multi_GPU_kernel(
-    int num_rows,
+    local_int_t num_rows,
     DataType * xc, //coarse, Halo
     DataType * xf, //fine, Halo
-    int * f2c_operator,
+    local_int_t * f2c_operator,
     int nx, int ny, int nz
 ){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-    for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x) {
+    for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x) {
 
         // if(f2c_operator[row] < 0){
 

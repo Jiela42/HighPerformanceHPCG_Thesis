@@ -2,6 +2,7 @@
 #define CUDATIMER_HPP
 
 #include "timer.hpp"
+#include "UtilLib/utils.hpp"
 #include <cuda_runtime.h>
 
 class CudaTimer : public Timer {

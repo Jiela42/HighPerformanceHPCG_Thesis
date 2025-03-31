@@ -90,7 +90,7 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
     local_int_t num_cols = A.get_num_cols();
     int num_stripes = A.get_num_stripes();
     local_int_t * j_min_i = A.get_j_min_i_d();
-    DataType * striped_A_d = A.get_values_d();
+    T * striped_A_d = A.get_values_d();
 
     assert(diag_offset >= 0);
 

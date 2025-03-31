@@ -65,7 +65,7 @@ __global__ void striped_coloring_SymGS_backward_kernel(
     DataType * x, DataType * y
 ){
 
-     int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
     int warp_id = tid / WARP_SIZE;
     int lane_id = tid % WARP_SIZE;
     int num_warps = blockDim.x * gridDim.x / WARP_SIZE;
@@ -116,7 +116,7 @@ void striped_coloring_Implementation<T>::striped_coloring_computeSymGS(
     striped_Matrix<T> & A,
     T * x_d, T * y_d // the vectors x and y are already on the device
 ){
-    int diag_offset = A.get_diag_index();
+    local_int_t diag_offset = A.get_diag_index();
 
     local_int_t num_rows = A.get_num_rows();
     local_int_t num_cols = A.get_num_cols();

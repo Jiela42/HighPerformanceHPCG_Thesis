@@ -9,11 +9,11 @@ int next_smaller_power_of_two(int n);
 
 
 __global__ void compute_restriction_kernel(
-    int num_rows,
+    local_int_t num_rows,
     DataType * Axf,
     DataType * rf,
     DataType * rc,
-    local_int_t * f2c_operator
+    local_int_t* f2c_operator
 );
 
 __global__ void compute_restriction_multi_GPU_kernel(
@@ -21,22 +21,22 @@ __global__ void compute_restriction_multi_GPU_kernel(
     DataType * Axf,
     DataType * rf,
     DataType * rc,
-    int *f2c_operator,
+    local_int_t *f2c_operator,
     int nx, int ny, int nz
 );
 
 __global__ void compute_prolongation_kernel(
     local_int_t num_rows,
-    double * xc,
-    double * x,
+    DataType * xc,
+    DataType * x,
     local_int_t * c2f_operator
 );
 
 __global__ void compute_prolongation_multi_GPU_kernel(
-    int num_rows,
+    local_int_t num_rows,
     DataType * xc,
     DataType * xf,
-    int * f2c_operator,
+    local_int_t * f2c_operator,
     int nx, int ny, int nz
 );
 
@@ -67,9 +67,9 @@ double relative_residual_norm_for_SymGS(
 
 void L2_norm_for_Device_Vector(
     cudaStream_t stream,
-    int num_rows,
-    DataType * y_d,
-    DataType * L2_norm
+    local_int_t num_rows,
+    double * y_d,
+    double * L2_norm
 );
 
 

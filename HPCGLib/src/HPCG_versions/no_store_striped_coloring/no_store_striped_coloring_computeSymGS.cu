@@ -73,7 +73,7 @@ void no_store_striped_coloring_Implementation<T>::no_store_striped_coloring_comp
     local_int_t num_cols = A.get_num_cols();
     int num_stripes = A.get_num_stripes();
     local_int_t * j_min_i = A.get_j_min_i_d();
-    DataType * striped_A_d = A.get_values_d();
+    T * striped_A_d = A.get_values_d();
 
     int diag_offset = A.get_diag_index();
 

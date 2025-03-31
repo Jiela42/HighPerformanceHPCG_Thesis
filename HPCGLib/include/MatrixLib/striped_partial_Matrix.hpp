@@ -54,7 +54,7 @@ class striped_partial_Matrix {
         // T get_element(int i, int j) const;
         //std::vector <int>& get_j_min_i();
         //std::vector <T>& get_values();
-        int * get_j_min_i_d();
+        local_int_t * get_j_min_i_d();
         T * get_values_d();
         //void set_num_rows(int num_rows);
         //void print_COR_Format();
@@ -78,14 +78,14 @@ class striped_partial_Matrix {
         local_int_t num_rows;
         local_int_t num_cols;
         int num_stripes;
-        std::vector<int> j_min_i;
+        std::vector<local_int_t> j_min_i;
         // std::vector<T> values;
         // MatrixType matrix_type;
         // friend void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped(striped_Matrix<T> & A);
         // void striped_Matrix_from_sparse_CSR(sparse_CSR_Matrix<T> & A);
         // void striped_3D27P_Matrix_from_CSR_onCPU(sparse_CSR_Matrix<T> & A);
         // void striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T> & A);
-        int *j_min_i_d;
+        local_int_t *j_min_i_d;
         T *values_d;
         // int* color_pointer_d;
         // int* color_sorted_rows_d;

@@ -29,7 +29,7 @@ striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
 
     //this->j_min_i.clear();
     //this->values.clear();
-    this->j_min_i = std::vector<int>(this->num_stripes, 0);
+    this->j_min_i = std::vector<local_int_t>(this->num_stripes, 0);
     //this->j_min_i_d = nullptr;
     //this->values_d = nullptr;
 
@@ -72,8 +72,8 @@ striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
         }
     }
 
-    CHECK_CUDA(cudaMalloc(&this->j_min_i_d, this->num_stripes * sizeof(int)));
-    CHECK_CUDA(cudaMemcpy(this->j_min_i_d, this->j_min_i.data(), this->num_stripes * sizeof(int), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMalloc(&this->j_min_i_d, this->num_stripes * sizeof(local_int_t)));
+    CHECK_CUDA(cudaMemcpy(this->j_min_i_d, this->j_min_i.data(), this->num_stripes * sizeof(local_int_t), cudaMemcpyHostToDevice));
 }
 
 template <typename T>
@@ -163,12 +163,17 @@ int striped_partial_Matrix<T>::get_diag_index() const{
 }
 
 template <typename T>
+int striped_partial_Matrix<T>::get_num_MG_pre_smooth_steps() const{
+    return this->num_MG_pre_smooth_steps;
+}
+
+template <typename T>
 int striped_partial_Matrix<T>::get_num_MG_post_smooth_steps() const{
     return this->num_MG_post_smooth_steps;
 }
 
 template <typename T>
-int * striped_partial_Matrix<T>::get_j_min_i_d(){
+local_int_t * striped_partial_Matrix<T>::get_j_min_i_d(){
     return this->j_min_i_d;
 }
 
@@ -195,7 +200,7 @@ void striped_partial_Matrix<T>::generate_f2c_operator_onGPU() {
     // set them to zero
     CHECK_CUDA(cudaMemset(this->f2c_op_d, 0, fine_n_rows * sizeof(int)));
 
-    generate_partialf2c_operator(x, y, z, x*2, y*2, z*2, f2c_op_d);
+    generate_partialf2c_operator(x, y, z, x*2, y*2, z*2, this->f2c_op_d);
 }
 
 template <typename T>
@@ -239,4 +244,4 @@ void striped_partial_Matrix<T>::generateMatrix_onGPU(){
 }
 
 // explicit template instantiation
-template class striped_partial_Matrix<double>;
+template class striped_partial_Matrix<DataType>;

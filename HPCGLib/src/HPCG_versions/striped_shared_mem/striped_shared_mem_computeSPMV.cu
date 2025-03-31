@@ -35,8 +35,11 @@ __device__ void test_val_cooperatively(DataType * array, local_int_t num_element
 }
 
 __global__ void striped_shared_memory_SPMV_kernel(
-        local_int_t rows_per_sm, local_int_t num_x_elem, local_int_t num_consecutive_memory_regions,
+        local_int_t rows_per_sm, local_int_t num_x_elem, int num_consecutive_memory_regions,
         int* min_j, int* max_j,
+        DataType* striped_A,
+        local_int_t num_rows, int num_stripes, local_int_t * j_min_i,
+        DataType* x, DataType* y
         DataType* striped_A,
         local_int_t num_rows, int num_stripes, local_int_t * j_min_i,
         DataType* x, DataType* y

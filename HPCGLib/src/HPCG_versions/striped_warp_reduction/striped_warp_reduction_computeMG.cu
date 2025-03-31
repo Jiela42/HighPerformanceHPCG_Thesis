@@ -26,7 +26,7 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeMG(
         this->compute_SPMV(A, x_d, Axf_d);
         
         int num_threads = 1024;
-        int num_blocks = std::max(num_coarse_rows / num_threads, 1);
+        local_int_t num_blocks = std::max(num_coarse_rows / num_threads, (local_int_t)1);
         
         compute_restriction_kernel<<<num_blocks, num_threads>>>(
             num_coarse_rows,

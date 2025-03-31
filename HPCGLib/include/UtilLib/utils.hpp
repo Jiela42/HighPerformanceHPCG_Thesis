@@ -6,7 +6,7 @@
 #include <cmath>
 // #include "MatrixLib/sparse_CSR_Matrix.hpp"
 typedef long local_int_t;
-typedef int global_int_t;
+typedef long global_int_t;
 
 using DataType = double;
 
@@ -15,8 +15,8 @@ template <typename T>
 class sparse_CSR_Matrix;
 
 // Define the local and global integer types
-typedef long local_int_t;
-typedef int global_int_t;
+//typedef long local_int_t;
+//typedef int global_int_t;
 
 using DataType = double;
 

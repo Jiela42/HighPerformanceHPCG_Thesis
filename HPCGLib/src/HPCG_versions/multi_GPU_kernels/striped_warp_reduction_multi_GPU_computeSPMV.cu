@@ -3,7 +3,7 @@
 #include <cuda_runtime.h>
 
 __inline__ __device__ global_int_t local_i_to_global_i(
-    int i, 
+    local_int_t i, 
     int nx, int ny, int nz, 
     global_int_t gnx, global_int_t gny, global_int_t gnz,
     global_int_t gi0
@@ -18,7 +18,7 @@ __inline__ __device__ global_int_t local_i_to_global_i(
 }
 
 __inline__ __device__ local_int_t global_i_to_halo_i(
-    int i,
+    global_int_t i,
     int nx, int ny, int nz,
     global_int_t gnx, global_int_t gny, global_int_t gnz,
     global_int_t gi0,
@@ -39,8 +39,8 @@ __inline__ __device__ local_int_t global_i_to_halo_i(
 }
 
 __global__ void striped_warp_reduction_multi_GPU_SPMV_kernel(
-        double* striped_A,
-        int num_rows, int num_stripes, int * j_min_i,
+        DataType* striped_A,
+        local_int_t num_rows, int num_stripes, local_int_t * j_min_i,
         double* x, double* y, int nx, int ny, int nz, 
         global_int_t gnx, global_int_t gny, global_int_t gnz, 
         global_int_t gi0,
@@ -53,17 +53,17 @@ __global__ void striped_warp_reduction_multi_GPU_SPMV_kernel(
     int lane = threadIdx.x % cooperation_number;
 
     // every thread computes one or more rows of the matrix
-    for (int i = tid/cooperation_number; i < num_rows; i += (blockDim.x * gridDim.x)/cooperation_number) {
+    for (local_int_t i = tid/cooperation_number; i < num_rows; i += (blockDim.x * gridDim.x)/cooperation_number) {
         // compute the matrix-vector product for the ith row
         // convert i to global index
         global_int_t gi = local_i_to_global_i(i, nx, ny, nz, gnx, gny, gnz, gi0);
         double sum_i = 0;
         for (int stripe = lane; stripe < num_stripes; stripe += cooperation_number) {
-            int gj = gi + j_min_i[stripe]; //use the global index gi to find global index gj
+            local_int_t gj = gi + j_min_i[stripe]; //use the global index gi to find global index gj
             if (gj >= 0 && gj < gnx * gny * gnz) {
                 //convert gj to halo coordinate hj which is the memory location of gj in the halo struct
                 local_int_t hj =  global_i_to_halo_i(gj, nx, ny, nz, gnx, gny, gnz, gi0, px, py, pz);
-                int current_row = i * num_stripes;
+                local_int_t current_row = i * num_stripes;
                 sum_i += striped_A[current_row + stripe] * x[hj];
             }
         }
@@ -92,7 +92,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
 
         //std::cout << "Rank="<< problem->rank <<"\t striped_warp_reduction_computeSPMV" << std::endl;
 
-        int num_rows = A.get_num_rows();
+        local_int_t num_rows = A.get_num_rows();
         int num_stripes = A.get_num_stripes();
         //int * j_min_i = A.get_j_min_i_d();
         T * striped_A_d = A.get_values_d();

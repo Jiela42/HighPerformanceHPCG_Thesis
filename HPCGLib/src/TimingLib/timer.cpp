@@ -26,7 +26,7 @@ Timer::Timer(
         int nx,
         int ny,
         int nz,
-        int nnz,
+        local_int_t nnz,
         std::string ault_node,
         std::string matrix_type,
         std::string version_name,
