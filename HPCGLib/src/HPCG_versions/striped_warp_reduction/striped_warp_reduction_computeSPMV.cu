@@ -70,4 +70,4 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeSPM
     }
 
 // explicit template instantiation
-template class striped_warp_reduction_Implementation<double>;
+template class striped_warp_reduction_Implementation<DataType>;

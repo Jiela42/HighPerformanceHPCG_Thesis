@@ -12,7 +12,7 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeMG(
     CHECK_CUDA(cudaMemset(x_d, 0, A.get_num_rows() * sizeof(T)));
 
     if(A.get_coarse_Matrix() != nullptr){ // go to coarser level if it exists
-        int num_coarse_rows = A.get_coarse_Matrix()->get_num_rows();
+        local_int_t num_coarse_rows = A.get_coarse_Matrix()->get_num_rows();
         int num_presmoother_steps = A.get_num_MG_pre_smooth_steps();
 
         for(int i = 0; i < num_presmoother_steps; i++){
@@ -61,4 +61,4 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeMG(
 }
 
 // template instanciation
-template class striped_warp_reduction_Implementation<double>;
+template class striped_warp_reduction_Implementation<DataType>;

@@ -13,7 +13,7 @@ public:
         int nx,
         int ny,
         int nz,
-        int nnz,
+        local_int_t nnz,
         std::string ault_node,
         std::string matrix_type,
         std::string version_name,
@@ -44,7 +44,8 @@ protected:
     std::string base_filename;
     std::string base_fileheader;
     std::string folder_path;
-    int nx, ny, nz, nnz;
+    int nx, ny, nz;
+    local_int_t nnz;
     std::string ault_node;
     std::string matrix_type;
     std::string version_name;

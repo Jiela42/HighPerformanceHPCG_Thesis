@@ -76,7 +76,7 @@ class HPCG_functions {
             T * b_d, T * x_d,
             int & n_iters, T& normr, T& normr0
         ) {
-            striped_Matrix<double>* striped_A = A.get_Striped();
+            striped_Matrix<T>* striped_A = A.get_Striped();
             compute_CG(*striped_A, b_d, x_d, n_iters, normr, normr0);
         }
         
@@ -136,7 +136,7 @@ class HPCG_functions {
     }
 
     double L2_norm_for_SymGS(
-        striped_Matrix<double> & A,
+        striped_Matrix<T> & A,
         double * x,
         double * y
     ){
@@ -145,11 +145,11 @@ class HPCG_functions {
         // Allocate memory for Ax on the device
         double *Ax;
         double *result;
-        CHECK_CUDA(cudaMalloc(&Ax, num_rows * sizeof(double)));
-        CHECK_CUDA(cudaMalloc(&result, 1 * sizeof(double)));
+        CHECK_CUDA(cudaMalloc(&Ax, num_rows * sizeof(T)));
+        CHECK_CUDA(cudaMalloc(&result, 1 * sizeof(T)));
     
-        CHECK_CUDA(cudaMemset(Ax, 0, num_rows * sizeof(double)));
-        CHECK_CUDA(cudaMemset(result, 0, 1 * sizeof(double)));
+        CHECK_CUDA(cudaMemset(Ax, 0, num_rows * sizeof(T)));
+        CHECK_CUDA(cudaMemset(result, 0, 1 * sizeof(T)));
     
         // Perform matrix-vector multiplication: Ax = A * x
     
@@ -158,15 +158,15 @@ class HPCG_functions {
         compute_Dot(A, Ax, Ax, result);
     
         // copy result over
-        double result_h;
-        CHECK_CUDA(cudaMemcpy(&result_h, result, 1 * sizeof(double), cudaMemcpyDeviceToHost));
+        T result_h;
+        CHECK_CUDA(cudaMemcpy(&result_h, result, 1 * sizeof(T), cudaMemcpyDeviceToHost));
     
     
         // Free device memory
         CHECK_CUDA(cudaFree(Ax));
         CHECK_CUDA(cudaFree(result));
     
-        return std::sqrt(result_h);
+        return static_cast<double>(std::sqrt(result_h));
     }
 
         double getSymGS_rrNorm(int nx, int ny, int nz){

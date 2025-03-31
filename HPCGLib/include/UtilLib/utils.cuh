@@ -42,9 +42,9 @@ __global__ void compute_prolongation_multi_GPU_kernel(
 
 
 double L2_norm_for_SymGS(
-    sparse_CSR_Matrix<double> & A,
-    double * x,
-    double * y
+    sparse_CSR_Matrix<DataType> & A,
+    DataType * x,
+    DataType * y
 );
 
 // double L2_norm_for_SymGS(
@@ -54,15 +54,15 @@ double L2_norm_for_SymGS(
 // );
 
 double relative_residual_norm_for_SymGS(
-    sparse_CSR_Matrix<double> & A,
-    double * x,
-    double * y
+    sparse_CSR_Matrix<DataType> & A,
+    DataType * x,
+    DataType * y
 );
 
 double relative_residual_norm_for_SymGS(
-    striped_Matrix<double> & A,
-    double * x,
-    double * y
+    striped_Matrix<DataType> & A,
+    DataType * x,
+    DataType * y
 );
 
 void L2_norm_for_Device_Vector(

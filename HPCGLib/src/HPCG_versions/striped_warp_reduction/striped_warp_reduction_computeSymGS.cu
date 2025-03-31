@@ -23,8 +23,8 @@ __inline__ __device__ void loop_body(int lane, local_int_t i, local_int_t num_co
 
     __syncthreads();
     if (lane == 0){
-        double diag = shared_diag[0];
-        double sum = diag * x[i] + y[i] + my_sum;
+        DataType diag = shared_diag[0];
+        DataType sum = diag * x[i] + y[i] + my_sum;
         x[i] = sum / diag;           
     }
     __syncthreads();
@@ -35,7 +35,7 @@ __global__ void striped_warp_reduction_SymGS_kernel(
     int num_stripes,
     local_int_t * j_min_i,
     DataType * striped_A,
-    DataType * x, double * y
+    DataType * x, DataType * y
 ){
     // note that here x is the result vector and y is the input vector
 

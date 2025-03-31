@@ -35,84 +35,84 @@ bool run_all_util_tests(int nx, int ny, int nz);
 // MatrixLib testing functions
 bool run_all_matrixLib_tests(int nx, int ny, int nz);
 
-bool read_save_test(sparse_CSR_Matrix<double>& A, std::string info);
-bool read_save_test(striped_Matrix<double>& A, std::string info);
+bool read_save_test(sparse_CSR_Matrix<DataType>& A, std::string info);
+bool read_save_test(striped_Matrix<DataType>& A, std::string info);
 
 
 // abstract test functions from HPCG_functions
 bool test_CG(
-    HPCG_functions<double>& implementation
+    HPCG_functions<DataType>& implementation
 );
 
 bool test_MG(
-    HPCG_functions<double>& implementation
+    HPCG_functions<DataType>& implementation
 );
 
 // bool test_CG(
-//     HPCG_functions<double>& uut,
-//     striped_Matrix<double> & A,
-//     double * x_d, double * y_d
+//     HPCG_functions<DataType>& uut,
+//     striped_Matrix<DataType> & A,
+//     DataType * x_d, DataType * y_d
 // );
 
 bool test_SPMV(
-    HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
-    sparse_CSR_Matrix<double> & A,
-    double * x_d // the vectors x is already on the device
+    HPCG_functions<DataType>& baseline, HPCG_functions<DataType>& uut,
+    sparse_CSR_Matrix<DataType> & A,
+    DataType * x_d // the vectors x is already on the device
     );
 
 // this one supports testing a striped matrix i.e. the naiveStriped implementation
 bool test_SPMV(
-    HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
-    striped_Matrix<double> & A,        
-    double * x_d // the vectors x is already on the device
+    HPCG_functions<DataType>& baseline, HPCG_functions<DataType>& uut,
+    striped_Matrix<DataType> & A,        
+    DataType * x_d // the vectors x is already on the device
         
 );
 
 bool test_Dot(
-    HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
-    striped_Matrix<double> & A, // we pass A for the metadata
-    double * x_d, double * y_d
+    HPCG_functions<DataType>& baseline, HPCG_functions<DataType>& uut,
+    striped_Matrix<DataType> & A, // we pass A for the metadata
+    DataType * x_d, DataType * y_d
 );
 
 bool test_Dot(
-    HPCG_functions<double>& uut,
-    sparse_CSR_Matrix<double> & A,
-    double * x_d, double * y_d // the vectors x, y and result are already on the device
+    HPCG_functions<DataType>& uut,
+    sparse_CSR_Matrix<DataType> & A,
+    DataType * x_d, DataType * y_d // the vectors x, y and result are already on the device
 );
 
 bool test_Dot(
-    HPCG_functions<double>&uut,
+    HPCG_functions<DataType>&uut,
     int nx, int ny, int nz
 );
 
 bool test_WAXPBY(
-    HPCG_functions<double>& uut,
-    striped_Matrix<double> & A,
-    double * x_d, double * y_d
+    HPCG_functions<DataType>& uut,
+    striped_Matrix<DataType> & A,
+    DataType * x_d, DataType * y_d
 );
 
 bool test_WAXPBY(
-    HPCG_functions<double>& uut,
-    striped_Matrix<double> & A,
-    double * x_d, double * y_d,
-    double a, double b
+    HPCG_functions<DataType>& uut,
+    striped_Matrix<DataType> & A,
+    DataType * x_d, DataType * y_d,
+    DataType a, DataType b
 );
 
 bool test_SymGS(
-    HPCG_functions<double>& uut,
-    sparse_CSR_Matrix<double> & A
+    HPCG_functions<DataType>& uut,
+    sparse_CSR_Matrix<DataType> & A
 );
 bool test_SymGS(
-    HPCG_functions<double>& uut, HPCG_functions<double>& baseline,
-    sparse_CSR_Matrix<double> & A,
-    double * x_d, double * y_d // the vectors x and y are already on the device
+    HPCG_functions<DataType>& uut, HPCG_functions<DataType>& baseline,
+    sparse_CSR_Matrix<DataType> & A,
+    DataType * x_d, DataType * y_d // the vectors x and y are already on the device
 );
 
 bool test_SymGS(
-    HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
-    striped_Matrix<double> & striped_A,
+    HPCG_functions<DataType>& baseline, HPCG_functions<DataType>& uut,
+    striped_Matrix<DataType> & striped_A,
         
-    double * y_d // the vectors x is already on the device
+    DataType * y_d // the vectors x is already on the device
 );
 
 // functions that call the abstract tests in order to test full versions

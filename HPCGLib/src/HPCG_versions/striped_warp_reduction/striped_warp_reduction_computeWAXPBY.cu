@@ -4,7 +4,7 @@
 #include "UtilLib/utils.cuh"
 
 __global__ void scalar_vector_mult_kernel(
-    int num_rows,
+    local_int_t num_rows,
     double alpha,
     double * x_d,
     double * w_d
@@ -12,14 +12,14 @@ __global__ void scalar_vector_mult_kernel(
 
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-    for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x){
+    for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x){
         w_d[row] = alpha * x_d[row];
     }
 }
 
 
 __global__ void waxpb1y_kernel(
-    int num_rows,
+    local_int_t num_rows,
     double alpha,
     double * x_d,
     double * y_d,
@@ -28,13 +28,13 @@ __global__ void waxpb1y_kernel(
 
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-    for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x){
+    for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x){
         w_d[row] = alpha * x_d[row] + y_d[row];
     }
 }
 
 __global__ void w1xpb1y_kernel(
-    int num_rows,
+    local_int_t num_rows,
     double * x_d,
     double * y_d,
     double * w_d
@@ -42,13 +42,13 @@ __global__ void w1xpb1y_kernel(
 
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-    for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x){
+    for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x){
         w_d[row] = x_d[row] + y_d[row];
     }
 }
 
 __global__ void waxpby_kernel(
-    int num_rows,
+    local_int_t num_rows,
     double alpha,
     double * x_d,
     double beta,
@@ -58,7 +58,7 @@ __global__ void waxpby_kernel(
 
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-    for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x){
+    for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x){
         w_d[row] = alpha * x_d[row] + beta * y_d[row];
     }
 }
@@ -72,7 +72,7 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeWAX
     T alpha, T beta
     ){
     
-    int num_rows = A.get_num_rows();
+    local_int_t num_rows = A.get_num_rows();
     int num_threads = 1024;
     int num_blocks = std::min(MAX_NUM_BLOCKS, ceiling_division(num_rows, num_threads));
 

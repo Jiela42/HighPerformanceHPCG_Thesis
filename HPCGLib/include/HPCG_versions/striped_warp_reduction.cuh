@@ -152,20 +152,20 @@ private:
 
 // we expose the kernel in case we need to call it from another method
 __global__ void striped_warp_reduction_SPMV_kernel(
-        double* striped_A,
-        int num_rows, int num_strips, int * j_min_i,
-        double* x, double* y
+        DataType* striped_A,
+        local_int_t num_rows, int num_strips, local_int_t * j_min_i,
+        DataType* x, DataType* y
     );
 __global__ void striped_warp_reduction_dot_kernel(
-    int num_rows,
-    double * x_d,
-    double * y_d,
-    double * result_d
+    local_int_t num_rows,
+    DataType * x_d,
+    DataType * y_d,
+    DataType * result_d
 );
 __global__ void reduce_sums(
-    double * intermediate_sums_d,
+    DataType * intermediate_sums_d,
     int num_inter_results,
-    double * result_d
+    DataType * result_d
 );
 
 
