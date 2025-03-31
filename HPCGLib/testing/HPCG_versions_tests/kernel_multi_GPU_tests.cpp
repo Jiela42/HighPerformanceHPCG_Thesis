@@ -771,25 +771,25 @@ void run_multi_GPU_tests(int argc, char *argv[], striped_multi_GPU_Implementatio
 
     
     //test matrix distribution
-    //test_matrix_distribution(A_local.get_num_stripes(), A_global_striped->get_num_stripes(), A_local.get_num_rows(), A_global_striped->get_num_rows(), A_local_h, A_global_h, &problem);
+    test_matrix_distribution(A_local.get_num_stripes(), A_global_striped->get_num_stripes(), A_local.get_num_rows(), A_global_striped->get_num_rows(), A_local_h, A_global_h, &problem);
     
     // test SPMV
-    //test_SPMV(implementation_multi_GPU, &A_local, A_global_striped, &halo_p_d, &halo_Ap_d, &problem);
+    test_SPMV(implementation_multi_GPU, &A_local, A_global_striped, &halo_p_d, &halo_Ap_d, &problem);
 
     // test SymGS
-    //test_SymGS(implementation_multi_GPU, &A_local, A_global_striped, &halo_p_d, &halo_Ap_d, &problem);
+    test_SymGS(implementation_multi_GPU, &A_local, A_global_striped, &halo_p_d, &halo_Ap_d, &problem);
 
     //test WAXPBY
-    //test_WAXPBY(implementation_multi_GPU, A_global_striped, &halo_w_d, &halo_x_d, &halo_y_d, &problem);
+    test_WAXPBY(implementation_multi_GPU, A_global_striped, &halo_w_d, &halo_x_d, &halo_y_d, &problem);
 
     //test Dot
-    //test_Dot(implementation_multi_GPU, A_global_striped, &halo_x_d, &halo_y_d, &problem);
+    test_Dot(implementation_multi_GPU, A_global_striped, &halo_x_d, &halo_y_d, &problem);
     
     //test CG
-    //test_CG(implementation_multi_GPU, &A_local, A_global_striped, &halo_b_d, &halo_x_d, &problem);
+    test_CG(implementation_multi_GPU, &A_local, A_global_striped, &halo_b_d, &halo_x_d, &problem);
 
     //test MG
-    //test_MG(implementation_multi_GPU, &A_local, A_global_striped, &halo_b_d, &halo_x_d, &problem);
+    test_MG(implementation_multi_GPU, &A_local, A_global_striped, &halo_b_d, &halo_x_d, &problem);
   
 
     // test partial matrix

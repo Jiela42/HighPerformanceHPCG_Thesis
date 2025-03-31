@@ -3,7 +3,7 @@
 #include "UtilLib/utils.cuh"
 
 __inline__ __device__ global_int_t local_i_to_global_i(
-    int i, 
+    local_int_t i, 
     int nx, int ny, int nz, 
     global_int_t gnx, global_int_t gny, global_int_t gnz,
     global_int_t gi0
@@ -16,7 +16,7 @@ __inline__ __device__ global_int_t local_i_to_global_i(
 }
 
 __inline__ __device__ local_int_t global_i_to_halo_i(
-    int i,
+    local_int_t i,
     int nx, int ny, int nz,
     global_int_t gnx, global_int_t gny, global_int_t gnz,
     global_int_t gi0,
@@ -36,10 +36,10 @@ __global__ void striped_box_coloring_half_SymGS_kernel(
     int cooperation_number,
     int color, int bx, int by, int bz,
     int nx, int ny, int nz,
-    int num_rows, int num_cols,
+    local_int_t num_rows, local_int_t num_cols,
     int num_stripes, int diag_offset,
-    int * j_min_i,
-    double * striped_A,
+    local_int_t * j_min_i,
+    DataType * striped_A,
     DataType * x, DataType * y,
     global_int_t gnx, global_int_t gny, global_int_t gnz,
     global_int_t gi0,
@@ -143,8 +143,8 @@ void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_compute
     
     int diag_offset = A.get_diag_index();
 
-    int num_rows = A.get_num_rows();
-    int num_cols = A.get_num_cols();
+    local_int_t num_rows = A.get_num_rows();
+    local_int_t num_cols = A.get_num_cols();
     int num_stripes = A.get_num_stripes();
     DataType * striped_A_d = A.get_values_d();
 

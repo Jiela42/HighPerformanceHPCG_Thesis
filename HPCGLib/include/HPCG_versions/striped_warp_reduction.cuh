@@ -164,7 +164,7 @@ __global__ void striped_warp_reduction_dot_kernel(
 );
 __global__ void reduce_sums(
     DataType * intermediate_sums_d,
-    int num_inter_results,
+    local_int_t num_inter_results,
     DataType * result_d
 );
 

@@ -4,7 +4,7 @@
 #include "UtilLib/utils.cuh"
 
 __inline__ __device__ global_int_t local_i_to_halo_i(
-    int i, 
+    local_int_t i, 
     int nx, int ny, int nz,
     local_int_t dimx, local_int_t dimy
     )
@@ -19,7 +19,7 @@ __inline__ __device__ global_int_t local_i_to_halo_i(
 
 
 __global__ void scalar_vector_multi_GPU_kernel(
-    int num_rows,
+    local_int_t num_rows,
     DataType alpha,
     DataType * x_d,
     DataType * w_d,
@@ -29,7 +29,7 @@ __global__ void scalar_vector_multi_GPU_kernel(
 
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-    for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x){
+    for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x){
         local_int_t hi = local_i_to_halo_i(row, nx, ny, nz, dimx, dimy);
         w_d[hi] = alpha * x_d[hi];
     }
@@ -37,7 +37,7 @@ __global__ void scalar_vector_multi_GPU_kernel(
 
 
 __global__ void waxpb1y_multi_GPU_kernel(
-    int num_rows,
+    local_int_t num_rows,
     DataType alpha,
     DataType * x_d,
     DataType * y_d,
@@ -48,14 +48,14 @@ __global__ void waxpb1y_multi_GPU_kernel(
 
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-    for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x){
+    for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x){
         local_int_t hi = local_i_to_halo_i(row, nx, ny, nz, dimx, dimy);
         w_d[hi] = alpha * x_d[hi] + y_d[hi];
     }
 }
 
 __global__ void w1xpb1y_multi_GPU_kernel(
-    int num_rows,
+    local_int_t num_rows,
     DataType * x_d,
     DataType * y_d,
     DataType * w_d,
@@ -65,14 +65,14 @@ __global__ void w1xpb1y_multi_GPU_kernel(
 
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-    for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x){
+    for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x){
         local_int_t hi = local_i_to_halo_i(row, nx, ny, nz, dimx, dimy);
         w_d[hi] = x_d[hi] + y_d[hi];
     }
 }
 
 __global__ void waxpby_multi_GPU_kernel(
-    int num_rows,
+    local_int_t num_rows,
     DataType alpha,
     DataType * x_d,
     DataType beta,
@@ -84,7 +84,7 @@ __global__ void waxpby_multi_GPU_kernel(
 
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-    for(int row = tid; row < num_rows; row += blockDim.x * gridDim.x){
+    for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x){
         local_int_t hi = local_i_to_halo_i(row, nx, ny, nz, dimx, dimy);
         w_d[hi] = alpha * x_d[hi] + beta * y_d[hi];
     }
@@ -115,9 +115,9 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     int ny = x_d->ny;
     int nz = x_d->nz;
     
-    int num_rows = problem->nx * problem->ny * problem->nz;
+    local_int_t num_rows = problem->nx * problem->ny * problem->nz;
     int num_threads = 1024;
-    int num_blocks = std::min(MAX_NUM_BLOCKS, ceiling_division(num_rows, num_threads));
+    int num_blocks = std::min(MAX_NUM_BLOCKS, (int) ceiling_division(num_rows, num_threads));
 
     if(alpha == 0.0 && beta == 0.0){
         CHECK_CUDA(cudaMemset(w_d->x_d, 0, dimx * dimy * dimz * sizeof(T)));

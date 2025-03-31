@@ -5,7 +5,7 @@
 #include <mpi.h>
 
 __inline__ __device__ global_int_t local_i_to_halo_i(
-    int i, 
+    local_int_t i, 
     int nx, int ny, int nz,
     local_int_t dimx, local_int_t dimy
     )
@@ -18,7 +18,7 @@ __inline__ __device__ global_int_t local_i_to_halo_i(
         return dimx*(dimy+1) + 1 + (i % nx) + dimx*((i % (nx*ny)) / nx) + (dimx*dimy)*(i / (nx*ny));
 }
 
-__global__ void reduce_sums_multi_GPU(DataType * array, int num_elements, DataType * result_d){
+__global__ void reduce_sums_multi_GPU(DataType * array, local_int_t num_elements, DataType * result_d){
 
     __shared__ DataType intermediate_sums[32];
     
@@ -28,7 +28,7 @@ __global__ void reduce_sums_multi_GPU(DataType * array, int num_elements, DataTy
 
     DataType my_sum = 0.0;
 
-    for (int i = tid; i < num_elements; i += blockDim.x * gridDim.x){
+    for (local_int_t i = tid; i < num_elements; i += blockDim.x * gridDim.x){
         my_sum += array[i];
     }
 
@@ -59,7 +59,7 @@ __global__ void reduce_sums_multi_GPU(DataType * array, int num_elements, DataTy
 }
 
 __global__ void striped_warp_reduction_multi_GPU_dot_kernel(
-    int num_rows,
+    local_int_t num_rows,
     DataType * x_d,
     DataType * y_d,
     DataType * result_d,
@@ -77,7 +77,7 @@ __global__ void striped_warp_reduction_multi_GPU_dot_kernel(
     // first we reduce as much as we can without cooperation
     DataType my_sum = 0.0;
 
-    for (int i = tid; i < num_rows; i += blockDim.x * gridDim.x){
+    for (local_int_t i = tid; i < num_rows; i += blockDim.x * gridDim.x){
         // if (y_d[i] != 0.0){
         //     printf("y_d[%d] = %f\n", i, y_d[i]);
         // }
@@ -166,11 +166,11 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     // std::cout << "Running dot product with striped warp reduction" << std::endl;
     // we compute z = xy
 
-    int num_rows = x_d->nx * x_d->ny * x_d->nz;
+    local_int_t num_rows = x_d->nx * x_d->ny * x_d->nz;
     int num_threads = 1024;
     int max_threads = NUM_PHYSICAL_CORES;
     int max_blocks = 4 * max_threads / num_threads + 1;
-    int num_blocks = std::min(num_rows/(num_threads*coop_num), max_blocks);
+    int num_blocks = std::min((int) (num_rows/(num_threads*coop_num)), max_blocks);
     // we need at least one block
     num_blocks = max(num_blocks, 1);
 
@@ -203,7 +203,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
         // std::cout << "we enter the loop" << std::endl;
         // std::cout << "num_inter_results = " << num_inter_results << std::endl;
         int num_threads = 1024;
-        num_blocks = std::min(num_inter_results/(num_threads*coop_num), max_blocks);
+        num_blocks = std::min((int)num_inter_results/(num_threads*coop_num), max_blocks);
         // we need at least one block
         num_blocks = max(num_blocks, 1);
 
