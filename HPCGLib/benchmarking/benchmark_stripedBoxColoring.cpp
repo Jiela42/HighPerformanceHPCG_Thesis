@@ -25,7 +25,7 @@ void run_striped_box_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std:
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(DataType), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
 
-    for(int i = 3; i <= 3; i ++){
+    for(int i = 2; i <= 3; i ++){
         
         implementation.bx = i;
         implementation.by = i;
@@ -34,8 +34,8 @@ void run_striped_box_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std:
         std::string box_dims = std::to_string(implementation.bx) + "x" + std::to_string(implementation.by) + "x" + std::to_string(implementation.bz);
         std::string coop_num_string = std::to_string(implementation.SymGS_cooperation_number);
         
-        // std::string implementation_name = implementation.version_name + " (coloringBox " + box_dims + ")" + " (coop_num " + coop_num_string + ")";
-        std::string implementation_name = implementation.version_name;
+        std::string implementation_name = implementation.version_name + " (coloringBox " + box_dims + ")";
+        // std::string implementation_name = implementation.version_name;
         std::string additional_params = implementation.additional_parameters;
         std::string ault_node = implementation.ault_nodes;
         CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);
@@ -97,18 +97,6 @@ void run_striped_box_coloring_3d27p_CG_benchmark(int nx, int ny, int nz, std::st
     std::vector<DataType> a = generate_random_vector(num_rows, RANDOM_SEED);
     std::vector<DataType> b = generate_random_vector(num_rows, RANDOM_SEED);
 
-
-    // if we want to measure the time it takes CG, we now need to delete the data between runs (heul heul)
-
-    std::string implementation_name = implementation.version_name;
-    if(include_conversion){
-        implementation_name += " (including conversion to Striped)";
-    }
-
-    std::string additional_params = implementation.additional_parameters;
-    std::string ault_node = implementation.ault_nodes;
-    CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);
-
     DataType * x_d;
     DataType * y_d;
 
@@ -120,45 +108,70 @@ void run_striped_box_coloring_3d27p_CG_benchmark(int nx, int ny, int nz, std::st
 
     int num_iteration = include_conversion ? 10: 1;
 
-    for(int i = 0; i< implementation.getNumberOfIterations(); i++){
-        
-        if(include_conversion){
-            std::cout << "we include the conversion to striped in this run" << std::endl;
-            bench_CG(
-                implementation,
-                *timer,
-                A,
-                x_d, y_d
-            );
-            // delete A & re-generate it
-            A.~sparse_CSR_Matrix();
-            new (&A) sparse_CSR_Matrix<DataType>();
-            A.generateMatrix_onGPU(nx, ny, nz);
+    // if we want to measure the time it takes CG, we now need to delete the data between runs (heul heul)
 
-            if(nx % 8 == 0 && ny % 8 == 0 && nz % 8 == 0 && nx / 8 > 2 && ny / 8 > 2 && nz / 8 > 2){
-                // initialize the MG data
-                sparse_CSR_Matrix <DataType>* current_matrix = &A;
-                for(int i = 0; i < 3; i++){
-                    current_matrix->initialize_coarse_Matrix();
-                    current_matrix = current_matrix->get_coarse_Matrix();
-                }
-            }
-        } else {
-            // get the striped version and run that
-            bench_CG(
-                implementation,
-                *timer,
-                striped_A,
-                x_d, y_d
-            );
-        }
+    std::string implementation_name = implementation.version_name;
+    if(include_conversion){
+        implementation_name += " (including conversion to Striped)";
     }
+
+    for(int i = 2; i <= 3; i++){
+        implementation.bx = i;
+        implementation.by = i;
+        implementation.bz = i;
+
+        std::string box_dims = std::to_string(implementation.bx) + "x" + std::to_string(implementation.by) + "x" + std::to_string(implementation.bz);
+        std::string coop_num_string = std::to_string(implementation.SymGS_cooperation_number);
+        
+        implementation_name += " (coloringBox " + box_dims + ")";
+        // std::cout << "Running the CG benchmark for the implementation: " << implementation_name << std::endl;
+
+        std::string additional_params = implementation.additional_parameters;
+        std::string ault_node = implementation.ault_nodes;
+        CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);
+    
+    
+        for(int i = 0; i< implementation.getNumberOfIterations(); i++){
+            
+            if(include_conversion){
+                std::cout << "we include the conversion to striped in this run" << std::endl;
+                bench_CG(
+                    implementation,
+                    *timer,
+                    A,
+                    x_d, y_d
+                );
+                // delete A & re-generate it
+                A.~sparse_CSR_Matrix();
+                new (&A) sparse_CSR_Matrix<DataType>();
+                A.generateMatrix_onGPU(nx, ny, nz);
+    
+                if(nx % 8 == 0 && ny % 8 == 0 && nz % 8 == 0 && nx / 8 > 2 && ny / 8 > 2 && nz / 8 > 2){
+                    // initialize the MG data
+                    sparse_CSR_Matrix <DataType>* current_matrix = &A;
+                    for(int i = 0; i < 3; i++){
+                        current_matrix->initialize_coarse_Matrix();
+                        current_matrix = current_matrix->get_coarse_Matrix();
+                    }
+                }
+            } else {
+                // get the striped version and run that
+                bench_CG(
+                    implementation,
+                    *timer,
+                    striped_A,
+                    x_d, y_d
+                );
+            }
+        }
+        delete timer;
+    }
+
 
     // free da memory
     CHECK_CUDA(cudaFree(x_d));
     CHECK_CUDA(cudaFree(y_d));
 
-    delete timer;
 
 }
 
@@ -186,9 +199,9 @@ void run_striped_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::stri
         }
     }
 
-    // std::string box_dims = std::to_string(implementation.bx) + "x" + std::to_string(implementation.by) + "x" + std::to_string(implementation.bz);
-    // std::string implementation_name = implementation.version_name + "_box: " + box_dims;
-    std::string implementation_name = implementation.version_name;
+    std::string box_dims = std::to_string(implementation.bx) + "x" + std::to_string(implementation.by) + "x" + std::to_string(implementation.bz);
+    std::string implementation_name = implementation.version_name + "_box: " + box_dims;
+    // std::string implementation_name = implementation.version_name;
     std::string additional_params = implementation.additional_parameters;
     std::string ault_node = implementation.ault_nodes;
     CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);

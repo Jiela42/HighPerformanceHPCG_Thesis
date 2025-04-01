@@ -35,7 +35,7 @@ class striped_partial_Matrix {
         //int get_nx() const;
         //int get_ny() const;
         //int get_nz() const;
-        //int get_nnz() const;
+        global_int_t get_nnz() const;
         int get_diag_index() const;
         //MatrixType get_matrix_type() const;
 
@@ -73,7 +73,7 @@ class striped_partial_Matrix {
         //int nx;
         //int ny;
         //int nz;
-        //int nnz;
+        global_int_t nnz;
         int diag_index;
         local_int_t num_rows;
         local_int_t num_cols;

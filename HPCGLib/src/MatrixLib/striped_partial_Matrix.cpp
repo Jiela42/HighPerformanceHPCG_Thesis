@@ -21,10 +21,28 @@ striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
     //this->diag_index = -1;
     this->problem = p;
     //this->matrix_type = MatrixType::UNKNOWN;
+    int nx = p->nx;
+    int ny = p->ny;
+    int nz = p->nz;
 
-    this->num_rows = p->nx * p->ny * p->nz; 
-    this->num_cols = p->nx * p->ny * p->nz;
+    this->num_rows = nx * ny * nz;
+    this->num_cols = nx * ny * nz;
     this->num_stripes = 27;
+
+
+    global_int_t num_interior_points = (nx - 2) * (ny - 2) * (nz - 2);
+    global_int_t num_face_points = 2 * ((nx - 2) * (ny - 2) + (nx - 2) * (nz - 2) + (ny - 2) * (nz - 2));
+    global_int_t num_edge_points = 4 * ((nx - 2) + (ny - 2) + (nz - 2));
+    global_int_t num_corner_points = 8;
+
+    global_int_t nnz_interior = 27 * num_interior_points;
+    global_int_t nnz_face = 18 * num_face_points;
+    global_int_t nnz_edge = 12 * num_edge_points;
+    global_int_t nnz_corner = 8 * num_corner_points;
+
+    global_int_t nnz = nnz_interior + nnz_face + nnz_edge + nnz_corner;
+
+    this->nnz = nnz;
 
 
     //this->j_min_i.clear();
@@ -155,6 +173,11 @@ local_int_t striped_partial_Matrix<T>::get_num_cols() const{
 template <typename T>
 int striped_partial_Matrix<T>::get_num_stripes() const{
     return this->num_stripes;
+}
+
+template <typename T>
+global_int_t striped_partial_Matrix<T>::get_nnz() const{
+    return this->nnz;
 }
 
 template <typename T>

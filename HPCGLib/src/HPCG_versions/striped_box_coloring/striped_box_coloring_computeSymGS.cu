@@ -100,9 +100,9 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
     int by = this->by;
     int bz = this->bz;
 
-    assert(bx >= 3);
-    assert(by >= 3);
-    assert(bz >= 3);
+    assert(bx >= 2);
+    assert(by >= 2);
+    assert(bz >= 2);
 
     // std::cout << "bx: " << bx << " by: " << by << " bz: " << bz << std::endl;
     

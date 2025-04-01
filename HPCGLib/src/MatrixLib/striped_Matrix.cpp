@@ -805,13 +805,13 @@ void striped_Matrix<T>::generate_f2c_operator_onGPU() {
 
 template <typename T>
 void striped_Matrix<T>::init_coarse_buffer(){
-    CHECK_CUDA(cudaMalloc(&this->rc_d, this->num_rows * sizeof(T)));
-    CHECK_CUDA(cudaMalloc(&this->xc_d, this->num_rows * sizeof(T)));
-    CHECK_CUDA(cudaMalloc(&this->Axf_d, this->num_rows*8 * sizeof(T)));
+    CHECK_CUDA(cudaMalloc(&this->coarse_Matrix->rc_d, this->num_rows/8 * sizeof(T)));
+    CHECK_CUDA(cudaMalloc(&this->coarse_Matrix->xc_d, this->num_rows/8 * sizeof(T)));
+    CHECK_CUDA(cudaMalloc(&this->coarse_Matrix->Axf_d, this->num_rows * sizeof(T)));
 
-    CHECK_CUDA(cudaMemset(this->rc_d, 0, this->num_rows * sizeof(T)));
-    CHECK_CUDA(cudaMemset(this->xc_d, 0, this->num_rows * sizeof(T)));
-    CHECK_CUDA(cudaMemset(this->Axf_d, 0, this->num_rows*8 * sizeof(T)));
+    CHECK_CUDA(cudaMemset(this->coarse_Matrix->rc_d, 0, this->num_rows/8 * sizeof(T)));
+    CHECK_CUDA(cudaMemset(this->coarse_Matrix->xc_d, 0, this->num_rows/8 * sizeof(T)));
+    CHECK_CUDA(cudaMemset(this->coarse_Matrix->Axf_d, 0, this->num_rows * sizeof(T)));
 }
 
 template <typename T>

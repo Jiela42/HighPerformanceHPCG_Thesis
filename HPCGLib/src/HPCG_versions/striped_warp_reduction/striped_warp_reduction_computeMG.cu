@@ -27,6 +27,8 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeMG(
         
         int num_threads = 1024;
         local_int_t num_blocks = std::max(num_coarse_rows / num_threads, (local_int_t)1);
+
+        // assert (A.get_coarse_Matrix()->get_f2c_op_d() != nullptr);
         
         compute_restriction_kernel<<<num_blocks, num_threads>>>(
             num_coarse_rows,
