@@ -4,8 +4,8 @@
 #SBATCH --job-name=HPCG_fullBenchmark
 #SBATCH --account=a-g34
 #SBATCH --output Benchmark.out
-#SBATCH --time 00:30:00
-#SBATCH --partition=debug
+#SBATCH --time 04:30:00
+#SBATCH --partition=normal
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus-per-task=1

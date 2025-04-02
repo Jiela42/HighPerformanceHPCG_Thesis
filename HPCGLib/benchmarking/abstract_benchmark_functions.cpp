@@ -700,6 +700,8 @@ void bench_SymGS(
     int original_max_iter = implementation.get_maxSymGSIters();
     implementation.set_maxSymGSIters(500);
 
+    std::cout << "num iterations for implementation " << implementation.version_name << ": " << implementation.get_maxSymGSIters() << std::endl;
+
     for(int i = 0; i < num_iterations; i++){
         // always write the original x back into x_d
         CHECK_CUDA(cudaMemcpy(x_d, x.data(), A.get_num_cols() * sizeof(DataType), cudaMemcpyHostToDevice));
@@ -714,6 +716,8 @@ void bench_SymGS(
 
     // greb da norm and store it in additional infos
     double norm = normPostExe / norm0;
+
+    std::cout << "norm: " << norm << " for implementation " << implementation.version_name << std::endl;
 
     std::ostringstream oss;
     oss << "RR Norm: " << norm;
@@ -762,9 +766,9 @@ void bench_SymGS(
 
      // for normbased implementations we need to make sure the maximum number of iterations performed by symGS is enough
      int original_max_symgs_iterations = implementation.get_maxSymGSIters();
-     if(implementation.norm_based){
-         implementation.set_maxSymGSIters(500);
-     }
+
+    implementation.set_maxSymGSIters(500);
+
 
     for (int i = 0; i < num_iterations; i++){
         // std::cout<< "Iteration: " << i << std::endl;
@@ -780,6 +784,8 @@ void bench_SymGS(
 
     // greb da norm and store it in additional infos
     double norm = normPostExe / norm0;
+
+    std::cout << "norm: " << norm << " for implementation " << implementation.version_name << std::endl;
 
     std::ostringstream oss;
     oss << "normi/norm0: " << norm;

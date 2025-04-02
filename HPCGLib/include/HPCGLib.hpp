@@ -9,7 +9,7 @@
 #include "cuda_runtime.h"
 
 // define number of iterations we want to have
-#define num_bench_iter 1
+#define num_bench_iter 10
 
 enum class Implementation_Type {
     STRIPED,

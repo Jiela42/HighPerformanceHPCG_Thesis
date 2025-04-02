@@ -31,20 +31,20 @@ int main(){
     std::string folder_path = createTimestampedFolder(base_path);
     folder_path += "/";
 
-    // striped_coloring_Implementation<double> implementation;
-    striped_box_coloring_Implementation<double> implementation;
+    striped_coloring_Implementation<double> implementation;
+    // striped_box_coloring_Implementation<double> implementation;
 
     // run_striped_coloring_3d27p_benchmarks(128, 128, 128, folder_path, implementation);
 
 
-    for(int i = 9; i < 100; i++){
-        int nx = i * 8 * 10;
-        int ny = i * 8 * 10;
-        int nz = i * 8 * 10;
+    for(int i = 80; i < 100; i++){
+        int nx = i * 8;
+        int ny = i * 8;
+        int nz = i * 8;
 
         std::cout << "Running striped coloring benchmarks for " << nx << " " << ny << " " << nz << std::endl;
-        // run_striped_coloring_3d27p_benchmarks(nx, ny, nz, folder_path, implementation);
-        run_striped_box_coloring_3d27p_benchmarks(nx, ny, nz, folder_path, implementation);
+        run_striped_coloring_3d27p_benchmarks(nx, ny, nz, folder_path, implementation);
+        // run_striped_box_coloring_3d27p_benchmarks(nx, ny, nz, folder_path, implementation);
         std::cout << "Finished striped coloring benchmarks for " << nx << " " << ny << " " << nz << std::endl;
     }
 

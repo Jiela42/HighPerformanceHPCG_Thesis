@@ -30,9 +30,9 @@ void striped_coloringPrecomputed_Implementation<T>::striped_coloringPrecomputed_
     assert(color_pointer_d != nullptr);
     assert(color_sorted_rows_d != nullptr);
     
-    int nx = A.get_nx();
-    int ny = A.get_ny();
-    int nz = A.get_nz();
+    local_int_t nx = A.get_nx();
+    local_int_t ny = A.get_ny();
+    local_int_t nz = A.get_nz();
 
     // the number of blocks is now dependent on the maximum number of rows per color
 
@@ -43,6 +43,10 @@ void striped_coloringPrecomputed_Implementation<T>::striped_coloringPrecomputed_
     
     int max_iterations = this->max_SymGS_iterations;
     // std::cout << "max_iterations = " << max_iterations << std::endl;
+    // std::cout << "tolerance = " << this->SymGS_tolerance << std::endl;
+
+    // int num_iterations = 0;
+    
     double norm0 = 1.0;
     double normi = norm0;
 
@@ -81,10 +85,14 @@ void striped_coloringPrecomputed_Implementation<T>::striped_coloringPrecomputed_
             CHECK_CUDA(cudaDeviceSynchronize());
         }
 
+        // num_iterations++;
+
         if(max_iterations != 1){
             normi = this->L2_norm_for_SymGS(A, x_d, y_d);
         }
     }
+
+    // std::cout << "num_iterations = " << num_iterations << "for implementation "<< this->version_name << std::endl;
     
 }
 

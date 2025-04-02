@@ -200,7 +200,7 @@ void run_striped_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::stri
     }
 
     std::string box_dims = std::to_string(implementation.bx) + "x" + std::to_string(implementation.by) + "x" + std::to_string(implementation.bz);
-    std::string implementation_name = implementation.version_name + "_box: " + box_dims;
+    std::string implementation_name = implementation.version_name + " (coloringBox " + box_dims + ")";
     // std::string implementation_name = implementation.version_name;
     std::string additional_params = implementation.additional_parameters;
     std::string ault_node = implementation.ault_nodes;
