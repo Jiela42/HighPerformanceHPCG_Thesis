@@ -5,17 +5,17 @@
 // again we have method overloading for different matrix types
 
 void bench_CG(
-    HPCG_functions<double>& implementation,
+    HPCG_functions<DataType>& implementation,
     Timer& timer,
-    striped_Matrix<double> & A,
-    double * x_d, double * y_d
+    striped_Matrix<DataType> & A,
+    DataType * x_d, DataType * y_d
     )
 {
     int num_iterations = implementation.getNumberOfIterations();
     
     // grab original data to store it
-    std::vector<double> x_original(A.get_num_rows(), 0.0);
-    CHECK_CUDA(cudaMemcpy(x_original.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+    std::vector<DataType> x_original(A.get_num_rows(), 0.0);
+    CHECK_CUDA(cudaMemcpy(x_original.data(), x_d, A.get_num_rows() * sizeof(DataType), cudaMemcpyDeviceToHost));
 
     if(implementation.test_before_bench and not implementation.CG_file_based_tests_passed){
         // we do not have a baseline for CG
@@ -56,7 +56,7 @@ void bench_CG(
             timer.stopTimer("compute_CG");
             std::cout << "CG took " << n_iters << " iterations for size " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz()<< " and implementation " << implementation.version_name << std::endl;
             // restore original x
-            CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+            CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(DataType), cudaMemcpyHostToDevice));
         }
     } else{
         std::cout << "Skipping CG Preconditioned bench for matrix with dimensions " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz() << " not divisible by 8 or too small for MG" << std::endl;
@@ -73,22 +73,22 @@ void bench_CG(
         );
         timer.stopTimer("compute_CG_noPreconditioning");
         // restore original x
-        CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+        CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(DataType), cudaMemcpyHostToDevice));
     }
 }
 
 void bench_CG(
-    HPCG_functions<double>& implementation,
+    HPCG_functions<DataType>& implementation,
     Timer& timer,
-    sparse_CSR_Matrix<double> & A,
-    double * x_d, double * y_d
+    sparse_CSR_Matrix<DataType> & A,
+    DataType * x_d, DataType * y_d
     )
 {
     int num_iterations = implementation.getNumberOfIterations();
     
     // grab original data to store it
-    std::vector<double> x_original(A.get_num_rows(), 0.0);
-    CHECK_CUDA(cudaMemcpy(x_original.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+    std::vector<DataType> x_original(A.get_num_rows(), 0.0);
+    CHECK_CUDA(cudaMemcpy(x_original.data(), x_d, A.get_num_rows() * sizeof(DataType), cudaMemcpyDeviceToHost));
 
     if(implementation.test_before_bench and not implementation.CG_file_based_tests_passed){
         // we do not have a baseline for CG
@@ -129,7 +129,7 @@ void bench_CG(
             timer.stopTimer("compute_CG");
             std::cout << "CG took " << n_iters << " iterations for size " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz()<< " and implementation " << implementation.version_name << std::endl;
             // restore original x
-            CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+            CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(DataType), cudaMemcpyHostToDevice));
         }
     } else{
         std::cout << "Skipping CG Preconditioned bench for matrix with dimensions " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz() << " not divisible by 8 or too small for MG" << std::endl;
@@ -146,7 +146,7 @@ void bench_CG(
         );
         timer.stopTimer("compute_CG_noPreconditioning");
         // restore original x
-        CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+        CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(DataType), cudaMemcpyHostToDevice));
     }
 }
 
@@ -260,10 +260,10 @@ void bench_MG(
 }
 
 void bench_MG(
-    HPCG_functions<double>& implementation,
+    HPCG_functions<DataType>& implementation,
     Timer& timer,
-    striped_Matrix<double> & A,
-    double * x_d, double * y_d
+    striped_Matrix<DataType> & A,
+    DataType * x_d, DataType * y_d
     )
 {
     int num_iterations = implementation.getNumberOfIterations();
@@ -283,8 +283,8 @@ void bench_MG(
     }
 
     // obtain the original x vector
-    std::vector<double> x_original(A.get_num_rows(), 0.0);
-    CHECK_CUDA(cudaMemcpy(x_original.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+    std::vector<DataType> x_original(A.get_num_rows(), 0.0);
+    CHECK_CUDA(cudaMemcpy(x_original.data(), x_d, A.get_num_rows() * sizeof(DataType), cudaMemcpyDeviceToHost));
 
     if (implementation.test_before_bench and not implementation.MG_file_based_tests_passed){
         
@@ -307,28 +307,28 @@ void bench_MG(
     }
 
     // restore the original x vector
-    CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(DataType), cudaMemcpyHostToDevice));
 }
 
 // this SPMV supports CSR matrixes
 void bench_SPMV(
-    HPCG_functions<double>& implementation,
+    HPCG_functions<DataType>& implementation,
     Timer& timer,
-    sparse_CSR_Matrix<double> & A,
-    double * x_d, double * y_d
+    sparse_CSR_Matrix<DataType> & A,
+    DataType * x_d, DataType * y_d
     )
 {
 
     // y_d is the output vector, hence we need to store the original and write the original back after the benchmarking
-    std::vector<double> y(A.get_num_rows(), 0.0);
+    std::vector<DataType> y(A.get_num_rows(), 0.0);
 
-    CHECK_CUDA(cudaMemcpy(y.data(), y_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(y.data(), y_d, A.get_num_rows() * sizeof(DataType), cudaMemcpyDeviceToHost));
 
     int num_iterations = implementation.getNumberOfIterations();
 
     if (implementation.test_before_bench){
     // we always test against cusparse$
-        cuSparse_Implementation<double> baseline;
+        cuSparse_Implementation<DataType> baseline;
         bool test_failed = !test_SPMV(
             baseline, implementation,
             A, x_d);
@@ -348,27 +348,27 @@ void bench_SPMV(
     }
 
     // copy the original vector back
-    CHECK_CUDA(cudaMemcpy(y_d, y.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), A.get_num_rows() * sizeof(DataType), cudaMemcpyHostToDevice));
 }
 
 // this SPMV supports striped matrixes which requires CSR for metadata and testing
 void bench_SPMV(
-    HPCG_functions<double>& implementation,
+    HPCG_functions<DataType>& implementation,
     Timer& timer,
-    striped_Matrix<double> & A,
-    double * x_d, double * y_d
+    striped_Matrix<DataType> & A,
+    DataType * x_d, DataType * y_d
     ){
 
     // y_d is the output vector, hence we need to store the original and write the original back after the benchmarking
-    std::vector<double> y(A.get_num_rows(), 0.0);
+    std::vector<DataType> y(A.get_num_rows(), 0.0);
 
-    CHECK_CUDA(cudaMemcpy(y.data(), y_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(y.data(), y_d, A.get_num_rows() * sizeof(DataType), cudaMemcpyDeviceToHost));
 
     int num_iterations = implementation.getNumberOfIterations();
 
     if (implementation.test_before_bench){
     // we always test against cusparse
-        cuSparse_Implementation<double> baseline;
+        cuSparse_Implementation<DataType> baseline;
     
         // test the SPMV function
         bool test_failed = !test_SPMV(
@@ -393,7 +393,7 @@ void bench_SPMV(
     }
 
     // copy the original vector back
-    CHECK_CUDA(cudaMemcpy(y_d, y.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), A.get_num_rows() * sizeof(DataType), cudaMemcpyHostToDevice));
 }
 
 // this SPMV supports multi GPU
@@ -413,6 +413,25 @@ void bench_SPMV(
 
     int num_iterations = implementation.getNumberOfIterations();
 
+    // testing not possible for multi GPU
+    /*
+    if (implementation.test_before_bench){
+    // we always test against cusparse
+        cuSparse_Implementation<DataType> baseline;
+    
+        // test the SPMV function
+        bool test_failed = !test_SPMV(
+            baseline, implementation,
+            A,
+            x_d
+            );
+
+        if (test_failed)
+        {
+            num_iterations = 0;
+        }
+    } */
+
     for(int i = 0; i < num_iterations; i++){
         timer.startTimer();
         implementation.compute_SPMV(
@@ -427,16 +446,16 @@ void bench_SPMV(
 }
 
 void bench_Dot(
-    HPCG_functions<double>& implementation,
+    HPCG_functions<DataType>& implementation,
     Timer& timer,
-    striped_Matrix<double> & A,
-    double * x_d, double * y_d, double * result_d
+    striped_Matrix<DataType> & A,
+    DataType * x_d, DataType * y_d, DataType * result_d
     ){
     int num_iterations = implementation.getNumberOfIterations();
 
     if (implementation.test_before_bench){
         // note that for the dot product the cuSparse implementation is an instanciation of warp reduction. ehem.
-        cuSparse_Implementation<double> baseline;
+        cuSparse_Implementation<DataType> baseline;
         bool test_failed = !test_Dot(
             baseline, implementation,
             A,
@@ -468,6 +487,23 @@ void bench_Dot(
     ){
     int num_iterations = implementation.getNumberOfIterations();
 
+    //not possible for multi GPU
+    /*
+    if (implementation.test_before_bench){
+        // note that for the dot product the cuSparse implementation is an instanciation of warp reduction. ehem.
+        cuSparse_Implementation<DataType> baseline;
+        bool test_failed = !test_Dot(
+            baseline, implementation,
+            A,
+            x_d, y_d
+        );
+
+        if (test_failed){
+            num_iterations = 0;
+        }            
+    }
+    */
+
     for(int i = 0; i < num_iterations; i++){
         timer.startTimer();
         implementation.compute_Dot(
@@ -479,16 +515,16 @@ void bench_Dot(
 }
 
 void bench_Dot(
-    HPCG_functions<double>& implementation,
+    HPCG_functions<DataType>& implementation,
     Timer& timer,
-    sparse_CSR_Matrix<double> & A,
-    double * x_d, double * y_d, double * result_d
+    sparse_CSR_Matrix<DataType> & A,
+    DataType * x_d, DataType * y_d, DataType * result_d
     ){
     int num_iterations = implementation.getNumberOfIterations();
 
     if (implementation.test_before_bench){
         // note that for the dot product the cuSparse implementation is an instanciation of warp reduction. ehem.
-        cuSparse_Implementation<double> baseline;
+        cuSparse_Implementation<DataType> baseline;
         bool test_failed = !test_Dot(
             implementation,
             A,
@@ -512,18 +548,18 @@ void bench_Dot(
 }
 
 void bench_WAXPBY(
-    HPCG_functions<double>& implementation,
+    HPCG_functions<DataType>& implementation,
     Timer& timer,
-    striped_Matrix<double> & A,
-    double * x_d, double * y_d, double * w_d,
-    double alpha, double beta
+    striped_Matrix<DataType> & A,
+    DataType * x_d, DataType * y_d, DataType * w_d,
+    DataType alpha, DataType beta
     ){
 
     int num_iterations = implementation.getNumberOfIterations();
     
     // grab original value of w_d
-    std::vector<double> w(A.get_num_rows(), 0.0);
-    CHECK_CUDA(cudaMemcpy(w.data(), w_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+    std::vector<DataType> w(A.get_num_rows(), 0.0);
+    CHECK_CUDA(cudaMemcpy(w.data(), w_d, A.get_num_rows() * sizeof(DataType), cudaMemcpyDeviceToHost));
 
     if(implementation.test_before_bench){
 
@@ -532,7 +568,7 @@ void bench_WAXPBY(
         );
 
         // restore original value of w_d
-        CHECK_CUDA(cudaMemcpy(w_d, w.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+        CHECK_CUDA(cudaMemcpy(w_d, w.data(), A.get_num_rows() * sizeof(DataType), cudaMemcpyHostToDevice));
 
         if (test_failed){
             num_iterations = 0;
@@ -548,7 +584,7 @@ void bench_WAXPBY(
         timer.stopTimer("compute_WAXPBY");
 
         // restore original value of w_d
-        CHECK_CUDA(cudaMemcpy(w_d, w.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+        CHECK_CUDA(cudaMemcpy(w_d, w.data(), A.get_num_rows() * sizeof(DataType), cudaMemcpyHostToDevice));
     }
 }
 
@@ -582,10 +618,10 @@ void bench_WAXPBY(
 
 
 void bench_SymGS(
-    HPCG_functions<double>& implementation,
+    HPCG_functions<DataType>& implementation,
     Timer& timer,
-    sparse_CSR_Matrix<double> & A,   
-    double * x_d, double * y_d
+    sparse_CSR_Matrix<DataType> & A,   
+    DataType * x_d, DataType * y_d
     )
 {
     int num_iterations = implementation.getNumberOfIterations();
@@ -595,14 +631,14 @@ void bench_SymGS(
     int num_cols = A.get_num_cols();
 
     // y_d is the output vector, hence we need to store the original and write the original back after the benchmarking
-    std::vector<double> x(A.get_num_rows(), 0.0);
+    std::vector<DataType> x(A.get_num_rows(), 0.0);
 
     double norm0 = L2_norm_for_SymGS(A, x_d, y_d);
 
-    CHECK_CUDA(cudaMemcpy(x.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(x.data(), x_d, A.get_num_rows() * sizeof(DataType), cudaMemcpyDeviceToHost));
 
     if (implementation.test_before_bench){
-        cuSparse_Implementation<double> baseline;
+        cuSparse_Implementation<DataType> baseline;
 
         bool test_failed = !test_SymGS(
             baseline, implementation,
@@ -617,9 +653,11 @@ void bench_SymGS(
     int original_max_iter = implementation.get_maxSymGSIters();
     implementation.set_maxSymGSIters(500);
 
+    std::cout << "num iterations for implementation " << implementation.version_name << ": " << implementation.get_maxSymGSIters() << std::endl;
+
     for(int i = 0; i < num_iterations; i++){
         // always write the original x back into x_d
-        CHECK_CUDA(cudaMemcpy(x_d, x.data(), A.get_num_cols() * sizeof(double), cudaMemcpyHostToDevice));
+        CHECK_CUDA(cudaMemcpy(x_d, x.data(), A.get_num_cols() * sizeof(DataType), cudaMemcpyHostToDevice));
         timer.startTimer();
         implementation.compute_SymGS(
             A,
@@ -632,13 +670,15 @@ void bench_SymGS(
     // greb da norm and store it in additional infos
     double norm = normPostExe / norm0;
 
+    std::cout << "norm: " << norm << " for implementation " << implementation.version_name << std::endl;
+
     std::ostringstream oss;
     oss << "RR Norm: " << norm;
     std::string norm_string = oss.str();
     timer.add_additional_parameters(norm_string);
 
     // copy the original vector back
-    CHECK_CUDA(cudaMemcpy(x_d, x.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(x_d, x.data(), A.get_num_rows() * sizeof(DataType), cudaMemcpyHostToDevice));
     
     // store the original number of iterations
     implementation.set_maxSymGSIters(original_max_iter);
@@ -646,10 +686,10 @@ void bench_SymGS(
 }
 
 void bench_SymGS(
-    HPCG_functions<double>& implementation,
+    HPCG_functions<DataType>& implementation,
     Timer& timer,
-    striped_Matrix<double> & A,
-    double * x_d, double * y_d
+    striped_Matrix<DataType> & A,
+    DataType * x_d, DataType * y_d
     )
 {   
     int num_iterations = implementation.getNumberOfIterations();
@@ -657,13 +697,13 @@ void bench_SymGS(
     // std::cout << "benching symgs for " << num_iterations << " iterations" << std::endl;
 
     // x_d is the output vector, hence we need to store the original and write the original back after the benchmarking
-    std::vector<double> x(A.get_num_rows(), 0.0);
+    std::vector<DataType> x(A.get_num_rows(), 0.0);
 
-    CHECK_CUDA(cudaMemcpy(x.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));   
+    CHECK_CUDA(cudaMemcpy(x.data(), x_d, A.get_num_rows() * sizeof(DataType), cudaMemcpyDeviceToHost));   
 
     if(implementation.test_before_bench){
 
-        cuSparse_Implementation<double> baseline;           
+        cuSparse_Implementation<DataType> baseline;           
 
         bool test_failed = !test_SymGS(
             baseline, implementation,
@@ -679,15 +719,15 @@ void bench_SymGS(
 
      // for normbased implementations we need to make sure the maximum number of iterations performed by symGS is enough
      int original_max_symgs_iterations = implementation.get_maxSymGSIters();
-     if(implementation.norm_based){
-         implementation.set_maxSymGSIters(500);
-     }
+
+    implementation.set_maxSymGSIters(500);
+
 
     for (int i = 0; i < num_iterations; i++){
         // std::cout<< "Iteration: " << i << std::endl;
         // std::cout<< "Num iterations: " << num_iterations << std::endl;
         // copy original x into x_d
-        CHECK_CUDA(cudaMemcpy(x_d, x.data(), A.get_num_cols() * sizeof(double), cudaMemcpyHostToDevice));
+        CHECK_CUDA(cudaMemcpy(x_d, x.data(), A.get_num_cols() * sizeof(DataType), cudaMemcpyHostToDevice));
         timer.startTimer();
         implementation.compute_SymGS( A, x_d, y_d);
         timer.stopTimer("compute_SymGS");
@@ -698,6 +738,8 @@ void bench_SymGS(
     // greb da norm and store it in additional infos
     double norm = normPostExe / norm0;
 
+    std::cout << "norm: " << norm << " for implementation " << implementation.version_name << std::endl;
+
     std::ostringstream oss;
     oss << "normi/norm0: " << norm;
     std::string norm_string = oss.str();
@@ -705,7 +747,7 @@ void bench_SymGS(
 
 
     // copy the original vector back
-    CHECK_CUDA(cudaMemcpy(x_d, x.data(), A.get_num_rows() * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(x_d, x.data(), A.get_num_rows() * sizeof(DataType), cudaMemcpyHostToDevice));
     // store the original number of iterations
 
 
@@ -797,29 +839,29 @@ void bench_ExchangeHalo(
 
 // this version supports CSR
 void bench_Implementation(
-    HPCG_functions<double>& implementation,
+    HPCG_functions<DataType>& implementation,
     Timer& timer,
-    sparse_CSR_Matrix<double> & A,
-    double * a_d, double * b_d, // a & b are random vectors
-    double * x_d, double * y_d // x & y are vectors as used in HPCG
+    sparse_CSR_Matrix<DataType> & A,
+    DataType * a_d, DataType * b_d, // a & b are random vectors
+    DataType * x_d, DataType * y_d // x & y are vectors as used in HPCG
     )
 {   
     // we want to make sure the vectors are not changed, so we grab the first 100 elements
     int num_sanity_elements = 100;
-    std::vector<double> a_original(num_sanity_elements);
-    std::vector<double> b_original(num_sanity_elements);
-    std::vector<double> x_original(num_sanity_elements);
-    std::vector<double> y_original(num_sanity_elements);
+    std::vector<DataType> a_original(num_sanity_elements);
+    std::vector<DataType> b_original(num_sanity_elements);
+    std::vector<DataType> x_original(num_sanity_elements);
+    std::vector<DataType> y_original(num_sanity_elements);
 
     // copy the first 100 elements of the vectors
-    CHECK_CUDA(cudaMemcpy(a_original.data(), a_d, num_sanity_elements * sizeof(double), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(b_original.data(), b_d, num_sanity_elements * sizeof(double), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(x_original.data(), x_d, num_sanity_elements * sizeof(double), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(y_original.data(), y_d, num_sanity_elements * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(a_original.data(), a_d, num_sanity_elements * sizeof(DataType), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(b_original.data(), b_d, num_sanity_elements * sizeof(DataType), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(x_original.data(), x_d, num_sanity_elements * sizeof(DataType), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(y_original.data(), y_d, num_sanity_elements * sizeof(DataType), cudaMemcpyDeviceToHost));
 
     // make a vector of vectors
-    std::vector<std::vector<double>> original_vectors = {a_original, b_original, x_original, y_original};
-    std::vector<double*> vectors_d = {a_d, b_d, x_d, y_d};
+    std::vector<std::vector<DataType>> original_vectors = {a_original, b_original, x_original, y_original};
+    std::vector<DataType*> vectors_d = {a_d, b_d, x_d, y_d};
 
     if(implementation.SPMV_implemented){
         bench_SPMV(implementation, timer, A, a_d, y_d);
@@ -838,31 +880,31 @@ void bench_Implementation(
 
 // this version supports striped matrixes
 void bench_Implementation(
-    HPCG_functions<double>& implementation,
+    HPCG_functions<DataType>& implementation,
     Timer& timer,
-    striped_Matrix<double> & A, // we need to pass the CSR matrix for metadata and potential testing
-    double * a_d, double * b_d, // a & b are random vectors
-    double * x_d, double * y_d, // x & y are vectors as used in HPCG
-    double * result_d ,  // result is used for the dot product (it is a scalar)
-    double alpha, double beta
+    striped_Matrix<DataType> & A, // we need to pass the CSR matrix for metadata and potential testing
+    DataType * a_d, DataType * b_d, // a & b are random vectors
+    DataType * x_d, DataType * y_d, // x & y are vectors as used in HPCG
+    DataType * result_d ,  // result is used for the dot product (it is a scalar)
+    DataType alpha, DataType beta
 ){
    
     // we want to make sure the vectors are not changed, so we grab the first 100 elements
     int num_sanity_elements = 100;
-    std::vector<double> a_original(num_sanity_elements);
-    std::vector<double> b_original(num_sanity_elements);
-    std::vector<double> x_original(num_sanity_elements);
-    std::vector<double> y_original(num_sanity_elements);
+    std::vector<DataType> a_original(num_sanity_elements);
+    std::vector<DataType> b_original(num_sanity_elements);
+    std::vector<DataType> x_original(num_sanity_elements);
+    std::vector<DataType> y_original(num_sanity_elements);
 
     // copy the first 100 elements of the vectors
-    CHECK_CUDA(cudaMemcpy(a_original.data(), a_d, num_sanity_elements * sizeof(double), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(b_original.data(), b_d, num_sanity_elements * sizeof(double), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(x_original.data(), x_d, num_sanity_elements * sizeof(double), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(y_original.data(), y_d, num_sanity_elements * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(a_original.data(), a_d, num_sanity_elements * sizeof(DataType), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(b_original.data(), b_d, num_sanity_elements * sizeof(DataType), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(x_original.data(), x_d, num_sanity_elements * sizeof(DataType), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(y_original.data(), y_d, num_sanity_elements * sizeof(DataType), cudaMemcpyDeviceToHost));
     
     // make a vector of vectors
-    std::vector<std::vector<double>> original_vectors = {a_original, b_original, x_original, y_original};
-    std::vector<double*> vectors_d = {a_d, b_d, x_d, y_d};
+    std::vector<std::vector<DataType>> original_vectors = {a_original, b_original, x_original, y_original};
+    std::vector<DataType*> vectors_d = {a_d, b_d, x_d, y_d};
     
     // we do one sanity check prior to the benchmarking (just for my sanity and to make debugging easier)
     sanity_check_vectors(vectors_d, original_vectors);

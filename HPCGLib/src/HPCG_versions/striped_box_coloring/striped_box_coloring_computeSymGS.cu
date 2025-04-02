@@ -8,13 +8,13 @@
 
 __global__ void striped_box_coloring_half_SymGS_kernel(
     int cooperation_number,
-    int color, int bx, int by, int bz,
+    local_int_t color, int bx, int by, int bz,
     int nx, int ny, int nz,
     local_int_t num_rows, local_int_t num_cols,
     int num_stripes, int diag_offset,
     local_int_t * j_min_i,
     DataType * striped_A,
-    double * x, double * y
+    DataType * x, DataType * y
 ){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     int coop_group_id = tid / cooperation_number;
@@ -38,9 +38,9 @@ __global__ void striped_box_coloring_half_SymGS_kernel(
     num_color_rows = (color_offs_y < ny % by) ? (num_color_rows + 1) : num_color_rows;
     num_color_faces = (color_offs_z < nz % bz) ? (num_color_faces + 1) : num_color_faces;
 
-    int num_nodes_with_color = num_color_cols * num_color_rows * num_color_faces;
+    local_int_t num_nodes_with_color = num_color_cols * num_color_rows * num_color_faces;
 
-    for (int i = coop_group_id; i < num_nodes_with_color; i += num_coop_groups){
+    for (local_int_t i = coop_group_id; i < num_nodes_with_color; i += num_coop_groups){
         
         // find out the position of the node (only considering faces, cols and rows that actually have that color)
         int ix = i % num_color_cols;
@@ -52,12 +52,12 @@ __global__ void striped_box_coloring_half_SymGS_kernel(
         iy = iy * by + color_offs_y;
         iz = iz * bz + color_offs_z;
 
-        int row = ix + iy * nx + iz * nx * ny;
+        local_int_t row = ix + iy * nx + iz * nx * ny;
 
-        double my_sum = 0.0;
+        DataType my_sum = 0.0;
         for(int stripe = lane; stripe < num_stripes; stripe += cooperation_number){
             local_int_t col = j_min_i[stripe] + row;
-            double val = striped_A[row * num_stripes + stripe];
+            DataType val = striped_A[row * num_stripes + stripe];
             if(col < num_cols && col >= 0){
                 my_sum -= val * x[col];
             }
@@ -70,8 +70,8 @@ __global__ void striped_box_coloring_half_SymGS_kernel(
         
         __syncthreads();
         if (lane == 0){
-            double diag = striped_A[row * num_stripes + diag_offset];
-            double sum = diag * x[row] + y[row] + my_sum;
+            DataType diag = striped_A[row * num_stripes + diag_offset];
+            DataType sum = diag * x[row] + y[row] + my_sum;
             x[row] = sum / diag;           
         }
         __syncthreads();
@@ -100,9 +100,9 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
     int by = this->by;
     int bz = this->bz;
 
-    assert(bx >= 3);
-    assert(by >= 3);
-    assert(bz >= 3);
+    assert(bx >= 2);
+    assert(by >= 2);
+    assert(bz >= 2);
 
     // std::cout << "bx: " << bx << " by: " << by << " bz: " << bz << std::endl;
     
@@ -125,7 +125,7 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
     int num_colors = bx * by * bz;
     int max_color =  num_colors - 1;
     // std::cout << "max_color: " << max_color << std::endl;
-    int max_num_rows_per_color = ceiling_division(nx, bx) * ceiling_division(ny, by) * ceiling_division(nz, bz);
+    local_int_t max_num_rows_per_color = ceiling_division(nx, bx) * ceiling_division(ny, by) * ceiling_division(nz, bz);
     
     int num_blocks = std::min(ceiling_division(max_num_rows_per_color, 1024/cooperation_number), MAX_NUM_BLOCKS);
 

@@ -30,7 +30,7 @@ public:
         this->implementation_type = Implementation_Type::STRIPED;
         this->SPMV_implemented = true;
         this->Dot_implemented = true;
-        this->SymGS_implemented = true;
+        this->SymGS_implemented = false;
         this->WAXPBY_implemented = true;
         this->CG_implemented = false;
         this->MG_implemented = false;

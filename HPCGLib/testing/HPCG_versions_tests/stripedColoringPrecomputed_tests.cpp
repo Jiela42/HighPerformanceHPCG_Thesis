@@ -2,7 +2,7 @@
 
 #include "UtilLib/cuda_utils.hpp"
 
-bool run_striped_coloringPrecomputed_tests_on_matrix(sparse_CSR_Matrix<double>& A){
+bool run_striped_coloringPrecomputed_tests_on_matrix(sparse_CSR_Matrix<DataType>& A){
     // the output will be allocated by the test function
     // but any inputs need to be allocated and copied over to the device here
     // and is then passed to the test function
@@ -10,46 +10,44 @@ bool run_striped_coloringPrecomputed_tests_on_matrix(sparse_CSR_Matrix<double>& 
     bool all_pass = true;
     
     // create the baseline and the UUT
-    cuSparse_Implementation<double> cuSparse;
-    striped_coloringPrecomputed_Implementation<double> striped_coloringPrecomputed;
+    cuSparse_Implementation<DataType> cuSparse;
+    striped_coloringPrecomputed_Implementation<DataType> striped_coloringPrecomputed;
     
     int nx = A.get_nx();
     int ny = A.get_ny();
     int nz = A.get_nz();
     
     // random seeded x vector
-    std::vector<double> a = generate_random_vector(nx*ny*nz, RANDOM_SEED);
-    std::vector<double> b = generate_random_vector(nx*ny*nz, RANDOM_SEED);
-    std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
+    std::vector<DataType> a = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+    std::vector<DataType> b = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+    std::vector<DataType> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
 
-    striped_Matrix<double>* A_striped = A.get_Striped();
-    std::cout << "getting striped matrix" << std::endl;
-    // A_striped.striped_Matrix_from_sparse_CSR(A);
+    striped_Matrix<DataType>* A_striped = A.get_Striped();
 
     A_striped->generate_coloring();
 
-    int num_rows = A.get_num_rows();
-    int num_cols = A.get_num_cols();
-    int nnz = A.get_nnz();
+    local_int_t num_rows = A.get_num_rows();
+    local_int_t num_cols = A.get_num_cols();
+    local_int_t nnz = A.get_nnz();
 
     int num_stripes = A_striped->get_num_stripes();
 
-    double * a_d;
-    double * b_d;
-    double * x_d;
-    double * y_d;
+    DataType * a_d;
+    DataType * b_d;
+    DataType * x_d;
+    DataType * y_d;
 
 
     // Allocate the memory on the device
-    CHECK_CUDA(cudaMalloc(&a_d, num_cols * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&b_d, num_cols * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&x_d, num_cols * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&y_d, num_cols * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&a_d, num_cols * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&b_d, num_cols * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&x_d, num_cols * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&y_d, num_cols * sizeof(DataType)));
 
     // Copy the data to the device    
-    CHECK_CUDA(cudaMemcpy(a_d, a.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(b_d, b.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(a_d, a.data(), num_cols * sizeof(DataType), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(b_d, b.data(), num_cols * sizeof(DataType), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_cols * sizeof(DataType), cudaMemcpyHostToDevice));
 
     // test the SymGS function (minitest, does not work with striped matrices)
     all_pass = all_pass && test_SymGS(
@@ -73,8 +71,8 @@ bool run_stripedColoringPrecomputed_filebased_tests(){
 
     bool all_pass = true;
 
-    striped_coloringPrecomputed_Implementation<double> striped_coloringPrecomputed;
-    striped_box_coloring_Implementation<double> striped_box_coloring;
+    striped_coloringPrecomputed_Implementation<DataType> striped_coloringPrecomputed;
+    striped_box_coloring_Implementation<DataType> striped_box_coloring;
 
     // MG tests
     // all_pass = all_pass && test_MG(striped_coloringPrecomputed);
@@ -99,7 +97,7 @@ bool run_stripedColoringPrecomputed_tests(int nx, int ny, int nz){
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     
-    sparse_CSR_Matrix<double> A;
+    sparse_CSR_Matrix<DataType> A;
     A.generateMatrix_onGPU(nx, ny, nz);
 
     all_pass = all_pass && run_striped_coloringPrecomputed_tests_on_matrix(A);

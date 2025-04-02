@@ -35,9 +35,10 @@ class striped_partial_Matrix {
         int get_nx() const;
         int get_ny() const;
         int get_nz() const;
+        global_int_t get_nnz() const;
         int get_diag_index() const;
         //int get_nnz() const;
-        //MatrixType get_matrix_type() const;
+        MatrixType get_matrix_type() const;
 
         //sparse_CSR_Matrix<T> *get_CSR();
         //void set_CSR(sparse_CSR_Matrix<T> *A);
@@ -73,14 +74,14 @@ class striped_partial_Matrix {
         int nx;
         int ny;
         int nz;
-        //int nnz;
+        global_int_t nnz;
         int diag_index;
         local_int_t num_rows;
         local_int_t num_cols;
         int num_stripes;
         std::vector<local_int_t> j_min_i;
         // std::vector<T> values;
-        // MatrixType matrix_type;
+        MatrixType matrix_type;
         // friend void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped(striped_Matrix<T> & A);
         // void striped_Matrix_from_sparse_CSR(sparse_CSR_Matrix<T> & A);
         // void striped_3D27P_Matrix_from_CSR_onCPU(sparse_CSR_Matrix<T> & A);

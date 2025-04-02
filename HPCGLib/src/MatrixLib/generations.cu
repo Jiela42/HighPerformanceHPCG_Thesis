@@ -15,7 +15,7 @@ __global__ void generateHPCGProblem_kernel(
 ) {
 
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    int num_rows = nx * ny * nz;
+    local_int_t num_rows = static_cast<local_int_t>(nx) * static_cast<local_int_t>(ny) * static_cast<local_int_t>(nz);
 
     // each thread takes a row to fill
     // the row_ptr is already correctly filled
@@ -33,7 +33,7 @@ __global__ void generateHPCGProblem_kernel(
                     if(iy + sy > -1 && iy + sy < ny){
                         for(int sx = -1; sx < 2; sx++){
                             if(ix + sx > -1 && ix + sx < nx){
-                                local_int_t j = ix + sx + nx * (iy + sy) + nx * ny * (iz + sz);
+                                local_int_t j = static_cast<local_int_t>(ix + sx) + static_cast<local_int_t>(nx) * (iy + sy) + static_cast<local_int_t>(nx) * static_cast<local_int_t>(ny) * (iz + sz);
                                 col_idx[current_index] = j;
                                 DataType current_val = i == j ? 26.0 : -1.0;
                                 values[current_index] = current_val;
@@ -56,7 +56,7 @@ __global__ void generateHPCGMatrix_kernel(
 )
 {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    local_int_t num_rows = nx * ny * nz;
+    local_int_t num_rows = static_cast<local_int_t>(nx) * static_cast<local_int_t>(ny) * static_cast<local_int_t>(nz);
 
     // each thread takes a row to fill
     // the row_ptr is already correctly filled
@@ -77,7 +77,7 @@ __global__ void generateHPCGMatrix_kernel(
                                 // if(threadIdx.x ==96 && blockIdx.x==8172){
                                 //     printf("i: %d, ix: %d, iy: %d, iz: %d, sx: %d, sy: %d, sz: %d, current_index: %d\n", i, ix, iy, iz, sx, sy, sz, current_index);
                                 // }
-                                local_int_t j = ix + sx + nx * (iy + sy) + nx * ny * (iz + sz);
+                                local_int_t j = static_cast<local_int_t>(ix + sx) + static_cast<local_int_t>(nx) * (iy + sy) + static_cast<local_int_t>(nx) * static_cast<local_int_t>(ny) * (iz + sz);
                                 col_idx[current_index] = j;
                                 DataType current_val = i == j ? 26.0 : -1.0;
                                 values[current_index] = current_val;
@@ -100,7 +100,7 @@ __global__ void get_num_elem_per_row_kernel(
     local_int_t * num_elem_per_row
 ) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    local_int_t num_rows = nx * ny * nz;
+    local_int_t num_rows = static_cast<local_int_t>(nx) * static_cast<local_int_t>(ny) * static_cast<local_int_t>(nz);
 
     for (local_int_t i = tid; i < num_rows; i += blockDim.x * gridDim.x) {
         int ix = i % nx;
@@ -236,7 +236,7 @@ __global__ void generate_f2c_operator_kernel(
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
     // int num_fine_rows = nxf * nyf * nzf;
-    local_int_t num_coarse_rows = nxc * nyc * nzc;
+    local_int_t num_coarse_rows = static_cast<local_int_t>(nxc) * static_cast<local_int_t>(nyc) * static_cast<local_int_t>(nzc);
 
     for(local_int_t coarse_idx = tid; coarse_idx < num_coarse_rows; coarse_idx += blockDim.x * gridDim.x){
         int izc = coarse_idx / (nxc * nyc);
@@ -247,7 +247,7 @@ __global__ void generate_f2c_operator_kernel(
         int iyf = iyc * 2;
         int ixf = ixc * 2;
 
-        local_int_t fine_idx = ixf + nxf * iyf + nxf * nyf * izf;
+        local_int_t fine_idx = static_cast<local_int_t>(ixf) + static_cast<local_int_t>(nxf) * (iyf) + static_cast<local_int_t>(nxf) * static_cast<local_int_t>(nyf) * (izf);
         f2c_op[coarse_idx] = fine_idx;
 
         // if(coarse_idx < 5){
@@ -262,7 +262,7 @@ void generateHPCGProblem(
     DataType * y    
 ) {
 
-    local_int_t num_rows = nx * ny * nz;
+    local_int_t num_rows = static_cast<local_int_t>(nx) * static_cast<local_int_t>(ny) * static_cast<local_int_t>(nz);
 
     int block_size = 256;
     int num_blocks = (num_rows + block_size - 1) / block_size;
@@ -282,7 +282,7 @@ void generateHPCGMatrix(
     int nx, int ny, int nz,
     local_int_t * row_ptr, local_int_t * col_idx, DataType * values
 ){
-    local_int_t num_rows = nx * ny * nz;
+    local_int_t num_rows = static_cast<local_int_t>(nx) * static_cast<local_int_t>(ny) * static_cast<local_int_t>(nz);
 
     int block_size = 256;
     int num_blocks = (num_rows + block_size - 1) / block_size;
@@ -316,7 +316,7 @@ local_int_t generate_striped_3D27P_Matrix_from_CSR(
 ){
 
     // allocate space for non-zeros
-    local_int_t num_rows = nx * ny * nz;
+    local_int_t num_rows = static_cast<local_int_t>(nx) * static_cast<local_int_t>(ny) * static_cast<local_int_t>(nz);
     local_int_t * num_nnz_i;
     CHECK_CUDA(cudaMalloc(&num_nnz_i, num_rows * sizeof(local_int_t)));
     CHECK_CUDA(cudaMemset(num_nnz_i, 0, num_rows * sizeof(local_int_t)));
@@ -385,7 +385,7 @@ void generate_f2c_operator(
     local_int_t * f2c_op
 ){
 
-    local_int_t num_coarse_rows = nxc * nyc * nzc;
+    local_int_t num_coarse_rows = static_cast<local_int_t>(nxc) * static_cast<local_int_t>(nyc) * static_cast<local_int_t>(nzc);
 
     int num_threads = 1024;
     int num_blocks = num_coarse_rows/num_threads;
@@ -522,8 +522,6 @@ __global__ void generate_y_vector_for_HPCG_problem_kernel(global_int_t gnx, glob
     }
 
 }
-
-
 
 void generate_y_vector_for_HPCG_problem_onGPU(Problem *problem, DataType*y_d){
     local_int_t num_rows = problem->nx * problem->ny * problem->nz;

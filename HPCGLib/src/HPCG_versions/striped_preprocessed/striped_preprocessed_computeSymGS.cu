@@ -6,12 +6,12 @@
 
 #define BAND_PREPED_SYMGS_COOP_NUM 16
 
-__device__ void forward_loop_body(int lane, local_int_t i, local_int_t num_cols, int num_stripes, int diag_index, local_int_t * j_min_i, double * striped_A, DataType * x, double * y, double * shared_diag){
+__device__ void forward_loop_body(int lane, int i, local_int_t num_cols, int num_stripes, int diag_index, local_int_t * j_min_i, DataType * striped_A, DataType * x, DataType * y, DataType * shared_diag){
     
-    double my_sum = 0.0;
+    DataType my_sum = 0.0;
     for (int stripe = lane; stripe < diag_index; stripe += BAND_PREPED_SYMGS_COOP_NUM){
         local_int_t col = j_min_i[stripe] + i;
-        double val = striped_A[i * num_stripes + stripe];
+        DataType val = striped_A[i * num_stripes + stripe];
         if (col < num_cols && col >= 0){
             // printf("Col: %d\n", col);
             my_sum -= val * x[col];
@@ -30,10 +30,10 @@ __device__ void forward_loop_body(int lane, local_int_t i, local_int_t num_cols,
     __syncthreads();
 
     if (lane == 0){
-        double diag = shared_diag[0];
+        DataType diag = shared_diag[0];
         // printf("diag_index: %d, diag: %f\n", diag_index, diag);
 
-        double sum = diag * x[i] + y[i] + my_sum;
+        DataType sum = diag * x[i] + y[i] + my_sum;
         x[i] = sum / diag;           
     }
     __syncthreads();
@@ -41,12 +41,12 @@ __device__ void forward_loop_body(int lane, local_int_t i, local_int_t num_cols,
 }
 
 
-__device__ void backward_loop_body(int lane, local_int_t i, local_int_t num_cols, int num_stripes, int diag_index, local_int_t * j_min_i, double * striped_A, double * x, double * y, double * shared_diag){
+__device__ void backward_loop_body(int lane, local_int_t i, local_int_t num_cols, local_int_t num_stripes, int diag_index, local_int_t * j_min_i, DataType * striped_A, DataType * x, DataType * y, DataType * shared_diag){
     
-    double my_sum = 0.0;
+    DataType my_sum = 0.0;
     for (int stripe = lane + diag_index+1; stripe < num_stripes; stripe += BAND_PREPED_SYMGS_COOP_NUM){
         local_int_t col = j_min_i[stripe] + i;
-        double val = striped_A[i * num_stripes + stripe];
+        DataType val = striped_A[i * num_stripes + stripe];
         if (col < num_cols && col >= 0){
             my_sum -= val * x[col];
         }
@@ -63,8 +63,8 @@ __device__ void backward_loop_body(int lane, local_int_t i, local_int_t num_cols
 
     __syncthreads();
     if (lane == 0){
-        double diag = shared_diag[0];
-        double sum = diag * x[i] + y[i] + my_sum;
+        DataType diag = shared_diag[0];
+        DataType sum = diag * x[i] + y[i] + my_sum;
         x[i] = sum / diag;           
     }
     __syncthreads();
@@ -77,7 +77,7 @@ __global__ void preprocessing_forward(
     int num_stripes, int diag_index,
     local_int_t min_row, local_int_t max_row,
     local_int_t * j_min_i, DataType * striped_A,
-    double * x, double * y){
+    DataType * x, DataType * y){
     
     // calculate Ax = y
 
@@ -86,7 +86,7 @@ __global__ void preprocessing_forward(
     
     for (local_int_t i = tid/BAND_PREPED_SYMGS_COOP_NUM + min_row; i < max_row; i += (blockDim.x * gridDim.x)/BAND_PREPED_SYMGS_COOP_NUM) {
         // compute the matrix-vector product for the ith row
-        double sum_i = 0;
+        DataType sum_i = 0;
         for (int stripe = lane + diag_index; stripe < num_stripes; stripe += BAND_PREPED_SYMGS_COOP_NUM) {
             local_int_t j = i + j_min_i[stripe];
             local_int_t current_row = i * num_stripes;
@@ -112,8 +112,8 @@ __global__ void preprocessing_backward(
     local_int_t num_rows, local_int_t num_cols,
     int num_stripes, int diag_index,
     local_int_t min_row, local_int_t max_row,
-    local_int_t * j_min_i, double * striped_A,
-    double * x, double * y){
+    local_int_t * j_min_i, DataType * striped_A,
+    DataType * x, DataType * y){
     
      // calculate Ax = y
 
@@ -122,7 +122,7 @@ __global__ void preprocessing_backward(
     
     for (local_int_t i = tid/BAND_PREPED_SYMGS_COOP_NUM + min_row; i < max_row; i += (blockDim.x * gridDim.x)/BAND_PREPED_SYMGS_COOP_NUM) {
         // compute the matrix-vector product for the ith row
-        double sum_i = 0;
+        DataType sum_i = 0;
         for (int stripe = lane; stripe <= diag_index; stripe += BAND_PREPED_SYMGS_COOP_NUM) {
             local_int_t j = i + j_min_i[stripe];
             local_int_t current_row = i * num_stripes;
@@ -149,10 +149,10 @@ __global__ void striped_forward_SymGS(
     int num_stripes, int diag_index,
     local_int_t min_row, local_int_t max_row,
     local_int_t * j_min_i,
-    double * striped_A,
-    double * x, double * y
+    DataType * striped_A,
+    DataType * x, DataType * y
 ){
-    __shared__ double diag_value[1];
+    __shared__ DataType diag_value[1];
     for(local_int_t i = min_row; i < max_row; i++){
         forward_loop_body(threadIdx.x, i, num_cols, diag_index, num_stripes, j_min_i, striped_A, x, y, diag_value);
     }
@@ -163,10 +163,10 @@ __global__ void striped_backward_SymGS(
     int num_stripes, int diag_index,
     local_int_t min_row, local_int_t max_row,
     local_int_t * j_min_i,
-    double * striped_A,
-    double * x, double * y
+    DataType * striped_A,
+    DataType * x, DataType * y
 ){
-    __shared__ double diag_value[1];
+    __shared__ DataType diag_value[1];
     for(local_int_t i = max_row-1; i >= min_row; i--){
         backward_loop_body(threadIdx.x, i, num_cols, num_stripes, diag_index, j_min_i, striped_A, x, y, diag_value);
     }
@@ -280,4 +280,4 @@ void striped_preprocessed_Implementation<T>::striped_preprocessed_computeSymGS(
 }
 
 // Explicit instantiation of the template
-template class striped_preprocessed_Implementation<double>;
+template class striped_preprocessed_Implementation<DataType>;

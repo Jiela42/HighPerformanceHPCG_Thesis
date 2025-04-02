@@ -6,7 +6,7 @@
 // #include <cuda_runtime.h>
 
 __global__ void striped_coloring_half_SymGS_kernel(
-    int color, local_int_t * color_pointer, local_int_t * color_sorted_rows,
+    local_int_t color, local_int_t * color_pointer, local_int_t * color_sorted_rows,
     local_int_t num_rows, local_int_t num_cols,
     int num_stripes, int diag_offset,
     local_int_t * j_min_i,
@@ -25,15 +25,15 @@ __global__ void striped_coloring_half_SymGS_kernel(
         // printf("start = %d, end = %d\n", start, end);
     // }
 
-    for(int i = warp_id + start; i < end; i += num_warps){
+    for(local_int_t i = warp_id + start; i < end; i += num_warps){
         local_int_t row = color_sorted_rows[i];
         // if(row < 0 || row >= num_rows){
         //     printf("threadid: %d, color %d, start %d, end %d, row = %d, num_rows = %d\n", tid, color, start, end, row, num_rows);
         // }
-            double my_sum = 0.0;
+            DataType my_sum = 0.0;
             for(int stripe = lane_id; stripe < num_stripes; stripe += WARP_SIZE){
                 local_int_t col = j_min_i[stripe] + row;
-                double val = striped_A[row * num_stripes + stripe];
+                DataType val = striped_A[row * num_stripes + stripe];
                 if(col < num_cols && col >= 0){
                     my_sum -= val * x[col];
                 }
@@ -46,8 +46,8 @@ __global__ void striped_coloring_half_SymGS_kernel(
 
             __syncthreads();
             if (lane_id == 0){
-                double diag = striped_A[row * num_stripes + diag_offset];
-                double sum = diag * x[row] + y[row] + my_sum;
+                DataType diag = striped_A[row * num_stripes + diag_offset];
+                DataType sum = diag * x[row] + y[row] + my_sum;
                 x[row] = sum / diag;           
             }
             __syncthreads();
@@ -57,7 +57,7 @@ __global__ void striped_coloring_half_SymGS_kernel(
 
 
 __global__ void striped_coloring_SymGS_backward_kernel(
-    int color, local_int_t * colors,
+    local_int_t color, local_int_t * colors,
     local_int_t num_rows, local_int_t num_cols,
     int num_stripes, int diag_offset,
     local_int_t * j_min_i,
@@ -72,10 +72,10 @@ __global__ void striped_coloring_SymGS_backward_kernel(
 
     for(local_int_t i = num_rows-1-warp_id; i >= 0; i += num_warps){
         if(colors[i] == color){
-            double my_sum = 0.0;
+            DataType my_sum = 0.0;
             for(int stripe = lane_id; stripe < num_stripes; stripe += WARP_SIZE){
                 local_int_t col = j_min_i[stripe] + i;
-                double val = striped_A[i * num_stripes + stripe];
+                DataType val = striped_A[i * num_stripes + stripe];
                 if(col < num_cols && col >= 0){
                     my_sum -= val * x[col];
                 }
@@ -88,8 +88,8 @@ __global__ void striped_coloring_SymGS_backward_kernel(
 
             __syncthreads();
             if (lane_id == 0){
-                double diag = striped_A[i * num_stripes + diag_offset];
-                double sum = diag * x[i] + y[i] + my_sum;
+                DataType diag = striped_A[i * num_stripes + diag_offset];
+                DataType sum = diag * x[i] + y[i] + my_sum;
                 x[i] = sum / diag;           
             }
             __syncthreads();
@@ -97,12 +97,12 @@ __global__ void striped_coloring_SymGS_backward_kernel(
     }
 }
 
-__global__ void compute_num_colors_per_row(local_int_t num_rows, int max_num_colors, local_int_t * colors, local_int_t * num_colors_per_row){
+__global__ void compute_num_colors_per_row(local_int_t num_rows, local_int_t max_num_colors, local_int_t * colors, local_int_t * num_colors_per_row){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
-    for(int i = tid; i < max_num_colors; i += gridDim.x * blockDim.x){
-        int num_rows_per_i = 0;
-        for(int j = 0; j < num_rows; j++){
+    for(local_int_t i = tid; i < max_num_colors; i += gridDim.x * blockDim.x){
+        local_int_t num_rows_per_i = 0;
+        for(local_int_t j = 0; j < num_rows; j++){
             if(colors[j] == i){
                 num_rows_per_i++;
             }
@@ -134,18 +134,18 @@ void striped_coloring_Implementation<T>::striped_coloring_computeSymGS(
     local_int_t * color_sorted_rows_d;
 
     // we allocate the memory for the colors
-    CHECK_CUDA(cudaMalloc(&color_pointer_d, (num_rows+1) * sizeof(int)));
-    CHECK_CUDA(cudaMalloc(&color_sorted_rows_d, num_rows * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&color_pointer_d, (num_rows+1) * sizeof(local_int_t)));
+    CHECK_CUDA(cudaMalloc(&color_sorted_rows_d, num_rows * sizeof(local_int_t)));
     
-    CHECK_CUDA(cudaMemset(color_pointer_d, 0, (num_rows+1) * sizeof(int)));
+    CHECK_CUDA(cudaMemset(color_pointer_d, 0, (num_rows+1) * sizeof(local_int_t)));
 
     // we need to get the colors
     get_color_row_mapping(nx, ny, nz, color_pointer_d, color_sorted_rows_d);
 
     // the number of blocks is now dependent on the maximum number of rows per color
 
-    int max_num_rows_per_color = std::min(nx * ny / 4, std::min(nx * nz / 2, ny * nz));
-    int max_color = (nx-1) + 2 * (ny-1) + 4 * (nz-1);
+    local_int_t max_num_rows_per_color = std::min(nx * ny / 4, std::min(nx * nz / 2, ny * nz));
+    local_int_t max_color = (nx-1) + 2 * (ny-1) + 4 * (nz-1);
 
     int num_blocks = std::min(ceiling_division(max_num_rows_per_color, 1024/WARP_SIZE), MAX_NUM_BLOCKS);
     
@@ -160,7 +160,7 @@ void striped_coloring_Implementation<T>::striped_coloring_computeSymGS(
     }
     
     for(int i = 0; i < max_iterations && normi/norm0 > this->SymGS_tolerance; i++){
-        for(int color = 0; color <= max_color; color++){
+        for(local_int_t color = 0; color <= max_color; color++){
             // we need to do a forward pass
             striped_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
             color, color_pointer_d, color_sorted_rows_d,
@@ -176,7 +176,7 @@ void striped_coloring_Implementation<T>::striped_coloring_computeSymGS(
         // we need to do a backward pass,
         // the colors for this are the same just in reverse order
         
-        for(int color = max_color; color  >= 0; color--){
+        for(local_int_t color = max_color; color  >= 0; color--){
     
             striped_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
             color, color_pointer_d, color_sorted_rows_d,

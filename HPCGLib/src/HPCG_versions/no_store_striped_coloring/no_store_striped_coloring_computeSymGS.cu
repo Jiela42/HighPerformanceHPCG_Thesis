@@ -6,24 +6,24 @@
 // #include <cuda_runtime.h>
 
 __global__ void no_store_striped_coloring_half_SymGS_kernel(
-    int color,
+    local_int_t color,
     int nx, int ny, int nz,
     local_int_t num_rows, local_int_t num_cols,
     int num_stripes, int diag_offset,
     local_int_t * j_min_i,
-    double * striped_A,
-    double * x, double * y
+    DataType * striped_A,
+    DataType * x, DataType * y
 ){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     int warp_id = tid / WARP_SIZE;
     int lane_id = tid % WARP_SIZE;
     int num_warps = blockDim.x * gridDim.x / WARP_SIZE;
 
-    for(int xy = 0 + warp_id; xy < nx*ny; xy += num_warps){
+    for(local_int_t xy = 0 + warp_id; xy < nx*ny; xy += num_warps){
         int xi = xy / ny;
         int yi = xy % ny;
 
-        int enumerator = color - xi - 2*yi;
+        local_int_t enumerator = color - xi - 2*yi;
 
         if(enumerator < 0){
             continue;
@@ -31,15 +31,15 @@ __global__ void no_store_striped_coloring_half_SymGS_kernel(
         if(enumerator % 4 != 0){
             continue;
         }
-        int zi = enumerator / 4;
+        local_int_t zi = enumerator / 4;
 
         if (zi < nz){
             local_int_t row = xi + yi * nx + zi * nx * ny;
-            double my_sum = 0.0;
+            DataType my_sum = 0.0;
             for(int stripe = lane_id; stripe < num_stripes; stripe += WARP_SIZE){
 
                 local_int_t col = j_min_i[stripe] + row;
-                double val = striped_A[row * num_stripes + stripe];
+                DataType val = striped_A[row * num_stripes + stripe];
                 if(col < num_cols && col >= 0){
                     my_sum -= val * x[col];
                 }
@@ -52,8 +52,8 @@ __global__ void no_store_striped_coloring_half_SymGS_kernel(
 
             __syncthreads();
             if (lane_id == 0){
-                double diag = striped_A[row * num_stripes + diag_offset];
-                double sum = diag * x[row] + y[row] + my_sum;          
+                DataType diag = striped_A[row * num_stripes + diag_offset];
+                DataType sum = diag * x[row] + y[row] + my_sum;          
                 x[row] = sum / diag;
             }
             __syncthreads();
@@ -85,15 +85,15 @@ void no_store_striped_coloring_Implementation<T>::no_store_striped_coloring_comp
 
     // std::cout << "nx: " << nx << ", ny: " << ny << ", nz: " << nz << std::endl;
 
-    // double looki_1082 = 0.0;
-    // CHECK_CUDA(cudaMemcpy(&looki_1082, &x_d[1082], sizeof(double), cudaMemcpyDeviceToHost));
+    // DataType looki_1082 = 0.0;
+    // CHECK_CUDA(cudaMemcpy(&looki_1082, &x_d[1082], sizeof(DataType), cudaMemcpyDeviceToHost));
 
     // std::cout << "beginning of symgs: " << looki_1082 << std::endl;
 
     // the number of blocks is now dependent on the maximum number of rows per color
 
-    int max_num_rows_per_color = std::min(nx * ny / 4, std::min(nx * nz / 2, ny * nz));
-    int max_color = (nx-1) + 2 * (ny-1) + 4 * (nz-1);
+    local_int_t max_num_rows_per_color = std::min(nx * ny / 4, std::min(nx * nz / 2, ny * nz));
+    local_int_t max_color = (nx-1) + 2 * (ny-1) + 4 * (nz-1);
 
     int num_blocks = std::min(ceiling_division(max_num_rows_per_color, 1024/WARP_SIZE), MAX_NUM_BLOCKS);
     
@@ -109,7 +109,7 @@ void no_store_striped_coloring_Implementation<T>::no_store_striped_coloring_comp
 
     for(int i = 0; i < max_iterations && normi/norm0 > this->SymGS_tolerance; i++){
 
-        for(int color = 0; color <= max_color; color++){
+        for(local_int_t color = 0; color <= max_color; color++){
             // we need to do a forward pass
             // std::cout << "color: " << color << std::endl;
             no_store_striped_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
@@ -127,7 +127,7 @@ void no_store_striped_coloring_Implementation<T>::no_store_striped_coloring_comp
         // we need to do a backward pass,
         // the colors for this are the same just in reverse order
         
-        for(int color = max_color; color  >= 0; color--){
+        for(local_int_t color = max_color; color  >= 0; color--){
     
             no_store_striped_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
             color,
@@ -152,4 +152,4 @@ void no_store_striped_coloring_Implementation<T>::no_store_striped_coloring_comp
 }
 
 // explicit template instantiation
-template class no_store_striped_coloring_Implementation<double>;
+template class no_store_striped_coloring_Implementation<DataType>;

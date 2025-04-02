@@ -114,9 +114,9 @@ __global__ void square_fusedReduction_kernel(local_int_t num_rows, double *y, do
 
 __global__ void compute_restriction_kernel(
     local_int_t num_rows,
-    double * Axf,
-    double * rf,
-    double * rc,
+    DataType * Axf,
+    DataType * rf,
+    DataType * rc,
     local_int_t * f2c_operator
 ){
     int tid = blockIdx.x * blockDim.x + threadIdx.x;

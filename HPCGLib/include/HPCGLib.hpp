@@ -9,7 +9,7 @@
 #include "cuda_runtime.h"
 
 // define number of iterations we want to have
-#define num_bench_iter 1
+#define num_bench_iter 10
 
 enum class Implementation_Type {
     STRIPED,
@@ -140,7 +140,7 @@ class HPCG_functions {
         double * x,
         double * y
     ){
-        int num_rows = A.get_num_rows();
+        global_int_t num_rows = A.get_num_rows();
 
         // Allocate memory for Ax on the device
         double *Ax;
@@ -264,7 +264,7 @@ class HPCG_functions {
         int max_CG_iterations = 500;
         double CG_tolerance = 1e-12;
         int max_SymGS_iterations = 1;
-        double SymGS_tolerance = 1e-6;
+        double SymGS_tolerance = 1e-3;
 };
 
 #endif // HPCGLIB_HPP

@@ -11,7 +11,7 @@ __global__ void cusparse_SymGS_kernel(
 ){
     // note that here x is the result vector and y is the input vector
 
-    __shared__ double diag_value[1];
+    __shared__ DataType diag_value[1];
     int lane = threadIdx.x % WARP_SIZE;
 
 
@@ -82,7 +82,7 @@ void cuSparse_Implementation<T>::cusparse_computeSymGS(
     int num_threads = WARP_SIZE;
     int num_blocks = 1;
 
-    local_int_t* A_row_ptr_d = A.get_row_ptr_d();
+    local_int_t * A_row_ptr_d = A.get_row_ptr_d();
     local_int_t * A_col_idx_d = A.get_col_idx_d();
     T * A_values_d = A.get_values_d();
 
@@ -133,4 +133,4 @@ void cuSparse_Implementation<T>::cusparse_computeSymGS(
 }
 
 // Explicit instantiation of the template
-template class cuSparse_Implementation<double>;
+template class cuSparse_Implementation<DataType>;

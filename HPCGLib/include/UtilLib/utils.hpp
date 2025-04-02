@@ -34,6 +34,8 @@ bool vector_compare(const std::vector<double>& a, const std::vector<double>& b);
 template <typename t>
 bool vector_compare(const std::vector<t>& a, const std::vector<t>& b, std::string info);
 
+bool vector_compare(const std::vector<local_int_t>& a, const std::vector<local_int_t>& b, std::string info);
+
 double L2_norm_for_SymGS(sparse_CSR_Matrix<double>& A, std::vector<double> & x_solution, std::vector<double>& true_solution);
 
 double relative_residual_norm_for_SymGS(sparse_CSR_Matrix<double>& A, std::vector<double> & x_solution, std::vector<double>& true_solution);

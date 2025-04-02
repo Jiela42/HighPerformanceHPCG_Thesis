@@ -1,23 +1,60 @@
 [  4%] Built target UtilLib
-[ 10%] Built target MatrixLib
-[ 14%] Built target TimingLib
+[ 11%] Built target MatrixLib
+[ 15%] Built target TimingLib
 [ 41%] Built target HPCGLib
-[ 49%] Built target run_bench_test
-[ 53%] Built target run_multi_GPU
-[ 53%] Built target run_multi_GPU_tests
-[ 53%] Built target run_get_Norm
 [ 53%] Built target run_coloring
+[ 53%] Built target run_get_Norm
 [ 53%] Built target run_example
+[ 53%] Built target run_multi_GPU
+[ 53%] Built target run_bench_test
+[ 53%] Built target run_multi_GPU_tests
 [ 68%] Built target TestHPCGLib
 [ 70%] Built target run_AllTests
-[ 71%] Building CXX object benchmarking/CMakeFiles/run_maxSizeSingleGPU_finder.dir/benchmark_stripedColoring.cpp.o
-[ 73%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedColoring.cpp.o
-[ 73%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedColoring.cpp.o
-[ 76%] Linking CXX executable run_maxSizeSingleGPU_finder
-[ 76%] Linking CXX executable run_full_bench
-[ 76%] Linking CXX executable run_specific_bench
-[ 84%] Built target run_maxSizeSingleGPU_finder
+[ 75%] Built target run_maxSizeSingleGPU_finder
 [100%] Built target run_full_bench
 [100%] Built target run_specific_bench
-Running striped coloring benchmarks for 432 432 432
-CUDA error in file '/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/MatrixLib/striped_Matrix.cpp' in line 465: an illegal memory access was encountered.
+Running striped coloring benchmarks for 640 640 640
+Bench SPMV
+Bench Dot
+Bench SymGS
+Bench WAXPBY
+Bench CG
+Bench MG
+Finished striped coloring benchmarks for 640 640 640
+Running striped coloring benchmarks for 648 648 648
+Bench SPMV
+Bench Dot
+Bench SymGS
+Bench WAXPBY
+Bench CG
+Bench MG
+Finished striped coloring benchmarks for 648 648 648
+Running striped coloring benchmarks for 656 656 656
+Bench SPMV
+Bench Dot
+Bench SymGS
+Bench WAXPBY
+Bench CG
+Bench MG
+Finished striped coloring benchmarks for 656 656 656
+Running striped coloring benchmarks for 664 664 664
+Bench SPMV
+Bench Dot
+Bench SymGS
+Bench WAXPBY
+Bench CG
+Bench MG
+Finished striped coloring benchmarks for 664 664 664
+Running striped coloring benchmarks for 672 672 672
+Bench SPMV
+Bench Dot
+Bench SymGS
+Bench WAXPBY
+Bench CG
+Bench MG
+Finished striped coloring benchmarks for 672 672 672
+Running striped coloring benchmarks for 680 680 680
+Bench SPMV
+Bench Dot
+Bench SymGS
+CUDA error in file '/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_coloring/striped_coloring_computeSymGS.cu' in line 138: out of memory.
