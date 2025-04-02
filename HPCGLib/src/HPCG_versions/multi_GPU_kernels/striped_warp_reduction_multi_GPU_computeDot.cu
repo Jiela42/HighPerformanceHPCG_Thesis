@@ -3,6 +3,8 @@
 #include "UtilLib/hpcg_multi_GPU_utils.cuh"
 #include <iostream>
 #include <mpi.h>
+#include <chrono>
+#include <thread>
 
 __inline__ __device__ global_int_t local_i_to_halo_i(
     local_int_t i, 
@@ -193,6 +195,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     striped_warp_reduction_multi_GPU_dot_kernel<<<num_blocks, num_threads>>>(
         num_rows, x_d->x_d, y_d->x_d, intermediate_sums_d, x_d->nx, x_d->ny, x_d->nz, x_d->dimx, x_d->dimy
     );
+    //std::this_thread::sleep_for(std::chrono::milliseconds(4));
 
     int num_inter_results = num_blocks;
     CHECK_CUDA(cudaDeviceSynchronize());

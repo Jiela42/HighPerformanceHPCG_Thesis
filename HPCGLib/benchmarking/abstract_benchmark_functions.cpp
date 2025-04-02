@@ -1,5 +1,6 @@
 #include "benchmark.hpp"
 #include <sstream>
+#include "mpi.h"
 
 // these function calls the abstract function the required number of times and records the time
 // again we have method overloading for different matrix types
@@ -473,6 +474,8 @@ void bench_Dot(
         implementation.compute_Dot(
             x_d, y_d, result_d
         );
+        CHECK_CUDA(cudaDeviceSynchronize());
+        CHECK_MPI(MPI_Barrier(MPI_COMM_WORLD));
         timer.stopTimer("compute_Dot");
     }
     
@@ -962,6 +965,10 @@ void bench_Implementation(
     if (runBenchmark("HALO")) {
         if(problem->rank == 0) std::cout << "Bench Halo Exchange" << std::endl;
         bench_ExchangeHalo(implementation, timer, x_d, problem);
+        cudaError_t err = cudaGetLastError();
+        if (err != cudaSuccess) {
+            if(problem->rank == 0) fprintf(stderr, "CUDA Error: %s\n", cudaGetErrorString(err));
+        }
     }
 
 }
