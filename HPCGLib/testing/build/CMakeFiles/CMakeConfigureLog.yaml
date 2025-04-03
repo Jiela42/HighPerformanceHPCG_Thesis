@@ -1,0 +1,794 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineSystem.cmake:205 (message)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      The system is: Linux - 5.14.21-150500.55.65_13.0.73-cray_shasta_c - x86_64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/clang++ 
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
+      
+      The CXX compiler identification is Clang, found in:
+        /capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/3.30.5/CompilerIdCXX/a.out
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineCompilerId.cmake:1205 (message)"
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineHIPCompiler.cmake:95 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Checking whether the HIP compiler is NVIDIA using "" did not match "nvcc: NVIDIA \\(R\\) Cuda compiler driver":
+      AMD clang version 18.0.0git
+      Target: x86_64-unknown-linux-gnu
+      Thread model: posix
+      InstalledDir: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineCompilerId.cmake:1192 (message)"
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineHIPCompiler.cmake:95 (CMAKE_DETERMINE_COMPILER_ID_VENDOR)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Checking whether the HIP compiler is Clang using "" matched "(clang version)":
+      AMD clang version 18.0.0git
+      Target: x86_64-unknown-linux-gnu
+      Thread model: posix
+      InstalledDir: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineHIPCompiler.cmake:136 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Compiling the HIP compiler identification source file "CMakeHIPCompilerId.hip" succeeded.
+      Compiler: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/clang++ 
+      Build flags: 
+      Id flags: -v 
+      
+      The output was:
+      0
+      AMD clang version 18.0.0git
+      Target: x86_64-unknown-linux-gnu
+      Thread model: posix
+      InstalledDir: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin
+      Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12
+      Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/7
+      Selected GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12
+      Candidate multilib: .;@m64
+      Selected multilib: .;@m64
+      Found HIP installation: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep, version 6.2.41134
+       "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/clang-18" -cc1 -triple amdgcn-amd-amdhsa -aux-triple x86_64-unknown-linux-gnu -emit-obj -mrelax-all -dumpdir a- -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeHIPCompilerId.hip -mrelocation-model pic -pic-level 2 -fhalf-no-semantic-interposition -mframe-pointer=all -fno-rounding-math -mconstructor-aliases -aux-target-cpu x86-64 -fcuda-is-device -mllvm -amdgpu-internalize-symbols -fcuda-allow-variadic-functions -fvisibility=hidden -fapply-global-visibility-to-externs -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/hip.bc -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/ocml.bc -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/ockl.bc -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/oclc_daz_opt_off.bc -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/oclc_unsafe_math_off.bc -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/oclc_finite_only_off.bc -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/oclc_correctly_rounded_sqrt_on.bc -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/oclc_wavefrontsize64_on.bc -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/oclc_isa_version_906.bc -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/oclc_abi_version_500.bc -target-cpu gfx906 -debugger-tuning=gdb -fdebug-compilation-dir=/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/3.30.5/CompilerIdHIP -v -resource-dir /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18 -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include/cuda_wrappers -idirafter /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include -include __clang_hip_runtime_wrapper.h -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -fno-autolink -ferror-limit 19 -fhip-new-launch-api -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -cuid=31e5db93472d367 -fcuda-allow-variadic-functions -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /tmp/CMakeHIPCompilerId-gfx906-604b9d.o -x hip CMakeHIPCompilerId.hip
+      clang -cc1 version 18.0.0git based upon LLVM 18.0.0git default target x86_64-unknown-linux-gnu
+      ignoring nonexistent directory "/include"
+      ignoring nonexistent directory "/include"
+      ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12"
+      ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux"
+      ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward"
+      ignoring duplicate directory "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include"
+      ignoring duplicate directory "/usr/local/include"
+      ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include"
+      ignoring duplicate directory "/usr/include"
+      ignoring duplicate directory "/usr/local/include"
+      ignoring duplicate directory "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include"
+      ignoring duplicate directory "/usr/include"
+      #include "..." search starts here:
+      #include <...> search starts here:
+       /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include/cuda_wrappers
+       /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12
+       /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux
+       /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward
+       /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include
+       /usr/local/include
+       /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include
+       /usr/include
+       /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include
+      End of search list.
+       "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/lld" -flavor gnu -m elf64_amdgpu --no-undefined -shared -plugin-opt=-amdgpu-internalize-symbols -plugin-opt=mcpu=gfx906 --whole-archive -o /tmp/CMakeHIPCompilerId-gfx906-6dca4c.out /tmp/CMakeHIPCompilerId-gfx906-604b9d.o --no-whole-archive
+       "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/clang-offload-bundler" -type=o -bundle-align=4096 -targets=host-x86_64-unknown-linux,hipv4-amdgcn-amd-amdhsa--gfx906 -input=/dev/null -input=/tmp/CMakeHIPCompilerId-gfx906-6dca4c.out -output=/tmp/CMakeHIPCompilerId-da87c5.hipfb -verbose
+       "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/clang-18" -cc1 -triple x86_64-unknown-linux-gnu -aux-triple amdgcn-amd-amdhsa -emit-obj -mrelax-all -dumpdir a- -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeHIPCompilerId.hip -mrelocation-model static -mframe-pointer=all -fmath-errno -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb -fdebug-compilation-dir=/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/3.30.5/CompilerIdHIP -v -fcoverage-compilation-dir=/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/3.30.5/CompilerIdHIP -resource-dir /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18 -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include/cuda_wrappers -idirafter /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include -include __clang_hip_runtime_wrapper.h -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -ferror-limit 19 -fhip-new-launch-api -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -fcuda-include-gpubinary /tmp/CMakeHIPCompilerId-da87c5.hipfb -cuid=31e5db93472d367 -fcuda-allow-variadic-functions -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /tmp/CMakeHIPCompilerId-b48458.o -x hip CMakeHIPCompilerId.hip
+      clang -cc1 version 18.0.0git based upon LLVM 18.0.0git default target x86_64-unknown-linux-gnu
+      ignoring nonexistent directory "/include"
+      ignoring nonexistent directory "/include"
+      ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12"
+      ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux"
+      ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward"
+      ignoring duplicate directory "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include"
+      ignoring duplicate directory "/usr/local/include"
+      ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include"
+      ignoring duplicate directory "/usr/include"
+      #include "..." search starts here:
+      #include <...> search starts here:
+       /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include/cuda_wrappers
+       /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12
+       /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux
+       /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward
+       /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include
+       /usr/local/include
+       /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include
+       /usr/include
+       /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include
+      End of search list.
+       "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/ld.lld" --hash-style=gnu --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o a.out /usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crt1.o /usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crti.o /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/clang_rt.crtbegin-x86_64.o -L/usr/lib64/gcc/x86_64-suse-linux/12 -L/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/lib -L/lib -L/usr/lib /tmp/CMakeHIPCompilerId-b48458.o -L/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib -rpath /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib -lamdhip64 -lstdc++ -lm /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a -lgcc_s -lc /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a -lgcc_s /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/clang_rt.crtend-x86_64.o /usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crtn.o
+      
+      
+      Compilation of the HIP compiler identification source "CMakeHIPCompilerId.hip" produced "a.out"
+      
+      The HIP compiler identification is Clang, found in:
+        /capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/3.30.5/CompilerIdHIP/a.out
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineHIPCompiler.cmake:188 (message)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Parsed HIP implicit link information from compiler id output:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(\\.[a-z]+)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        ignore line: [AMD clang version 18.0.0git]
+        ignore line: [Target: x86_64-unknown-linux-gnu]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin]
+        ignore line: [Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12]
+        ignore line: [Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/7]
+        ignore line: [Selected GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12]
+        ignore line: [Candidate multilib: .]
+        ignore line: [@m64]
+        ignore line: [Selected multilib: .]
+        ignore line: [@m64]
+        ignore line: [Found HIP installation: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep  version 6.2.41134]
+        ignore line: [ "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/clang-18" -cc1 -triple amdgcn-amd-amdhsa -aux-triple x86_64-unknown-linux-gnu -emit-obj -mrelax-all -dumpdir a- -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeHIPCompilerId.hip -mrelocation-model pic -pic-level 2 -fhalf-no-semantic-interposition -mframe-pointer=all -fno-rounding-math -mconstructor-aliases -aux-target-cpu x86-64 -fcuda-is-device -mllvm -amdgpu-internalize-symbols -fcuda-allow-variadic-functions -fvisibility=hidden -fapply-global-visibility-to-externs -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/hip.bc -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/ocml.bc -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/ockl.bc -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/oclc_daz_opt_off.bc -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/oclc_unsafe_math_off.bc -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/oclc_finite_only_off.bc -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/oclc_correctly_rounded_sqrt_on.bc -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/oclc_wavefrontsize64_on.bc -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/oclc_isa_version_906.bc -mlink-builtin-bitcode /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/amdgcn/bitcode/oclc_abi_version_500.bc -target-cpu gfx906 -debugger-tuning=gdb -fdebug-compilation-dir=/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/3.30.5/CompilerIdHIP -v -resource-dir /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18 -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include/cuda_wrappers -idirafter /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include -include __clang_hip_runtime_wrapper.h -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -fno-autolink -ferror-limit 19 -fhip-new-launch-api -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -cuid=31e5db93472d367 -fcuda-allow-variadic-functions -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /tmp/CMakeHIPCompilerId-gfx906-604b9d.o -x hip CMakeHIPCompilerId.hip]
+        ignore line: [clang -cc1 version 18.0.0git based upon LLVM 18.0.0git default target x86_64-unknown-linux-gnu]
+        ignore line: [ignoring nonexistent directory "/include"]
+        ignore line: [ignoring nonexistent directory "/include"]
+        ignore line: [ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12"]
+        ignore line: [ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux"]
+        ignore line: [ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward"]
+        ignore line: [ignoring duplicate directory "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include"]
+        ignore line: [ignoring duplicate directory "/usr/local/include"]
+        ignore line: [ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include"]
+        ignore line: [ignoring duplicate directory "/usr/include"]
+        ignore line: [ignoring duplicate directory "/usr/local/include"]
+        ignore line: [ignoring duplicate directory "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include"]
+        ignore line: [ignoring duplicate directory "/usr/include"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include/cuda_wrappers]
+        ignore line: [ /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12]
+        ignore line: [ /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux]
+        ignore line: [ /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward]
+        ignore line: [ /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include]
+        ignore line: [ /usr/local/include]
+        ignore line: [ /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include]
+        ignore line: [ /usr/include]
+        ignore line: [ /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include]
+        ignore line: [End of search list.]
+        ignore line: [ "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/lld" -flavor gnu -m elf64_amdgpu --no-undefined -shared -plugin-opt=-amdgpu-internalize-symbols -plugin-opt=mcpu=gfx906 --whole-archive -o /tmp/CMakeHIPCompilerId-gfx906-6dca4c.out /tmp/CMakeHIPCompilerId-gfx906-604b9d.o --no-whole-archive]
+        ignore line: [ "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/clang-offload-bundler" -type=o -bundle-align=4096 -targets=host-x86_64-unknown-linux hipv4-amdgcn-amd-amdhsa--gfx906 -input=/dev/null -input=/tmp/CMakeHIPCompilerId-gfx906-6dca4c.out -output=/tmp/CMakeHIPCompilerId-da87c5.hipfb -verbose]
+        ignore line: [ "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/clang-18" -cc1 -triple x86_64-unknown-linux-gnu -aux-triple amdgcn-amd-amdhsa -emit-obj -mrelax-all -dumpdir a- -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeHIPCompilerId.hip -mrelocation-model static -mframe-pointer=all -fmath-errno -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb -fdebug-compilation-dir=/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/3.30.5/CompilerIdHIP -v -fcoverage-compilation-dir=/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/3.30.5/CompilerIdHIP -resource-dir /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18 -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include/cuda_wrappers -idirafter /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include -include __clang_hip_runtime_wrapper.h -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -ferror-limit 19 -fhip-new-launch-api -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -fcuda-include-gpubinary /tmp/CMakeHIPCompilerId-da87c5.hipfb -cuid=31e5db93472d367 -fcuda-allow-variadic-functions -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o /tmp/CMakeHIPCompilerId-b48458.o -x hip CMakeHIPCompilerId.hip]
+        ignore line: [clang -cc1 version 18.0.0git based upon LLVM 18.0.0git default target x86_64-unknown-linux-gnu]
+        ignore line: [ignoring nonexistent directory "/include"]
+        ignore line: [ignoring nonexistent directory "/include"]
+        ignore line: [ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12"]
+        ignore line: [ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux"]
+        ignore line: [ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward"]
+        ignore line: [ignoring duplicate directory "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include"]
+        ignore line: [ignoring duplicate directory "/usr/local/include"]
+        ignore line: [ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include"]
+        ignore line: [ignoring duplicate directory "/usr/include"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include/cuda_wrappers]
+        ignore line: [ /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12]
+        ignore line: [ /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux]
+        ignore line: [ /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward]
+        ignore line: [ /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include]
+        ignore line: [ /usr/local/include]
+        ignore line: [ /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include]
+        ignore line: [ /usr/include]
+        ignore line: [ /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include]
+        ignore line: [End of search list.]
+        link line: [ "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/ld.lld" --hash-style=gnu --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o a.out /usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crt1.o /usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crti.o /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/clang_rt.crtbegin-x86_64.o -L/usr/lib64/gcc/x86_64-suse-linux/12 -L/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/lib -L/lib -L/usr/lib /tmp/CMakeHIPCompilerId-b48458.o -L/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib -rpath /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib -lamdhip64 -lstdc++ -lm /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a -lgcc_s -lc /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a -lgcc_s /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/clang_rt.crtend-x86_64.o /usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crtn.o]
+          arg [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/ld.lld] ==> ignore
+          arg [--hash-style=gnu] ==> ignore
+          arg [--eh-frame-hdr] ==> ignore
+          arg [-m] ==> ignore
+          arg [elf_x86_64] ==> ignore
+          arg [-dynamic-linker] ==> ignore
+          arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+          arg [-o] ==> ignore
+          arg [a.out] ==> ignore
+          arg [-L/usr/lib64/gcc/x86_64-suse-linux/12] ==> dir [/usr/lib64/gcc/x86_64-suse-linux/12]
+          arg [-L/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64] ==> dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64]
+          arg [-L/lib/../lib64] ==> dir [/lib/../lib64]
+          arg [-L/usr/lib/../lib64] ==> dir [/usr/lib/../lib64]
+          arg [-L/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/lib] ==> dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/lib]
+          arg [-L/lib] ==> dir [/lib]
+          arg [-L/usr/lib] ==> dir [/usr/lib]
+          arg [-L/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib] ==> dir [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib]
+          arg [-rpath] ==> ignore
+          arg [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib] ==> ignore
+          arg [-lamdhip64] ==> lib [amdhip64]
+          arg [-lstdc++] ==> lib [stdc++]
+          arg [-lm] ==> lib [m]
+          arg [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a] ==> lib [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a]
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [-lc] ==> lib [c]
+          arg [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a] ==> lib [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a]
+          arg [-lgcc_s] ==> lib [gcc_s]
+        remove lib [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a]
+        remove lib [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a]
+        collapse library dir [/usr/lib64/gcc/x86_64-suse-linux/12] ==> [/usr/lib64/gcc/x86_64-suse-linux/12]
+        collapse library dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64] ==> [/usr/lib64]
+        collapse library dir [/lib/../lib64] ==> [/lib64]
+        collapse library dir [/usr/lib/../lib64] ==> [/usr/lib64]
+        collapse library dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/lib] ==> [/usr/x86_64-suse-linux/lib]
+        collapse library dir [/lib] ==> [/lib]
+        collapse library dir [/usr/lib] ==> [/usr/lib]
+        collapse library dir [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib] ==> [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib]
+        implicit libs: [amdhip64;stdc++;m;gcc_s;c;gcc_s]
+        implicit objs: []
+        implicit dirs: [/usr/lib64/gcc/x86_64-suse-linux/12;/usr/lib64;/lib64;/usr/x86_64-suse-linux/lib;/lib;/usr/lib;/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib]
+        implicit fwks: []
+      
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineCompilerABI.cmake:74 (try_compile)"
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-EpKFGO"
+      binary: "/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-EpKFGO"
+    cmakeVariables:
+      CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS: "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/clang-scan-deps"
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_CXX_SCAN_FOR_MODULES: "OFF"
+      CMAKE_EXE_LINKER_FLAGS: "-L/users/ybudanaz/.local/lib"
+      CMAKE_HIP_ARCHITECTURES: "gfx90a;gfx90a;gfx90a;gfx90a;gfx90a;gfx90a;gfx90a;gfx90a"
+      CMAKE_HIP_PLATFORM: "amd"
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-EpKFGO'
+        
+        Run Build Command(s): /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/bin/cmake -E env VERBOSE=1 /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/gmake-4.4.1-jv75rb6ldfqlahbjzas456fzqarsrlkb/bin/gmake -f Makefile cmTC_e090e/fast
+        /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/gmake-4.4.1-jv75rb6ldfqlahbjzas456fzqarsrlkb/bin/gmake  -f CMakeFiles/cmTC_e090e.dir/build.make CMakeFiles/cmTC_e090e.dir/build
+        gmake[1]: Entering directory '/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-EpKFGO'
+        Building CXX object CMakeFiles/cmTC_e090e.dir/CMakeCXXCompilerABI.cpp.o
+        /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/clang++   -v -MD -MT CMakeFiles/cmTC_e090e.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_e090e.dir/CMakeCXXCompilerABI.cpp.o.d -o CMakeFiles/cmTC_e090e.dir/CMakeCXXCompilerABI.cpp.o -c /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeCXXCompilerABI.cpp
+        clang version 17.0.6
+        Target: x86_64-unknown-linux-gnu
+        Thread model: posix
+        InstalledDir: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin
+        Configuration file: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/clang++.cfg
+        Selected GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12
+        Candidate multilib: .;@m64
+        Selected multilib: .;@m64
+        Found HIP installation: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep, version 6.2.41134
+         (in-process)
+         "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/clang-17" -cc1 -triple x86_64-unknown-linux-gnu -emit-obj -mrelax-all -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -pic-is-pie -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb -v -fcoverage-compilation-dir=/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-EpKFGO -resource-dir /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/lib/clang/17 -dependency-file CMakeFiles/cmTC_e090e.dir/CMakeCXXCompilerABI.cpp.o.d -MT CMakeFiles/cmTC_e090e.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/lib/clang/17/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -fdebug-compilation-dir=/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-EpKFGO -ferror-limit 19 -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_e090e.dir/CMakeCXXCompilerABI.cpp.o -x c++ /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeCXXCompilerABI.cpp
+        clang -cc1 version 17.0.6 based upon LLVM 17.0.6 default target x86_64-unknown-linux-gnu
+        ignoring nonexistent directory "/include"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12
+         /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux
+         /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward
+         /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/lib/clang/17/include
+         /usr/local/include
+         /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include
+         /usr/include
+        End of search list.
+        Linking CXX executable cmTC_e090e
+        /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e090e.dir/link.txt --verbose=1
+        /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/clang++ -L/users/ybudanaz/.local/lib -v -Wl,-v CMakeFiles/cmTC_e090e.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_e090e
+        clang version 17.0.6
+        Target: x86_64-unknown-linux-gnu
+        Thread model: posix
+        InstalledDir: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin
+        Configuration file: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/clang++.cfg
+        Selected GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12
+        Candidate multilib: .;@m64
+        Selected multilib: .;@m64
+        Found HIP installation: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep, version 6.2.41134
+         "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/bin/ld" -pie --hash-style=gnu --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_e090e /usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/Scrt1.o /usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crti.o /usr/lib64/gcc/x86_64-suse-linux/12/crtbeginS.o -L/users/ybudanaz/.local/lib -L/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/../lib/x86_64-unknown-linux-gnu -L/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/lib/clang/17/lib/x86_64-unknown-linux-gnu -L/usr/lib64/gcc/x86_64-suse-linux/12 -L/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/lib -L/lib -L/usr/lib -v CMakeFiles/cmTC_e090e.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib64/gcc/x86_64-suse-linux/12/crtendS.o /usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crtn.o
+        GNU ld (GNU Binutils; SUSE Linux Enterprise 15) 2.41.0.20230908-150100.7.46
+        gmake[1]: Leaving directory '/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-EpKFGO'
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineCompilerABI.cmake:182 (message)"
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Parsed CXX implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12]
+          add: [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux]
+          add: [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward]
+          add: [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/lib/clang/17/include]
+          add: [/usr/local/include]
+          add: [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include]
+          add: [/usr/include]
+        end of search list found
+        collapse include dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12] ==> [/usr/include/c++/12]
+        collapse include dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux] ==> [/usr/include/c++/12/x86_64-suse-linux]
+        collapse include dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward] ==> [/usr/include/c++/12/backward]
+        collapse include dir [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/lib/clang/17/include] ==> [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/lib/clang/17/include]
+        collapse include dir [/usr/local/include] ==> [/usr/local/include]
+        collapse include dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include] ==> [/usr/x86_64-suse-linux/include]
+        collapse include dir [/usr/include] ==> [/usr/include]
+        implicit include dirs: [/usr/include/c++/12;/usr/include/c++/12/x86_64-suse-linux;/usr/include/c++/12/backward;/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/lib/clang/17/include;/usr/local/include;/usr/x86_64-suse-linux/include;/usr/include]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineCompilerABI.cmake:218 (message)"
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Parsed CXX implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(\\.[a-z]+)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(\\.[a-z]+)?))("|,| |$)]
+        ignore line: [Change Dir: '/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-EpKFGO']
+        ignore line: []
+        ignore line: [Run Build Command(s): /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/bin/cmake -E env VERBOSE=1 /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/gmake-4.4.1-jv75rb6ldfqlahbjzas456fzqarsrlkb/bin/gmake -f Makefile cmTC_e090e/fast]
+        ignore line: [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/gmake-4.4.1-jv75rb6ldfqlahbjzas456fzqarsrlkb/bin/gmake  -f CMakeFiles/cmTC_e090e.dir/build.make CMakeFiles/cmTC_e090e.dir/build]
+        ignore line: [gmake[1]: Entering directory '/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-EpKFGO']
+        ignore line: [Building CXX object CMakeFiles/cmTC_e090e.dir/CMakeCXXCompilerABI.cpp.o]
+        ignore line: [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/clang++   -v -MD -MT CMakeFiles/cmTC_e090e.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_e090e.dir/CMakeCXXCompilerABI.cpp.o.d -o CMakeFiles/cmTC_e090e.dir/CMakeCXXCompilerABI.cpp.o -c /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [clang version 17.0.6]
+        ignore line: [Target: x86_64-unknown-linux-gnu]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin]
+        ignore line: [Configuration file: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/clang++.cfg]
+        ignore line: [Selected GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12]
+        ignore line: [Candidate multilib: .]
+        ignore line: [@m64]
+        ignore line: [Selected multilib: .]
+        ignore line: [@m64]
+        ignore line: [Found HIP installation: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep  version 6.2.41134]
+        ignore line: [ (in-process)]
+        ignore line: [ "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/clang-17" -cc1 -triple x86_64-unknown-linux-gnu -emit-obj -mrelax-all -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -pic-is-pie -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb -v -fcoverage-compilation-dir=/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-EpKFGO -resource-dir /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/lib/clang/17 -dependency-file CMakeFiles/cmTC_e090e.dir/CMakeCXXCompilerABI.cpp.o.d -MT CMakeFiles/cmTC_e090e.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/lib/clang/17/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -fdebug-compilation-dir=/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-EpKFGO -ferror-limit 19 -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_e090e.dir/CMakeCXXCompilerABI.cpp.o -x c++ /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [clang -cc1 version 17.0.6 based upon LLVM 17.0.6 default target x86_64-unknown-linux-gnu]
+        ignore line: [ignoring nonexistent directory "/include"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12]
+        ignore line: [ /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux]
+        ignore line: [ /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward]
+        ignore line: [ /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/lib/clang/17/include]
+        ignore line: [ /usr/local/include]
+        ignore line: [ /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include]
+        ignore line: [ /usr/include]
+        ignore line: [End of search list.]
+        ignore line: [Linking CXX executable cmTC_e090e]
+        ignore line: [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e090e.dir/link.txt --verbose=1]
+        ignore line: [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/clang++ -L/users/ybudanaz/.local/lib -v -Wl -v CMakeFiles/cmTC_e090e.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_e090e]
+        ignore line: [clang version 17.0.6]
+        ignore line: [Target: x86_64-unknown-linux-gnu]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin]
+        ignore line: [Configuration file: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/clang++.cfg]
+        ignore line: [Selected GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12]
+        ignore line: [Candidate multilib: .]
+        ignore line: [@m64]
+        ignore line: [Selected multilib: .]
+        ignore line: [@m64]
+        ignore line: [Found HIP installation: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep  version 6.2.41134]
+        link line: [ "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/bin/ld" -pie --hash-style=gnu --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_e090e /usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/Scrt1.o /usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crti.o /usr/lib64/gcc/x86_64-suse-linux/12/crtbeginS.o -L/users/ybudanaz/.local/lib -L/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/../lib/x86_64-unknown-linux-gnu -L/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/lib/clang/17/lib/x86_64-unknown-linux-gnu -L/usr/lib64/gcc/x86_64-suse-linux/12 -L/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/lib -L/lib -L/usr/lib -v CMakeFiles/cmTC_e090e.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib64/gcc/x86_64-suse-linux/12/crtendS.o /usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crtn.o]
+          arg [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/bin/ld] ==> ignore
+          arg [-pie] ==> ignore
+          arg [--hash-style=gnu] ==> ignore
+          arg [--eh-frame-hdr] ==> ignore
+          arg [-m] ==> ignore
+          arg [elf_x86_64] ==> ignore
+          arg [-dynamic-linker] ==> ignore
+          arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_e090e] ==> ignore
+          arg [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/Scrt1.o] ==> obj [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/Scrt1.o]
+          arg [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crti.o] ==> obj [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crti.o]
+          arg [/usr/lib64/gcc/x86_64-suse-linux/12/crtbeginS.o] ==> obj [/usr/lib64/gcc/x86_64-suse-linux/12/crtbeginS.o]
+          arg [-L/users/ybudanaz/.local/lib] ==> dir [/users/ybudanaz/.local/lib]
+          arg [-L/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/../lib/x86_64-unknown-linux-gnu] ==> dir [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/../lib/x86_64-unknown-linux-gnu]
+          arg [-L/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/lib/clang/17/lib/x86_64-unknown-linux-gnu] ==> dir [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/lib/clang/17/lib/x86_64-unknown-linux-gnu]
+          arg [-L/usr/lib64/gcc/x86_64-suse-linux/12] ==> dir [/usr/lib64/gcc/x86_64-suse-linux/12]
+          arg [-L/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64] ==> dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64]
+          arg [-L/lib/../lib64] ==> dir [/lib/../lib64]
+          arg [-L/usr/lib/../lib64] ==> dir [/usr/lib/../lib64]
+          arg [-L/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/lib] ==> dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/lib]
+          arg [-L/lib] ==> dir [/lib]
+          arg [-L/usr/lib] ==> dir [/usr/lib]
+          arg [-v] ==> ignore
+          arg [CMakeFiles/cmTC_e090e.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+          arg [-lstdc++] ==> lib [stdc++]
+          arg [-lm] ==> lib [m]
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [-lgcc] ==> lib [gcc]
+          arg [-lc] ==> lib [c]
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [-lgcc] ==> lib [gcc]
+          arg [/usr/lib64/gcc/x86_64-suse-linux/12/crtendS.o] ==> obj [/usr/lib64/gcc/x86_64-suse-linux/12/crtendS.o]
+          arg [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crtn.o] ==> obj [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crtn.o]
+        linker tool for 'CXX': /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/bin/ld
+        collapse obj [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/Scrt1.o] ==> [/usr/lib64/Scrt1.o]
+        collapse obj [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crti.o] ==> [/usr/lib64/crti.o]
+        collapse obj [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crtn.o] ==> [/usr/lib64/crtn.o]
+        collapse library dir [/users/ybudanaz/.local/lib] ==> [/users/ybudanaz/.local/lib]
+        collapse library dir [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/../lib/x86_64-unknown-linux-gnu] ==> [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/lib/x86_64-unknown-linux-gnu]
+        collapse library dir [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/lib/clang/17/lib/x86_64-unknown-linux-gnu] ==> [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/lib/clang/17/lib/x86_64-unknown-linux-gnu]
+        collapse library dir [/usr/lib64/gcc/x86_64-suse-linux/12] ==> [/usr/lib64/gcc/x86_64-suse-linux/12]
+        collapse library dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64] ==> [/usr/lib64]
+        collapse library dir [/lib/../lib64] ==> [/lib64]
+        collapse library dir [/usr/lib/../lib64] ==> [/usr/lib64]
+        collapse library dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/lib] ==> [/usr/x86_64-suse-linux/lib]
+        collapse library dir [/lib] ==> [/lib]
+        collapse library dir [/usr/lib] ==> [/usr/lib]
+        implicit libs: [stdc++;m;gcc_s;gcc;c;gcc_s;gcc]
+        implicit objs: [/usr/lib64/Scrt1.o;/usr/lib64/crti.o;/usr/lib64/gcc/x86_64-suse-linux/12/crtbeginS.o;/usr/lib64/gcc/x86_64-suse-linux/12/crtendS.o;/usr/lib64/crtn.o]
+        implicit dirs: [/users/ybudanaz/.local/lib;/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/lib/x86_64-unknown-linux-gnu;/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/lib/clang/17/lib/x86_64-unknown-linux-gnu;/usr/lib64/gcc/x86_64-suse-linux/12;/usr/lib64;/lib64;/usr/x86_64-suse-linux/lib;/lib;/usr/lib]
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/Internal/CMakeDetermineLinkerId.cmake:40 (message)"
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineCompilerABI.cmake:255 (cmake_determine_linker_id)"
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Running the CXX compiler's linker: "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/bin/ld" "-v"
+      GNU ld (GNU Binutils; SUSE Linux Enterprise 15) 2.41.0.20230908-150100.7.46
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineCompilerABI.cmake:74 (try_compile)"
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeTestHIPCompiler.cmake:32 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    checks:
+      - "Detecting HIP compiler ABI info"
+    directories:
+      source: "/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-ehD6cO"
+      binary: "/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-ehD6cO"
+    cmakeVariables:
+      CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS: "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/clang-scan-deps"
+      CMAKE_EXE_LINKER_FLAGS: "-L/users/ybudanaz/.local/lib"
+      CMAKE_HIP_ARCHITECTURES: "gfx90a;gfx90a;gfx90a;gfx90a;gfx90a;gfx90a;gfx90a;gfx90a"
+      CMAKE_HIP_FLAGS: " --cuda-host-only"
+      CMAKE_HIP_FLAGS_DEBUG: "-g -O"
+      CMAKE_HIP_PLATFORM: "amd"
+      CMAKE_HIP_RUNTIME_LIBRARY: "Static"
+    buildResult:
+      variable: "CMAKE_HIP_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-ehD6cO'
+        
+        Run Build Command(s): /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/bin/cmake -E env VERBOSE=1 /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/gmake-4.4.1-jv75rb6ldfqlahbjzas456fzqarsrlkb/bin/gmake -f Makefile cmTC_338b3/fast
+        /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/gmake-4.4.1-jv75rb6ldfqlahbjzas456fzqarsrlkb/bin/gmake  -f CMakeFiles/cmTC_338b3.dir/build.make CMakeFiles/cmTC_338b3.dir/build
+        gmake[1]: Entering directory '/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-ehD6cO'
+        Building HIP object CMakeFiles/cmTC_338b3.dir/CMakeHIPCompilerABI.hip.o
+        /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/clang++  -D__HIP_ROCclr__=1 -isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include --cuda-host-only  --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a   -v -o CMakeFiles/cmTC_338b3.dir/CMakeHIPCompilerABI.hip.o -x hip -c /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeHIPCompilerABI.hip
+        AMD clang version 18.0.0git
+        Target: x86_64-unknown-linux-gnu
+        Thread model: posix
+        InstalledDir: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin
+        Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12
+        Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/7
+        Selected GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12
+        Candidate multilib: .;@m64
+        Selected multilib: .;@m64
+        Found HIP installation: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep, version 6.2.41134
+         (in-process)
+         "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/clang-18" -cc1 -triple x86_64-unknown-linux-gnu -aux-triple amdgcn-amd-amdhsa -emit-obj -mrelax-all -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeHIPCompilerABI.hip -mrelocation-model static -mframe-pointer=all -fmath-errno -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb -fdebug-compilation-dir=/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-ehD6cO -v -fcoverage-compilation-dir=/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-ehD6cO -resource-dir /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18 -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include/cuda_wrappers -idirafter /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include -include __clang_hip_runtime_wrapper.h -isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include -D __HIP_ROCclr__=1 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -ferror-limit 19 -fhip-new-launch-api -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -fcuda-allow-variadic-functions -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_338b3.dir/CMakeHIPCompilerABI.hip.o -x hip /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeHIPCompilerABI.hip
+        clang -cc1 version 18.0.0git based upon LLVM 18.0.0git default target x86_64-unknown-linux-gnu
+        ignoring nonexistent directory "/include"
+        ignoring nonexistent directory "/include"
+        ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12"
+        ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux"
+        ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward"
+        ignoring duplicate directory "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include"
+        ignoring duplicate directory "/usr/local/include"
+        ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include"
+        ignoring duplicate directory "/usr/include"
+        ignoring duplicate directory "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include
+         /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include/cuda_wrappers
+         /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12
+         /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux
+         /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward
+         /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include
+         /usr/local/include
+         /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include
+         /usr/include
+        End of search list.
+        Linking HIP executable cmTC_338b3
+        /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/bin/cmake -E cmake_link_script CMakeFiles/cmTC_338b3.dir/link.txt --verbose=1
+        /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/clang++  --cuda-host-only  --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a -L/users/ybudanaz/.local/lib -v --hip-link --rtlib=compiler-rt -unwindlib=libgcc CMakeFiles/cmTC_338b3.dir/CMakeHIPCompilerABI.hip.o -o cmTC_338b3  /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib/libamdhip64.so.6.2.41134
+        AMD clang version 18.0.0git
+        Target: x86_64-unknown-linux-gnu
+        Thread model: posix
+        InstalledDir: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin
+        Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12
+        Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/7
+        Selected GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12
+        Candidate multilib: .;@m64
+        Selected multilib: .;@m64
+        Found HIP installation: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep, version 6.2.41134
+         "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/ld.lld" --hash-style=gnu --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_338b3 /usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crt1.o /usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crti.o /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/clang_rt.crtbegin-x86_64.o -L/users/ybudanaz/.local/lib -L/usr/lib64/gcc/x86_64-suse-linux/12 -L/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/lib -L/lib -L/usr/lib CMakeFiles/cmTC_338b3.dir/CMakeHIPCompilerABI.hip.o /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib/libamdhip64.so.6.2.41134 -L/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib -rpath /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib -lamdhip64 -lstdc++ -lm /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a -lgcc_s -lc /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a -lgcc_s /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/clang_rt.crtend-x86_64.o /usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crtn.o
+        gmake[1]: Leaving directory '/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-ehD6cO'
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineCompilerABI.cmake:182 (message)"
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeTestHIPCompiler.cmake:32 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Parsed HIP implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include]
+          add: [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include/cuda_wrappers]
+          add: [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12]
+          add: [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux]
+          add: [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward]
+          add: [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include]
+          add: [/usr/local/include]
+          add: [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include]
+          add: [/usr/include]
+        end of search list found
+        collapse include dir [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include] ==> [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include]
+        collapse include dir [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include/cuda_wrappers] ==> [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include/cuda_wrappers]
+        collapse include dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12] ==> [/usr/include/c++/12]
+        collapse include dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux] ==> [/usr/include/c++/12/x86_64-suse-linux]
+        collapse include dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward] ==> [/usr/include/c++/12/backward]
+        collapse include dir [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include] ==> [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include]
+        collapse include dir [/usr/local/include] ==> [/usr/local/include]
+        collapse include dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include] ==> [/usr/x86_64-suse-linux/include]
+        collapse include dir [/usr/include] ==> [/usr/include]
+        implicit include dirs: [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include;/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include/cuda_wrappers;/usr/include/c++/12;/usr/include/c++/12/x86_64-suse-linux;/usr/include/c++/12/backward;/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include;/usr/local/include;/usr/x86_64-suse-linux/include;/usr/include]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineCompilerABI.cmake:218 (message)"
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeTestHIPCompiler.cmake:32 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Parsed HIP implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(\\.[a-z]+)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(\\.[a-z]+)?))("|,| |$)]
+        ignore line: [Change Dir: '/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-ehD6cO']
+        ignore line: []
+        ignore line: [Run Build Command(s): /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/bin/cmake -E env VERBOSE=1 /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/gmake-4.4.1-jv75rb6ldfqlahbjzas456fzqarsrlkb/bin/gmake -f Makefile cmTC_338b3/fast]
+        ignore line: [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/gmake-4.4.1-jv75rb6ldfqlahbjzas456fzqarsrlkb/bin/gmake  -f CMakeFiles/cmTC_338b3.dir/build.make CMakeFiles/cmTC_338b3.dir/build]
+        ignore line: [gmake[1]: Entering directory '/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-ehD6cO']
+        ignore line: [Building HIP object CMakeFiles/cmTC_338b3.dir/CMakeHIPCompilerABI.hip.o]
+        ignore line: [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/clang++  -D__HIP_ROCclr__=1 -isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include --cuda-host-only  --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a   -v -o CMakeFiles/cmTC_338b3.dir/CMakeHIPCompilerABI.hip.o -x hip -c /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeHIPCompilerABI.hip]
+        ignore line: [AMD clang version 18.0.0git]
+        ignore line: [Target: x86_64-unknown-linux-gnu]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin]
+        ignore line: [Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12]
+        ignore line: [Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/7]
+        ignore line: [Selected GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12]
+        ignore line: [Candidate multilib: .]
+        ignore line: [@m64]
+        ignore line: [Selected multilib: .]
+        ignore line: [@m64]
+        ignore line: [Found HIP installation: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep  version 6.2.41134]
+        ignore line: [ (in-process)]
+        ignore line: [ "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/clang-18" -cc1 -triple x86_64-unknown-linux-gnu -aux-triple amdgcn-amd-amdhsa -emit-obj -mrelax-all -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeHIPCompilerABI.hip -mrelocation-model static -mframe-pointer=all -fmath-errno -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb -fdebug-compilation-dir=/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-ehD6cO -v -fcoverage-compilation-dir=/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-ehD6cO -resource-dir /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18 -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include/cuda_wrappers -idirafter /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include -include __clang_hip_runtime_wrapper.h -isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include -D __HIP_ROCclr__=1 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12 -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -internal-isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include -internal-isystem /usr/local/include -internal-isystem /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdeprecated-macro -ferror-limit 19 -fhip-new-launch-api -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -fcuda-allow-variadic-functions -faddrsig -D__GCC_HAVE_DWARF2_CFI_ASM=1 -o CMakeFiles/cmTC_338b3.dir/CMakeHIPCompilerABI.hip.o -x hip /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeHIPCompilerABI.hip]
+        ignore line: [clang -cc1 version 18.0.0git based upon LLVM 18.0.0git default target x86_64-unknown-linux-gnu]
+        ignore line: [ignoring nonexistent directory "/include"]
+        ignore line: [ignoring nonexistent directory "/include"]
+        ignore line: [ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12"]
+        ignore line: [ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux"]
+        ignore line: [ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward"]
+        ignore line: [ignoring duplicate directory "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include"]
+        ignore line: [ignoring duplicate directory "/usr/local/include"]
+        ignore line: [ignoring duplicate directory "/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include"]
+        ignore line: [ignoring duplicate directory "/usr/include"]
+        ignore line: [ignoring duplicate directory "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/include]
+        ignore line: [ /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include/cuda_wrappers]
+        ignore line: [ /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12]
+        ignore line: [ /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/x86_64-suse-linux]
+        ignore line: [ /usr/lib64/gcc/x86_64-suse-linux/12/../../../../include/c++/12/backward]
+        ignore line: [ /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/include]
+        ignore line: [ /usr/local/include]
+        ignore line: [ /usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/include]
+        ignore line: [ /usr/include]
+        ignore line: [End of search list.]
+        ignore line: [Linking HIP executable cmTC_338b3]
+        ignore line: [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/bin/cmake -E cmake_link_script CMakeFiles/cmTC_338b3.dir/link.txt --verbose=1]
+        ignore line: [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/clang++  --cuda-host-only  --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a --offload-arch=gfx90a -L/users/ybudanaz/.local/lib -v --hip-link --rtlib=compiler-rt -unwindlib=libgcc CMakeFiles/cmTC_338b3.dir/CMakeHIPCompilerABI.hip.o -o cmTC_338b3  /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib/libamdhip64.so.6.2.41134]
+        ignore line: [AMD clang version 18.0.0git]
+        ignore line: [Target: x86_64-unknown-linux-gnu]
+        ignore line: [Thread model: posix]
+        ignore line: [InstalledDir: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin]
+        ignore line: [Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12]
+        ignore line: [Found candidate GCC installation: /usr/lib64/gcc/x86_64-suse-linux/7]
+        ignore line: [Selected GCC installation: /usr/lib64/gcc/x86_64-suse-linux/12]
+        ignore line: [Candidate multilib: .]
+        ignore line: [@m64]
+        ignore line: [Selected multilib: .]
+        ignore line: [@m64]
+        ignore line: [Found HIP installation: /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep  version 6.2.41134]
+        link line: [ "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/ld.lld" --hash-style=gnu --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_338b3 /usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crt1.o /usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crti.o /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/clang_rt.crtbegin-x86_64.o -L/users/ybudanaz/.local/lib -L/usr/lib64/gcc/x86_64-suse-linux/12 -L/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/lib -L/lib -L/usr/lib CMakeFiles/cmTC_338b3.dir/CMakeHIPCompilerABI.hip.o /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib/libamdhip64.so.6.2.41134 -L/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib -rpath /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib -lamdhip64 -lstdc++ -lm /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a -lgcc_s -lc /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a -lgcc_s /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/clang_rt.crtend-x86_64.o /usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crtn.o]
+          arg [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/ld.lld] ==> ignore
+          arg [--hash-style=gnu] ==> ignore
+          arg [--eh-frame-hdr] ==> ignore
+          arg [-m] ==> ignore
+          arg [elf_x86_64] ==> ignore
+          arg [-dynamic-linker] ==> ignore
+          arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_338b3] ==> ignore
+          arg [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crt1.o] ==> obj [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crt1.o]
+          arg [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crti.o] ==> obj [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crti.o]
+          arg [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/clang_rt.crtbegin-x86_64.o] ==> obj [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/clang_rt.crtbegin-x86_64.o]
+          arg [-L/users/ybudanaz/.local/lib] ==> dir [/users/ybudanaz/.local/lib]
+          arg [-L/usr/lib64/gcc/x86_64-suse-linux/12] ==> dir [/usr/lib64/gcc/x86_64-suse-linux/12]
+          arg [-L/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64] ==> dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64]
+          arg [-L/lib/../lib64] ==> dir [/lib/../lib64]
+          arg [-L/usr/lib/../lib64] ==> dir [/usr/lib/../lib64]
+          arg [-L/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/lib] ==> dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/lib]
+          arg [-L/lib] ==> dir [/lib]
+          arg [-L/usr/lib] ==> dir [/usr/lib]
+          arg [CMakeFiles/cmTC_338b3.dir/CMakeHIPCompilerABI.hip.o] ==> ignore
+          arg [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib/libamdhip64.so.6.2.41134] ==> ignore
+          arg [-L/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib] ==> dir [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib]
+          arg [-rpath] ==> ignore
+          arg [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib] ==> ignore
+          arg [-lamdhip64] ==> lib [amdhip64]
+          arg [-lstdc++] ==> lib [stdc++]
+          arg [-lm] ==> lib [m]
+          arg [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a] ==> lib [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a]
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [-lc] ==> lib [c]
+          arg [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a] ==> lib [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a]
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/clang_rt.crtend-x86_64.o] ==> obj [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/clang_rt.crtend-x86_64.o]
+          arg [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crtn.o] ==> obj [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crtn.o]
+        linker tool for 'HIP': /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/ld.lld
+        remove lib [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a]
+        remove lib [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/libclang_rt.builtins-x86_64.a]
+        collapse obj [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crt1.o] ==> [/usr/lib64/crt1.o]
+        collapse obj [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crti.o] ==> [/usr/lib64/crti.o]
+        collapse obj [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64/crtn.o] ==> [/usr/lib64/crtn.o]
+        collapse library dir [/users/ybudanaz/.local/lib] ==> [/users/ybudanaz/.local/lib]
+        collapse library dir [/usr/lib64/gcc/x86_64-suse-linux/12] ==> [/usr/lib64/gcc/x86_64-suse-linux/12]
+        collapse library dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../lib64] ==> [/usr/lib64]
+        collapse library dir [/lib/../lib64] ==> [/lib64]
+        collapse library dir [/usr/lib/../lib64] ==> [/usr/lib64]
+        collapse library dir [/usr/lib64/gcc/x86_64-suse-linux/12/../../../../x86_64-suse-linux/lib] ==> [/usr/x86_64-suse-linux/lib]
+        collapse library dir [/lib] ==> [/lib]
+        collapse library dir [/usr/lib] ==> [/usr/lib]
+        collapse library dir [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib] ==> [/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib]
+        implicit libs: [amdhip64;stdc++;m;gcc_s;c;gcc_s]
+        implicit objs: [/usr/lib64/crt1.o;/usr/lib64/crti.o;/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/clang_rt.crtbegin-x86_64.o;/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/lib/clang/18/lib/linux/clang_rt.crtend-x86_64.o;/usr/lib64/crtn.o]
+        implicit dirs: [/users/ybudanaz/.local/lib;/usr/lib64/gcc/x86_64-suse-linux/12;/usr/lib64;/lib64;/usr/x86_64-suse-linux/lib;/lib;/usr/lib;/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib]
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/Internal/CMakeDetermineLinkerId.cmake:40 (message)"
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeDetermineCompilerABI.cmake:255 (cmake_determine_linker_id)"
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/CMakeTestHIPCompiler.cmake:32 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Running the HIP compiler's linker: "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-amdgpu-6.2.1-yngnjmgew6jucin34wuga45fbc65ys5f/bin/ld.lld" "-v"
+      AMD LLD 18.0.0 (compatible with GNU linkers)
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/FindMPI.cmake:1282 (try_compile)"
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/FindMPI.cmake:1326 (_MPI_try_staged_settings)"
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/FindMPI.cmake:1649 (_MPI_check_lang_works)"
+      - "CMakeLists.txt:10 (find_package)"
+    description: "The MPI test test_mpi for CXX in mode normal"
+    directories:
+      source: "/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-bHoaqO"
+      binary: "/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-bHoaqO"
+    cmakeVariables:
+      CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS: "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/clang-scan-deps"
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: "-L/users/ybudanaz/.local/lib"
+      CMAKE_HIP_ARCHITECTURES: "gfx90a;gfx90a;gfx90a;gfx90a;gfx90a;gfx90a;gfx90a;gfx90a"
+      CMAKE_HIP_PLATFORM: "amd"
+    buildResult:
+      variable: "MPI_RESULT_CXX_test_mpi_normal"
+      cached: true
+      stdout: |
+        Change Dir: '/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-bHoaqO'
+        
+        Run Build Command(s): /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/bin/cmake -E env VERBOSE=1 /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/gmake-4.4.1-jv75rb6ldfqlahbjzas456fzqarsrlkb/bin/gmake -f Makefile cmTC_f277c/fast
+        /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/gmake-4.4.1-jv75rb6ldfqlahbjzas456fzqarsrlkb/bin/gmake  -f CMakeFiles/cmTC_f277c.dir/build.make CMakeFiles/cmTC_f277c.dir/build
+        gmake[1]: Entering directory '/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-bHoaqO'
+        Building CXX object CMakeFiles/cmTC_f277c.dir/test_mpi.cpp.o
+        /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/clang++  -isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/mpich-4.2.3-dfsmhyouvtg5jag7pzsrxzh4d7jlfhmi/include  -MD -MT CMakeFiles/cmTC_f277c.dir/test_mpi.cpp.o -MF CMakeFiles/cmTC_f277c.dir/test_mpi.cpp.o.d -o CMakeFiles/cmTC_f277c.dir/test_mpi.cpp.o -c /capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-bHoaqO/test_mpi.cpp
+        Linking CXX executable cmTC_f277c
+        /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/bin/cmake -E cmake_link_script CMakeFiles/cmTC_f277c.dir/link.txt --verbose=1
+        /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/clang++ -L/users/ybudanaz/.local/lib  -Wl,-rpath -Wl,/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/mpich-4.2.3-dfsmhyouvtg5jag7pzsrxzh4d7jlfhmi/lib CMakeFiles/cmTC_f277c.dir/test_mpi.cpp.o -o cmTC_f277c  -Wl,-rpath,/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/mpich-4.2.3-dfsmhyouvtg5jag7pzsrxzh4d7jlfhmi/lib /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/mpich-4.2.3-dfsmhyouvtg5jag7pzsrxzh4d7jlfhmi/lib/libmpicxx.so /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/mpich-4.2.3-dfsmhyouvtg5jag7pzsrxzh4d7jlfhmi/lib/libmpi.so
+        gmake[1]: Leaving directory '/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-bHoaqO'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/FindMPI.cmake:1282 (try_compile)"
+      - "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/share/cmake-3.30/Modules/FindMPI.cmake:1676 (_MPI_try_staged_settings)"
+      - "CMakeLists.txt:10 (find_package)"
+    description: "The MPI test test_mpi for CXX in mode MPICXX"
+    directories:
+      source: "/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-1r6BGP"
+      binary: "/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-1r6BGP"
+    cmakeVariables:
+      CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS: "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/clang-scan-deps"
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: "-L/users/ybudanaz/.local/lib"
+      CMAKE_HIP_ARCHITECTURES: "gfx90a;gfx90a;gfx90a;gfx90a;gfx90a;gfx90a;gfx90a;gfx90a"
+      CMAKE_HIP_PLATFORM: "amd"
+    buildResult:
+      variable: "MPI_RESULT_CXX_test_mpi_MPICXX"
+      cached: true
+      stdout: |
+        Change Dir: '/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-1r6BGP'
+        
+        Run Build Command(s): /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/bin/cmake -E env VERBOSE=1 /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/gmake-4.4.1-jv75rb6ldfqlahbjzas456fzqarsrlkb/bin/gmake -f Makefile cmTC_0d405/fast
+        /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/gmake-4.4.1-jv75rb6ldfqlahbjzas456fzqarsrlkb/bin/gmake  -f CMakeFiles/cmTC_0d405.dir/build.make CMakeFiles/cmTC_0d405.dir/build
+        gmake[1]: Entering directory '/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-1r6BGP'
+        Building CXX object CMakeFiles/cmTC_0d405.dir/test_mpi.cpp.o
+        /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/clang++  -isystem /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/mpich-4.2.3-dfsmhyouvtg5jag7pzsrxzh4d7jlfhmi/include  -MD -MT CMakeFiles/cmTC_0d405.dir/test_mpi.cpp.o -MF CMakeFiles/cmTC_0d405.dir/test_mpi.cpp.o.d -o CMakeFiles/cmTC_0d405.dir/test_mpi.cpp.o -c /capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-1r6BGP/test_mpi.cpp
+        Linking CXX executable cmTC_0d405
+        /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/cmake-3.30.5-xznhor3oz3j3y6rpah6c4jiwbmrfrz5m/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0d405.dir/link.txt --verbose=1
+        /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/llvm-17.0.6-q35ikc2dbcepmwzwtoouyn7djtc7lrpb/bin/clang++ -L/users/ybudanaz/.local/lib  -Wl,-rpath -Wl,/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/mpich-4.2.3-dfsmhyouvtg5jag7pzsrxzh4d7jlfhmi/lib CMakeFiles/cmTC_0d405.dir/test_mpi.cpp.o -o cmTC_0d405  -Wl,-rpath,/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/mpich-4.2.3-dfsmhyouvtg5jag7pzsrxzh4d7jlfhmi/lib /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/mpich-4.2.3-dfsmhyouvtg5jag7pzsrxzh4d7jlfhmi/lib/libmpicxx.so /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/mpich-4.2.3-dfsmhyouvtg5jag7pzsrxzh4d7jlfhmi/lib/libmpi.so
+        gmake[1]: Leaving directory '/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/CMakeScratch/TryCompile-1r6BGP'
+        
+      exitCode: 0
+...

@@ -1,51 +1,44 @@
-cmake_minimum_required(VERSION 3.21)
-
-project(benchmarkingLib)
-
-# # Set C++ standard to C++17
-# set(CMAKE_CXX_STANDARD 17)
-# set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(run_bench_test
-    run_bench_test.cpp
+    run_bench_test_hipified.cpp
 )
 
 add_executable(run_full_bench
-    run_full_bench.cpp
-    abstract_benchmark_functions.cpp
-    benchmark_cuSparse.cpp
-    benchmark_naiveStriped.cpp
-    benchmark_stripedSharedMem.cpp
-    benchmark_stripedWarpReduction.cpp
-    benchmark_stripedPreprocessed.cpp
-    benchmark_stripedColoring.cpp
-    benchmark_noStoreStripedColoring.cpp
-    benchmark_stripedColoringPrecomputed.cpp
-    benchmark_stripedBoxColoring.cpp
-    benchmark_stripedCORBoxColoring.cpp
+    run_full_bench_hipified.cpp
+    abstract_benchmark_functions_hipified.cpp
+    benchmark_cuSparse_hipified.cpp
+    benchmark_naiveStriped_hipified.cpp
+    benchmark_stripedSharedMem_hipified.cpp
+    benchmark_stripedWarpReduction_hipified.cpp
+    benchmark_stripedPreprocessed_hipified.cpp
+    benchmark_stripedColoring_hipified.cpp
+    benchmark_noStoreStripedColoring_hipified.cpp
+    benchmark_stripedColoringPrecomputed_hipified.cpp
+    benchmark_stripedBoxColoring_hipified.cpp
+    benchmark_stripedCORBoxColoring_hipified.cpp
 
 )
 
 add_executable(run_specific_bench
-    run_specific_bench.cpp
-    abstract_benchmark_functions.cpp
-    benchmark_cuSparse.cpp
-    benchmark_naiveStriped.cpp
-    benchmark_stripedSharedMem.cpp
-    benchmark_stripedWarpReduction.cpp
-    benchmark_stripedPreprocessed.cpp
-    benchmark_stripedColoring.cpp
-    benchmark_noStoreStripedColoring.cpp
-    benchmark_stripedColoringPrecomputed.cpp
-    benchmark_stripedBoxColoring.cpp
-    benchmark_stripedCORBoxColoring.cpp
+    run_specific_bench_hipified.cpp
+    abstract_benchmark_functions_hipified.cpp
+    benchmark_cuSparse_hipified.cpp
+    benchmark_naiveStriped_hipified.cpp
+    benchmark_stripedSharedMem_hipified.cpp
+    benchmark_stripedWarpReduction_hipified.cpp
+    benchmark_stripedPreprocessed_hipified.cpp
+    benchmark_stripedColoring_hipified.cpp
+    benchmark_noStoreStripedColoring_hipified.cpp
+    benchmark_stripedColoringPrecomputed_hipified.cpp
+    benchmark_stripedBoxColoring_hipified.cpp
+    benchmark_stripedCORBoxColoring_hipified.cpp
 )
 
 add_executable(run_maxSizeSingleGPU_finder
-    run_maxSizeSingleGPU_finder.cpp
-    abstract_benchmark_functions.cpp
-    benchmark_stripedColoring.cpp
-    benchmark_stripedBoxColoring.cpp
+    run_maxSizeSingleGPU_finder_hipified.cpp
+    abstract_benchmark_functions_hipified.cpp
+    benchmark_stripedColoring_hipified.cpp
+    benchmark_stripedBoxColoring_hipified.cpp
 )
 
 

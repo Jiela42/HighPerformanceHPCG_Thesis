@@ -1,0 +1,9 @@
+/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/TestHPCGLib.dir
+/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/run_coloring.dir
+/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/run_AllTests.dir
+/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/run_get_Norm.dir
+/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/run_example.dir
+/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/run_multi_GPU_tests.dir
+/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/run_multi_GPU.dir
+/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/edit_cache.dir
+/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/testing/build/CMakeFiles/rebuild_cache.dir

@@ -1,14 +1,9 @@
-# Minimum CMake version required
-cmake_minimum_required(VERSION 3.21)
 
-add_library(TimingLib)
+file(GLOB SOURCES "*.cpp")
+set_source_files_properties(${SOURCES} PROPERTIES LANGUAGE HIP)
 
-target_sources(TimingLib PRIVATE
-    timer.cpp
-    cudaTimer.cpp
-    MPITimer.cpp
-)
+add_library(TimingLib ${SOURCES})
 
-target_link_libraries(TimingLib
-    HPCGLib
+target_link_libraries(TimingLib PUBLIC
+    UtilLib
 )

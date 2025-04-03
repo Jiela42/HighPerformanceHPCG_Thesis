@@ -32,17 +32,49 @@ declare -A processed_files # Associative array to store original -> hipified map
 
 # Process each .cu and .cpp file in the directory recursively
 echo "Starting Hipify process..."
+
 # Use process substitution and mapfile for efficiency if available (Bash 4+)
 # Otherwise, use a temporary file or loop as before. Sticking to original loop structure for compatibility.
-find "$INPUT_DIR_ABS" -type f \( -name "*.cu" -o -name "*.cpp" \) | while read -r file; do
+find "$INPUT_DIR_ABS" -type f \( -name "*.cu" -o -name "*.cpp" -o -name "*.hpp" -o -name "*.cuh" \) | while read -r file; do
     # Skip files already ending in _hipified.*
     if [[ "$file" == *_hipified.* ]]; then
         echo "Skipping already hipified file: $file"
         continue
     fi
 
-    OUTPUT_FILE="${file%.*}_hipified.${file##*.}"
+    # --- Determine Output Filename ---
+    base_name="${file%.*}"  # Get path and filename without extension
+    extension="${file##*.}" # Get the original extension
+
+    output_extension="" # Variable to hold the target extension
+
+    # Set the output extension based on the input extension
+    case "$extension" in
+        cu)
+            output_extension="cpp" # Change .cu input to .cpp output
+            ;;
+        cpp)
+            output_extension="cpp" # Keep .cpp as .cpp
+            ;;
+        hpp)
+            output_extension="hpp" # Keep .hpp as .hpp
+            ;;
+        cuh)
+            output_extension="cuh" # Keep .cuh as .cuh
+            ;;
+        *)
+            # This case should not be reached due to the 'find' command filters,
+            # but it's good practice to handle unexpected scenarios.
+            echo "Warning: Skipping file with unexpected extension '$extension': $file" >&2
+            continue # Skip to the next file
+            ;;
+        esac
+
+    OUTPUT_FILE="${base_name}_hipified.${output_extension}"
+    # --- End Output Filename Determination ---
+
     echo "Processing: $file -> $OUTPUT_FILE"
+
 
     # Run hipify-perl and check exit status
     if hipify-perl "$file" > "$OUTPUT_FILE"; then

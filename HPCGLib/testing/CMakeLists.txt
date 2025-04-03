@@ -1,65 +1,50 @@
-cmake_minimum_required(VERSION 3.10)
 
-project(Testing LANGUAGES CXX CUDA)
 
 # Set C++ standard to C++17
 # set(CMAKE_CXX_STANDARD 17)
 # set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find MPI and make sure it's available
-find_package(MPI REQUIRED)
-link_directories("/user-environment/linux-sles15-neoverse_v2/gcc-13.3.0/nccl-2.22.3-1-4j6h3ffzysukqpqbvriorrzk2lm762dd/lib")
+
+file(GLOB SOURCES "*.cpp")
+set_source_files_properties(${SOURCES} PROPERTIES LANGUAGE HIP)
 
 add_library(TestHPCGLib
-    HPCG_versions_tests/cuSparse_tests.cpp
-    HPCG_versions_tests/naiveStriped_tests.cpp
-    HPCG_versions_tests/stripedSharedMem_tests.cpp
-    HPCG_versions_tests/stripedWarpReduction_tests.cpp
-    HPCG_versions_tests/stripedPreprocessed_tests.cpp
-    HPCG_versions_tests/stripedColored_tests.cpp
-    HPCG_versions_tests/stripedColoringPrecomputed_tests.cpp
-    HPCG_versions_tests/stripedBoxColoring_tests.cpp
-    HPCG_versions_tests/stripedNoStore_tests.cpp
-    HPCG_versions_tests/kernel_multi_GPU_tests.cpp
-    HPCG_versions_tests/dim_check.cpp
-    HPCG_versions_tests/stripedCORBoxColoring_tests.cpp
-    
-    UtilLib_tests.cpp
-    MatrixLib_tests.cpp
-    HPCG_versions_tests/test_calls.cpp
+    ${SOURCES}
 )
 
+
 add_executable(run_coloring
-    run_coloring.cpp
+    run_coloring_hipified.cpp
 )
 
 add_executable(run_AllTests
-    run_all_tests.cpp
+    run_all_tests_hipified.cpp
 )
 
 add_executable(run_get_Norm
-    run_get_Norm.cpp
+    run_get_Norm_hipified.cpp
 )
 
 add_executable(run_example
-    run_example.cpp
+    run_example_hipified.cpp
 )
 
 add_executable(run_multi_GPU_tests
-    run_multi_GPU_tests.cpp
+    run_multi_GPU_tests_hipified.cpp
 )
 
 add_executable(run_multi_GPU
-    run_multi_GPU.cpp
+    run_multi_GPU_hipified.cpp
 )
 
-target_link_libraries(TestHPCGLib
+target_link_libraries(TestHPCGLib PUBLIC
     HPCGLib
     MatrixLib
     UtilLib
 )
 
-target_link_libraries(run_AllTests
+target_link_libraries(run_AllTests PUBLIC
     HPCGLib
     MatrixLib
     TestHPCGLib
@@ -67,33 +52,37 @@ target_link_libraries(run_AllTests
     stdc++fs
 )
 
-target_link_libraries(run_coloring
+target_link_libraries(run_coloring PUBLIC
     HPCGLib
     MatrixLib
 )
 
-target_link_libraries(run_get_Norm
+target_link_libraries(run_get_Norm PUBLIC
     HPCGLib
     MatrixLib
     UtilLib
 )
 
-target_link_libraries(run_example
+target_link_libraries(run_example PUBLIC
     HPCGLib
     MatrixLib
 )
 
-target_link_libraries(run_multi_GPU
+target_link_libraries(run_multi_GPU PUBLIC
+    HPCGLib
+    MatrixLib
+    UtilLib
+    hipsparse
+    hipblas
+    MPI::MPI_CXX
+)
+
+target_link_libraries(run_multi_GPU_tests PUBLIC
     HPCGLib
     MatrixLib
     UtilLib
     MPI::MPI_CXX
-)
-
-target_link_libraries(run_multi_GPU_tests
-    HPCGLib
-    MatrixLib
-    UtilLib
-    MPI::MPI_CXX
-    nccl
+    hipsparse
+    hipblas
+    rccl
 )
