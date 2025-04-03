@@ -25,10 +25,9 @@ striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
     global_int_t gny = p->gny;
     global_int_t gnz = p->gnz;
 
-    this->num_rows = nx * ny * nz;
-    this->num_cols = nx * ny * nz;
+    this->num_rows = p->nx * p->ny * p->nz;
+    this->num_cols = p->nx * p->ny * p->nz;
     this->num_stripes = 27;
-
 
     global_int_t num_interior_points = (gnx - 2) * (gny - 2) * (gnz - 2);
     global_int_t num_face_points = 2 * ((gnx - 2) * (gny - 2) + (gnx - 2) * (gnz - 2) + (gny - 2) * (gnz - 2));
