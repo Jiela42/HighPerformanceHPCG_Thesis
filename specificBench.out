@@ -1,0 +1,61 @@
+-- Configuring done (3.2s)
+-- Generating done (1.3s)
+-- Build files have been written to: /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/build
+[  4%] Built target UtilLib
+[ 11%] Built target MatrixLib
+[ 15%] Built target TimingLib
+[ 41%] Built target HPCGLib
+[ 51%] Built target run_multi_GPU_tests
+[ 51%] Built target run_get_Norm
+[ 51%] Built target run_example
+[ 53%] Built target run_multi_GPU
+[ 53%] Built target run_bench_test
+[ 53%] Built target run_coloring
+[ 68%] Built target TestHPCGLib
+[ 70%] Built target run_AllTests
+[ 71%] Building CXX object benchmarking/CMakeFiles/run_maxSizeSingleGPU_finder.dir/abstract_benchmark_functions.cpp.o
+[ 73%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/abstract_benchmark_functions.cpp.o
+[ 73%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/abstract_benchmark_functions.cpp.o
+[ 76%] Linking CXX executable run_specific_bench
+[ 76%] Linking CXX executable run_maxSizeSingleGPU_finder
+[ 76%] Linking CXX executable run_full_bench
+[ 88%] Built target run_maxSizeSingleGPU_finder
+[100%] Built target run_full_bench
+[100%] Built target run_specific_bench
+Starting Benchmark
+Finished cuSparse Benchmark
+num iterations for implementation Striped coloring (pre-computing COR Format): 2000
+norm: 9.87681e-06 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+num iterations for implementation Striped coloring (pre-computing COR Format): 2000
+norm: 9.9903e-06 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+num iterations for implementation Striped Box coloring: 2000
+max_iterations = 2000
+normi/norm0 = 0.0014978
+1e-05
+SymGS for size 32x32x32 took 402 iterations.
+norm: 9.96275e-06 for implementation Striped Box coloring
+original max iter: 1
+num iterations for implementation Striped Box coloring: 2000
+max_iterations = 2000
+normi/norm0 = 0.0014978
+1e-05
+SymGS for size 32x32x32 took 353 iterations.
+norm: 9.94435e-06 for implementation Striped Box coloring
+original max iter: 1
+num iterations for implementation Striped Box coloring: 2000
+max_iterations = 2000
+normi/norm0 = 0.000732676
+1e-05
+SymGS for size 64x64x64 took 1642 iterations.
+norm: 9.9963e-06 for implementation Striped Box coloring
+original max iter: 1
+num iterations for implementation Striped Box coloring: 2000
+max_iterations = 2000
+normi/norm0 = 0.000732676
+1e-05
+SymGS for size 64x64x64 took 1440 iterations.
+norm: 9.97848e-06 for implementation Striped Box coloring
+original max iter: 1
+Finished Benchmark

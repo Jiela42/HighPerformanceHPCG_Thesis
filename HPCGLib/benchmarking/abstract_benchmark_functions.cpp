@@ -651,7 +651,7 @@ void bench_SymGS(
     // in case it is a norm based SymGS (we do more than one iteration)
     // we need to store and adjust the number of max iterations
     int original_max_iter = implementation.get_maxSymGSIters();
-    implementation.set_maxSymGSIters(500);
+    implementation.set_maxSymGSIters(10);
 
     std::cout << "num iterations for implementation " << implementation.version_name << ": " << implementation.get_maxSymGSIters() << std::endl;
 
@@ -681,6 +681,7 @@ void bench_SymGS(
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), A.get_num_rows() * sizeof(DataType), cudaMemcpyHostToDevice));
     
     // store the original number of iterations
+    std::cout << "original max iter: " << original_max_iter << std::endl;
     implementation.set_maxSymGSIters(original_max_iter);
 
 }
@@ -717,11 +718,12 @@ void bench_SymGS(
 
     double norm0 = implementation.L2_norm_for_SymGS(A, x_d, y_d);
 
-     // for normbased implementations we need to make sure the maximum number of iterations performed by symGS is enough
-     int original_max_symgs_iterations = implementation.get_maxSymGSIters();
+    // for normbased implementations we need to make sure the maximum number of iterations performed by symGS is enough
+    int original_max_symgs_iterations = implementation.get_maxSymGSIters();
 
-    implementation.set_maxSymGSIters(500);
+    implementation.set_maxSymGSIters(10);
 
+    std::cout << "num iterations for implementation " << implementation.version_name << ": " << implementation.get_maxSymGSIters() << std::endl;
 
     for (int i = 0; i < num_iterations; i++){
         // std::cout<< "Iteration: " << i << std::endl;
@@ -752,6 +754,8 @@ void bench_SymGS(
 
 
     // restore the original number of iterations
+    std::cout << "original max iter: " << original_max_symgs_iterations << std::endl;
+
     implementation.set_maxSymGSIters(original_max_symgs_iterations);
 }
 
@@ -777,7 +781,7 @@ void bench_SymGS(
      // for normbased implementations we need to make sure the maximum number of iterations performed by symGS is enough
      int original_max_symgs_iterations = implementation.get_maxSymGSIters();
      if(implementation.norm_based){
-         implementation.set_maxSymGSIters(500);
+         implementation.set_maxSymGSIters(10);
      }
 
     for (int i = 0; i < num_iterations; i++){
@@ -920,11 +924,11 @@ void bench_Implementation(
         bench_Dot(implementation, timer, A, a_d, b_d, result_d);
         sanity_check_vectors(vectors_d, original_vectors);
     }
-    std::cout << "Bench SymGS" << std::endl;
-    if(implementation.SymGS_implemented){
-        bench_SymGS(implementation, timer, A, x_d, y_d);
-        sanity_check_vectors(vectors_d, original_vectors);
-    }
+    // std::cout << "Bench SymGS" << std::endl;
+    // if(implementation.SymGS_implemented){
+    //     bench_SymGS(implementation, timer, A, x_d, y_d);
+    //     sanity_check_vectors(vectors_d, original_vectors);
+    // }
     std::cout << "Bench WAXPBY" << std::endl;
     if(implementation.WAXPBY_implemented){
         bench_WAXPBY(implementation, timer, A, a_d, b_d, y_d, alpha, beta);

@@ -150,6 +150,13 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
         norm0 = this->L2_norm_for_SymGS(A, x_d, y_d);
     }
 
+    // std::cout << "normi/norm0 = " << normi/norm0 << std::endl;
+    // std::cout << this->SymGS_tolerance << std::endl;
+
+    // int total_iterations = 0;
+
+    
+
     for(int i = 0; i < max_iterations && normi/norm0 > this->SymGS_tolerance; i++){
 
     
@@ -186,7 +193,7 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
                 );
                 CHECK_CUDA(cudaDeviceSynchronize());
             }
-
+        // total_iterations ++;
         if(max_iterations > 1){
 
             // double L2_norm = this->L2_norm_for_SymGS(A, x_d, y_d);
@@ -198,7 +205,7 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
         // CHECK_CUDA(cudaStreamDestroy(y_Norm_stream));
 
     }
-
+    // std::cout << "SymGS for size " << nx << "x" << ny << "x" << nz << " took " << total_iterations << " iterations." << std::endl;
     // std::cout << "rr_norm after one iteration: " << rr_norm << std::endl;
 
     // int iter = 1;

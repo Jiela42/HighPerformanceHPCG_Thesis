@@ -101,15 +101,15 @@ int main() {
     // run_striped_warp_reduction_3d27p_benchmarks(8, 8, 8, folder_path, SWR_implementation);
     // run_striped_warp_reduction_3d27p_benchmarks(16, 16, 16, folder_path, SWR_implementation);
     // run_striped_warp_reduction_3d27p_benchmarks(24, 24, 24, folder_path, SWR_implementation);
-    // run_striped_warp_reduction_3d27p_benchmarks(32, 32, 32, folder_path, SWR_implementation);
-    // run_striped_warp_reduction_3d27p_benchmarks(64, 64, 64, folder_path, SWR_implementation);
-    // // run_striped_warp_reduction_3d27p_benchmarks(128, 64, 64, folder_path, SWR_implementation);
-    // // run_striped_warp_reduction_3d27p_benchmarks(128, 128, 64, folder_path, SWR_implementation);
-    // run_striped_warp_reduction_3d27p_benchmarks(128, 128, 128, folder_path, SWR_implementation);
-    // // run_striped_warp_reduction_3d27p_benchmarks(256, 128, 128, folder_path, SWR_implementation);
-    // // run_striped_warp_reduction_3d27p_benchmarks(256, 256, 128, folder_path, SWR_implementation);
-    // run_striped_warp_reduction_3d27p_benchmarks(256, 256, 256, folder_path, SWR_implementation);
-    // run_striped_warp_reduction_3d27p_benchmarks(512, 512, 512, folder_path, SWR_implementation);
+    run_striped_warp_reduction_3d27p_benchmarks(32, 32, 32, folder_path, SWR_implementation);
+    run_striped_warp_reduction_3d27p_benchmarks(64, 64, 64, folder_path, SWR_implementation);
+    // run_striped_warp_reduction_3d27p_benchmarks(128, 64, 64, folder_path, SWR_implementation);
+    // run_striped_warp_reduction_3d27p_benchmarks(128, 128, 64, folder_path, SWR_implementation);
+    run_striped_warp_reduction_3d27p_benchmarks(128, 128, 128, folder_path, SWR_implementation);
+    // run_striped_warp_reduction_3d27p_benchmarks(256, 128, 128, folder_path, SWR_implementation);
+    // run_striped_warp_reduction_3d27p_benchmarks(256, 256, 128, folder_path, SWR_implementation);
+    run_striped_warp_reduction_3d27p_benchmarks(256, 256, 256, folder_path, SWR_implementation);
+    run_striped_warp_reduction_3d27p_benchmarks(512, 512, 512, folder_path, SWR_implementation);
     // run_striped_warp_reduction_3d27p_benchmarks(672, 672, 672, folder_path, SWR_implementation);
 
     end = std::chrono::high_resolution_clock::now();
@@ -137,15 +137,15 @@ int main() {
     // run_striped_coloring_3d27p_benchmarks(8, 8, 8, folder_path, SC_implementation);
     // run_striped_coloring_3d27p_benchmarks(16, 16, 16, folder_path, SC_implementation);
     // // run_striped_coloring_3d27p_benchmarks(24, 24, 24, folder_path, SC_implementation);
-    // run_striped_coloring_3d27p_benchmarks(32, 32, 32, folder_path, SC_implementation);
-    // run_striped_coloring_3d27p_benchmarks(64, 64, 64, folder_path, SC_implementation);
-    // // run_striped_coloring_3d27p_benchmarks(128, 64, 64, folder_path, SC_implementation);
-    // // run_striped_coloring_3d27p_benchmarks(128, 128, 64, folder_path, SC_implementation);
-    // run_striped_coloring_3d27p_benchmarks(128, 128, 128, folder_path, SC_implementation);
-    // // run_striped_coloring_3d27p_benchmarks(256, 128, 128, folder_path, SC_implementation);
-    // // run_striped_coloring_3d27p_benchmarks(256, 256, 128, folder_path, SC_implementation);
-    // run_striped_coloring_3d27p_benchmarks(256, 256, 256, folder_path, SC_implementation);
-    // run_striped_coloring_3d27p_benchmarks(512, 512, 512, folder_path, SC_implementation);
+    run_striped_coloring_3d27p_benchmarks(32, 32, 32, folder_path, SC_implementation);
+    run_striped_coloring_3d27p_benchmarks(64, 64, 64, folder_path, SC_implementation);
+    // run_striped_coloring_3d27p_benchmarks(128, 64, 64, folder_path, SC_implementation);
+    // run_striped_coloring_3d27p_benchmarks(128, 128, 64, folder_path, SC_implementation);
+    run_striped_coloring_3d27p_benchmarks(128, 128, 128, folder_path, SC_implementation);
+    // run_striped_coloring_3d27p_benchmarks(256, 128, 128, folder_path, SC_implementation);
+    // run_striped_coloring_3d27p_benchmarks(256, 256, 128, folder_path, SC_implementation);
+    run_striped_coloring_3d27p_benchmarks(256, 256, 256, folder_path, SC_implementation);
+    run_striped_coloring_3d27p_benchmarks(512, 512, 512, folder_path, SC_implementation);
     // run_striped_coloring_3d27p_benchmarks(672, 672, 672, folder_path, SC_implementation);
 
 
@@ -161,14 +161,14 @@ int main() {
     // run_no_store_striped_coloring_3d27p_benchmarks(8, 8, 8, folder_path, NC_SC_implementation);
     // run_no_store_striped_coloring_3d27p_benchmarks(16, 16, 16, folder_path, NC_SC_implementation);
     // run_no_store_striped_coloring_3d27p_benchmarks(24, 24, 24, folder_path, NC_SC_implementation);
-    // run_no_store_striped_coloring_3d27p_benchmarks(32, 32, 32, folder_path, NC_SC_implementation);
-    // run_no_store_striped_coloring_3d27p_benchmarks(64, 64, 64, folder_path, NC_SC_implementation);
-    // // run_no_store_striped_coloring_3d27p_benchmarks(128, 64, 64, folder_path, NC_SC_implementation);
-    // // run_no_store_striped_coloring_3d27p_benchmarks(128, 128, 64, folder_path, NC_SC_implementation);
-    // run_no_store_striped_coloring_3d27p_benchmarks(128, 128, 128, folder_path, NC_SC_implementation);
-    // // run_no_store_striped_coloring_3d27p_benchmarks(256, 128, 128, folder_path, NC_SC_implementation);
-    // run_no_store_striped_coloring_3d27p_benchmarks(256, 256, 256, folder_path, NC_SC_implementation);
-    // run_no_store_striped_coloring_3d27p_benchmarks(512, 512, 512, folder_path, NC_SC_implementation);
+    run_no_store_striped_coloring_3d27p_benchmarks(32, 32, 32, folder_path, NC_SC_implementation);
+    run_no_store_striped_coloring_3d27p_benchmarks(64, 64, 64, folder_path, NC_SC_implementation);
+    // run_no_store_striped_coloring_3d27p_benchmarks(128, 64, 64, folder_path, NC_SC_implementation);
+    // run_no_store_striped_coloring_3d27p_benchmarks(128, 128, 64, folder_path, NC_SC_implementation);
+    run_no_store_striped_coloring_3d27p_benchmarks(128, 128, 128, folder_path, NC_SC_implementation);
+    // run_no_store_striped_coloring_3d27p_benchmarks(256, 128, 128, folder_path, NC_SC_implementation);
+    run_no_store_striped_coloring_3d27p_benchmarks(256, 256, 256, folder_path, NC_SC_implementation);
+    run_no_store_striped_coloring_3d27p_benchmarks(512, 512, 512, folder_path, NC_SC_implementation);
     // run_no_store_striped_coloring_3d27p_benchmarks(672, 672, 672, folder_path, NC_SC_implementation);
 
     end = std::chrono::high_resolution_clock::now();
@@ -183,13 +183,13 @@ int main() {
     // run_striped_coloringPrecomputed_3d27p_benchmarks(8, 8, 8, folder_path, SCP_implementation);
     // run_striped_coloringPrecomputed_3d27p_benchmarks(16, 16, 16, folder_path, SCP_implementation);
     // run_striped_coloringPrecomputed_3d27p_benchmarks(24, 24, 24, folder_path, SCP_implementation);
-    // run_striped_coloringPrecomputed_3d27p_benchmarks(32, 32, 32, folder_path, SCP_implementation);
-    // run_striped_coloringPrecomputed_3d27p_benchmarks(64, 64, 64, folder_path, SCP_implementation);
-    // // run_striped_coloringPrecomputed_3d27p_benchmarks(128, 64, 64, folder_path, SCP_implementation);
-    // // run_striped_coloringPrecomputed_3d27p_benchmarks(128, 128, 64, folder_path, SCP_implementation);
-    // run_striped_coloringPrecomputed_3d27p_benchmarks(128, 128, 128, folder_path, SCP_implementation);
-    // // run_striped_coloringPrecomputed_3d27p_benchmarks(256, 128, 128, folder_path, SCP_implementation);
-    // run_striped_coloringPrecomputed_3d27p_benchmarks(256, 256, 256, folder_path, SCP_implementation);
+    run_striped_coloringPrecomputed_3d27p_benchmarks(32, 32, 32, folder_path, SCP_implementation);
+    run_striped_coloringPrecomputed_3d27p_benchmarks(64, 64, 64, folder_path, SCP_implementation);
+    // run_striped_coloringPrecomputed_3d27p_benchmarks(128, 64, 64, folder_path, SCP_implementation);
+    // run_striped_coloringPrecomputed_3d27p_benchmarks(128, 128, 64, folder_path, SCP_implementation);
+    run_striped_coloringPrecomputed_3d27p_benchmarks(128, 128, 128, folder_path, SCP_implementation);
+    // run_striped_coloringPrecomputed_3d27p_benchmarks(256, 128, 128, folder_path, SCP_implementation);
+    run_striped_coloringPrecomputed_3d27p_benchmarks(256, 256, 256, folder_path, SCP_implementation);
     run_striped_coloringPrecomputed_3d27p_benchmarks(512, 512, 512, folder_path, SCP_implementation);
     // run_striped_coloringPrecomputed_3d27p_benchmarks(672, 672, 672, folder_path, SCP_implementation);
 
@@ -213,7 +213,7 @@ int main() {
     // run_striped_box_coloring_3d27p_benchmarks(256, 128, 128, folder_path, SBC_implementation);
     run_striped_box_coloring_3d27p_benchmarks(256, 256, 256, folder_path, SBC_implementation);
     run_striped_box_coloring_3d27p_benchmarks(512, 512, 512, folder_path, SBC_implementation);
-    // run_striped_box_coloring_3d27p_benchmarks(672, 672, 672, folder_path, SBC_implementation);
+    // // run_striped_box_coloring_3d27p_benchmarks(672, 672, 672, folder_path, SBC_implementation);
 
     end = std::chrono::high_resolution_clock::now();
     elapsed_seconds = end-start;
@@ -235,7 +235,7 @@ int main() {
     // run_striped_COR_box_coloring_3d27p_benchmarks(256, 128, 128, folder_path, SBC_COR_implementation);
     run_striped_COR_box_coloring_3d27p_benchmarks(256, 256, 256, folder_path, SBC_COR_implementation);
     run_striped_COR_box_coloring_3d27p_benchmarks(512, 512, 512, folder_path, SBC_COR_implementation);
-    // run_striped_COR_box_coloring_3d27p_benchmarks(672, 672, 672, folder_path, SBC_COR_implementation);
+    // // run_striped_COR_box_coloring_3d27p_benchmarks(672, 672, 672, folder_path, SBC_COR_implementation);
 
     end = std::chrono::high_resolution_clock::now();
     elapsed_seconds = end-start;

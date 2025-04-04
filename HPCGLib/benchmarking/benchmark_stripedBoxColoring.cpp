@@ -199,13 +199,6 @@ void run_striped_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::stri
         }
     }
 
-    std::string box_dims = std::to_string(implementation.bx) + "x" + std::to_string(implementation.by) + "x" + std::to_string(implementation.bz);
-    std::string implementation_name = implementation.version_name + " (coloringBox " + box_dims + ")";
-    // std::string implementation_name = implementation.version_name;
-    std::string additional_params = implementation.additional_parameters;
-    std::string ault_node = implementation.ault_nodes;
-    CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);
-
     // Allocate the memory on the device
     DataType * a_d;
     DataType * b_d;
@@ -224,11 +217,28 @@ void run_striped_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::stri
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(DataType), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
 
-    // run the benchmarks (without the copying back and forth)
-    // we don't want to bench the implementation for the SymGS
-    // (yet, because that has a bunch of parameters, specific to that, so we do an extra call to bench_SymGS)
-    implementation.SymGS_implemented = false;
-    bench_Implementation(implementation, *timer, striped_A, a_d, b_d, x_d, y_d, result_d, 1.0, 1.0);
+    for(int i = 2; i <=3; i++){
+        
+        implementation.bx = i;
+        implementation.by = i;
+        implementation.bz = i;
+    
+        std::string box_dims = std::to_string(implementation.bx) + "x" + std::to_string(implementation.by) + "x" + std::to_string(implementation.bz);
+        std::string implementation_name = implementation.version_name + " (coloringBox " + box_dims + ")";
+        // std::string implementation_name = implementation.version_name;
+        std::string additional_params = implementation.additional_parameters;
+        std::string ault_node = implementation.ault_nodes;
+        CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);
+    
+    
+        // run the benchmarks (without the copying back and forth)
+        // we don't want to bench the implementation for the SymGS
+        // (yet, because that has a bunch of parameters, specific to that, so we do an extra call to bench_SymGS)
+        implementation.SymGS_implemented = false;
+        bench_Implementation(implementation, *timer, striped_A, a_d, b_d, x_d, y_d, result_d, 1.0, 1.0);
+
+        delete timer;
+    }
 
     // free the memory
     cudaFree(a_d);
@@ -237,8 +247,7 @@ void run_striped_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::stri
     cudaFree(y_d);
     cudaFree(result_d);
 
-    delete timer;
 
     // run the SymGS benchmark
-    run_striped_box_coloring_3d27p_SymGS_benchmark(nx, ny, nz, folder_path, implementation);
+    // run_striped_box_coloring_3d27p_SymGS_benchmark(nx, ny, nz, folder_path, implementation);
 }

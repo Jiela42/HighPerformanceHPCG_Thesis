@@ -29,6 +29,8 @@ sizes_to_plot =[
     ("128x128x128"),
     ("256x128x128"),
     # ("256x256x128"),
+    ("256x256x256"),
+    ("512x512x512"),
 ]
 
 versions_to_plot = [
@@ -229,7 +231,7 @@ original_CG_num_iterations = defaultdict(lambda: 0, {
 memory_bandwidth_GBs = {
     # ault nodes 41-44 have RTX3090s
     "41-44": 936,
-    "GH200": 10,
+    "GH200": 4000,
 }
 
 
@@ -357,7 +359,7 @@ def read_data():
         # grab the norm
 
         # print("Warning for now we ignore any ault_node that is not 41-44", flush=True)
-        if ault_node not in ["41-44"]:
+        if ault_node not in ["GH100"]:
             continue
 
         if version_name not in version_names:

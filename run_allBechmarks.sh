@@ -4,8 +4,8 @@
 #SBATCH --job-name=HPCG_fullBenchmark
 #SBATCH --account=a-g34
 #SBATCH --output Benchmark.out
-#SBATCH --time 04:30:00
-#SBATCH --partition=normal
+#SBATCH --time 01:20:00
+#SBATCH --partition=debug
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --gpus-per-task=1
@@ -34,4 +34,4 @@ make -j16
 cd benchmarking
 # ls
 
-./run_full_bench
+srun ./run_full_bench
