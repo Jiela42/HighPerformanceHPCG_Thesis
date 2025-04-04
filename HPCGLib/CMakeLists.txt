@@ -51,8 +51,9 @@ link_directories("/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-ze
 link_directories("/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/rocprim-6.2.1-lguqn2d2gznl7t5n7h5w3ndneigfr2zg/lib")
 link_directories("/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/rocthrust-6.2.1-ihyylrpt7zc2buckjcgkaxlmll3kib4u/lib")
 #link_libraries("-L/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hip-6.2.1-dnxqftoeqt7lshn7es5sf7vnjy2n65ep/lib/libamdhip64.so")
+link_directories("/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/rccl-6.2.1-6ig3jji6qqna4oqyxohqmazhxts7i7wd/include/")
 #link_libraries("amdhip64")
-link_libraries(${ROCPRIM_LIBRARIES} hipsparse hipblas)
+link_libraries(${ROCPRIM_LIBRARIES} hipsparse hipblas rccl)
 link_directories("/capstor/scratch/cscs/ybudanaz/jingjing/HighPerformanceHPCG_Thesis/HPCGLib/build> ls /capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/rccl-6.2.1-6ig3jji6qqna4oqyxohqmazhxts7i7wd/include/")
 #find_library(AMDHIP64_LIBRARY
 #    NAMES amdhip64

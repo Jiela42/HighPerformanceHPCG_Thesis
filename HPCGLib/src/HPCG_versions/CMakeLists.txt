@@ -8,7 +8,13 @@ include_directories("/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15
 target_include_directories(HPCGLib PUBLIC "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hipsparse-6.2.1-r2wk6eagqbyozhokoioobayvtjtgoilb/include")
 target_link_directories(HPCGLib PUBLIC "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/hipsparse-6.2.1-r2wk6eagqbyozhokoioobayvtjtgoilb/lib")
 
-target_include_directories(HPCGLib PUBLIC ${hipSPARSE_INCLUDE_DIRS})
+include_directories("/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/rccl-6.2.1-6ig3jji6qqna4oqyxohqmazhxts7i7wd/include/")
+
+include_directories("/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/rccl-6.2.1-6ig3jji6qqna4oqyxohqmazhxts7i7wd/include/")
+target_include_directories(HPCGLib PUBLIC ${hipSPARSE_INCLUDE_DIRS} ${rccl_INCLUDE_DIRS})
+target_include_directories(HPCGLib PUBLIC "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/rccl-6.2.1-6ig3jji6qqna4oqyxohqmazhxts7i7wd/include/")
+target_link_directories(HPCGLib PUBLIC "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/rccl-6.2.1-6ig3jji6qqna4oqyxohqmazhxts7i7wd/lib/")
+
 
 target_link_libraries(
     HPCGLib  PUBLIC
@@ -17,5 +23,6 @@ target_link_libraries(
     MatrixLib
     hipsparse
     hipblas
+    rccl
     MPI::MPI_CXX
 )

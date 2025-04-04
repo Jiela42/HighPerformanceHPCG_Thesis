@@ -16,9 +16,9 @@
 #define NPY 2
 #define NPZ 1
 //each process gets assigned problem size of NX x NY x NZ
-#define NX 512
-#define NY 512
-#define NZ 512
+#define NX 128
+#define NY 128
+#define NZ 128
 
 /*
 * MPI must be initializid before calling.

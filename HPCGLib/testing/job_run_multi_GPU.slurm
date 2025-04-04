@@ -26,4 +26,4 @@
 
 ## Run 
 #srun /users/ljingjin/HPCG/HighPerformanceHPCG_Thesis/HPCGLib/build/benchmarking/run_bench_multi_GPU 2 2 1 512 512 512 DOT
-srun /users/ljingjin/HPCG/HighPerformanceHPCG_Thesis/HPCGLib/build/testing/run_multi_GPU
+srun /users/ljingjin/HPCG/HighPerformanceHPCG_Thesis/HPCGLib/build/testing/run_multi_GPU_tests

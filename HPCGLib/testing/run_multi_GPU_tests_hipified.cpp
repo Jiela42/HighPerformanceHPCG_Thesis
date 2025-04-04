@@ -3,9 +3,9 @@
 #include "HPCG_versions/striped_multi_GPU_hipified.cuh"
 #include "HPCG_versions/blocking_mpi_halo_exchange_hipified.cuh"
 #include "HPCG_versions/non_blocking_mpi_halo_exchange_hipified.cuh"
-#include "HPCG_versions/nccl_halo_exchange_hipified.cuh"
-#include "HPCG_versions_tests/kernel_multi_GPU_tests_hipified.hpp"
-#include "HPCG_versions_tests/dim_check_hipified.hpp"
+//#include "HPCG_versions/nccl_halo_exchange_hipified.cuh"
+#include "HPCG_versions_tests/kernel_multi_GPU_tests_hipified.cpp"
+#include "HPCG_versions_tests/dim_check_hipified.cpp"
 #include "MatrixLib/striped_partial_Matrix_hipified.hpp"
 
 #include <mpi.h>
