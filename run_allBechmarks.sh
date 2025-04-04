@@ -4,7 +4,7 @@
 #SBATCH --job-name=HPCG_fullBenchmark
 #SBATCH --account=a-g34
 #SBATCH --output Benchmark.out
-#SBATCH --time 01:20:00
+#SBATCH --time 01:30:00
 #SBATCH --partition=debug
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
