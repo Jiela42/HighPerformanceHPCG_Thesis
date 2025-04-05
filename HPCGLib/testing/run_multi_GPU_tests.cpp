@@ -20,9 +20,6 @@ int main(int argc, char *argv[]){
 
     //blocking_mpi_Implementation<DataType> implementation_multi_GPU_blocking_mpi;
     //run_multi_GPU_tests(argc, argv, implementation_multi_GPU_blocking_mpi);
-    printf("local_int_t=%d\n", sizeof(local_int_t));
-    printf("global_int_t=%d\n", sizeof(global_int_t));
-    return 0;
 
     non_blocking_mpi_Implementation<DataType> implementation_multi_GPU_non_blocking_mpi;
     run_multi_GPU_tests(argc, argv, implementation_multi_GPU_non_blocking_mpi);

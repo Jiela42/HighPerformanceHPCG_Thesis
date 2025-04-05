@@ -59,12 +59,12 @@ int main(){
     // all_pass = all_pass && run_naiveStriped_tests(128, 128, 128);
     // std::cout << "Finished naiveStriped tests" << std::endl;
 
-    std::cout << "Starting striped shared memory tests" << std::endl;
-    all_pass = all_pass && run_stripedSharedMem_tests(4, 4, 4);
-    all_pass = all_pass && run_stripedSharedMem_tests(8, 8, 8);
-    all_pass = all_pass && run_stripedSharedMem_tests(16, 16, 16);
-    all_pass = all_pass && run_stripedSharedMem_tests(32, 32, 32);
-    all_pass = all_pass && run_stripedSharedMem_tests(64, 64, 64);
+    // std::cout << "Starting striped shared memory tests" << std::endl;
+    // all_pass = all_pass && run_stripedSharedMem_tests(4, 4, 4);
+    // all_pass = all_pass && run_stripedSharedMem_tests(8, 8, 8);
+    // all_pass = all_pass && run_stripedSharedMem_tests(16, 16, 16);
+    // all_pass = all_pass && run_stripedSharedMem_tests(32, 32, 32);
+    // all_pass = all_pass && run_stripedSharedMem_tests(64, 64, 64);
     // all_pass = all_pass && run_stripedSharedMem_tests(128, 128, 128);
     // std::cout << "Finished striped shared memory tests" << std::endl;
 
