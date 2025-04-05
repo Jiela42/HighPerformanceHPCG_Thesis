@@ -79,9 +79,6 @@ int main(int argc, char *argv[]) {
     Problem *problem = MGPU_Implementation.init_comm(argc, argv, NPX, NPY, NPZ, NX, NY, NZ);
     if(problem->rank == 0) std::cout << "Starting Benchmark" << std::endl;
     
-    //set Device
-    InitGPU(problem);
-    
     //start timer
     if(problem->rank == 0) std::cout << "Starting multi GPU Benchmarks" << std::endl;
     auto start = std::chrono::high_resolution_clock::now();

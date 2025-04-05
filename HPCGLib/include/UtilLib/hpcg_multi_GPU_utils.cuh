@@ -35,9 +35,9 @@ typedef struct Halo_STRUCT Halo;
 
 /*This is used for extraction and injection from a halo. E.g. extract a plane of size length_X x length_Y at point x, y, z, within halo of size dimx, dimy, dimz and interior size of nx, ny, nz*/
 struct GhostCell_STRUCT{
-    int x, y, z;
-    int dimx, dimy, dimz;
-    int length_X, length_Y, length_Z;
+    local_int_t x, y, z;
+    local_int_t dimx, dimy, dimz;
+    local_int_t length_X, length_Y, length_Z;
 };
 typedef struct GhostCell_STRUCT GhostCell;
 

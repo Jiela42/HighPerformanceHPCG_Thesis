@@ -1,10 +1,10 @@
 #!/usr/local/bin/bash
 
 ##Resources
-#SBATCH --job-name=hpcg_test
+#SBATCH --job-name=bench_solver
 #SBATCH --account=a-g200
 #SBATCH --output result.out
-#SBATCH --time 00:20:00
+#SBATCH --time 00:05:00
 #SBATCH --partition=debug
 #SBATCH --nodes=1
 #SBATCH --ntasks=4

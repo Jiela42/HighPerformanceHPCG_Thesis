@@ -54,10 +54,13 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     
     this->compute_WAXPBY(x_d, x_d, &p_d, 1.0, 0.0, problem, false); // p = x
     this->ExchangeHalo(&p_d, problem);
+    CHECK_CUDA(cudaDeviceSynchronize());
     this->compute_SPMV(A, &p_d, &Ap_d, problem); //Ap = A*p
     this->ExchangeHalo(&Ap_d, problem);
+    CHECK_CUDA(cudaDeviceSynchronize());
     this->compute_WAXPBY(b_d, &Ap_d, &r_d, 1.0, -1.0, problem, false); // r = b - Ax (x stored in p)
     this->ExchangeHalo(&r_d, problem);
+    CHECK_CUDA(cudaDeviceSynchronize());
     this->compute_Dot(&r_d, &r_d, normr_d);
     CHECK_CUDA(cudaMemcpy(&normr, normr_d, sizeof(DataType), cudaMemcpyDeviceToHost));
     // std::cout << "Initial residual: " << normr << std::endl;
@@ -71,14 +74,18 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
         
         if(this->doPreconditioning){
             this->compute_MG(A, &r_d, &z_d, problem); // Apply preconditioner
+            this->ExchangeHalo(&z_d, problem);
+            CHECK_CUDA(cudaDeviceSynchronize());
         } else {
             this->compute_WAXPBY(&r_d, &r_d, &z_d, 1.0, 0.0, problem, false); // z = r
             this->ExchangeHalo(&z_d, problem);
+            CHECK_CUDA(cudaDeviceSynchronize());
         }
         
         if(k == 1){
             this->compute_WAXPBY(&z_d, &z_d, &p_d, 1.0, 0.0, problem, false); // Copy Mr to p
             this->ExchangeHalo(&p_d, problem);
+            CHECK_CUDA(cudaDeviceSynchronize());
             this->compute_Dot(&r_d, &z_d, rtz_d); // rtz = r'*z
             CHECK_CUDA(cudaMemcpy(&rtz, rtz_d, sizeof(DataType), cudaMemcpyDeviceToHost));
         } else {
@@ -88,21 +95,26 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
             beta = rtz/rtz_old;
             this->compute_WAXPBY(&z_d, &p_d, &p_d, 1.0, beta, problem, false); // p = z + beta*p
             this->ExchangeHalo(&p_d, problem);
+            CHECK_CUDA(cudaDeviceSynchronize());
         }
         
         this->compute_SPMV(A, &p_d, &Ap_d, problem); // Ap = A*p
         this->ExchangeHalo(&Ap_d, problem);
+        CHECK_CUDA(cudaDeviceSynchronize());
         this->compute_Dot(&p_d, &Ap_d, pAp_d); // pAp = p'*Ap
         CHECK_CUDA(cudaMemcpy(&pAp, pAp_d, sizeof(DataType), cudaMemcpyDeviceToHost));
         alpha = rtz/pAp;
         this->compute_WAXPBY(x_d, &p_d, x_d, 1.0, alpha, problem, false); // x = x + alpha*p
         this->ExchangeHalo(x_d, problem);
+        CHECK_CUDA(cudaDeviceSynchronize());
         this->compute_WAXPBY(&r_d, &Ap_d, &r_d, 1.0, -alpha, problem, false); // r = r - alpha*Ap
         this->ExchangeHalo(&r_d, problem);
+        CHECK_CUDA(cudaDeviceSynchronize());
         this->compute_Dot(&r_d, &r_d, normr_d); // normr = r'*r
         CHECK_CUDA(cudaMemcpy(&normr, normr_d, sizeof(DataType), cudaMemcpyDeviceToHost));
         normr = sqrt(normr);
         n_iters = k;
+        
     }
     
     // Free device memory
@@ -118,6 +130,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     CHECK_CUDA(cudaFree(pAp_d));
     CHECK_CUDA(cudaFree(rtz_d));
 
+    CHECK_CUDA(cudaDeviceSynchronize());
     // std::cout << "CG converged in " << n_iters << " iterations" << std::endl;
 
 }

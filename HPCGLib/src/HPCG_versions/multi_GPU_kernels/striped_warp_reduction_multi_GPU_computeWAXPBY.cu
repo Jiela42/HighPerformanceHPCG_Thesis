@@ -146,7 +146,9 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     
     if(updateHalo){
         this->ExchangeHalo(w_d, problem);
+        CHECK_CUDA(cudaDeviceSynchronize());
     }
+
 }
 
 template class striped_multi_GPU_Implementation<DataType>;

@@ -108,7 +108,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
         );
 
         // synchronize the device
-        cudaDeviceSynchronize();
+        CHECK_CUDA(cudaDeviceSynchronize());
 
         // std::cerr << "Assertion failed in function: " << __PRETTY_FUNCTION__ << std::endl;
         // assert(false);

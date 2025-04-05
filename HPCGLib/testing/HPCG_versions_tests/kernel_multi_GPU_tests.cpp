@@ -14,7 +14,7 @@
 //number of processes in x, y, z
 #define NPX 2
 #define NPY 2
-#define NPZ 1
+#define NPZ 2
 //each process gets assigned problem size of NX x NY x NZ
 #define NX 32
 #define NY 32
@@ -529,7 +529,7 @@ void test_CG(striped_multi_GPU_Implementation<DataType>& implementation_multi_GP
         DataType normr0_global;
 
         //run CG on single GPU
-        striped_warp_reduction_Implementation<DataType> implementation_single_GPU;
+        striped_box_coloring_Implementation<DataType> implementation_single_GPU;
         //if(problem->rank == 0) printf("Rank=%d:\t CG About to do single GPU computation.\n", problem->rank);
         implementation_single_GPU.compute_CG(*A_global_striped, b_global_d, x_global_d, n_iters_global, normr_global, normr0_global);
 
@@ -557,6 +557,8 @@ void test_CG(striped_multi_GPU_Implementation<DataType>& implementation_multi_GP
             printf("++++++\n");
             printf("CG is correct for multi GPU\n");
             printf("Max difference: %20ef\n", max_diff);
+            printf("CG Multi GPU:\t n_iters_local=%d,\t normr_local=%f,\t normr0_local=%f\n", n_iters_local, normr_local, normr0_local);
+            printf("CG Single GPU:\t n_iters_global=%d,\t normr_global=%20f,\t normr0_global=%.20f\n", n_iters_global, normr_global, normr0_global);
             printf("++++++\n");
             //printf("Time for multi GPU CG: %f\n", time_multi_GPU);
             //printf("Time for single GPU CG: %f\n", time_single_GPU);
@@ -588,7 +590,7 @@ void test_CG(striped_multi_GPU_Implementation<DataType>& implementation_multi_GP
 void test_MG(striped_multi_GPU_Implementation<DataType>& implementation_multi_GPU, striped_partial_Matrix<DataType>* A_local_striped, striped_Matrix<DataType>* A_global_striped, Halo *halo_r_local_d, Halo *halo_x_local_d, Problem *problem){
     //make sure that we work on clean data
     SetHaloGlobalIndexGPU(halo_r_local_d, problem);
-    SetHaloZeroGPU(halo_x_local_d);
+    SetHaloGlobalIndexGPU(halo_x_local_d, problem);
 
     //exchange halos so each process starts with the correct data
     implementation_multi_GPU.ExchangeHalo(halo_r_local_d, problem);
@@ -617,7 +619,7 @@ void test_MG(striped_multi_GPU_Implementation<DataType>& implementation_multi_GP
         //compute verification result on single GPU
         DataType *result_single_GPU_h = (DataType*) malloc(NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType));
         for(int i = 0; i < NPX*NX*NPY*NY*NPZ*NZ; i++){
-            result_single_GPU_h[i] = 0;
+            result_single_GPU_h[i] = i;
         }
         
         //create b_global_h
@@ -702,14 +704,11 @@ void run_multi_GPU_tests(int argc, char *argv[], striped_multi_GPU_Implementatio
 
     Problem problem = *implementation_multi_GPU.init_comm(argc, argv, NPX, NPY, NPZ, NX, NY, NZ);
     //non_blocking_mpi_Implementation<DataType> implementation_multi_GPU_non_blocking_mpi;
-
     
     MPI_Barrier(MPI_COMM_WORLD);
     if(problem.rank == 0) printf("Testing started.\n");
     MPI_Barrier(MPI_COMM_WORLD);
     
-    //set Device
-    InitGPU(&problem);
     
     //initialize matrix partial matrix A_local
     striped_partial_Matrix<DataType> A_local(&problem);

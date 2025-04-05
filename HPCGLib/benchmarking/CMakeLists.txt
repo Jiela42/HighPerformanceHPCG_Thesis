@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.21)
 
 project(benchmarkingLib)
+find_package(MPI REQUIRED)
+link_directories("/user-environment/linux-sles15-neoverse_v2/gcc-13.3.0/nccl-2.22.3-1-4j6h3ffzysukqpqbvriorrzk2lm762dd/lib")
 
 # # Set C++ standard to C++17
 # set(CMAKE_CXX_STANDARD 17)
@@ -48,6 +50,12 @@ add_executable(run_maxSizeSingleGPU_finder
     benchmark_stripedBoxColoring.cpp
 )
 
+add_executable(run_bench_multi_GPU
+    run_bench_multi_GPU.cpp
+    abstract_benchmark_functions.cpp
+    benchmark_multi_GPU.cpp
+)
+
 
 target_link_libraries(run_bench_test
     HPCGLib
@@ -73,4 +81,14 @@ target_link_libraries(run_maxSizeSingleGPU_finder
     TimingLib
     TestHPCGLib
     stdc++fs
+)
+
+target_link_libraries(run_bench_multi_GPU
+    HPCGLib
+    TimingLib
+    TestHPCGLib
+    stdc++fs
+    MPI::MPI_CXX
+    nccl
+
 )
