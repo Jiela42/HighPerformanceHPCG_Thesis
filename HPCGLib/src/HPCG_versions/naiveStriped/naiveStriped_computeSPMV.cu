@@ -14,7 +14,7 @@ __global__ void naiveStriped_SPMV_kernel(
     // every thread computes one or more rows of the matrix
     for (local_int_t i = tid; i < num_rows; i += blockDim.x * gridDim.x) {
         // compute the matrix-vector product for the ith row
-        double sum_i = 0;
+        DataType sum_i = 0;
         for (int stripe = 0; stripe < num_stripes; stripe++) {
             local_int_t j = i + j_min_i[stripe];
             local_int_t current_row = i * num_stripes;
@@ -53,4 +53,4 @@ void naiveStriped_Implementation<T>::naiveStriped_computeSPMV(
     }
 
 // explicit template instantiation
-template class naiveStriped_Implementation<double>;
+template class naiveStriped_Implementation<DataType>;

@@ -1,29 +1,30 @@
 #include "benchmark.hpp"
 
 
-void run_striped_coloringPrecomputed_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path, striped_coloringPrecomputed_Implementation<double>& implementation){
+void run_striped_coloringPrecomputed_3d27p_benchmarks(int nx, int ny, int nz, std::string folder_path, striped_coloringPrecomputed_Implementation<DataType>& implementation){
 
-    striped_Matrix<double> striped_A;
+    striped_Matrix<DataType> striped_A;
     striped_A.Generate_striped_3D27P_Matrix_onGPU(nx, ny, nz);
 
-    std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
-    std::vector<double> x (nx*ny*nz, 0.0);
-    std::vector<double> a = generate_random_vector(nx*ny*nz, RANDOM_SEED);
-    std::vector<double> b = generate_random_vector(nx*ny*nz, RANDOM_SEED);
+    local_int_t num_rows = striped_A.get_num_rows();
+    local_int_t num_cols = striped_A.get_num_cols();
+    local_int_t nnz = striped_A.get_nnz();
+    int num_stripes = striped_A.get_num_stripes();
+
+    std::vector<DataType> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
+    std::vector<DataType> x (num_rows, 0.0);
+    std::vector<DataType> a = generate_random_vector(num_rows, RANDOM_SEED);
+    std::vector<DataType> b = generate_random_vector(num_rows, RANDOM_SEED);
 
     if(nx % 8 == 0 && ny % 8 == 0 && nz % 8 == 0 && nx / 8 > 2 && ny / 8 > 2 && nz / 8 > 2){
         // initialize the MG data
-        striped_Matrix <double>* current_matrix = &striped_A;
+        striped_Matrix <DataType>* current_matrix = &striped_A;
         for(int i = 0; i < 3; i++){
             current_matrix->initialize_coarse_Matrix();
             current_matrix = current_matrix->get_coarse_Matrix();
         }
     }
 
-    int num_rows = striped_A.get_num_rows();
-    int num_cols = striped_A.get_num_cols();
-    int nnz = striped_A.get_nnz();
-    int num_stripes = striped_A.get_num_stripes();
     
     striped_A.generate_coloring();
     
@@ -33,22 +34,22 @@ void run_striped_coloringPrecomputed_3d27p_benchmarks(int nx, int ny, int nz, st
     CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);
 
     // Allocate the memory on the device
-    double * a_d;
-    double * b_d;
-    double * x_d;
-    double * y_d;
-    double * result_d;
+    DataType * a_d;
+    DataType * b_d;
+    DataType * x_d;
+    DataType * y_d;
+    DataType * result_d;
 
-    CHECK_CUDA(cudaMalloc(&a_d, num_rows * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&b_d, num_rows * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&x_d, num_cols * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&y_d, num_rows * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&result_d, sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&a_d, num_rows * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&b_d, num_rows * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&x_d, num_cols * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&y_d, num_rows * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&result_d, sizeof(DataType)));
 
-    CHECK_CUDA(cudaMemcpy(a_d, a.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(b_d, b.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(a_d, a.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(b_d, b.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(DataType), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
 
     // run the benchmarks (without the copying back and forth)
     bench_Implementation(implementation, *timer, striped_A, a_d, b_d, x_d, y_d, result_d, 1.0, 1.0);
@@ -63,19 +64,19 @@ void run_striped_coloringPrecomputed_3d27p_benchmarks(int nx, int ny, int nz, st
     delete timer;
 }
 
-void run_striped_coloringPrecomputed_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path, striped_coloringPrecomputed_Implementation<double>& implementation){
+void run_striped_coloringPrecomputed_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::string folder_path, striped_coloringPrecomputed_Implementation<DataType>& implementation){
     
-    striped_Matrix<double> striped_A;
+    striped_Matrix<DataType> striped_A;
     striped_A.Generate_striped_3D27P_Matrix_onGPU(nx, ny, nz);
 
-    std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
-    std::vector<double> x (nx*ny*nz, 0.0);
-
-    int num_rows = striped_A.get_num_rows();
-    int num_cols = striped_A.get_num_cols();
-    int nnz = striped_A.get_nnz();
+    local_int_t num_rows = striped_A.get_num_rows();
+    local_int_t num_cols = striped_A.get_num_cols();
+    local_int_t nnz = striped_A.get_nnz();
     int num_stripes = striped_A.get_num_stripes();
     
+    std::vector<DataType> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
+    std::vector<DataType> x (num_rows, 0.0);
+
     striped_A.generate_coloring();
 
     std::string implementation_name = implementation.version_name;
@@ -84,14 +85,14 @@ void run_striped_coloringPrecomputed_3d27p_SymGS_benchmark(int nx, int ny, int n
     CudaTimer* timer = new CudaTimer (nx, ny, nz, nnz, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);
 
     // Allocate the memory on the device
-    double * x_d;
-    double * y_d;
+    DataType * x_d;
+    DataType * y_d;
 
-    CHECK_CUDA(cudaMalloc(&x_d, num_cols * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&y_d, num_rows * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&x_d, num_cols * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&y_d, num_rows * sizeof(DataType)));
 
-    CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(DataType), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
 
     implementation.test_before_bench = false;
     bench_SymGS(implementation, *timer, striped_A, x_d, y_d);

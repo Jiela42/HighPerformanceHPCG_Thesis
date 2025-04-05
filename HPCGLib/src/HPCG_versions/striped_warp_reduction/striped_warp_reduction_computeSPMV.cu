@@ -35,6 +35,7 @@ __global__ void striped_warp_reduction_SPMV_kernel(
 
         if (lane == 0){
             y[i] = sum_i;
+            // printf("y[%d] = %f\n", i, y[i]);
         }
     }
 }

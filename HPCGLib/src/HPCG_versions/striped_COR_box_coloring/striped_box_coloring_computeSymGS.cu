@@ -47,7 +47,7 @@ void striped_COR_box_coloring_Implementation<T>::striped_COR_box_coloring_comput
     num_color_rows = (0 < ny % by) ? (num_color_rows + 1) : num_color_rows;
     num_color_faces = (0 < nz % bz) ? (num_color_faces + 1) : num_color_faces;
 
-    int max_num_rows_per_color = num_color_cols * num_color_rows * num_color_faces;
+    local_int_t max_num_rows_per_color = num_color_cols * num_color_rows * num_color_faces;
     int max_color = 26;
 
     // std::cout << "num_rows = " << num_rows << std::endl;
@@ -71,7 +71,7 @@ void striped_COR_box_coloring_Implementation<T>::striped_COR_box_coloring_comput
     for(int i = 0; i < max_iterations && normi/norm0 > this->SymGS_tolerance; i++){
 
 
-        for(int color = 0; color <= max_color; color++){
+        for(local_int_t color = 0; color <= max_color; color++){
             // we need to do a forward pass
             striped_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
             color, color_pointer_d, color_sorted_rows_d,
@@ -87,7 +87,7 @@ void striped_COR_box_coloring_Implementation<T>::striped_COR_box_coloring_comput
         // we need to do a backward pass,
         // the colors for this are the same just in reverse order
         
-        for(int color = max_color; color  >= 0; color--){
+        for(local_int_t color = max_color; color  >= 0; color--){
     
             striped_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
             color, color_pointer_d, color_sorted_rows_d,

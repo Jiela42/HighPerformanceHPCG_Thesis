@@ -20,7 +20,7 @@
 // file based tests
 
 bool test_CG(
-    HPCG_functions<double>& implementation)
+    HPCG_functions<DataType>& implementation)
 {
 
     if (implementation.norm_based){
@@ -34,7 +34,7 @@ bool test_CG(
 
     // the file_based tests require a tolerance of zero and a max iteration of 50
     
-    double original_tolerance = implementation.get_CGTolerance();
+    DataType original_tolerance = implementation.get_CGTolerance();
     int original_CG_max_iters = implementation.get_maxCGIters();
     int original_SymGS_max_iters = implementation.get_maxSymGSIters();
 
@@ -79,7 +79,7 @@ bool test_CG(
             std::string x_beforeCG_file_path = test_file_path + "/x_beforeCG.txt";
             std::string x_afterCG_file_path = test_file_path + "/x_afterCG.txt";
 
-            int nx; int ny; int nz; int num_rows; int num_cols;
+            int nx; int ny; int nz; local_int_t num_rows; local_int_t num_cols;
 
             // open and read the dimensions from dimA.txt
             std::ifstream dimA_file(dimA_file_path);
@@ -105,14 +105,14 @@ bool test_CG(
             }
             dimA_file.close();
 
-            std::vector<double> b_host(num_rows, 0.0);
-            std::vector<double> x_beforeCG_host(num_rows, 0.0);
-            std::vector<double> x_afterCG_host(num_rows, 0.0);
+            std::vector<DataType> b_host(num_rows, 0.0);
+            std::vector<DataType> x_beforeCG_host(num_rows, 0.0);
+            std::vector<DataType> x_afterCG_host(num_rows, 0.0);
 
             // now read the vectors
             std::ifstream b_file(b_file_path);
             if (b_file.is_open()) {
-                for (int i = 0; i < num_rows && b_file >> b_host[i]; ++i);
+                for (local_int_t i = 0; i < num_rows && b_file >> b_host[i]; ++i);
                 b_file.close();
             } else {
                 std::cerr << "Failed to open file: " << b_file_path << std::endl;
@@ -122,7 +122,7 @@ bool test_CG(
 
             std::ifstream x_beforeCG_file(x_beforeCG_file_path);
             if (x_beforeCG_file.is_open()) {
-                for (int i = 0; i < num_rows && x_beforeCG_file >> x_beforeCG_host[i]; ++i);
+                for (local_int_t i = 0; i < num_rows && x_beforeCG_file >> x_beforeCG_host[i]; ++i);
                 x_beforeCG_file.close();
             } else {
                 std::cerr << "Failed to open file: " << x_beforeCG_file_path << std::endl;
@@ -132,7 +132,7 @@ bool test_CG(
 
             std::ifstream x_afterCG_file(x_afterCG_file_path);
             if (x_afterCG_file.is_open()) {
-                for (int i = 0; i < num_rows && x_afterCG_file >> x_afterCG_host[i]; ++i);
+                for (local_int_t i = 0; i < num_rows && x_afterCG_file >> x_afterCG_host[i]; ++i);
                 x_afterCG_file.close();
             } else {
                 std::cerr << "Failed to open file: " << x_afterCG_file_path << std::endl;
@@ -140,14 +140,14 @@ bool test_CG(
                 continue;
             }
 
-            double * b_d;
-            double * x_d;
+            DataType * b_d;
+            DataType * x_d;
 
-            CHECK_CUDA(cudaMalloc(&b_d, num_rows * sizeof(double)));
-            CHECK_CUDA(cudaMalloc(&x_d, num_rows * sizeof(double)));
+            CHECK_CUDA(cudaMalloc(&b_d, num_rows * sizeof(DataType)));
+            CHECK_CUDA(cudaMalloc(&x_d, num_rows * sizeof(DataType)));
 
-            CHECK_CUDA(cudaMemcpy(b_d, b_host.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
-            CHECK_CUDA(cudaMemcpy(x_d, x_beforeCG_host.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
+            CHECK_CUDA(cudaMemcpy(b_d, b_host.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
+            CHECK_CUDA(cudaMemcpy(x_d, x_beforeCG_host.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
 
             // // print the first 5 elements of x
             // for (int i = 0; i < 5; i++) {
@@ -165,7 +165,7 @@ bool test_CG(
             }
 
             // make A
-            sparse_CSR_Matrix<double> A;
+            sparse_CSR_Matrix<DataType> A;
             A.generateMatrix_onGPU(nx, ny, nz);
 
             // preallocate an int and two doubles for the output
@@ -177,7 +177,7 @@ bool test_CG(
 
                 implementation.doPreconditioning = false;
                 if (implementation.implementation_type == Implementation_Type::STRIPED){
-                    striped_Matrix<double>* A_striped = A.get_Striped();
+                    striped_Matrix<DataType>* A_striped = A.get_Striped();
 
                     // we might need a coloring precomputed for some SymGS implementations
                     A_striped->generate_coloring();
@@ -194,7 +194,7 @@ bool test_CG(
                 // when we do preconditioning we need at least 3 layers of coarse matrices to be able to compare to an HPCG file and we cannot do 2x2x2 matrices
                 
                 // initialize the coarse matrices to be used when preconditioning
-                sparse_CSR_Matrix<double>* current_matrix = &A;
+                sparse_CSR_Matrix<DataType>* current_matrix = &A;
     
                 for(int i = 0; i < 3; i++){
                     current_matrix->initialize_coarse_Matrix();
@@ -205,7 +205,7 @@ bool test_CG(
                 implementation.doPreconditioning = true;
                 
                 if (implementation.implementation_type == Implementation_Type::STRIPED){
-                    striped_Matrix<double>* A_striped = A.get_Striped();
+                    striped_Matrix<DataType>* A_striped = A.get_Striped();
                     
                     // we might need a coloring precomputed
                     A_striped->generate_coloring();
@@ -230,8 +230,8 @@ bool test_CG(
 
     
             // now get the result and compare
-            std::vector<double> computed_result(num_rows, 0.0);
-            CHECK_CUDA(cudaMemcpy(computed_result.data(), x_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+            std::vector<DataType> computed_result(num_rows, 0.0);
+            CHECK_CUDA(cudaMemcpy(computed_result.data(), x_d, num_rows * sizeof(DataType), cudaMemcpyDeviceToHost));
 
             // compare the results
             // bool test_pass = vector_compare(x_afterCG_host, computed_result);
@@ -262,7 +262,7 @@ bool test_CG(
 }
 
 bool test_MG(
-    HPCG_functions<double>& implementation)
+    HPCG_functions<DataType>& implementation)
 {
 
     if(implementation.norm_based){
@@ -303,7 +303,7 @@ bool test_MG(
             std::string x_overlap_file_path = test_file_path + "/x_overlap.txt";
             std::string x_overlap_after_mg_file_path = test_file_path + "/x_overlap_after_mg.txt";
 
-            int nx; int ny; int nz; int num_rows; int num_cols;
+            int nx; int ny; int nz; local_int_t num_rows; local_int_t num_cols;
 
             // open and read the dimensions from dimA.txt
             std::ifstream dimA_file(dimA_file_path);
@@ -348,14 +348,14 @@ bool test_MG(
                 // allocate the memory for the host vectors
                 // std::cout << "nx: " << nx << " ny: " << ny << " nz: " << nz << std::endl;
                 // std::cout << "Number of Rows: " << num_rows << std::endl;
-                std::vector<double> b_computed_host(num_rows, 0.0);
-                std::vector<double> x_overlap_host(num_rows, 0.0);
-                std::vector<double> x_overlap_after_mg_host(num_rows, 0.0);
+                std::vector<DataType> b_computed_host(num_rows, 0.0);
+                std::vector<DataType> x_overlap_host(num_rows, 0.0);
+                std::vector<DataType> x_overlap_after_mg_host(num_rows, 0.0);
     
                 // now read the vectors
                 std::ifstream b_computed_file(b_computed_file_path);
                 if (b_computed_file.is_open()) {
-                    for (int i = 0; i < num_rows && b_computed_file >> b_computed_host[i]; ++i);
+                    for (local_int_t i = 0; i < num_rows && b_computed_file >> b_computed_host[i]; ++i);
                     b_computed_file.close();
                 } else {
                     std::cerr << "Failed to open file: " << b_computed_file_path << std::endl;
@@ -365,7 +365,7 @@ bool test_MG(
     
                 std::ifstream x_overlap_file(x_overlap_file_path);
                 if (x_overlap_file.is_open()) {
-                    for (int i = 0; i < num_rows && x_overlap_file >> x_overlap_host[i]; ++i);
+                    for (local_int_t i = 0; i < num_rows && x_overlap_file >> x_overlap_host[i]; ++i);
                     x_overlap_file.close();
                 } else {
                     std::cerr << "Failed to open file: " << x_overlap_file_path << std::endl;
@@ -375,7 +375,7 @@ bool test_MG(
     
                 std::ifstream x_overlap_after_mg_file(x_overlap_after_mg_file_path);
                 if (x_overlap_after_mg_file.is_open()) {
-                    for (int i = 0; i < num_rows && x_overlap_after_mg_file >> x_overlap_after_mg_host[i]; ++i);
+                    for (local_int_t i = 0; i < num_rows && x_overlap_after_mg_file >> x_overlap_after_mg_host[i]; ++i);
                     x_overlap_after_mg_file.close();
                 } else {
                     std::cerr << "Failed to open file: " << x_overlap_after_mg_file_path << std::endl;
@@ -401,21 +401,21 @@ bool test_MG(
                 // std::cout << std::endl;
     
                 // allocate the memory for the device vectors
-                double * b_computed_d;
-                double * x_overlap_d;
+                DataType * b_computed_d;
+                DataType * x_overlap_d;
     
-                CHECK_CUDA(cudaMalloc(&b_computed_d, num_rows * sizeof(double)));
-                CHECK_CUDA(cudaMalloc(&x_overlap_d, num_rows * sizeof(double)));
+                CHECK_CUDA(cudaMalloc(&b_computed_d, num_rows * sizeof(DataType)));
+                CHECK_CUDA(cudaMalloc(&x_overlap_d, num_rows * sizeof(DataType)));
     
-                CHECK_CUDA(cudaMemcpy(b_computed_d, b_computed_host.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
-                CHECK_CUDA(cudaMemcpy(x_overlap_d, x_overlap_host.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
+                CHECK_CUDA(cudaMemcpy(b_computed_d, b_computed_host.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
+                CHECK_CUDA(cudaMemcpy(x_overlap_d, x_overlap_host.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
     
                 // make A
-                sparse_CSR_Matrix<double> A;
+                sparse_CSR_Matrix<DataType> A;
                 A.generateMatrix_onGPU(nx, ny, nz);
     
                 // also initialize the MG data
-                sparse_CSR_Matrix<double>* current_matrix = &A;
+                sparse_CSR_Matrix<DataType>* current_matrix = &A;
     
                 for(int i = 0; i < 3; i++){
                     current_matrix->initialize_coarse_Matrix();
@@ -430,7 +430,7 @@ bool test_MG(
 
                 if (implementation.implementation_type == Implementation_Type::STRIPED){
 
-                    striped_Matrix<double>* A_striped = A.get_Striped();
+                    striped_Matrix<DataType>* A_striped = A.get_Striped();
 
                     // we might need a coloring precomputed
                     A_striped->generate_coloring();
@@ -443,8 +443,8 @@ bool test_MG(
                 }
     
                 // now get the result and compare
-                std::vector<double> computed_result(num_rows, 0.0);
-                CHECK_CUDA(cudaMemcpy(computed_result.data(), x_overlap_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+                std::vector<DataType> computed_result(num_rows, 0.0);
+                CHECK_CUDA(cudaMemcpy(computed_result.data(), x_overlap_d, num_rows * sizeof(DataType), cudaMemcpyDeviceToHost));
     
                 // compare the results
                 bool test_pass = vector_compare(x_overlap_after_mg_host, computed_result);
@@ -474,21 +474,21 @@ bool test_MG(
 
 // in this case both versions require the same inputs 
 bool test_SPMV(
-    HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
-    sparse_CSR_Matrix<double> & A,
-    double * x_d // the vectors x is already on the device
+    HPCG_functions<DataType>& baseline, HPCG_functions<DataType>& uut,
+    sparse_CSR_Matrix<DataType> & A,
+    DataType * x_d // the vectors x is already on the device
         
 ){  
 
-    int num_rows = A.get_num_rows();
-    std::vector<double> y_baseline(num_rows, 0.0);
-    std::vector<double> y_uut(num_rows, 0.0);
+    local_int_t num_rows = A.get_num_rows();
+    std::vector<DataType> y_baseline(num_rows, 0.0);
+    std::vector<DataType> y_uut(num_rows, 0.0);
 
-    double * y_baseline_d;
-    double * y_uut_d;
+    DataType * y_baseline_d;
+    DataType * y_uut_d;
 
-    CHECK_CUDA(cudaMalloc(&y_baseline_d, num_rows * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&y_uut_d, num_rows * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&y_baseline_d, num_rows * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&y_uut_d, num_rows * sizeof(DataType)));
 
     baseline.compute_SPMV(A,
                           x_d, y_baseline_d);
@@ -497,8 +497,8 @@ bool test_SPMV(
                     x_d, y_uut_d);
 
     // and now we need to copy the result back and de-allocate the memory
-    CHECK_CUDA(cudaMemcpy(y_baseline.data(), y_baseline_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(y_uut.data(), y_uut_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(y_baseline.data(), y_baseline_d, num_rows * sizeof(DataType), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(y_uut.data(), y_uut_d, num_rows * sizeof(DataType), cudaMemcpyDeviceToHost));
 
     CHECK_CUDA(cudaFree(y_baseline_d));
     CHECK_CUDA(cudaFree(y_uut_d));
@@ -509,25 +509,25 @@ bool test_SPMV(
 
 // in this case the baseline requires CSR and the UUT requires both CSR and striped
 bool test_SPMV(
-    HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
-    striped_Matrix<double> & striped_A, // we pass A for the metadata
-    double * x_d // the vectors x is already on the device
+    HPCG_functions<DataType>& baseline, HPCG_functions<DataType>& uut,
+    striped_Matrix<DataType> & striped_A, // we pass A for the metadata
+    DataType * x_d // the vectors x is already on the device
         
 ){
-    int num_rows = striped_A.get_num_rows();
+    local_int_t num_rows = striped_A.get_num_rows();
     
-    sparse_CSR_Matrix<double> * A = striped_A.get_CSR();
+    sparse_CSR_Matrix<DataType> * A = striped_A.get_CSR();
     // A.sparse_CSR_Matrix_from_striped(striped_A);
 
-    int num_rows_baseline = A->get_num_rows();
-    std::vector<double> y_baseline(num_rows, 0.0);
-    std::vector<double> y_uut(num_rows, 0.0);
+    local_int_t num_rows_baseline = A->get_num_rows();
+    std::vector<DataType> y_baseline(num_rows, 0.0);
+    std::vector<DataType> y_uut(num_rows, 0.0);
 
-    double * y_baseline_d;
-    double * y_uut_d;
+    DataType * y_baseline_d;
+    DataType * y_uut_d;
 
-    CHECK_CUDA(cudaMalloc(&y_baseline_d, num_rows * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&y_uut_d, num_rows * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&y_baseline_d, num_rows * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&y_uut_d, num_rows * sizeof(DataType)));
 
     baseline.compute_SPMV(*A,
                           x_d, y_baseline_d);
@@ -536,8 +536,8 @@ bool test_SPMV(
                     x_d, y_uut_d);
     
     // and now we need to copy the result back and de-allocate the memory
-    CHECK_CUDA(cudaMemcpy(y_baseline.data(), y_baseline_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(y_uut.data(), y_uut_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(y_baseline.data(), y_baseline_d, num_rows * sizeof(DataType), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(y_uut.data(), y_uut_d, num_rows * sizeof(DataType), cudaMemcpyDeviceToHost));
 
     CHECK_CUDA(cudaFree(y_baseline_d));
     CHECK_CUDA(cudaFree(y_uut_d));
@@ -554,34 +554,38 @@ bool test_SPMV(
 
     bool test_pass = vector_compare(y_baseline, y_uut);
 
+    if(not test_pass){
+        std::cout << "SPMV failed for implementation: "<< uut.version_name << std::endl;
+    }
+
     return test_pass;
 }
 
 bool test_Dot(
-    HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
-    striped_Matrix<double> & A, // we pass A for the metadata
-    double * x_d, double * y_d // the vectors x, y and result are already on the device
+    HPCG_functions<DataType>& baseline, HPCG_functions<DataType>& uut,
+    striped_Matrix<DataType> & A, // we pass A for the metadata
+    DataType * x_d, DataType * y_d // the vectors x, y and result are already on the device
     ){
-
-    // sparse_CSR_Matrix<double> A_CSR;
+    
+    // sparse_CSR_Matrix<DataType> A_CSR;
     // A_CSR.sparse_CSR_Matrix_from_striped(A);
 
-    double result_baseline = 0.0;
-    double result_uut = 0.0;
+    DataType result_baseline = 0.0;
+    DataType result_uut = 0.0;
 
     // allocate the memory for the result
-    double * result_baseline_d;
-    double * result_uut_d;
+    DataType * result_baseline_d;
+    DataType * result_uut_d;
 
-    CHECK_CUDA(cudaMalloc(&result_baseline_d, sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&result_uut_d, sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&result_baseline_d, sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&result_uut_d, sizeof(DataType)));
 
     baseline.compute_Dot(A, x_d, y_d, result_baseline_d);
     uut.compute_Dot(A, x_d, y_d, result_uut_d);
 
     // and now we need to copy the result back and de-allocate the memory
-    CHECK_CUDA(cudaMemcpy(&result_baseline, result_baseline_d, sizeof(double), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(&result_uut, result_uut_d, sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(&result_baseline, result_baseline_d, sizeof(DataType), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(&result_uut, result_uut_d, sizeof(DataType), cudaMemcpyDeviceToHost));
 
     CHECK_CUDA(cudaFree(result_baseline_d));
     CHECK_CUDA(cudaFree(result_uut_d));
@@ -597,34 +601,34 @@ bool test_Dot(
 }
 
 bool test_Dot(
-    HPCG_functions<double>& uut,
-    sparse_CSR_Matrix<double> & A,
-    double * x_d, double * y_d // the vectors x, y and result are already on the device
+    HPCG_functions<DataType>& uut,
+    sparse_CSR_Matrix<DataType> & A,
+    DataType * x_d, DataType * y_d // the vectors x, y and result are already on the device
     ){
 
         // get the result on the device
-        double * result_uut_d;
-        double result_uut = 0.0;
+        DataType * result_uut_d;
+        DataType result_uut = 0.0;
 
-        CHECK_CUDA(cudaMalloc(&result_uut_d, sizeof(double)));
+        CHECK_CUDA(cudaMalloc(&result_uut_d, sizeof(DataType)));
 
         uut.compute_Dot(A, x_d, y_d, result_uut_d);
 
         // and now we need to copy the result back and de-allocate the memory
-        CHECK_CUDA(cudaMemcpy(&result_uut, result_uut_d, sizeof(double), cudaMemcpyDeviceToHost));
+        CHECK_CUDA(cudaMemcpy(&result_uut, result_uut_d, sizeof(DataType), cudaMemcpyDeviceToHost));
 
         CHECK_CUDA(cudaFree(result_uut_d));
 
-        double result_baseline = 0.0;
+        DataType result_baseline = 0.0;
 
         // calculate the baseline result (on the host like a mooron)
-        std::vector <double> x_h(A.get_num_rows());
-        std::vector <double> y_h(A.get_num_rows());
+        std::vector <DataType> x_h(A.get_num_rows());
+        std::vector <DataType> y_h(A.get_num_rows());
 
-        CHECK_CUDA(cudaMemcpy(x_h.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
-        CHECK_CUDA(cudaMemcpy(y_h.data(), y_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+        CHECK_CUDA(cudaMemcpy(x_h.data(), x_d, A.get_num_rows() * sizeof(DataType), cudaMemcpyDeviceToHost));
+        CHECK_CUDA(cudaMemcpy(y_h.data(), y_d, A.get_num_rows() * sizeof(DataType), cudaMemcpyDeviceToHost));
 
-        for(int i = 0; i < A.get_num_rows(); i++){
+        for(local_int_t i = 0; i < A.get_num_rows(); i++){
             result_baseline += x_h[i] * y_h[i];
         }
 
@@ -641,50 +645,52 @@ bool test_Dot(
 
 // this is a minitest, it can be called to do some rudimentary testing (currently only for striped Matrices)
 bool test_Dot(
-    HPCG_functions<double>& uut,
+    HPCG_functions<DataType>& uut,
     int nx, int ny, int nz
 ){
 
+    local_int_t num_rows = static_cast<local_int_t>(nx) * static_cast<local_int_t>(ny) * static_cast<local_int_t>(nz);
+
     // make a matrix (for some reason we need it) (num_rows is the only thing we need to get from the matrix)
-    striped_Matrix<double> A_striped;
-    A_striped.set_num_rows(nx * ny * nz);
+    striped_Matrix<DataType> A_striped;
+    A_striped.set_num_rows(num_rows);
     
 
     // create two vectors
-    std::vector<double> x(nx * ny * nz, 2.0);
-    std::vector<double> y(nx * ny * nz, 0.5);
+    std::vector<DataType> x(num_rows, 2.0);
+    std::vector<DataType> y(num_rows, 0.5);
     // std::cout << "we use this function" << std::endl;
 
-    double result = 0.0;
+    DataType result = 0.0;
 
     srand(RANDOM_SEED);
 
-    for(int i = 0; i < nx * ny * nz; i++){
-        double a = (double)rand() / RAND_MAX;
-        double b = (double)rand() / RAND_MAX;
-        x[i] = a;
-        y[i] = b;
-        result += a * b;
-        // result += x[i] * y[i];
+    for(local_int_t i = 0; i < num_rows; i++){
+        // DataType a = (DataType)rand() / RAND_MAX;
+        // DataType b = (DataType)rand() / RAND_MAX;
+        // x[i] = a;
+        // y[i] = b;
+        // result += a * b;
+        result += x[i] * y[i];
     }
 
     // allocate x and y on the device
-    double * x_d;
-    double * y_d;
-    double * result_d;
+    DataType * x_d;
+    DataType * y_d;
+    DataType * result_d;
 
-    CHECK_CUDA(cudaMalloc(&x_d, nx * ny * nz * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&y_d, nx * ny * nz * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&result_d, sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&x_d, num_rows * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&y_d, num_rows * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&result_d, sizeof(DataType)));
 
-    CHECK_CUDA(cudaMemcpy(x_d, x.data(), nx * ny * nz * sizeof(double), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(y_d, y.data(), nx * ny * nz * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
 
     uut.compute_Dot(A_striped, x_d, y_d, result_d);
 
     // get result back
-    double result_uut = 42;
-    CHECK_CUDA(cudaMemcpy(&result_uut, result_d, sizeof(double), cudaMemcpyDeviceToHost));
+    DataType result_uut = 42;
+    CHECK_CUDA(cudaMemcpy(&result_uut, result_d, sizeof(DataType), cudaMemcpyDeviceToHost));
 
     CHECK_CUDA(cudaFree(x_d));
     CHECK_CUDA(cudaFree(y_d));
@@ -702,16 +708,16 @@ bool test_Dot(
 }
 
 bool test_WAXPBY(
-    HPCG_functions<double>& uut,
-    striped_Matrix<double> & A,
-    double * x_d, double * y_d
+    HPCG_functions<DataType>& uut,
+    striped_Matrix<DataType> & A,
+    DataType * x_d, DataType * y_d
 ){
     // this one runs a bunch of tests for the WAXPBY function
 
     srand(RANDOM_SEED);
 
-    double a = (double)rand() / RAND_MAX;
-    double b = (double)rand() / RAND_MAX;
+    DataType a = (DataType)rand() / RAND_MAX;
+    DataType b = (DataType)rand() / RAND_MAX;
 
     
     bool all_pass = test_WAXPBY(uut, A, x_d, y_d, 0.0, 0.0);
@@ -729,34 +735,34 @@ bool test_WAXPBY(
 }
 
 bool test_WAXPBY(
-    HPCG_functions<double>& uut,
-    striped_Matrix<double> & A,
-    double * x_d, double * y_d,
-    double alpha, double beta
+    HPCG_functions<DataType>& uut,
+    striped_Matrix<DataType> & A,
+    DataType * x_d, DataType * y_d,
+    DataType alpha, DataType beta
 )
     
     {
 
         // x & y should be random vectors, so let's quickly grab them
-        std::vector<double> x_host(A.get_num_rows());
-        std::vector<double> y_host(A.get_num_rows());
-        std::vector<double> w_host(A.get_num_rows());
-        std::vector<double> w_baseline(A.get_num_rows());
+        std::vector<DataType> x_host(A.get_num_rows());
+        std::vector<DataType> y_host(A.get_num_rows());
+        std::vector<DataType> w_host(A.get_num_rows());
+        std::vector<DataType> w_baseline(A.get_num_rows());
 
 
         // allocate result vector on device
-        double * w_d;
-        CHECK_CUDA(cudaMalloc(&w_d, A.get_num_rows() * sizeof(double)));
+        DataType * w_d;
+        CHECK_CUDA(cudaMalloc(&w_d, A.get_num_rows() * sizeof(DataType)));
 
         // grab the vectors from the device
-        CHECK_CUDA(cudaMemcpy(x_host.data(), x_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
-        CHECK_CUDA(cudaMemcpy(y_host.data(), y_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+        CHECK_CUDA(cudaMemcpy(x_host.data(), x_d, A.get_num_rows() * sizeof(DataType), cudaMemcpyDeviceToHost));
+        CHECK_CUDA(cudaMemcpy(y_host.data(), y_d, A.get_num_rows() * sizeof(DataType), cudaMemcpyDeviceToHost));
 
         uut.compute_WAXPBY(A, x_d, y_d, w_d, alpha, beta);
 
-        CHECK_CUDA(cudaMemcpy(w_baseline.data(), w_d, A.get_num_rows() * sizeof(double), cudaMemcpyDeviceToHost));
+        CHECK_CUDA(cudaMemcpy(w_baseline.data(), w_d, A.get_num_rows() * sizeof(DataType), cudaMemcpyDeviceToHost));
 
-        for(int i = 0; i < A.get_num_rows(); i++){
+        for(local_int_t i = 0; i < A.get_num_rows(); i++){
             w_host[i] = alpha * x_host[i] + beta * y_host[i];
         }
 
@@ -770,14 +776,14 @@ bool test_WAXPBY(
     }
 
 bool test_SymGS(
-    HPCG_functions<double>&uut,
-    sparse_CSR_Matrix<double> & A
+    HPCG_functions<DataType>&uut,
+    sparse_CSR_Matrix<DataType> & A
     ){
     // This is the mini test for the SymGS function
 
     // std::cout << "SymGS Mini test" << std::endl;
 
-    std::vector<std::vector<double>> A_dense = {
+    std::vector<std::vector<DataType>> A_dense = {
         {1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0.},
         {1., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0.},
         {0., 1., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 0., 0., 1., 1.},
@@ -803,14 +809,14 @@ bool test_SymGS(
     uut.set_maxSymGSIters(1);
 
     // Define the vector y
-    std::vector<double> y = {8., 9., 9., 8., 8., 9., 9., 8., 8., 9., 9., 8., 8., 9., 9., 8.};
+    std::vector<DataType> y = {8., 9., 9., 8., 8., 9., 9., 8., 8., 9., 9., 8., 8., 9., 9., 8.};
 
     // Define the solution vector
-    std::vector<double> solution = {15., -7., 8., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.};
+    std::vector<DataType> solution = {15., -7., 8., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.};
 
-    sparse_CSR_Matrix<double> A_csr (A_dense);
-    int nnz = A_csr.get_nnz();
-    int num_rows = A_csr.get_num_rows();
+    sparse_CSR_Matrix<DataType> A_csr (A_dense);
+    local_int_t nnz = A_csr.get_nnz();
+    local_int_t num_rows = A_csr.get_num_rows();
 
     // put A onto gpu
     std::cout << "Copying A to GPU, you can safely ignore the following warning." << std::endl;
@@ -819,23 +825,23 @@ bool test_SymGS(
     // A_csr.print();
 
     // Allocate the memory on the device
-    double * y_d;
-    double * x_d;
+    DataType * y_d;
+    DataType * x_d;
 
-    CHECK_CUDA(cudaMalloc(&y_d, num_rows * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&x_d, num_rows * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&y_d, num_rows * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&x_d, num_rows * sizeof(DataType)));
 
     // Copy the data to the device
-    CHECK_CUDA(cudaMemset(x_d, 0.0, num_rows * sizeof(double)));
-    CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemset(x_d, 0.0, num_rows * sizeof(DataType)));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
 
     // run the symGS function
     uut.compute_SymGS(A_csr, x_d, y_d);
 
     // get the result back
-    std::vector<double> x(num_rows, 0.0);
+    std::vector<DataType> x(num_rows, 0.0);
 
-    CHECK_CUDA(cudaMemcpy(x.data(), x_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(x.data(), x_d, num_rows * sizeof(DataType), cudaMemcpyDeviceToHost));
 
     // free the memory
     CHECK_CUDA(cudaFree(y_d));
@@ -856,23 +862,23 @@ bool test_SymGS(
 }
 
 bool test_SymGS(
-    HPCG_functions<double> &baseline, HPCG_functions<double> &uut,
-    sparse_CSR_Matrix<double> & A,
-    double * x_d, double * y_d
+    HPCG_functions<DataType> &baseline, HPCG_functions<DataType> &uut,
+    sparse_CSR_Matrix<DataType> & A,
+    DataType * x_d, DataType * y_d
     )
 
 {   
 
-    int num_rows = A.get_num_rows();
+    local_int_t num_rows = A.get_num_rows();
     // since symGS changes x, we preserve the original x
-    std::vector<double> x(num_rows, 0.0);
-    std::vector<double> uut_result(num_rows, 0.0);
-    std::vector<double> baseline_result(num_rows, 0.0);
-    CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
+    std::vector<DataType> x(num_rows, 0.0);
+    std::vector<DataType> uut_result(num_rows, 0.0);
+    std::vector<DataType> baseline_result(num_rows, 0.0);
+    CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
     uut.compute_SymGS(A, x_d, y_d);
 
     // get the result back
-    CHECK_CUDA(cudaMemcpy(uut_result.data(), x_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(uut_result.data(), x_d, num_rows * sizeof(DataType), cudaMemcpyDeviceToHost));
 
     // testing is either done by a comparison of the results or by checking the relative residual
     // this depends on the version
@@ -904,11 +910,11 @@ bool test_SymGS(
         // }
     } else{
         // run the baseline
-        CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
+        CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
         baseline.compute_SymGS(A, x_d, y_d);
 
         // get the result back
-        CHECK_CUDA(cudaMemcpy(baseline_result.data(), x_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+        CHECK_CUDA(cudaMemcpy(baseline_result.data(), x_d, num_rows * sizeof(DataType), cudaMemcpyDeviceToHost));
 
         test_pass = vector_compare(uut_result, baseline_result);
         if (not test_pass){
@@ -917,18 +923,18 @@ bool test_SymGS(
     }
 
     // copy the original x back
-    CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_rows * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
     return test_pass;
 }
 
 
 bool test_SymGS(
-    HPCG_functions<double>& baseline, HPCG_functions<double>& uut,
-    striped_Matrix<double> & striped_A, // we pass A for the metadata
-    double * y_d // the vectors x is already on the device
+    HPCG_functions<DataType>& baseline, HPCG_functions<DataType>& uut,
+    striped_Matrix<DataType> & striped_A, // we pass A for the metadata
+    DataType * y_d // the vectors x is already on the device
         
 ){
-    int num_rows = striped_A.get_num_rows();
+    local_int_t num_rows = striped_A.get_num_rows();
     bool test_pass;
 
     // if the baseline is a CSR implementation we make the distinction between normbased and "correct" implementations
@@ -938,19 +944,19 @@ bool test_SymGS(
         // std::cout << "SymGS test 2" << std::endl;
 
 
-        sparse_CSR_Matrix<double>* A = striped_A.get_CSR();
+        sparse_CSR_Matrix<DataType>* A = striped_A.get_CSR();
         // A.sparse_CSR_Matrix_from_striped(striped_A);
 
-        int num_rows_baseline = A->get_num_rows();
+        local_int_t num_rows_baseline = A->get_num_rows();
 
-        double * x_uut_d;
-        CHECK_CUDA(cudaMalloc(&x_uut_d, num_rows * sizeof(double)));
-        CHECK_CUDA(cudaMemset(x_uut_d, 0, num_rows * sizeof(double)));
+        DataType * x_uut_d;
+        CHECK_CUDA(cudaMalloc(&x_uut_d, num_rows * sizeof(DataType)));
+        CHECK_CUDA(cudaMemset(x_uut_d, 0, num_rows * sizeof(DataType)));
 
         // std::cout << "Baseline name = " << baseline.version_name << std::endl;
 
-        std::vector<double> x_baseline(num_rows, 0.0);
-        std::vector<double> x_uut(num_rows, 0.0);
+        std::vector<DataType> x_baseline(num_rows, 0.0);
+        std::vector<DataType> x_uut(num_rows, 0.0);
 
         // in case it is a norm based SymGS (we do more than one iteration)
         // we need to store and adjust the number of max iterations
@@ -960,8 +966,8 @@ bool test_SymGS(
             uut.set_maxSymGSIters(500);
         }
 
-        // std::vector<double> looki(5);
-        // CHECK_CUDA(cudaMemcpy(looki.data(), x_uut_d, 5 * sizeof(double), cudaMemcpyDeviceToHost));
+        // std::vector<DataType> looki(5);
+        // CHECK_CUDA(cudaMemcpy(looki.data(), x_uut_d, 5 * sizeof(DataType), cudaMemcpyDeviceToHost));
         // std::cout << "Looki: " << looki[0] << std::endl;
 
         uut.compute_SymGS(striped_A,
@@ -1001,18 +1007,18 @@ bool test_SymGS(
 
         } else{
             // this is the case where we compare to a CSR baseline
-            double * x_baseline_d;
+            DataType * x_baseline_d;
 
-            CHECK_CUDA(cudaMalloc(&x_baseline_d, num_rows * sizeof(double)));
+            CHECK_CUDA(cudaMalloc(&x_baseline_d, num_rows * sizeof(DataType)));
 
             // we need the x to be all set to zero, otherwise with different initial conditions the results will be different
-            CHECK_CUDA(cudaMemset(x_baseline_d, 0, num_rows * sizeof(double)));
+            CHECK_CUDA(cudaMemset(x_baseline_d, 0, num_rows * sizeof(DataType)));
 
             baseline.compute_SymGS(*A, x_baseline_d, y_d);
 
             // and now we need to copy the result back and de-allocate the memory
-            CHECK_CUDA(cudaMemcpy(x_baseline.data(), x_baseline_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
-            CHECK_CUDA(cudaMemcpy(x_uut.data(), x_uut_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(x_baseline.data(), x_baseline_d, num_rows * sizeof(DataType), cudaMemcpyDeviceToHost));
+            CHECK_CUDA(cudaMemcpy(x_uut.data(), x_uut_d, num_rows * sizeof(DataType), cudaMemcpyDeviceToHost));
             
             CHECK_CUDA(cudaFree(x_baseline_d));
 
@@ -1036,29 +1042,29 @@ bool test_SymGS(
     } else if (baseline.implementation_type == Implementation_Type::STRIPED){
         // if the baseline is STriped, we can directly compare the results of the two implementations
     
-        std::vector<double> x_baseline(num_rows, 0.0);
-        std::vector<double> x_uut(num_rows, 0.0);
+        std::vector<DataType> x_baseline(num_rows, 0.0);
+        std::vector<DataType> x_uut(num_rows, 0.0);
 
-        double * x_uut_d;
-        double * x_baseline_d;
+        DataType * x_uut_d;
+        DataType * x_baseline_d;
 
-        CHECK_CUDA(cudaMalloc(&x_uut_d, num_rows * sizeof(double)));
-        CHECK_CUDA(cudaMemset(x_uut_d, 0, num_rows * sizeof(double)));
+        CHECK_CUDA(cudaMalloc(&x_uut_d, num_rows * sizeof(DataType)));
+        CHECK_CUDA(cudaMemset(x_uut_d, 0, num_rows * sizeof(DataType)));
 
         // std::cout << "Baseline name = " << baseline.version_name << std::endl;
 
-        CHECK_CUDA(cudaMalloc(&x_baseline_d, num_rows * sizeof(double)));
+        CHECK_CUDA(cudaMalloc(&x_baseline_d, num_rows * sizeof(DataType)));
         
         uut.compute_SymGS(striped_A,
             x_uut_d, y_d);
         // we need the x to be all set to zero, otherwise with different initial conditions the results will be different
-        CHECK_CUDA(cudaMemset(x_baseline_d, 0, num_rows * sizeof(double)));
+        CHECK_CUDA(cudaMemset(x_baseline_d, 0, num_rows * sizeof(DataType)));
 
         baseline.compute_SymGS(striped_A, x_baseline_d, y_d);
 
         // and now we need to copy the result back and de-allocate the memory
-        CHECK_CUDA(cudaMemcpy(x_baseline.data(), x_baseline_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
-        CHECK_CUDA(cudaMemcpy(x_uut.data(), x_uut_d, num_rows * sizeof(double), cudaMemcpyDeviceToHost));
+        CHECK_CUDA(cudaMemcpy(x_baseline.data(), x_baseline_d, num_rows * sizeof(DataType), cudaMemcpyDeviceToHost));
+        CHECK_CUDA(cudaMemcpy(x_uut.data(), x_uut_d, num_rows * sizeof(DataType), cudaMemcpyDeviceToHost));
         
         
         // compare the results

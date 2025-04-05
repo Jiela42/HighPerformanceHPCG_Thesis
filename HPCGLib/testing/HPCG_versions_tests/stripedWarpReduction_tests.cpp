@@ -2,7 +2,7 @@
 
 #include "UtilLib/cuda_utils.hpp"
 
-bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double>& A){
+bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<DataType>& A){
     // the output will be allocated by the test function
     // but any inputs need to be allocated and copied over to the device here
     // and is then passed to the test function
@@ -10,19 +10,23 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double>& A){
     bool all_pass = true;
     
     // create the baseline and the UUT
-    cuSparse_Implementation<double> cuSparse;
-    striped_warp_reduction_Implementation<double> striped_warp_reduction;
+    cuSparse_Implementation<DataType> cuSparse;
+    striped_warp_reduction_Implementation<DataType> striped_warp_reduction;
+    
+    local_int_t num_rows = A.get_num_rows();
+    local_int_t num_cols = A.get_num_cols();
+    local_int_t nnz = A.get_nnz();
     
     int nx = A.get_nx();
     int ny = A.get_ny();
     int nz = A.get_nz();
     
     // random seeded x vector
-    std::vector<double> a = generate_random_vector(nx*ny*nz, RANDOM_SEED);
-    std::vector<double> b = generate_random_vector(nx*ny*nz, RANDOM_SEED);
-    std::vector<double> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
+    std::vector<DataType> a = generate_random_vector(num_rows, RANDOM_SEED);
+    std::vector<DataType> b = generate_random_vector(num_rows, RANDOM_SEED);
+    std::vector<DataType> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
 
-    striped_Matrix<double>* A_striped = A.get_Striped();
+    striped_Matrix<DataType>* A_striped = A.get_Striped();
 
     // std::cout << "size: " << nx << "x" << ny << "x" << nz << std::endl;
 
@@ -35,29 +39,26 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double>& A){
     // }
     // std::cout << std::endl;
 
-    int num_rows = A.get_num_rows();
-    int num_cols = A.get_num_cols();
-    int nnz = A.get_nnz();
-
-    double * a_d;
-    double * b_d;
-    double * x_d;
-    double * y_d;
+    DataType * a_d;
+    DataType * b_d;
+    DataType * x_d;
+    DataType * y_d;
 
 
     // Allocate the memory on the device
-    CHECK_CUDA(cudaMalloc(&a_d, num_cols * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&b_d, num_cols * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&x_d, num_cols * sizeof(double)));
-    CHECK_CUDA(cudaMalloc(&y_d, num_cols * sizeof(double)));
+    CHECK_CUDA(cudaMalloc(&a_d, num_cols * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&b_d, num_cols * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&x_d, num_cols * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&y_d, num_cols * sizeof(DataType)));
 
     // Copy the data to the device    
-    CHECK_CUDA(cudaMemcpy(a_d, a.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(b_d, b.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
-    CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_cols * sizeof(double), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(a_d, a.data(), num_cols * sizeof(DataType), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(b_d, b.data(), num_cols * sizeof(DataType), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_cols * sizeof(DataType), cudaMemcpyHostToDevice));
 
-    CHECK_CUDA(cudaMemset(x_d, 0, num_cols * sizeof(double)));
+    CHECK_CUDA(cudaMemset(x_d, 0, num_cols * sizeof(DataType)));
 
+    // std::cout << "testing SPMV" << std::endl;
     // test the SPMV function
     all_pass = all_pass && test_SPMV(
         cuSparse, striped_warp_reduction,
@@ -65,7 +66,7 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double>& A){
         a_d
         );
 
-
+    // std::cout << "testing Dot" << std::endl;
     // test the Dot function
     all_pass = all_pass && test_Dot(
         striped_warp_reduction,
@@ -73,12 +74,15 @@ bool run_striped_warp_reduction_tests_on_matrix(sparse_CSR_Matrix<double>& A){
         );
 
     
+    // std::cout << "testing symgs" << std::endl;
     // test the SymGS function (minitest, does not work with striped matrices)
     all_pass = all_pass && test_SymGS(
         cuSparse, striped_warp_reduction,
         *A_striped,
         y_d
     );
+    
+    // std::cout << "testing WAXPBY" << std::endl;
 
     all_pass = all_pass && test_WAXPBY(
         striped_warp_reduction,
@@ -104,7 +108,7 @@ bool run_stripedWarpReduction_filebased_tests(){
 
     bool all_pass = true;
 
-    striped_warp_reduction_Implementation<double> striped_warp_reduction;
+    striped_warp_reduction_Implementation<DataType> striped_warp_reduction;
 
     // MG tests
     all_pass = all_pass && test_MG(striped_warp_reduction);
@@ -127,10 +131,10 @@ bool run_stripedWarpReduction_tests(int nx, int ny, int nz){
     
 
 
-    sparse_CSR_Matrix<double> A;
+    sparse_CSR_Matrix<DataType> A;
     A.generateMatrix_onGPU(nx, ny, nz);
 
-    sparse_CSR_Matrix <double>* current_matrix = &A;
+    sparse_CSR_Matrix <DataType>* current_matrix = &A;
 
     for(int i = 0; i < 3; i++){
         int current_nx = current_matrix->get_nx();

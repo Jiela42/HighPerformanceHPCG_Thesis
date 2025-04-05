@@ -37,5 +37,5 @@ make -j16
 cd testing
 
 # Run the tests
-./run_AllTests
+srun ./run_AllTests
 

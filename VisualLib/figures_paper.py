@@ -174,6 +174,8 @@ def generate_memory_footprint_analysis():
     # Calculate y values
     y = memory_footprint_3d27pt(nx, 4, 8)
     y2 = memory_footprint_3d27pt(nx, 4, 4)
+    y3 = memory_footprint_3d27pt(nx, 8, 8)
+    y4 = memory_footprint_3d27pt(nx, 8, 4)
 
     # Find the value of nx where y equals 1500
     # nx_1500 = nx[np.isclose(y, 1.4, atol=1e-2)]
@@ -196,6 +198,8 @@ def generate_memory_footprint_analysis():
     plt.figure(figsize=(10, 6))
     plt.plot(nx, y, label=r'$s_{idx} =$ int, $s_{val} =$ float64')
     plt.plot(nx, y2, label=r'$s_{idx} =$ int, $s_{val} =$ float32')
+    plt.plot(nx, y3, label=r'$s_{idx} =$ long, $s_{val} =$ float64')
+    plt.plot(nx, y4, label=r'$s_{idx} =$ long, $s_{val} =$ float32')
     plt.xlabel('nx')
     plt.ylabel('CSR/Striped memory-footprint ratio')
     # plt.title('Memory Footprint Ratio')

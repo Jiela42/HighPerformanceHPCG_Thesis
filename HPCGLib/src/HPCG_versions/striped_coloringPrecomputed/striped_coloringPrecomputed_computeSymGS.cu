@@ -30,19 +30,23 @@ void striped_coloringPrecomputed_Implementation<T>::striped_coloringPrecomputed_
     assert(color_pointer_d != nullptr);
     assert(color_sorted_rows_d != nullptr);
     
-    int nx = A.get_nx();
-    int ny = A.get_ny();
-    int nz = A.get_nz();
+    local_int_t nx = A.get_nx();
+    local_int_t ny = A.get_ny();
+    local_int_t nz = A.get_nz();
 
     // the number of blocks is now dependent on the maximum number of rows per color
 
-    int max_num_rows_per_color = std::min(nx * ny / 4, std::min(nx * nz / 2, ny * nz));
-    int max_color = (nx-1) + 2 * (ny-1) + 4 * (nz-1);
+    local_int_t max_num_rows_per_color = std::min(nx * ny / 4, std::min(nx * nz / 2, ny * nz));
+    local_int_t max_color = (nx-1) + 2 * (ny-1) + 4 * (nz-1);
 
     int num_blocks = std::min(ceiling_division(max_num_rows_per_color, 1024/WARP_SIZE), MAX_NUM_BLOCKS);
     
     int max_iterations = this->max_SymGS_iterations;
     // std::cout << "max_iterations = " << max_iterations << std::endl;
+    // std::cout << "tolerance = " << this->SymGS_tolerance << std::endl;
+
+    // int num_iterations = 0;
+    
     double norm0 = 1.0;
     double normi = norm0;
 
@@ -52,7 +56,7 @@ void striped_coloringPrecomputed_Implementation<T>::striped_coloringPrecomputed_
     }
 
     for(int i = 0; i < max_iterations && normi/norm0 > this->SymGS_tolerance; i++){
-        for(int color = 0; color <= max_color; color++){
+        for(local_int_t color = 0; color <= max_color; color++){
             // we need to do a forward pass
             striped_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
             color, color_pointer_d, color_sorted_rows_d,
@@ -68,7 +72,7 @@ void striped_coloringPrecomputed_Implementation<T>::striped_coloringPrecomputed_
         // we need to do a backward pass,
         // the colors for this are the same just in reverse order
         
-        for(int color = max_color; color  >= 0; color--){
+        for(local_int_t color = max_color; color  >= 0; color--){
     
             striped_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
             color, color_pointer_d, color_sorted_rows_d,
@@ -81,10 +85,14 @@ void striped_coloringPrecomputed_Implementation<T>::striped_coloringPrecomputed_
             CHECK_CUDA(cudaDeviceSynchronize());
         }
 
+        // num_iterations++;
+
         if(max_iterations != 1){
             normi = this->L2_norm_for_SymGS(A, x_d, y_d);
         }
     }
+
+    // std::cout << "num_iterations = " << num_iterations << "for implementation "<< this->version_name << std::endl;
     
 }
 
