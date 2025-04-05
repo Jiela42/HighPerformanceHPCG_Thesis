@@ -5,14 +5,14 @@ cmake_minimum_required(VERSION 3.21)
 project(HPCGlib)
 
 # Set CUDA architecture to 90a
-# set(CMAKE_CUDA_ARCHITECTURES 90a 86)
+set(CMAKE_CUDA_ARCHITECTURES 90a 86)
 
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 
-set(CMAKE_CUDA_ARCHITECTURES 90a)
-set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -arch=sm_90a")
-include_directories("/user-environment/linux-sles15-neoverse_v2/gcc-13.3.0/nccl-2.22.3-1-4j6h3ffzysukqpqbvriorrzk2lm762dd/include")
+# set(CMAKE_CUDA_ARCHITECTURES 90a)
+# set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -arch=sm_90a")
+# include_directories("/user-environment/linux-sles15-neoverse_v2/gcc-13.3.0/nccl-2.22.3-1-4j6h3ffzysukqpqbvriorrzk2lm762dd/include")
 
 # Include directories
 include_directories(include)
