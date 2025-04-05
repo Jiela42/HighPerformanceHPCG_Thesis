@@ -49,7 +49,7 @@ void run_multi_GPU_benchmarks(int npx, int npy, int npz, int nx, int ny, int nz,
     } 
 
     std::string implementation_name = implementation.version_name;
-    std::string additional_params = implementation.additional_parameters;
+    std::string additional_params = implementation.additional_parameters + " NPX=" + std::to_string(npx) + " NPY=" + std::to_string(npy) + " NPZ=" + std::to_string(npz);
     std::string ault_node = implementation.ault_nodes;
  
     MPITimer* timer = new MPITimer(nx, ny, nz, 0, ault_node, "3d_27pt", implementation_name, additional_params, folder_path);

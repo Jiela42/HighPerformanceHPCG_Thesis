@@ -527,7 +527,6 @@ __global__ void generate_y_vector_for_HPCG_problem_kernel(global_int_t gnx, glob
 
 void generate_y_vector_for_HPCG_problem_onGPU(Problem *problem, DataType*y_d){
     local_int_t num_rows = problem->nx * problem->ny * problem->nz;
-    local_int_t num_cols = problem->nx * problem->ny * problem->nz;
 
     int nthread=256;
     local_int_t nblocks=(num_rows+nthread-1) / nthread;

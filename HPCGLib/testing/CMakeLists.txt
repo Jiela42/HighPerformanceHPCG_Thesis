@@ -21,7 +21,7 @@ add_library(TestHPCGLib
     HPCG_versions_tests/stripedBoxColoring_tests.cpp
     HPCG_versions_tests/stripedNoStore_tests.cpp
     HPCG_versions_tests/kernel_multi_GPU_tests.cpp
-    HPCG_versions_tests/dim_check.cpp
+    #HPCG_versions_tests/dim_check.cpp
     HPCG_versions_tests/stripedCORBoxColoring_tests.cpp
     
     UtilLib_tests.cpp

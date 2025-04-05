@@ -71,7 +71,10 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     
     } else {
         this->compute_SymGS(A, x_d, r_d, problem);
+        this->ExchangeHalo(x_d, problem);
     }
+    CHECK_CUDA(cudaDeviceSynchronize());
+
 
 }
 

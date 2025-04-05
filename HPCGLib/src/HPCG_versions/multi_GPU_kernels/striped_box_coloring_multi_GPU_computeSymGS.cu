@@ -126,6 +126,7 @@ void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_compute
     Halo *x_d, Halo *b_d, // the vectors x and y are already on the device
     Problem *problem
 ){
+
     //some geometrical information
     int nx = problem->nx;
     int ny = problem->ny;
@@ -205,6 +206,7 @@ void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_compute
             );
             CHECK_CUDA(cudaDeviceSynchronize());
             this->ExchangeHalo(x_d, problem);
+            CHECK_CUDA(cudaDeviceSynchronize());
         }
 
     // we need to do a backward pass,
@@ -224,6 +226,7 @@ void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_compute
         );
         CHECK_CUDA(cudaDeviceSynchronize());
         this->ExchangeHalo(x_d, problem);
+        CHECK_CUDA(cudaDeviceSynchronize());
     }
     /*
     printf("ALERT: L2_norm_ is not implemented for multi GPU! Result is going to be wrong!");
@@ -290,6 +293,7 @@ void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_compute
     // std::cout << "SymGS for size " << nx << "x" << ny << "x" << nz << " took " << iter << " iterations." << std::endl;
     // std::cout << "RR norm after " << iter << " iterations: " << rr_norm << std::endl;
     // std::cout << "Threshold RR norm: " << threshold_rr_Norm << std::endl;
+    CHECK_CUDA(cudaDeviceSynchronize());
 }
 
 // explicit template instantiation

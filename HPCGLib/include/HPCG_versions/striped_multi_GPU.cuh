@@ -23,7 +23,7 @@ public:
 
         this->dot_cooperation_number = 8;
 
-        this->doPreconditioning = false;
+        this->doPreconditioning = true;
 
         this->version_name = "Striped Multi GPU";
         this->implementation_type = Implementation_Type::STRIPED;

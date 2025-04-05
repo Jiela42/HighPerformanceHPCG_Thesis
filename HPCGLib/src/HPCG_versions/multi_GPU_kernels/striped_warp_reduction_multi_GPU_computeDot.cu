@@ -239,6 +239,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     }
 
     // std::cout << "done with dot product" << std::endl;
+    CHECK_CUDA(cudaDeviceSynchronize());
 
 }
 

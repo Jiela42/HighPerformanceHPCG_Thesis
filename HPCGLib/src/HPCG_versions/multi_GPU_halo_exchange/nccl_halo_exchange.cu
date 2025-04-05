@@ -8,7 +8,6 @@
 
 #include "nccl.h"
 
-//each process is using one GPU
 #define NCCL_TYPE ncclDouble
 
 //cf. https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/examples.html
@@ -83,8 +82,14 @@ Problem* NCCL_Implementation<T>::init_comm_NCCL(int argc, char *argv[], int npx,
         if (hostHashs[p] == hostHashs[rank]) localRank++;
     }
 
+    int deviceCount = 0;
+    CHECK_CUDA(cudaGetDeviceCount(&deviceCount));
+
     //picking a GPU based on localRank
-    CHECK_CUDA(cudaSetDevice(localRank));
+    if(deviceCount > 1){
+        CHECK_CUDA(cudaSetDevice(localRank));
+    }
+
     CHECK_CUDA(cudaStreamCreate(&this->cuda_stream));
 
     //get NCCL unique ID at rank 0 and broadcast it to all others
