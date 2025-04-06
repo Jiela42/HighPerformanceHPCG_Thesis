@@ -9,7 +9,8 @@ find_package(CUDAToolkit REQUIRED)
 find_package(MPI REQUIRED)
 # Include CUDA directories
 include_directories(${CUDAToolkit_INCLUDE_DIRS})
-include_directories(/user-environment/linux-sles15-neoverse_v2/gcc-13.3.0/nccl-2.22.3-1-4j6h3ffzysukqpqbvriorrzk2lm762dd/include)
+include_directories(${MPI_CXX_INCLUDE_DIRS})
+include_directories(/user-environment/linux-sles15-neoverse_v2/gcc-13.2.0/nccl-2.20.3-1-l2d55ru4lupkbzxnqm2b5nrvlgnt3v3s/include)
 
 
 # specify cuda standard
@@ -19,15 +20,9 @@ include_directories(/user-environment/linux-sles15-neoverse_v2/gcc-13.3.0/nccl-2
 # Set C++ standard to C++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_definitions(-DMPI_GPU_AWARE)
 
 # set(CMAKE_CUDA_ARCHITECTURES 86)
-
-# Set compile options for CUDA
-target_compile_options(HPCGLib PUBLIC $<$<COMPILE_LANGUAGE:CUDA>:
-    # --std=c++12
-    # --std=c++11
-    # -arch=sm_86
->)
 
 target_sources(HPCGLib PRIVATE
 

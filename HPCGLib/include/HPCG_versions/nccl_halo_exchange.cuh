@@ -11,7 +11,7 @@ public:
     Problem* init_comm(
         int argc, char *argv[],
         int npx, int npy, int npz,
-        int nx, int ny, int nz
+        local_int_t nx, local_int_t ny, local_int_t nz
     ) override {
         return init_comm_NCCL(argc, argv, npx, npy, npz, nx, ny, nz);
     }
@@ -33,7 +33,7 @@ private:
     Problem* init_comm_NCCL(
         int argc, char *argv[],
         int npx, int npy, int npz,
-        int nx, int ny, int nz
+        local_int_t nx, local_int_t ny, local_int_t nz
     );
 
     void ExchangeHaloNCCL(

@@ -8,7 +8,7 @@
 
 __inline__ __device__ global_int_t local_i_to_halo_i(
     local_int_t i, 
-    int nx, int ny, int nz,
+    local_int_t nx, local_int_t ny, local_int_t nz,
     local_int_t dimx, local_int_t dimy
     )
     {
@@ -24,7 +24,7 @@ __global__ void reduce_sums_multi_GPU(DataType * array, local_int_t num_elements
 
     __shared__ DataType intermediate_sums[32];
     
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
     int lane = threadIdx.x % 32;
     int warp_id = threadIdx.x / 32;
 
@@ -65,13 +65,13 @@ __global__ void striped_warp_reduction_multi_GPU_dot_kernel(
     DataType * x_d,
     DataType * y_d,
     DataType * result_d,
-    int nx, int ny, int nz,
+    local_int_t nx, local_int_t ny, local_int_t nz,
     local_int_t dimx, local_int_t dimy
 ){
 
     __shared__ DataType intermediate_sums[32];
 
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
     int lane = threadIdx.x % 32;
     // warp_id within the block
     int warp_id = threadIdx.x / 32;

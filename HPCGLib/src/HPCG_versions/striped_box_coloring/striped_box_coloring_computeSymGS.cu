@@ -99,6 +99,7 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
     int bx = this->bx;
     int by = this->by;
     int bz = this->bz;
+    //printf("SINGLE bx: %d by: %d bz: %d\n", bx, by, bz);
 
     assert(bx >= 2);
     assert(by >= 2);

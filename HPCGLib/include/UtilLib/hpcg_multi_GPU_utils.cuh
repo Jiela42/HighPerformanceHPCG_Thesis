@@ -61,12 +61,12 @@ struct Problem_STRUCT{
 typedef struct Problem_STRUCT Problem;
 
 struct Halo_STRUCT{
-    int nx;
-    int ny;
-    int nz;
-    int dimx;
-    int dimy;
-    int dimz;
+    local_int_t nx;
+    local_int_t ny;
+    local_int_t nz;
+    local_int_t dimx;
+    local_int_t dimy;
+    local_int_t dimz;
     DataType *interior;
     DataType *x_d;
     Problem *problem;

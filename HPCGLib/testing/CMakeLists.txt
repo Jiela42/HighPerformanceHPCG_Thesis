@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.21)
 
 project(Testing LANGUAGES CXX CUDA)
 
@@ -8,7 +8,7 @@ project(Testing LANGUAGES CXX CUDA)
 
 # Find MPI and make sure it's available
 find_package(MPI REQUIRED)
-link_directories("/user-environment/linux-sles15-neoverse_v2/gcc-13.3.0/nccl-2.22.3-1-4j6h3ffzysukqpqbvriorrzk2lm762dd/lib")
+link_directories("/user-environment/linux-sles15-neoverse_v2/gcc-13.2.0/nccl-2.20.3-1-l2d55ru4lupkbzxnqm2b5nrvlgnt3v3s/lib")
 
 add_library(TestHPCGLib
     HPCG_versions_tests/cuSparse_tests.cpp
@@ -88,6 +88,7 @@ target_link_libraries(run_multi_GPU
     MatrixLib
     UtilLib
     MPI::MPI_CXX
+    nccl
 )
 
 target_link_libraries(run_multi_GPU_tests

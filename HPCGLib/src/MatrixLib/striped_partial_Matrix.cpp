@@ -66,7 +66,7 @@ striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
     GenerateStripedPartialMatrix_GPU(this->problem, this->values_d);
 
     // fill j_min_i_d
-    int neighbour_offsets [num_stripes][3] = {
+    local_int_t neighbour_offsets [num_stripes][3] = {
         {-1, -1, -1}, {0, -1, -1}, {1, -1, -1},
         {-1, 0, -1}, {0, 0, -1}, {1, 0, -1},
         {-1, 1, -1}, {0, 1, -1}, {1, 1, -1},
@@ -79,9 +79,9 @@ striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
     };
 
     for (int i = 0; i < this->num_stripes; i++) {
-        int off_x = neighbour_offsets[i][0];
-        int off_y = neighbour_offsets[i][1];
-        int off_z = neighbour_offsets[i][2];
+        local_int_t off_x = neighbour_offsets[i][0];
+        local_int_t off_y = neighbour_offsets[i][1];
+        local_int_t off_z = neighbour_offsets[i][2];
         
         this->j_min_i[i] = off_x + off_y * p->gnx + off_z * p->gnx * p->gny;
         if (this->j_min_i[i] == 0) {
@@ -94,17 +94,17 @@ striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
 }
 
 template<typename T>
-int striped_partial_Matrix<T>::get_nx() const{
+local_int_t striped_partial_Matrix<T>::get_nx() const{
     return this->problem->nx;
 }
 
 template<typename T>
-int striped_partial_Matrix<T>::get_ny() const{
+local_int_t striped_partial_Matrix<T>::get_ny() const{
     return this->problem->nx;
 }
 
 template<typename T>
-int striped_partial_Matrix<T>::get_nz() const{
+local_int_t striped_partial_Matrix<T>::get_nz() const{
     return this->problem->nx;
 }
 
@@ -190,7 +190,7 @@ local_int_t striped_partial_Matrix<T>::get_num_cols() const{
 }
 
 template <typename T>
-int striped_partial_Matrix<T>::get_num_stripes() const{
+local_int_t striped_partial_Matrix<T>::get_num_stripes() const{
     return this->num_stripes;
 }
 
@@ -200,7 +200,7 @@ global_int_t striped_partial_Matrix<T>::get_nnz() const{
 }
 
 template <typename T>
-int striped_partial_Matrix<T>::get_diag_index() const{
+local_int_t striped_partial_Matrix<T>::get_diag_index() const{
     return this->diag_index;
 }
 
@@ -231,16 +231,16 @@ local_int_t * striped_partial_Matrix<T>::get_f2c_op_d(){
 
 template <typename T>
 void striped_partial_Matrix<T>::generate_f2c_operator_onGPU() {
-    const int x = this->problem->nx;
-    const int y = this->problem->ny;
-    const int z = this->problem->nz;
+    const local_int_t x = this->problem->nx;
+    const local_int_t y = this->problem->ny;
+    const local_int_t z = this->problem->nz;
     const local_int_t fine_n_rows = x *2 * y * 2 * z * 2;
 
     // allocate space for the device pointers
-    CHECK_CUDA(cudaMalloc(&this->f2c_op_d, fine_n_rows * sizeof(int)));
+    CHECK_CUDA(cudaMalloc(&this->f2c_op_d, fine_n_rows * sizeof(local_int_t)));
 
     // set them to zero
-    CHECK_CUDA(cudaMemset(this->f2c_op_d, 0, fine_n_rows * sizeof(int)));
+    CHECK_CUDA(cudaMemset(this->f2c_op_d, 0, fine_n_rows * sizeof(local_int_t)));
 
     generate_partialf2c_operator(x, y, z, x*2, y*2, z*2, this->f2c_op_d);
 }
@@ -255,13 +255,13 @@ void striped_partial_Matrix<T>::initialize_coarse_matrix(){
     assert(this->problem->gnz % 2 == 0);
     assert(this->coarse_Matrix == nullptr);
 
-    int nx_f = this->problem->nx;
-    int ny_f = this->problem->ny;
-    int nz_f = this->problem->nz;
+    local_int_t nx_f = this->problem->nx;
+    local_int_t ny_f = this->problem->ny;
+    local_int_t nz_f = this->problem->nz;
     //int fine_n_rows = this->nx *2 * this->ny * 2 * this->nz * 2;
-    int nx_c = this->problem->nx / 2;
-    int ny_c = this->problem->ny / 2;
-    int nz_c = this->problem->nz / 2;
+    local_int_t nx_c = this->problem->nx / 2;
+    local_int_t ny_c = this->problem->ny / 2;
+    local_int_t nz_c = this->problem->nz / 2;
 
     // allocate coarse matrix
     Problem *p_c = new Problem;

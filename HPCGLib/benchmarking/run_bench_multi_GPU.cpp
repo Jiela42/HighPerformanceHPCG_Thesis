@@ -7,13 +7,14 @@
 #include <filesystem>
 
 #include "HPCG_versions/non_blocking_mpi_halo_exchange.cuh"
+#include "HPCG_versions/nccl_halo_exchange.cuh"
 #include "UtilLib/hpcg_multi_GPU_utils.cuh"
 
 using DataType = double;
 
 namespace fs = std::filesystem;
 
-std::string createTimestampedFolder(const std::string base_folder){
+std::string createTimestampedFolder(const std::string base_folder, Problem *problem) {
     if(!fs::exists(base_folder)){
         std::cout << "Base folder " << base_folder <<" does not exist" << std::endl;
     }
@@ -23,8 +24,10 @@ std::string createTimestampedFolder(const std::string base_folder){
     std::stringstream ss;
     ss << std::put_time(std::localtime(&in_time_t), "%Y-%m-%d_%H-%M-%S");
 
-    std::string folder_path = base_folder + ss.str();
-    fs::create_directory(folder_path);
+    std::string folder_path = base_folder + ss.str() + "_NPX" + std::to_string(problem->npx) + "_NPY" + std::to_string(problem->npy) +
+                            "_NPZ" + std::to_string(problem->npz) + "_NX" + std::to_string(problem->nx) + "_NY" +
+                            std::to_string(problem->ny) + "_NZ" + std::to_string(problem->nz);
+    if(problem->rank == 0) fs::create_directory(folder_path);
 
     return folder_path;
 
@@ -69,14 +72,14 @@ int main(int argc, char *argv[]) {
     std::string base_path = "../../../timing_results/";
     base_path = "../../../dummy_timing_results/";
 
-    std::string folder_path = createTimestampedFolder(base_path);
-    folder_path += "/";
-
+    
     //start timer
     auto total_start = std::chrono::high_resolution_clock::now();
     
     non_blocking_mpi_Implementation<DataType> MGPU_Implementation;
     Problem *problem = MGPU_Implementation.init_comm(argc, argv, NPX, NPY, NPZ, NX, NY, NZ);
+    std::string folder_path = createTimestampedFolder(base_path, problem);
+    folder_path += "/";
     if(problem->rank == 0) std::cout << "Starting Benchmark" << std::endl;
     
     //start timer

@@ -5,7 +5,7 @@
 
 __inline__ __device__ global_int_t local_i_to_halo_i(
     local_int_t i, 
-    int nx, int ny, int nz,
+    local_int_t nx, local_int_t ny, local_int_t nz,
     local_int_t dimx, local_int_t dimy
     )
     {
@@ -23,11 +23,11 @@ __global__ void scalar_vector_multi_GPU_kernel(
     DataType alpha,
     DataType * x_d,
     DataType * w_d,
-    int nx, int ny, int nz,
+    local_int_t nx, local_int_t ny, local_int_t nz,
     local_int_t dimx, local_int_t dimy
 ){
 
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 
     for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x){
         local_int_t hi = local_i_to_halo_i(row, nx, ny, nz, dimx, dimy);
@@ -42,7 +42,7 @@ __global__ void waxpb1y_multi_GPU_kernel(
     DataType * x_d,
     DataType * y_d,
     DataType * w_d,
-    int nx, int ny, int nz,
+    local_int_t nx, local_int_t ny, local_int_t nz,
     local_int_t dimx, local_int_t dimy
 ){
 
@@ -59,11 +59,11 @@ __global__ void w1xpb1y_multi_GPU_kernel(
     DataType * x_d,
     DataType * y_d,
     DataType * w_d,
-    int nx, int ny, int nz,
+    local_int_t nx, local_int_t ny, local_int_t nz,
     local_int_t dimx, local_int_t dimy
 ){
 
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 
     for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x){
         local_int_t hi = local_i_to_halo_i(row, nx, ny, nz, dimx, dimy);
@@ -78,11 +78,11 @@ __global__ void waxpby_multi_GPU_kernel(
     DataType beta,
     DataType * y_d,
     DataType * w_d,
-    int nx, int ny, int nz,
+    local_int_t nx, local_int_t ny, local_int_t nz,
     local_int_t dimx, local_int_t dimy
 ){
 
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 
     for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x){
         local_int_t hi = local_i_to_halo_i(row, nx, ny, nz, dimx, dimy);
@@ -108,12 +108,12 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     assert(x_d->ny == y_d->ny && x_d->ny == w_d->ny);
     assert(x_d->nz == y_d->nz && x_d->nz == w_d->nz);
 
-    int dimx = x_d->dimx;
-    int dimy = x_d->dimy;
-    int dimz = x_d->dimz;
-    int nx = x_d->nx;
-    int ny = x_d->ny;
-    int nz = x_d->nz;
+    local_int_t dimx = x_d->dimx;
+    local_int_t dimy = x_d->dimy;
+    local_int_t dimz = x_d->dimz;
+    local_int_t nx = x_d->nx;
+    local_int_t ny = x_d->ny;
+    local_int_t nz = x_d->nz;
     
     local_int_t num_rows = problem->nx * problem->ny * problem->nz;
     int num_threads = 1024;

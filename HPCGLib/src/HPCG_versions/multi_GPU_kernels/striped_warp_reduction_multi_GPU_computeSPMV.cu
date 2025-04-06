@@ -4,7 +4,7 @@
 
 __inline__ __device__ global_int_t local_i_to_global_i(
     local_int_t i, 
-    int nx, int ny, int nz, 
+    local_int_t nx, local_int_t ny, local_int_t nz, 
     global_int_t gnx, global_int_t gny, global_int_t gnz,
     global_int_t gi0
     )
@@ -19,7 +19,7 @@ __inline__ __device__ global_int_t local_i_to_global_i(
 
 __inline__ __device__ local_int_t global_i_to_halo_i(
     global_int_t i,
-    int nx, int ny, int nz,
+    local_int_t nx, local_int_t ny, local_int_t nz,
     global_int_t gnx, global_int_t gny, global_int_t gnz,
     global_int_t gi0,
     int px, int py, int pz
@@ -41,16 +41,16 @@ __inline__ __device__ local_int_t global_i_to_halo_i(
 __global__ void striped_warp_reduction_multi_GPU_SPMV_kernel(
         DataType* striped_A,
         local_int_t num_rows, int num_stripes, local_int_t * j_min_i,
-        double* x, double* y, int nx, int ny, int nz, 
+        double* x, double* y, local_int_t nx, local_int_t ny, local_int_t nz, 
         global_int_t gnx, global_int_t gny, global_int_t gnz, 
         global_int_t gi0,
         int px, int py, int pz
     )
 {
     // printf("striped_warp_reduction_SPMV_kernel\n");
-    int cooperation_number = 4;
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    int lane = threadIdx.x % cooperation_number;
+    local_int_t cooperation_number = 4;
+    local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+    local_int_t lane = threadIdx.x % cooperation_number;
 
     // every thread computes one or more rows of the matrix
     for (local_int_t i = tid/cooperation_number; i < num_rows; i += (blockDim.x * gridDim.x)/cooperation_number) {
@@ -58,27 +58,26 @@ __global__ void striped_warp_reduction_multi_GPU_SPMV_kernel(
         // convert i to global index
         global_int_t gi = local_i_to_global_i(i, nx, ny, nz, gnx, gny, gnz, gi0);
         double sum_i = 0;
-        for (int stripe = lane; stripe < num_stripes; stripe += cooperation_number) {
+        for (local_int_t stripe = lane; stripe < num_stripes; stripe += cooperation_number) {
             local_int_t gj = gi + j_min_i[stripe]; //use the global index gi to find global index gj
             if (gj >= 0 && gj < gnx * gny * gnz) {
                 //convert gj to halo coordinate hj which is the memory location of gj in the halo struct
                 local_int_t hj =  global_i_to_halo_i(gj, nx, ny, nz, gnx, gny, gnz, gi0, px, py, pz);
                 local_int_t current_row = i * num_stripes;
-                sum_i += striped_A[current_row + stripe] * x[hj];
+                if(hj>=0 && hj<(nx+2)*(ny+2)*(nz+2))sum_i += striped_A[current_row + stripe] * x[hj];
             }
         }
-
         // now let's reduce the sum_i to a single value using warp-level reduction
         for(int offset = cooperation_number/2; offset > 0; offset /= 2){
             sum_i += __shfl_down_sync(0xFFFFFFFF, sum_i, offset);
         }
-
+        
         __syncthreads();
-
+        
         if (lane == 0){
             //convert gi to halo coordinate hi which is the memory location of gi in the halo struct
             local_int_t hi =  global_i_to_halo_i(gi, nx, ny, nz, gnx, gny, gnz, gi0, px, py, pz);
-            y[hi] = sum_i;
+            if(hi>=0 && hi<(nx+2)*(ny+2)*(nz+2))y[hi] = sum_i;
         }
     }
 }
@@ -99,9 +98,10 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
 
         // since every thread is working on one or more rows we need to base the number of threads on that
         int num_threads = 1024;
-        int num_blocks = (problem->nx * problem->ny * problem->nz + num_threads - 1) / num_threads;
+        local_int_t num_blocks = (problem->nx * problem->ny * problem->nz + num_threads - 1) / num_threads;
 
         // call the kernel
+        
         striped_warp_reduction_multi_GPU_SPMV_kernel<<<num_blocks, num_threads>>>(
             striped_A_d, num_rows, num_stripes, A.get_j_min_i_d(), x_d->x_d, y_d->x_d, problem->nx, problem->ny, problem->nz,
             problem->gnx, problem->gny, problem->gnz, problem->gi0, problem->px, problem->py, problem->pz

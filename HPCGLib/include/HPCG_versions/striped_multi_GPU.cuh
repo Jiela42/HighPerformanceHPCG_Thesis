@@ -36,9 +36,9 @@ public:
         this->norm_based = false;
 
         // default box size for coloring
-        this->bx = 3;
-        this->by = 3;
-        this->bz = 3;
+        this->bx = 2;
+        this->by = 2;
+        this->bz = 2;
 
         // set the default cooperation number for the SymGS
         this->SymGS_cooperation_number = 4;
@@ -48,7 +48,7 @@ public:
     virtual Problem* init_comm(
         int argc, char *argv[],
         int npx, int npy, int npz,
-        int nx, int ny, int nz
+        local_int_t nx, local_int_t ny, local_int_t nz
         ) = 0;
 
     virtual void ExchangeHalo(
@@ -229,7 +229,7 @@ private:
 __global__ void striped_warp_reduction_multi_GPU_SPMV_kernel(
     double* striped_A,
     local_int_t num_rows, int num_stripes, local_int_t * j_min_i,
-    double* x, double* y, int nx, int ny, int nz, 
+    double* x, double* y, local_int_t nx, local_int_t ny, local_int_t nz, 
     global_int_t gnx, global_int_t gny, global_int_t gnz, 
     global_int_t gi0,
     int px, int py, int pz
@@ -239,7 +239,7 @@ __global__ void striped_warp_reduction_multi_GPU_dot_kernel(
     double * x_d,
     double * y_d,
     double * result_d,
-    int nx, int ny, int nz,
+    local_int_t nx, local_int_t ny, local_int_t nz,
     local_int_t dimx, local_int_t dimy
 );
 

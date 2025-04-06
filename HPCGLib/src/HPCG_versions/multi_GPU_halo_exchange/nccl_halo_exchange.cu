@@ -63,7 +63,7 @@ static void getHostName(char* hostname, int maxlen) {
 }
 
 template <typename T>
-Problem* NCCL_Implementation<T>::init_comm_NCCL(int argc, char *argv[], int npx, int npy, int npz, int nx, int ny, int nz) {
+Problem* NCCL_Implementation<T>::init_comm_NCCL(int argc, char *argv[], int npx, int npy, int npz, local_int_t nx, local_int_t ny, local_int_t nz) {
     
     //initializing MPI
     CHECK_MPI(MPI_Init( &argc , &argv ));
@@ -129,10 +129,12 @@ void NCCL_Implementation<T>::ExchangeHaloNCCL(Halo *halo, Problem *problem) {
     ncclGroupStart();
     
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
-        CHECK_NCCL(ncclRecv(halo->recv_buff_d[i], problem->count_exchange[i], NCCL_TYPE,
-                    problem->neighbors[i], this->nccl_comm, cuda_stream));
-        CHECK_NCCL(ncclSend(halo->send_buff_d[i], problem->count_exchange[i], NCCL_TYPE,
-                    problem->neighbors[i], this->nccl_comm, cuda_stream));
+        if(problem->neighbors_mask[i]){
+            CHECK_NCCL(ncclRecv(halo->recv_buff_d[i], problem->count_exchange[i], NCCL_TYPE,
+                        problem->neighbors[i], this->nccl_comm, cuda_stream));
+            CHECK_NCCL(ncclSend(halo->send_buff_d[i], problem->count_exchange[i], NCCL_TYPE,
+                        problem->neighbors[i], this->nccl_comm, cuda_stream));
+        }
     }
 
     ncclGroupEnd();

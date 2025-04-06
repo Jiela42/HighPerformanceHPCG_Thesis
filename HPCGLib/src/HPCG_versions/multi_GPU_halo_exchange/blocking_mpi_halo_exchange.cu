@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 template <typename T>
-Problem* blocking_mpi_Implementation<T>::init_comm_blocking_MPI(int argc, char *argv[], int npx, int npy, int npz, int nx, int ny, int nz){
+Problem* blocking_mpi_Implementation<T>::init_comm_blocking_MPI(int argc, char *argv[], int npx, int npy, int npz, local_int_t nx, local_int_t ny, local_int_t nz){
     MPI_Init(&argc, &argv);
     int size, rank;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
