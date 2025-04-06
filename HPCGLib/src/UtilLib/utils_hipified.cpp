@@ -214,7 +214,7 @@ __global__ void diff_and_norm_kernel(local_int_t num_rows, double *Ax, double *y
     double my_sum = 0;
     int lane = threadIdx.x % WARP_SIZE;
     int warp_id = threadIdx.x / WARP_SIZE;
-    __shared__ double intermediate_sums[32];
+    __shared__ double intermediate_sums[WARP_SIZE];
 
     for(local_int_t row = tid; row < num_rows; row += blockDim.x * gridDim.x) {
         double d = Ax[row] - y[row];
@@ -260,7 +260,7 @@ __global__ void square_fusedReduction_kernel(local_int_t num_rows, double *y, do
     double my_sum = 0;
     int lane = threadIdx.x % WARP_SIZE;
     int warp_id = threadIdx.x / WARP_SIZE;
-    __shared__ double intermediate_sums[32];
+    __shared__ double intermediate_sums[WARP_SIZE];
 
     // printf("Hello from the kernel\n");
 

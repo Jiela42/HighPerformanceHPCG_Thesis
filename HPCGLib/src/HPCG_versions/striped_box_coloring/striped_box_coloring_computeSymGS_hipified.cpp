@@ -66,7 +66,7 @@ __global__ void striped_box_coloring_half_SymGS_kernel(
 
         // reduce the my_sum using warp reduction
         for (int offset = cooperation_number/2; offset > 0; offset /= 2){
-            my_sum += __shfl_down_sync(static_cast<unsigned long long>(0xFFFFFFFFFFFFFFFF), my_sum, offset);
+            my_sum += __shfl_down(my_sum, offset);
         }
 
         __syncthreads();
@@ -155,7 +155,7 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
 
 
     // to do the L2 norm asynchroneously we do the first iteration outside of the loop
-        for(int color = 0; color < num_colors; color++){
+        for(int color = 0; color <= max_color; color++){
                 // we need to do a forward pass
                 striped_box_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
                 cooperation_number,

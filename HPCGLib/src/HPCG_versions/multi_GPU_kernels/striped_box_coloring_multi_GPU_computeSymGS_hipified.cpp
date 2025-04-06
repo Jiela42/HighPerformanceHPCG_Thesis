@@ -107,7 +107,7 @@ __global__ void striped_box_coloring_half_SymGS_kernel(
 
         // reduce the my_sum using warp reduction
         for (int offset = cooperation_number/2; offset > 0; offset /= 2){
-            my_sum += __shfl_down_sync(static_cast<unsigned long long>(0xFFFFFFFFFFFFFFFF), my_sum, offset);
+            my_sum += __shfl_down(my_sum, offset);
         }
 
         __syncthreads();

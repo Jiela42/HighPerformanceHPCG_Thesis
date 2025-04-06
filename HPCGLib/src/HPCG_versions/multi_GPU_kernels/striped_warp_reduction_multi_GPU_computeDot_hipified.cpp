@@ -5,27 +5,24 @@
 #include <iostream>
 #include <mpi.h>
 
+
+
 __inline__ __device__ global_int_t local_i_to_halo_i(
     local_int_t i,
     int nx, int ny, int nz,
-    local_int_t dimx, local_int_t dimy
+    int dimx, int dimy
     )
     {
-        /*
-        int local_i_x = i % nx;
-        int local_i_y = (i % (nx * ny)) / nx;
-        int local_i_z = i / (nx * ny);
-        return (dimx * dimy) + dimx + 1 + local_i_x + local_i_y * dimx + local_i_z * (dimx * dimy);*/
         return dimx*(dimy+1) + 1 + (i % nx) + dimx*((i % (nx*ny)) / nx) + (dimx*dimy)*(i / (nx*ny));
 }
 
 __global__ void reduce_sums_multi_GPU(DataType * array, local_int_t num_elements, DataType * result_d){
 
-    __shared__ DataType intermediate_sums[32];
+    __shared__ DataType intermediate_sums[warpSize];
 
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    int lane = threadIdx.x % 32;
-    int warp_id = threadIdx.x / 32;
+    int lane = threadIdx.x % warpSize;
+    int warp_id = threadIdx.x / warpSize;
 
     DataType my_sum = 0.0;
 
@@ -33,8 +30,8 @@ __global__ void reduce_sums_multi_GPU(DataType * array, local_int_t num_elements
         my_sum += array[i];
     }
 
-    for (int offset = 16; offset > 0; offset /= 2){
-        my_sum += __shfl_down_sync(static_cast<unsigned long long>(0xFFFFFFFFFFFFFFFF), my_sum, offset);
+    for (int offset = warpSize/2; offset > 0; offset /= 2){
+        my_sum += __shfl_down_sync(0xffffffffffffffffULL, my_sum, offset);
     }
 
     __syncthreads();
@@ -45,11 +42,15 @@ __global__ void reduce_sums_multi_GPU(DataType * array, local_int_t num_elements
 
     __syncthreads();
 
-    if(warp_id == 0){
-        my_sum = intermediate_sums[lane];
-        for (int offset = 16; offset > 0; offset /= 2){
-            my_sum += __shfl_down_sync(static_cast<unsigned long long>(0xFFFFFFFFFFFFFFFF), my_sum, offset);
-        }
+    int num_warps = (blockDim.x + warpSize - 1) / warpSize;
+
+    if (threadIdx.x < num_warps) {
+        my_sum = intermediate_sums[threadIdx.x];
+    } else {
+        my_sum = 0.0;
+    }
+    for (int offset = warpSize / 2; offset > 0; offset /= 2) {
+        my_sum += __shfl_down_sync(0xffffffffffffffffULL, my_sum, offset);
     }
 
     __syncthreads();
@@ -65,40 +66,26 @@ __global__ void striped_warp_reduction_multi_GPU_dot_kernel(
     DataType * y_d,
     DataType * result_d,
     int nx, int ny, int nz,
-    local_int_t dimx, local_int_t dimy
+    int dimx, int dimy
 ){
 
-    __shared__ DataType intermediate_sums[32];
+    __shared__ DataType intermediate_sums[warpSize];
 
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    int lane = threadIdx.x % 32;
-    // warp_id within the block
-    int warp_id = threadIdx.x / 32;
+    int lane = threadIdx.x % warpSize;
+    int warp_id = threadIdx.x / warpSize;
 
-    // first we reduce as much as we can without cooperation
     DataType my_sum = 0.0;
 
     for (local_int_t i = tid; i < num_rows; i += blockDim.x * gridDim.x){
-        // if (y_d[i] != 0.0){
-        //     printf("y_d[%d] = %f\n", i, y_d[i]);
-        // }
         local_int_t hi = local_i_to_halo_i(i, nx, ny, nz, dimx, dimy);
         my_sum += x_d[hi] * y_d[hi];
-        // printf("i = %d, x_d[i] = %f, y_d[i] = %f\n", i, x_d[i], y_d[i]);
     }
 
-    // now we cooperatively reduce the sum
-    // if(tid == 0){
-    //     printf("before warp level reduction\n");
-    // }
-
-    for (int offset = 16; offset > 0; offset /= 2){
-        my_sum += __shfl_down_sync(static_cast<unsigned long long>(0xFFFFFFFFFFFFFFFF), my_sum, offset);
+    for (int offset = warpSize/2; offset > 0; offset /= 2){
+        my_sum += __shfl_down_sync(0xffffffffffffffffULL, my_sum, offset);
     }
 
-    // if(tid == 0){
-    //     printf("after warp level reduction\n");
-    // }
     __syncthreads();
 
     if (lane == 0){
@@ -107,44 +94,22 @@ __global__ void striped_warp_reduction_multi_GPU_dot_kernel(
 
     __syncthreads();
 
-    // if (tid == 0){
-    //     printf("write to shared memory done\n");
-    // }
-
-    // now we reduce the intermediate sums
-    if (threadIdx.x < 32){
+    int num_warps = (blockDim.x + warpSize - 1) / warpSize;
+    
+    if (threadIdx.x < num_warps) {
         my_sum = intermediate_sums[threadIdx.x];
-        for (int offset = 16; offset > 0; offset /= 2){
-            my_sum += __shfl_down_sync(static_cast<unsigned long long>(0xFFFFFFFFFFFFFFFF), my_sum, offset);
-        }
+    } else {
+        my_sum = 0.0;
     }
-
-    // if(tid == 0){
-    //     printf("Reduced stuff in shared memory\n");
-    // }
+    for (int offset = warpSize / 2; offset > 0; offset /= 2) {
+        my_sum += __shfl_down_sync(0xffffffffffffffffULL, my_sum, offset);
+    }
 
     __syncthreads();
 
-    // printf("my_sum = %f\n", my_sum);
-
-    // if (tid == 0){
-    //     printf("let's write to global memory\n");
-    // }
     if(threadIdx.x == 0){
-        // printf("yo imma write to global memory\n");
-        // printf("blockIdx.x = %d\n", blockIdx.x);
-        // printf("resuld_d: %p\n", result_d);
-
-        if (my_sum != 0.0){
-
-        // printf("result_d[%d] = %f\n", blockIdx.x, result_d[blockIdx.x]);
-        }
         result_d[blockIdx.x] = my_sum;
     }
-
-    // if(tid == 0){
-    //     printf("wrote to result_d\n");
-    // }
 
 }
 
@@ -164,32 +129,23 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
 
 
     int coop_num = this->dot_cooperation_number;
-    // std::cout << "Running dot product with striped warp reduction" << std::endl;
-    // we compute z = xy
 
     local_int_t num_rows = x_d->nx * x_d->ny * x_d->nz;
     int num_threads = 1024;
     int max_threads = NUM_PHYSICAL_CORES;
     int max_blocks = 4 * max_threads / num_threads + 1;
     int num_blocks = std::min((int) (num_rows/(num_threads*coop_num)), max_blocks);
-    // we need at least one block
     num_blocks = max(num_blocks, 1);
 
     bool seperate_reduction_needed = num_blocks > 1;
 
-    // allocate memory for the intermediate vector if needed
     DataType *intermediate_sums_d;
     if (seperate_reduction_needed){
-        // std::cout << "seperate reduction needed" << std::endl;
-        // std::cout << "num_blocks = " << num_blocks << std::endl;
         CHECK_CUDA(hipMalloc(&intermediate_sums_d, num_blocks * sizeof(DataType)));
         CHECK_CUDA(hipMemset(intermediate_sums_d,0 ,num_blocks * sizeof(DataType)));
     } else{
         intermediate_sums_d = result_d;
-        // std::cout << "no seperate reduction needed we write to result_d directly" << std::endl;
     }
-
-    // std::cout << "num_rows = " << num_rows << std::endl;
 
     striped_warp_reduction_multi_GPU_dot_kernel<<<num_blocks, num_threads>>>(
         num_rows, x_d->x_d, y_d->x_d, intermediate_sums_d, x_d->nx, x_d->ny, x_d->nz, x_d->dimx, x_d->dimy
@@ -198,14 +154,9 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     int num_inter_results = num_blocks;
     CHECK_CUDA(hipDeviceSynchronize());
 
-    // std::cout << "num_inter_results = " << num_inter_results << std::endl;
-
     while (num_inter_results > 1){
-        // std::cout << "we enter the loop" << std::endl;
-        // std::cout << "num_inter_results = " << num_inter_results << std::endl;
         int num_threads = 1024;
         num_blocks = std::min((int)num_inter_results/(num_threads*coop_num), max_blocks);
-        // we need at least one block
         num_blocks = max(num_blocks, 1);
 
         if(num_blocks == 1){
@@ -214,7 +165,6 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
             reduce_sums_multi_GPU<<<num_blocks, num_threads>>>(intermediate_sums_d, num_inter_results, intermediate_sums_d);
         }
 
-
         CHECK_CUDA(hipDeviceSynchronize());
         num_inter_results = num_blocks;
     }
@@ -222,21 +172,13 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     DataType my_result;
     CHECK_CUDA(hipMemcpy(&my_result, result_d, sizeof(DataType), hipMemcpyDeviceToHost));
     DataType result_h;
+    MPI_Barrier(MPI_COMM_WORLD);
     MPI_Allreduce(&my_result, &result_h, 1, MPIDataType, MPI_SUM, MPI_COMM_WORLD);
     CHECK_CUDA(hipMemcpy(result_d, &result_h, sizeof(DataType), hipMemcpyHostToDevice));
 
-    // std::cout<< "after the loop"<< std::endl;
-    // use a kernel to reduce the intermediate sums
-    // reduce_sums<<<1, num_threads>>>(intermediate_sums_d, num_blocks, result_d);
-
-    // CHECK_CUDA(hipDeviceSynchronize());
-
     if(seperate_reduction_needed){
-        // std::cout << "freeing intermediate_sums_d" << std::endl;
         CHECK_CUDA(hipFree(intermediate_sums_d));
     }
-
-    // std::cout << "done with dot product" << std::endl;
 
 }
 

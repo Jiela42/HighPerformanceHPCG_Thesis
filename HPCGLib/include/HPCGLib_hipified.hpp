@@ -26,7 +26,7 @@ class HPCG_functions {
         // this string is used when small changes are benchmarked to see their effect
         std::string additional_parameters = "vanilla_version";
 
-        bool doPreconditioning = false;
+        bool doPreconditioning = true;
 
         Implementation_Type implementation_type = Implementation_Type::UNKNOWN;
         bool norm_based = false;
@@ -262,7 +262,7 @@ class HPCG_functions {
         }
     protected:
         int max_CG_iterations = 500;
-        double CG_tolerance = 1e-12;
+        double CG_tolerance = 1e-9;
         int max_SymGS_iterations = 1;
         double SymGS_tolerance = 1e-3;
 };

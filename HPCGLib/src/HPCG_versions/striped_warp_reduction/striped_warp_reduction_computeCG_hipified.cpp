@@ -66,6 +66,8 @@ void striped_warp_reduction_Implementation<T>::striped_warp_reduction_computeCG(
 
     // Start iterations
     for(int k = 1; k <= this->max_CG_iterations && normr/normr0 > this->CG_tolerance; k++){
+        printf("SINGLE CG iteration %d \t tolreance=%f\n", k, normr/normr0);
+
         
         if(this->doPreconditioning){
             this->compute_MG(A, r_d, z_d); // Apply preconditioner
