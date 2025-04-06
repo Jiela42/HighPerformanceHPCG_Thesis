@@ -109,7 +109,8 @@ void dimension_tests(int argc, char *argv[], striped_multi_GPU_Implementation<Da
     CHECK_CUDA(hipMemset(result_multi_GPU_d, 0, sizeof(DataType)));
 
     //run Dot on multi GPU
-    implementation_multi_GPU.compute_Dot(&halo_x_d, &halo_y_d, result_multi_GPU_d); 
+    //implementation_multi_GPU.compute_Dot(&halo_x_d, &halo_y_d, result_multi_GPU_d); 
+
 
     striped_Matrix<DataType> A_striped;
     A_striped.Generate_striped_3D27P_Matrix_onGPU(NX, NY, NZ);
