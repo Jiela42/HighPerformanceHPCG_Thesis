@@ -34,6 +34,13 @@ HPCG_functions<DataType>& get_implementation(const std::string& implementation_n
 
 int main(int argc, char* argv[]){
 
+    int device;
+    cudaGetDevice(&device);
+
+    int l2CacheSize;
+    cudaDeviceGetAttribute(&l2CacheSize, cudaDevAttrL2CacheSize, device);
+
+    std::cout << "L2 Cache Size: " << static_cast<double>(l2CacheSize) / (1024*1024) << " MB" << std::endl;
 
     // Check if the correct number of arguments is provided
     if (argc < 6) {
@@ -51,6 +58,7 @@ int main(int argc, char* argv[]){
 
     HPCG_functions<DataType>& implementation = get_implementation(implementation_name);
 
+    implementation.set_maxCGIters(1);
 
     striped_Matrix<DataType> striped_A;
     striped_A.Generate_striped_3D27P_Matrix_onGPU(nx, ny, nz);

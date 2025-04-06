@@ -1,0 +1,34 @@
+[  4%] Built target UtilLib
+[ 11%] Built target MatrixLib
+[ 15%] Built target TimingLib
+[ 40%] Built target HPCGLib
+[ 48%] Built target run_coloring
+[ 48%] Built target run_bench_test
+[ 51%] Built target run_get_Norm
+[ 51%] Built target run_example
+[ 51%] Built target run_multi_GPU
+[ 51%] Built target run_multi_GPU_tests
+[ 66%] Built target TestHPCGLib
+[ 69%] Built target run_AllTests
+[ 69%] Building CXX object benchmarking/CMakeFiles/run_profiler.dir/run_profiling.cpp.o
+[ 73%] Built target run_maxSizeSingleGPU_finder
+[ 99%] Built target run_full_bench
+[ 99%] Built target run_specific_bench
+[100%] Linking CXX executable run_profiler
+[100%] Built target run_profiler
+L2 Cache Size: 60 MB
+Starting profiling
+Execution time for 32x32x32: 0 minutes and 17 seconds
+L2 Cache Size: 60 MB
+Starting profiling
+Execution time for 64x64x64: 0 minutes and 17 seconds
+L2 Cache Size: 60 MB
+Starting profiling
+Execution time for 128x128x128: 0 minutes and 16 seconds
+L2 Cache Size: 60 MB
+Starting profiling
+Execution time for 256x256x256: 0 minutes and 19 seconds
+L2 Cache Size: 60 MB
+Starting profiling
+Execution time for 512x512x512: 0 minutes and 33 seconds
+Total execution time: 1 minutes and 42 seconds

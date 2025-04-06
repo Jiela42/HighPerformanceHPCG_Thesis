@@ -56,8 +56,14 @@ void bench_CG(
             timer.stopTimer("compute_CG");
             std::cout << "CG took " << n_iters << " iterations for size " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz()<< " and implementation " << implementation.version_name << std::endl;
             // restore original x
-            CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(DataType), cudaMemcpyHostToDevice));
+
         }
+        // add the CG iterations to the timer
+        std::ostringstream oss;
+        oss << "CG iterations: " << n_iters;
+        std::string n_iters_string = oss.str();
+        timer.add_additional_parameters(n_iters_string);
+        CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(DataType), cudaMemcpyHostToDevice));
     } else{
         std::cout << "Skipping CG Preconditioned bench for matrix with dimensions " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz() << " not divisible by 8 or too small for MG" << std::endl;
     }
