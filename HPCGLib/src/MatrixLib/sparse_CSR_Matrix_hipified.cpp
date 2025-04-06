@@ -932,7 +932,7 @@ T sparse_CSR_Matrix<T>::get_element(local_int_t row, local_int_t col) const{
     }
     // uncomment the following during development
     if (this->development) {
-        printf("WARNING Element row %d, col %d not found in sparse CSR Matrix\n", row, col);
+        printf("WARNING Element row %ld, col %ld not found in sparse CSR Matrix\n", row, col);
     }
     return T();
 }
@@ -982,11 +982,11 @@ bool sparse_CSR_Matrix<T>::compare_to(sparse_CSR_Matrix<T>& other, std::string i
     bool same = true;
 
     if (this->num_rows != other.get_num_rows()){
-        printf("Matrices have different number of rows: this has %d the other %d for %s\n", this->num_rows, other.get_num_rows(), info.c_str());
+        printf("Matrices have different number of rows: this has %ld the other %ld for %s\n", this->num_rows, other.get_num_rows(), info.c_str());
         same = false;
     }
     if (this->num_cols != other.get_num_cols()){
-        printf("Matrices have different number of cols: this has %d the other %d for %s\n", this->num_cols, other.get_num_cols(), info.c_str());
+        printf("Matrices have different number of cols: this has %ld the other %ld for %s\n", this->num_cols, other.get_num_cols(), info.c_str());
         same = false;
     }
 
@@ -1001,13 +1001,13 @@ bool sparse_CSR_Matrix<T>::compare_to(sparse_CSR_Matrix<T>& other, std::string i
             local_int_t other_end = other.get_row_ptr()[i + 1];
             std::cout << "compared row " << i << std::endl;
             if (end - start != other_end - other_start) {
-                printf("Row %d has different number of non-zero elements for %s\n", i, info.c_str());
-                // printf("This has %d, other has %d\n", end - start, other_end - other_start);
+                printf("Row %ld has different number of non-zero elements for %s\n", i, info.c_str());
+                // printf("This has %ld, other has %ld\n", end - start, other_end - other_start);
                 same = false;
             }
             for (local_int_t j = start; j < end; j++) {
                 if (this->col_idx[j] != other.get_col_idx()[j] || this->values[j] != other.get_values()[j]) {
-                    printf("Element at row %d, col %d is different for %s\n", i, this->col_idx[j], info.c_str());
+                    printf("Element at row %ld, col %ld is different for %s\n", i, this->col_idx[j], info.c_str());
                     same = false;
                 }
             }
@@ -1024,7 +1024,7 @@ bool sparse_CSR_Matrix<T>::compare_to(sparse_CSR_Matrix<T>& other, std::string i
     } else if(not this->f2c_op.empty() and not other.get_f2c_op().empty()){
         std::vector<local_int_t> other_f2c = other.get_f2c_op();
 
-        if(not other_f2c.size() == this->f2c_op.size()){
+        if(other_f2c.size() != this->f2c_op.size()){
             printf("f2c operators have different sizes for %s\n", info.c_str());
             same = false;
         }
@@ -1082,7 +1082,7 @@ void sparse_CSR_Matrix<T>::write_to_file()const{
             fclose(file);
             return;
         }
-        fprintf(file, "%d ", this->row_ptr[i]);
+        fprintf(file, "%ld ", this->row_ptr[i]);
     }
     fprintf(file, "\n");
 
@@ -1093,7 +1093,7 @@ void sparse_CSR_Matrix<T>::write_to_file()const{
             fclose(file);
             return;
         }
-        fprintf(file, "%d ", this->col_idx[i]);
+        fprintf(file, "%ld ", this->col_idx[i]);
     }
     fprintf(file, "\n");
 

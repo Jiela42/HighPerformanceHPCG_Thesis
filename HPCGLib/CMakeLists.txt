@@ -13,6 +13,11 @@ enable_language(HIP)
 set(CMAKE_CXX_STANDARD 17)
 
 find_package(MPI REQUIRED)
+
+set(MPI_INCLUDE_PATH "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/mpich-4.2.3-dfsmhyouvtg5jag7pzsrxzh4d7jlfhmi/include")
+set(MPI_LIBRARY "/capstor/scratch/cscs/ybudanaz/spack/opt/spack/linux-sles15-zen3/gcc-12.3.0/mpich-4.2.3-dfsmhyouvtg5jag7pzsrxzh4d7jlfhmi/lib/libmpi.so")
+include_directories(${MPI_INCLUDE_PATH})
+
 #link_directories("/user-environment/linux-sles15-neoverse_v2/gcc-13.3.0/nccl-2.22.3-1-4j6h3ffzysukqpqbvriorrzk2lm762dd/lib")
 add_compile_definitions(__HIP_PLATFORM_AMD__)
 add_compile_definitions(__HIP_PLATFORM_HCC__)
@@ -73,8 +78,8 @@ set(CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS} --offload-arch=gfx942")
 set_source_files_properties(${SRC_FILES} PROPERTIES LANGUAGE HIP)
 
 
-add_compile_options(-Wno-c++11-narrowing)
-
+#add_compile_options(-Wno-c++11-narrowing)
+#add_compile_options(-g)
 # Include directories
 include_directories(include)
 

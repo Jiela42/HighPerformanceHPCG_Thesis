@@ -1,15 +1,10 @@
 #include "hip/hip_runtime.h"
+#include "hip/hip_runtime.h"
 #include "UtilLib/utils_hipified.cuh"
 #include "UtilLib/cuda_utils_hipified.hpp"
 #include "MatrixLib/generations_hipified.cuh"
 #include "UtilLib/hpcg_multi_GPU_utils_hipified.cuh"
-#include "MatrixLib/sparse_CSR_Matrix_hipified.hpp"
-#include "MatrixLib/generations_hipified.hpp"
-#include <vector>
-#include <iostream>
-#include <cassert>
-#include <random>
-#include <utility>
+
 #include <cmath>
 #include <hip/hip_runtime.h>
 #include <thrust/device_vector.h>

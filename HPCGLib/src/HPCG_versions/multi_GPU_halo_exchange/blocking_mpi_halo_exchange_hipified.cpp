@@ -11,7 +11,7 @@ Problem* blocking_mpi_Implementation<T>::init_comm_blocking_MPI(int argc, char *
     int size, rank;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    
+    printf("Rank %d of %d\n", rank, size);
     Problem *problem = (Problem *)malloc(sizeof(Problem));
     GenerateProblem(npx, npy, npz, nx, ny, nz, size, rank, problem);
 

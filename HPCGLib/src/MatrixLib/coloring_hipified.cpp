@@ -437,8 +437,8 @@ std::pair<std::vector<local_int_t>, std::vector<local_int_t>> get_color_row_mapp
 }
 
 void print_COR_Format(local_int_t max_colors, local_int_t num_rows, local_int_t* color_pointer, local_int_t* color_sorted_rows){
-    printf("Max colors: %d\n", max_colors);
-    printf("Num rows: %d\n", num_rows);
+    printf("Max colors: %ld\n", max_colors);
+    printf("Num rows: %ld\n", num_rows);
 
     print_COR_Format_kernel<<<1,1>>>(max_colors, num_rows, color_pointer, color_sorted_rows);
 }

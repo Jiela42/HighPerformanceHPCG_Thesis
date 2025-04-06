@@ -8,10 +8,10 @@
 #include <cassert>
 #include <stdbool.h>
 
-__inline__ __device__ global_int_t local_i_to_halo_i(
+__inline__ __device__ local_int_t local_i_to_halo_i(
     int i,
     int nx, int ny, int nz,
-    local_int_t dimx, local_int_t dimy
+    int dimx, int dimy
     )
     {
         return dimx*(dimy+1) + 1 + (i % nx) + dimx*((i % (nx*ny)) / nx) + (dimx*dimy)*(i / (nx*ny));
@@ -26,16 +26,16 @@ __global__ void inject_data_to_halo_kernel(DataType *x_d, DataType *data, int nx
     }
 }
 
-void GenerateProblem(int npx, int npy, int npz, local_int_t nx, local_int_t ny, local_int_t nz, int size, int rank, Problem *problem){
+void GenerateProblem(int npx, int npy, int npz, int nx, int ny, int nz, int size, int rank, Problem *problem){
     problem->npx = npx; //number of processes in x
     problem->npy = npy; //number of processes in y
     problem->npz = npz; //number of processes in z
     problem->nx = nx; //number of grid points of processes subdomain in x
     problem->ny = ny; //number of grid points of processes subdomain in y
     problem->nz = nz; //number of grid points of processes subdomain in z
-    local_int_t dimx = nx + 2;
-    local_int_t dimy = ny + 2;
-    local_int_t dimz = nz + 2;
+    int dimx = nx + 2;
+    int dimy = ny + 2;
+    int dimz = nz + 2;
     problem->size = size;
     problem->rank = rank;
     problem->gnx = npx * nx; //global number of grid points in x

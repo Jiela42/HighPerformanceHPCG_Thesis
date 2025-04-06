@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-// #include "nccl.h"
+//#include "nccl/nccl.h"
 
 //each process is using one GPU
 #define NCCL_TYPE ncclDouble

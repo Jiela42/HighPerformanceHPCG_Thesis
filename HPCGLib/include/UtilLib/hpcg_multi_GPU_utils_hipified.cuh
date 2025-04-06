@@ -111,7 +111,7 @@ enum Comm_Tags {
 
 void InitGPU(Problem *problem);
 
-void GenerateProblem(int npx, int npy, int npz, local_int_t nx, local_int_t ny, local_int_t nz, int size, int rank, Problem *problem);
+void GenerateProblem(int npx, int npy, int npz, int nx, int ny, int nz, int size, int rank, Problem *problem);
 
 void InitHaloMemGPU(Halo *halo, Problem *problem);
 void InitHaloMemCPU(Halo *halo, Problem *problem);

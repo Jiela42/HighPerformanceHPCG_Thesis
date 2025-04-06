@@ -16,9 +16,9 @@
 #define NPY 2
 #define NPZ 1
 //each process gets assigned problem size of NX x NY x NZ
-#define NX 512
-#define NY 512
-#define NZ 512
+#define NX 16
+#define NY 16
+#define NZ 16
 
 void test_matrix_distribution(int num_stripes_local, int num_stripes_global, int num_rows_local, int num_rows_global, DataType *striped_A_local_h, DataType *striped_A_global_h, Problem *problem){
     //verfify the partial matrix
@@ -564,7 +564,7 @@ void test_CG(striped_multi_GPU_Implementation<DataType>& implementation_multi_GP
         }else{
             printf("!!!!!CG Result is NOT correct!!!!!\n");
             global_int_t gn = NPX*NX*NPY*NY*NPZ*NZ;
-            printf("CG: %d of %d wrong values which is %f percent\n", count, gn, (double) count/(gn)*100.0);
+            printf("CG: %d of %ld wrong values which is %f percent\n", count, gn, (double) count/(gn)*100.0);
             printf("CG Multi GPU:\t n_iters_local=%d,\t normr_local=%f,\t normr0_local=%f\n", n_iters_local, normr_local, normr0_local);
             printf("CG Single GPU:\t n_iters_global=%d,\t normr_global=%20f,\t normr0_global=%.20f\n", n_iters_global, normr_global, normr0_global);
             printf("Difference normr_global - normr_local = %.20f\n", normr_global - normr_local);
@@ -674,7 +674,7 @@ void test_MG(striped_multi_GPU_Implementation<DataType>& implementation_multi_GP
         }else{
             printf("!!!!!MG Result is NOT correct!!!!!\n");
             double gn = NPX*NX*NPY*NY*NPZ*NZ;
-            printf("MG: %f of %f wrong values which is %f percent\n", count, gn, count/(gn)*100.0);
+            printf("MG: %d of %f wrong values which is %f percent\n", count, gn, count/(gn)*100.0);
             printf("Max difference: %20ef\n", max_diff);
         }
         free(result_single_GPU_h);
@@ -729,7 +729,7 @@ void run_multi_GPU_tests(int argc, char *argv[], striped_multi_GPU_Implementatio
     A_global.generateMatrix_onGPU(NPX*NX, NPY*NY, NPZ*NZ);
 
     // create the coarse matrices for the mg routines
-    sparse_CSR_Matrix <DataType>* current_matrix = &A_global;
+    sparse_CSR_Matrix<DataType>* current_matrix = &A_global;
     for(int i = 0; i < 3; i++){
         current_matrix->initialize_coarse_Matrix();
         current_matrix = current_matrix->get_coarse_Matrix();
@@ -934,7 +934,7 @@ void run_multi_GPU_tests(int argc, char *argv[], striped_multi_GPU_Implementatio
 
 
     MPI_Barrier(MPI_COMM_WORLD);
-    if(problem.rank == 0) printf("Testing done.\n", problem.rank);
+    if(problem.rank == 0) printf("Testing done %d.\n", problem.rank);
     MPI_Barrier(MPI_COMM_WORLD);
     
 

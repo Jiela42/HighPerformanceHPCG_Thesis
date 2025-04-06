@@ -16,9 +16,9 @@
 #define NPY 2
 #define NPZ 1
 //each process gets assigned problem size of NX x NY x NZ
-#define NX 128
-#define NY 128
-#define NZ 128
+#define NX 16
+#define NY 16
+#define NZ 16
 
 /*
 * MPI must be initializid before calling.
@@ -32,10 +32,13 @@ void dimension_tests(int argc, char *argv[], striped_multi_GPU_Implementation<Da
     Problem problem = *implementation_multi_GPU.init_comm(argc, argv, NPX, NPY, NPZ, NX, NY, NZ);
     //non_blocking_mpi_Implementation<DataType> implementation_multi_GPU_non_blocking_mpi;
 
-    
     MPI_Barrier(MPI_COMM_WORLD);
     if(problem.rank == 0) printf("Testing started.\n");
     MPI_Barrier(MPI_COMM_WORLD);
+
+    int size;
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    if(problem.rank == 0) printf("Problem size: %d x %d x %d, actual %d computed %d\n", NPX, NPY, NPZ, size, problem.size);
     
     //set Device
     InitGPU(&problem);
@@ -256,7 +259,7 @@ void dimension_tests(int argc, char *argv[], striped_multi_GPU_Implementation<Da
 
 
     MPI_Barrier(MPI_COMM_WORLD);
-    if(problem.rank == 0) printf("Testing done.\n", problem.rank);
+    if(problem.rank == 0) printf("Testing done %d.\n", problem.rank);
     MPI_Barrier(MPI_COMM_WORLD);
     
 
