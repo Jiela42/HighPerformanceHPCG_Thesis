@@ -1,0 +1,115 @@
+nvcc -std=c++11 -O3 -DCUDA main.cpp CUDAStream.cu -arch=sm_90a -o cuda-stream
+BabelStream
+Version: 3.2
+Implementation: CUDA
+Running kernels 100 times
+Precision: double
+Array size: 268.4 MB (=0.3 GB)
+Total size: 805.3 MB (=0.8 GB)
+Using CUDA device NVIDIA GH200 120GB
+Driver: 12040
+Function    MBytes/sec  Min (sec)   Max         Average     
+Copy        3178199.014 0.00017     0.00017     0.00017     
+Mul         3088695.716 0.00017     0.00018     0.00018     
+Add         3402281.272 0.00024     0.00024     0.00024     
+Triad       3426354.461 0.00024     0.00024     0.00024     
+Dot         3379203.223 0.00016     0.00017     0.00016     
+nvcc -std=c++11 -O3 -DCUDA main.cpp CUDAStream.cu -arch=sm_90a -o cuda-stream
+BabelStream
+Version: 3.2
+Implementation: CUDA
+Running kernels 100 times
+Precision: double
+Array size: 536.9 MB (=0.5 GB)
+Total size: 1610.6 MB (=1.6 GB)
+Using CUDA device NVIDIA GH200 120GB
+Driver: 12040
+Function    MBytes/sec  Min (sec)   Max         Average     
+Copy        3192410.772 0.00034     0.00034     0.00034     
+Mul         3144551.864 0.00034     0.00035     0.00034     
+Add         3461464.988 0.00047     0.00047     0.00047     
+Triad       3483746.687 0.00046     0.00047     0.00046     
+Dot         3568220.658 0.00030     0.00031     0.00031     
+nvcc -std=c++11 -O3 -DCUDA main.cpp CUDAStream.cu -arch=sm_90a -o cuda-stream
+BabelStream
+Version: 3.2
+Implementation: CUDA
+Running kernels 100 times
+Precision: double
+Array size: 2147.5 MB (=2.1 GB)
+Total size: 6442.5 MB (=6.4 GB)
+Using CUDA device NVIDIA GH200 120GB
+Driver: 12040
+Function    MBytes/sec  Min (sec)   Max         Average     
+Copy        3211742.801 0.00134     0.00134     0.00134     
+Mul         3200561.050 0.00134     0.00135     0.00134     
+Add         3523010.035 0.00183     0.00184     0.00183     
+Triad       3516610.177 0.00183     0.00184     0.00183     
+Dot         3755408.919 0.00114     0.00118     0.00115     
+nvcc -std=c++11 -O3 -DCUDA main.cpp CUDAStream.cu -arch=sm_90a -o cuda-stream
+BabelStream
+Version: 3.2
+Implementation: CUDA
+Running kernels 100 times
+Precision: double
+Array size: 4295.0 MB (=4.3 GB)
+Total size: 12884.9 MB (=12.9 GB)
+Using CUDA device NVIDIA GH200 120GB
+Driver: 12040
+Function    MBytes/sec  Min (sec)   Max         Average     
+Copy        3200521.697 0.00268     0.00269     0.00269     
+Mul         3206867.524 0.00268     0.00268     0.00268     
+Add         3527945.011 0.00365     0.00366     0.00366     
+Triad       3530419.623 0.00365     0.00366     0.00365     
+Dot         3793827.361 0.00226     0.00229     0.00227     
+nvcc -std=c++11 -O3 -DCUDA main.cpp CUDAStream.cu -arch=sm_90a -o cuda-stream
+BabelStream
+Version: 3.2
+Implementation: CUDA
+Running kernels 100 times
+Precision: double
+Array size: 8589.9 MB (=8.6 GB)
+Total size: 25769.8 MB (=25.8 GB)
+Using CUDA device NVIDIA GH200 120GB
+Driver: 12040
+Function    MBytes/sec  Min (sec)   Max         Average     
+Copy        3209607.895 0.00535     0.00536     0.00536     
+Mul         3210413.402 0.00535     0.00536     0.00536     
+Add         3526074.442 0.00731     0.00734     0.00732     
+Triad       3529087.638 0.00730     0.00733     0.00731     
+Dot         3804094.544 0.00452     0.00459     0.00453     
+nvcc -std=c++11 -O3 -DCUDA main.cpp CUDAStream.cu -arch=sm_90a -o cuda-stream
+main.cpp:41:35: warning: integer overflow in expression of type 'int' results in '-2147483648' [-Woverflow]
+   41 | unsigned int ARRAY_SIZE = 33554432*64;
+      |                           ~~~~~~~~^~~
+BabelStream
+Version: 3.2
+Implementation: CUDA
+Running kernels 100 times
+Precision: double
+Array size: 17179.9 MB (=17.2 GB)
+Total size: 51539.6 MB (=51.5 GB)
+Using CUDA device NVIDIA GH200 120GB
+Driver: 12040
+Function    MBytes/sec  Min (sec)   Max         Average     
+Copy        3216626.300 0.01068     0.01070     0.01069     
+Mul         3212334.333 0.01070     0.01071     0.01071     
+Add         3527224.788 0.01461     0.01466     0.01464     
+Triad       3531865.395 0.01459     0.01464     0.01462     
+Dot         3809939.179 0.00902     0.00910     0.00904     
+nvcc -std=c++11 -O3 -DCUDA main.cpp CUDAStream.cu -arch=sm_90a -o cuda-stream
+main.cpp:41:35: warning: integer overflow in expression of type 'int' results in '0' [-Woverflow]
+   41 | unsigned int ARRAY_SIZE = 33554432*128;
+      |                           ~~~~~~~~^~~~
+BabelStream
+Version: 3.2
+Implementation: CUDA
+Running kernels 100 times
+Precision: double
+Array size: 0.0 MB (=0.0 GB)
+Total size: 0.0 MB (=0.0 GB)
+Using CUDA device NVIDIA GH200 120GB
+Driver: 12040
+Error: invalid configuration argument
+srun: error: nid006628: task 0: Exited with exit code 9
+srun: Terminating StepId=329844.0
