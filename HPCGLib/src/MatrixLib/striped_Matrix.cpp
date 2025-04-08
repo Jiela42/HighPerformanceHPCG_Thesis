@@ -620,11 +620,11 @@ void striped_Matrix<T>::generate_coloring(){
 }
 
 template <typename T>
-void striped_Matrix<T>::generate_box_coloring(){
+void striped_Matrix<T>::generate_box_coloring(int bx, int by, int bz){
 
     if(this->matrix_type == MatrixType::Stencil_3D27P){
 
-        int num_colors = 27;
+        int num_colors = bx * by * bz;
 
         // first we allocate the space on the GPU
         // to do so we first check if the color ptr are nullptr
@@ -643,11 +643,11 @@ void striped_Matrix<T>::generate_box_coloring(){
         CHECK_CUDA(cudaMalloc(&this->color_pointer_d, (num_colors + 1) * sizeof(local_int_t)));
         CHECK_CUDA(cudaMalloc(&this->color_sorted_rows_d, this->num_rows * sizeof(local_int_t)));
 
-        get_color_row_mapping_for_boxColoring(this->nx, this->ny, this->nz, this->color_pointer_d, this->color_sorted_rows_d);
+        get_color_row_mapping_for_boxColoring(this->nx, this->ny, this->nz, bx, by, bz, this->color_pointer_d, this->color_sorted_rows_d);
 
         // also generate the coloring for any coarse matrices
         if(this->coarse_Matrix != nullptr){
-            this->coarse_Matrix->generate_box_coloring();
+            this->coarse_Matrix->generate_box_coloring(bx, by, bz);
         }
         
     } else{

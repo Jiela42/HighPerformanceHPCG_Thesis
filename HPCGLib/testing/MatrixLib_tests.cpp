@@ -507,17 +507,18 @@ bool coloring_test(striped_Matrix<double>& A){
 
 bool box_coloring_test(striped_Matrix<double>& A){
 
-    // first color the matrix
-    A.generate_box_coloring();
-
+    
     int nx = A.get_nx();
     int ny = A.get_ny();
     int nz = A.get_nz();
-
-    int num_colors = 27;
+    
     int bx = 3;
     int by = 3;
     int bz = 3;
+    int num_colors = bx * by * bz;
+
+    // first color the matrix
+    A.generate_box_coloring(bx, by, bz);
 
     // now we get the colors from the matrix
     std::vector<local_int_t> color_idx_ptr(num_colors + 1, 0);
