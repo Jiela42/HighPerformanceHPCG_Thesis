@@ -34,13 +34,13 @@ HPCG_functions<DataType>& get_implementation(const std::string& implementation_n
 
 int main(int argc, char* argv[]){
 
-    int device;
-    cudaGetDevice(&device);
+    // int device;
+    // cudaGetDevice(&device);
 
-    int l2CacheSize;
-    cudaDeviceGetAttribute(&l2CacheSize, cudaDevAttrL2CacheSize, device);
+    // int l2CacheSize;
+    // cudaDeviceGetAttribute(&l2CacheSize, cudaDevAttrL2CacheSize, device);
 
-    std::cout << "L2 Cache Size: " << static_cast<double>(l2CacheSize) / (1024*1024) << " MB" << std::endl;
+    // std::cout << "L2 Cache Size: " << static_cast<double>(l2CacheSize) / (1024*1024) << " MB" << std::endl;
 
     // Check if the correct number of arguments is provided
     if (argc < 6) {
@@ -59,6 +59,7 @@ int main(int argc, char* argv[]){
     HPCG_functions<DataType>& implementation = get_implementation(implementation_name);
 
     implementation.set_maxCGIters(1);
+    implementation.set_maxSymGSIters(1);
 
     striped_Matrix<DataType> striped_A;
     striped_A.Generate_striped_3D27P_Matrix_onGPU(nx, ny, nz);
@@ -101,7 +102,7 @@ int main(int argc, char* argv[]){
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
 
     // now comes the actual profiling
-    if(implementation.CG_implemented){
+    if(implementation.CG_implemented && function_name == "CG"){
         
         int n_iters = 0;
         double normr;
@@ -121,7 +122,18 @@ int main(int argc, char* argv[]){
         cudaProfilerStop();
     }
 
-    if (implementation.SPMV_implemented) {
+    if (implementation.SymGS_implemented && function_name == "SymGS") {
+        std::cout << "SymGS" << std::endl;
+        // start the profiling
+        cudaProfilerStart();
+        implementation.compute_SymGS(
+            striped_A,
+            y_d, x_d
+        );
+        cudaProfilerStop();
+    }
+
+    if (implementation.SPMV_implemented && function_name == "SPMV") {
         // start the profiling
         cudaProfilerStart();
         implementation.compute_SPMV(
