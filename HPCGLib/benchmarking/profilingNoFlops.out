@@ -1,0 +1,7 @@
+Starting profiling
+Execution time for 32x32x32: 6 minutes and 42 seconds
+Starting profiling
+Execution time for 64x64x64: 12 minutes and 15 seconds
+Starting profiling
+Execution time for 128x128x128: 22 minutes and 35 seconds
+Total execution time: 41 minutes and 32 seconds

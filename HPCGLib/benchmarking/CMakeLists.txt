@@ -50,6 +50,21 @@ add_executable(run_maxSizeSingleGPU_finder
     benchmark_stripedBoxColoring.cpp
 )
 
+add_executable(run_profiler
+    run_profiling.cpp
+
+    # benchmark_cuSparse.cpp
+    # benchmark_naiveStriped.cpp
+    # benchmark_stripedSharedMem.cpp
+    # benchmark_stripedWarpReduction.cpp
+    # benchmark_stripedPreprocessed.cpp
+    # benchmark_stripedColoring.cpp
+    # benchmark_noStoreStripedColoring.cpp
+    # benchmark_stripedColoringPrecomputed.cpp
+    # benchmark_stripedBoxColoring.cpp
+    # benchmark_stripedCORBoxColoring.cpp
+)
+
 add_executable(run_bench_multi_GPU
     run_bench_multi_GPU.cpp
     abstract_benchmark_functions.cpp
@@ -77,6 +92,13 @@ target_link_libraries(run_specific_bench
 )
 
 target_link_libraries(run_maxSizeSingleGPU_finder
+    HPCGLib
+    TimingLib
+    TestHPCGLib
+    stdc++fs
+)
+
+target_link_libraries(run_profiler
     HPCGLib
     TimingLib
     TestHPCGLib

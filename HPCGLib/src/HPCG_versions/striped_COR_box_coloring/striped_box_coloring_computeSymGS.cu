@@ -48,7 +48,9 @@ void striped_COR_box_coloring_Implementation<T>::striped_COR_box_coloring_comput
     num_color_faces = (0 < nz % bz) ? (num_color_faces + 1) : num_color_faces;
 
     local_int_t max_num_rows_per_color = num_color_cols * num_color_rows * num_color_faces;
-    int max_color = 26;
+    int max_color = bx * by * bz - 1;
+
+    // std::cout << "max_color = " << max_color << std::endl;
 
     // std::cout << "num_rows = " << num_rows << std::endl;
     // std::cout << "nx = " << nx << std::endl;

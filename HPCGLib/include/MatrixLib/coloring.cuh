@@ -8,7 +8,7 @@ std::vector<local_int_t> color_for_forward_pass(striped_Matrix<DataType>& A);
 std::vector<local_int_t> color_for_backward_pass(striped_Matrix<DataType>& A);
 std::pair<std::vector<local_int_t>, std::vector<local_int_t>> get_color_row_mapping(int nx, int ny, int nz);
 void get_color_row_mapping(int nx, int ny, int nz, local_int_t * color_pointer_d, local_int_t * color_sorted_row_d);
-void get_color_row_mapping_for_boxColoring(int nx, int ny, int nz, local_int_t * color_pointer_d, local_int_t * color_sorted_row_d);
+void get_color_row_mapping_for_boxColoring(int nx, int ny, int nz, int bx, int by, int bz, local_int_t * color_pointer_d, local_int_t * color_sorted_row_d);
 void print_COR_Format(local_int_t max_color, local_int_t num_rows, local_int_t * color_pointer, local_int_t * color_sorted_rows);
 
 __global__ void color_for_forward_pass_kernel(

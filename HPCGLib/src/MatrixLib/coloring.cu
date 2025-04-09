@@ -446,18 +446,18 @@ void get_color_row_mapping_for_boxColoring(
     int nx,
     int ny,
     int nz,
+    int bx,
+    int by,
+    int bz,
     local_int_t *color_pointer_d,
     local_int_t * color_sorted_rows_d
 ){
-    int num_colors = 27;
-    int bx = 3;
-    int by = 3;
-    int bz = 3;
+    int num_colors = bx * by * bz;
     
     std::vector<local_int_t> color_ptr_h(num_colors+1, 0);
     
     
-    // because we have only 27 colors, we can do the color-setting sequentially
+    // because we have only very few colors, we can do the color-setting sequentially
     for(local_int_t i = 1; i <= num_colors; i++){
 
         local_int_t color = i-1;

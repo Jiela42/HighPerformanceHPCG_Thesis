@@ -34,125 +34,34 @@ sizes_to_plot =[
 ]
 
 versions_to_plot = [
-    # "BaseTorch",
-    # "MatlabReference",
-    # "BaseCuPy",
-    # "CuPy (no copy)",
-    # "CuPy (gmres)",
-    # "CuPy 2 iterations (gmres)",
-    # "CuPy 3 iterations (gmres)",
-    # "CuPy 4 iterations (gmres)",
-    # "CuPy 5 iterations (gmres)",
-    # "CuPy (lsmr)",
-    # "CuPy 2 iterations (lsmr)",
-    # "CuPy 3 iterations (lsmr)",
-    # "CuPy 4 iterations (lsmr)",
-    # "CuPy 5 iterations (lsmr)",
-    # "CuPy (minres)",
-    # "CuPy 2 iterations (minres)",
-    # "CuPy 3 iterations (minres)",
-    # "CuPy 4 iterations (minres)",
-    # "CuPy 5 iterations (minres)",
 
-    # "CuPy (converging) (minres)",
-    # "CuPy (converging) (lsmr)",
-    # "CuPy (converging) (gmres)",
-    
-    # "NaiveStriped CuPy",
-    # "CSR-Implementation",
-    # "AMGX (converging) (non deterministic)",
+    ###### Active versions ######
     "AMGX",
-    # "AMGX non-deterministic",
-    # "AMGX 2 iterations",
-    # "AMGX 2 iterations non-deterministic",
-    # "AMGX 3 iterations",
-    # "AMGX 3 iterations non-deterministic",
-    # "AMGX 4 iterations",
-    # "AMGX 4 iterations non-deterministic",
-    # "AMGX 5 iterations",
-    # "AMGX 5 iterations non-deterministic",
-    # "Naive Striped",
-    # "Naive Striped (1 thread per physical core)",
-    # "Naive Striped (4 thread per physical core)",
-    # "Striped explicit Shared Memory",
-    # "Striped explicit Shared Memory (rows_per_SM pow2)",
-    # "Striped explicit Shared Memory (rows_per_SM pow2 1024 threads)",
-    # "Striped explicit Shared Memory (rows_per_SM pow2 1024 threads 2x physical cores)",
-    "Striped Warp Reduction",
-    # "Striped Warp Reduction (thrust reduction)",
-    # "Striped Warp Reduction (kernel reduction)",
-    # "Striped Warp Reduction (kernel reduction - cooperation number = 1)",
-    # "Striped Warp Reduction (kernel reduction - cooperation number = 2)",
-    # "Striped Warp Reduction (kernel reduction - cooperation number = 4)",
-    # "Striped Warp Reduction (kernel reduction - cooperation number = 8)",
-    # "Striped Warp Reduction (kernel reduction - cooperation number = 16)",
-    # "Striped Warp Reduction (1x physical cores occupied)",
-    # "Striped Warp Reduction (2x physical cores occupied)",
-    # "Striped Warp Reduction (3x physical cores occupied)",
-    # "Striped Warp Reduction (4x physical cores occupied)",
-    # "Striped Warp Reduction (256 threads)",
-
-    # "Striped Warp Reduction (8x physical cores occupied)",
-
-
-    # "Striped Warp Reduction (kernel reduction - cooperation number = 32)",
-    # "Striped Warp Reduction (kernel reduction - cooperation number = 64)",
-    # "Striped Warp Reduction (pre-compute diag_offset)",
-    # "Striped Warp Reduction (cooperation number = 16)",
-    # "Striped Warp Reduction (loop body in method)",
-    # "Striped Warp Reduction (8 cooperating threads)",
-    # "Striped Warp Reduction - many blocks - 4 threads cooperating",
-    # "Striped Warp Reduction - many blocks - 8 threads cooperating",
-    # "Striped Preprocessed (2 rows while preprocessing)",
-    # "Striped Preprocessed",
-    # "Striped Preprocessed (16 rows while preprocessing)",
-
-    # "Striped Warp Reduction (x=0.5)",
-    # "Striped Warp Reduction (x=0)",
-    # "Striped Warp Reduction (x=2)",
-    # "Striped Warp Reduction (x=random)",
-    # "CSR-Implementation (x=0.5)",
-    # "CSR-Implementation (x=0)",
-    # "CSR-Implementation (x=2)",
-    # "CSR-Implementation (x=random)",
-    # "Striped Preprocessed (x=0.5)",
-    # "Striped Preprocessed (x=0)",
-    # "Striped Preprocessed (x=2)",
-    # "Striped Preprocessed (x=random)",
-    # "Striped coloring (storing nothing)",
-    # "Striped coloring (pre-computing COR Format)",
-    "Striped coloring (COR Format already stored on the GPU)",
+    # "Striped Warp Reduction",
+    # "Striped coloring (COR Format already stored on the GPU)",
+    "Striped coloring (pre-computing COR Format)",
     
-    "Striped Box coloring (coloringBox 3x3x3)",
+    # "Striped Box coloring (coloringBox 3x3x3)",
     "Striped Box coloring (coloringBox 2x2x2)",
-    # "Striped Box coloring (changed Norm) (coloringBox 3x3x3) (coop_num 4)",
-    # "Striped Box coloring (maybe final norm)",
+
     # "Striped Box coloring (COR stored on GPU) (coloringBox 3x3x3)",
-    # "Striped Box coloring",
-    # "Striped Box coloring (including conversion to Striped)",
 
-
-    # "Striped Box coloring (coloringBox: 4x4x4) (coop_num: 4)",
-    # "Striped Box coloring (coloringBox: 5x5x5) (coop_num: 4)",
-    # "Striped Box coloring (coloringBox: 6x6x6) (coop_num: 4)",
-    # "Striped Box coloring (coloringBox: 7x7x7) (coop_num: 4)",
-    # "Striped Box coloring (coloringBox: 8x8x8) (coop_num: 4)",
-    
-    # "Striped Box coloring (coloringBox: 3x3x3) (coop_num: 8)",
-    # "Striped Box coloring (coloringBox: 3x3x3) (coop_num: 16)",
-    # "Striped Box coloring (coloringBox: 3x3x3) (coop_num: 32)",
-
+    # "Striped Multi GPU",
 
 ]
 plot_percentage_baseline = False
-plot_speedup_vs_baseline = True
+plot_speedup_vs_baseline = False
 plot_memory_roofline = False
 
 baseline_implementations = [
     # "CSR-Implementation",
     # "BaseTorch",
     # "BaseCuPy",
-    "AMGX",
+    # "AMGX",
+    # "Striped coloring (COR Format already stored on the GPU)",
+    "Striped Box coloring (coloringBox 3x3x3)",
+
+
     # "Striped Box coloring",
     # "Striped Box coloring (COR stored on GPU) (coloringBox 3x3x3)",
     # "Striped Box coloring (coloringBox 3x3x3) (coop_num 4)",
@@ -169,11 +78,11 @@ y_axis_to_plot = [
 ]
 
 y_axis_config_to_plot = [
-    "linear",
+    # "linear",
     "log"
 ]
 
-make_eps_plots = False
+make_eps_plots = True
 num_measurements_to_skip_for_warm_cache = 2
 
 
@@ -480,7 +389,7 @@ def get_percentage_of_baseline_data(full_data):
         full_data = full_data.merge(baseline_medians_ms, on=['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'], how='left')
         # full_data = full_data.merge(baseline_medians_nnz, on=['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'], how='left')
 
-        show_data = full_data.drop(columns=['nx', 'ny', 'nz', 'NNZ', 'Density of A', 'Matrix Type', 'Ault Node', 'Matrix Dimensions, # Rows, Matrix Density'])
+        show_data = full_data.drop(columns=['nx', 'ny', 'nz', 'NNZ', 'Density of A', 'Matrix Type', 'Ault Node', 'NXxNYxNZ = #Rows'])
 
         # print(show_data.head())
 
@@ -510,7 +419,7 @@ def get_speedup_vs_baseline_data(full_data):
         full_data = full_data.merge(baseline_medians_ms, on=['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'], how='left')
         # full_data = full_data.merge(baseline_medians_nnz, on=['Method', 'Matrix Size', 'Ault Node', 'Matrix Type'], how='left')
 
-        show_data = full_data.drop(columns=['nx', 'ny', 'nz', 'NNZ', 'Density of A', 'Matrix Type', 'Ault Node', 'Matrix Dimensions, # Rows, Matrix Density'])
+        show_data = full_data.drop(columns=['nx', 'ny', 'nz', 'NNZ', 'Density of A', 'Matrix Type', 'Ault Node', 'NXxNYxNZ = #Rows'])
 
         # print(show_data.head())
 
@@ -581,7 +490,7 @@ def preprocess_data(full_data):
 
     # add a column matrix dimensions: nx x ny x nz (a string)
     full_data['# Rows'] = full_data['nx'] * full_data['ny'] * full_data['nz']
-    full_data['Matrix Dimensions, # Rows, Matrix Density'] = full_data['nx'].astype(str) + "x" + full_data['ny'].astype(str) + "x" + full_data['nz'].astype(str) + ", "  + full_data['# Rows'].astype(str) +  ', '+ (full_data['Density of A']* 100).round(2).astype(str) + "%" 
+    full_data['NXxNYxNZ = #Rows'] = full_data['nx'].astype(str) + "x" + full_data['ny'].astype(str) + "x" + full_data['nz'].astype(str) + "="  + full_data['# Rows'].astype(str) # +  ', '+ (full_data['Density of A']* 100).round(2).astype(str) + "%" 
     full_data['Matrix Size'] = full_data['nx'].astype(str) + "x" + full_data['ny'].astype(str) + "x" + full_data['nz'].astype(str)
 
     # remove any data, that is not to be plotted
@@ -593,7 +502,7 @@ def preprocess_data(full_data):
     all_versions = full_data['Version'].unique()
     all_methods = full_data['Method'].unique()
     all_ault_nodes = full_data['Ault Node'].unique()
-    all_matrix_dimensions = full_data['Matrix Dimensions, # Rows, Matrix Density'].unique()
+    all_matrix_dimensions = full_data['NXxNYxNZ = #Rows'].unique()
 
     all_sparse_ops = [
         "SymGS",
@@ -646,7 +555,7 @@ def preprocess_data(full_data):
         full_data = get_percentage_of_memBW_data(full_data)
 
     # for showing we remove nx,ny,nz, NNZ, Density of A
-    show_data = full_data.drop(columns=['nx', 'ny', 'nz', 'NNZ', 'Density of A', 'Matrix Type', 'Ault Node', 'Matrix Dimensions, # Rows, Matrix Density'])
+    show_data = full_data.drop(columns=['nx', 'ny', 'nz', 'NNZ', 'Density of A', 'Matrix Type', 'Ault Node', 'NXxNYxNZ = #Rows'])
 
     # print(show_data.head())
     print(all_matrix_types, flush=True)
@@ -693,6 +602,9 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
     sns.set(style="whitegrid")
     plt.figure(figsize=(30, 8))
 
+    # print("hue column values", data[hue].unique(), flush=True)
+    # print("hue order", hue_order, flush=True)
+
     ax = sns.barplot(x=x, order=x_order, y=y, hue=hue, hue_order=hue_order, data=data, estimator= np.median, ci=98)
     fig = ax.get_figure()
 
@@ -706,7 +618,7 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
     # Initialize bar counter
     bar_ctr = 0
 
-    text_size = 20
+    text_size = 30
 
 
     # Iterate over x_order and hue_order to annotate bars
@@ -749,7 +661,7 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
     ax.set_title(title, fontsize=text_size+4)
     ax.set_xlabel(x, fontsize=text_size+2)
     ax.set_ylabel(y, fontsize=text_size+2)
-    ax.tick_params(axis='both', which='major', labelsize=text_size)
+    ax.tick_params(axis='both', which='major', labelsize=text_size-5)
 
     if y_ax_scale == "log":
         ax.set_yscale('log')
@@ -773,9 +685,9 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
 
         handles, labels = ax.get_legend_handles_labels()
         legend_labels = [legend_label_updates.get(label, label) for label in labels]
-        legend = ax.legend(handles, legend_labels, loc='lower center', bbox_to_anchor=(0.5, box_offset - 0.05), ncol=nc, prop={'size': text_size})
+        legend = ax.legend(handles, legend_labels, loc='lower center', bbox_to_anchor=(0.5, box_offset -0.2), ncol=nc, prop={'size': text_size})
     else:
-        legend = ax.legend(loc='lower center', bbox_to_anchor=(0.5, box_offset - 0.05), ncol=nc, prop={'size': text_size})
+        legend = ax.legend(loc='lower center', bbox_to_anchor=(0.5, box_offset - 0.2), ncol=nc, prop={'size': text_size})
 
 
     # legend = ax.legend(loc = 'lower center', bbox_to_anchor = (0.5, box_offset- 0.05), ncol = nc, prop={'size': text_size}, labels = legend_labels)
@@ -795,20 +707,23 @@ def generate_order(current_dim_perc):
     sorted_sizes = {}
 
     for string in current_dim_perc:
-        size = string.split(",")[0]
+        size = string.split("=")[0]
+        # print(size, flush=True)
         if size in sizes_to_plot:
             if size not in sorted_sizes:
                 sorted_sizes[size] = []
             sorted_sizes[size].append(string)
     
     # sort the order from smallest size to largest and sort the percentages within the same size
-    
+    # print(sorted_sizes, flush=True)
+
     order = []
 
     for size in sizes_to_plot:
         if size in sorted_sizes:
-            sorted_sizes[size] = sorted(sorted_sizes[size], key=lambda x: float(x.split(",")[1].strip("%")))
+            sorted_sizes[size] =  sorted(sorted_sizes[size], key=lambda x: x[1])
             order += sorted_sizes[size]
+    # print(order, flush=True)
     return order
     
 
@@ -837,13 +752,13 @@ def plot_x_options(y_axis, y_axis_scale, save_path, full_data):
         current_sparse_methods = [m for m in sparse_ops_to_plot if m in data['Method'].unique()]
         current_dense_methods = [m for m in dense_ops_to_plot if m in data['Method'].unique()]
         current_dense_sizes = [s for s in sizes_to_plot if s in dense_data['Matrix Size'].unique()]
-        current_sparse_sizes = generate_order(sparse_data['Matrix Dimensions, # Rows, Matrix Density'].unique())
+        current_sparse_sizes = generate_order(sparse_data['NXxNYxNZ = #Rows'].unique())
         current_title = version
         current_dense_save_path = os.path.join(save_path, axis_info + "_" + version + "_denseOps_grouped_by_sizes.png")
         current_sparse_save_path = os.path.join(save_path, axis_info + "_" + version + "_sparseOps_grouped_by_sizes.png")
 
         if not sparse_data.empty:
-            plot_data(sparse_data, x = 'Matrix Dimensions, # Rows, Matrix Density', x_order = current_sparse_sizes, y = y_axis, hue = 'Method', hue_order = current_sparse_methods, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
+            plot_data(sparse_data, x = 'NXxNYxNZ = #Rows', x_order = current_sparse_sizes, y = y_axis, hue = 'Method', hue_order = current_sparse_methods, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
         if not dense_data.empty:
             # print(dense_data.head())
             plot_data(dense_data, x = 'Matrix Size', x_order = current_dense_sizes, y = y_axis, hue = 'Method', hue_order = current_dense_methods, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale)
@@ -852,7 +767,7 @@ def plot_x_options(y_axis, y_axis_scale, save_path, full_data):
         current_sparse_save_path = os.path.join(save_path, axis_info + "_" + version + "_sparseOps_grouped_by_methods.png")
 
         if not sparse_data.empty:
-            plot_data(sparse_data, x = 'Method', x_order = current_sparse_methods, y = y_axis, hue = 'Matrix Dimensions, # Rows, Matrix Density', hue_order = current_sparse_sizes, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
+            plot_data(sparse_data, x = 'Method', x_order = current_sparse_methods, y = y_axis, hue = 'NXxNYxNZ = #Rows', hue_order = current_sparse_sizes, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
         if not dense_data.empty:
             plot_data(dense_data, x = 'Method', x_order = current_dense_methods, y = y_axis, hue = 'Matrix Size', hue_order = current_dense_sizes, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale)
 
@@ -864,12 +779,12 @@ def plot_x_options(y_axis, y_axis_scale, save_path, full_data):
         # we might want to sort these in accordance with the sorting instructions!
         current_versions = [v for v in versions_to_plot if v in data['Version'].unique()]
         current_dense_sizes = [s for s in sizes_to_plot if s in data['Matrix Size'].unique()]
-        current_sparse_sizes = generate_order(data['Matrix Dimensions, # Rows, Matrix Density'].unique())
+        current_sparse_sizes = generate_order(data['NXxNYxNZ = #Rows'].unique())
         current_title = method
         current_save_path = os.path.join(save_path,  axis_info + "_" + method + "_grouped_by_versions.png")
 
         if method in sparse_ops_to_plot and not data.empty:
-            plot_data(data, x = 'Matrix Dimensions, # Rows, Matrix Density', x_order = current_sparse_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale)
+            plot_data(data, x = 'NXxNYxNZ = #Rows', x_order = current_sparse_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale)
         if method in dense_ops_to_plot and not data.empty:
             plot_data(data, x = 'Matrix Size', x_order = current_dense_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale)
 
@@ -886,7 +801,7 @@ def plot_x_options(y_axis, y_axis_scale, save_path, full_data):
         dense_data = data[data['Method'].isin(dense_ops_to_plot)]
 
         current_dense_sizes = [s for s in sizes_to_plot if s in dense_data['Matrix Size'].unique()]
-        current_sparse_sizes = generate_order(sparse_data['Matrix Dimensions, # Rows, Matrix Density'].unique())
+        current_sparse_sizes = generate_order(sparse_data['NXxNYxNZ = #Rows'].unique())
 
         # we might want to sort these in accordance with the sorting instructions!
         current_versions = [v for v in versions_to_plot if v in data['Version'].unique()]

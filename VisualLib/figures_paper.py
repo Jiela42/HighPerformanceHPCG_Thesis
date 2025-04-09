@@ -169,7 +169,7 @@ def memory_footprint(nnz, num_rows, additional_zeros, num_stripes, index_size, v
 
 def generate_memory_footprint_analysis():
     # Generate nx values
-    nx = np.linspace(2, 256, 400)  # Generate 400 points between 2 and 1028
+    nx = np.linspace(2, 128, 400)  # Generate 400 points between 2 and 1028
 
     # Calculate y values
     y = memory_footprint_3d27pt(nx, 4, 8)
@@ -195,18 +195,29 @@ def generate_memory_footprint_analysis():
 
 
     # Create the plot
-    plt.figure(figsize=(10, 6))
-    plt.plot(nx, y, label=r'$s_{idx} =$ int, $s_{val} =$ float64')
-    plt.plot(nx, y2, label=r'$s_{idx} =$ int, $s_{val} =$ float32')
-    plt.plot(nx, y3, label=r'$s_{idx} =$ long, $s_{val} =$ float64')
-    plt.plot(nx, y4, label=r'$s_{idx} =$ long, $s_{val} =$ float32')
+    textsize = 20
+    # Set global font size
+    plt.rcParams.update({'font.size': textsize})  # Adjust this value as needed
+
+    # # print the last 10 values of y
+    # print(f"y: {y[-10:]}")
+    # print(f"y2: {y2[-10:]}")
+    # print(f"y3: {y3[-10:]}")
+    # print(f"y4: {y4[-10:]}")
+
+    # compare y2 and y3
+
+
+    plt.figure(figsize=(12,8))
+    plt.plot(nx, y, label=r'$s_{idx} =$ int, $s_{val} =$ float64', linewidth=3)
+    plt.plot(nx, y2, label=r'$s_{idx} =$ int, $s_{val} =$ float32', linewidth=3)
+    # plt.plot(nx, y3, label=r'$s_{idx} =$ long, $s_{val} =$ float64')
+    plt.plot(nx, y4, label=r'$s_{idx} =$ long, $s_{val} =$ float32', linewidth=3)
     plt.xlabel('nx')
     plt.ylabel('CSR/Striped memory-footprint ratio')
     # plt.title('Memory Footprint Ratio')
 
-
-    plt.legend()
-    plt.legend(bbox_to_anchor=(0.5, -0.2), loc='lower center', ncol=2)
+    plt.legend(fontsize=textsize, bbox_to_anchor=(0.5, -0.4), loc='lower center', ncol=2)
     plt.grid(True)
 
     plt.tight_layout()
