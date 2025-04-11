@@ -31,22 +31,24 @@ sizes_to_plot =[
     # ("256x256x128"),
     ("256x256x256"),
     ("512x512x512"),
+    (str(64*8) + "x" + str(64*8) + "x" + str(64*8)),
+    (str(128*8) + "x" + str(128*8) + "x" + str(128*8)),
+    (str(256*8) + "x" + str(256*8) + "x" + str(256*8)),
+    (str(512*8) + "x" + str(512*8) + "x" + str(512*8)),
 ]
 
 versions_to_plot = [
 
     ###### Active versions ######
     "AMGX",
-    # "Striped Warp Reduction",
-    # "Striped coloring (COR Format already stored on the GPU)",
+    "Striped Multi GPU",
+    "Striped coloring (COR Format already stored on the GPU)",
     "Striped coloring (pre-computing COR Format)",
     
-    # "Striped Box coloring (coloringBox 3x3x3)",
+    "Striped Box coloring (coloringBox 3x3x3)",
     "Striped Box coloring (coloringBox 2x2x2)",
 
-    # "Striped Box coloring (COR stored on GPU) (coloringBox 3x3x3)",
-
-    # "Striped Multi GPU",
+    "Striped Box coloring (COR stored on GPU) (coloringBox 3x3x3)",
 
 ]
 plot_percentage_baseline = False
@@ -54,9 +56,6 @@ plot_speedup_vs_baseline = False
 plot_memory_roofline = False
 
 baseline_implementations = [
-    # "CSR-Implementation",
-    # "BaseTorch",
-    # "BaseCuPy",
     # "AMGX",
     # "Striped coloring (COR Format already stored on the GPU)",
     "Striped Box coloring (coloringBox 3x3x3)",
@@ -148,7 +147,58 @@ memory_bandwidth_GBs = {
     "41-44": 936,
     "GH200": 4000,
 }
+#################################################################################################################
 
+name_map = {
+    "Striped coloring (COR Format already stored on the GPU)" : "Striped Propagated Coloring (Precomputed)",
+    "Striped coloring (pre-computing COR Format)" : "Striped Propagated Coloring (On-the-fly)",
+    "Striped Box coloring (coloringBox 3x3x3)" : "Striped Box Coloring (bx=by=bz=3)",
+    "Striped Box coloring (coloringBox 2x2x2)" : "Striped Box Coloring (bx=by=bz=2)",
+
+    "Striped Box coloring (COR stored on GPU) (coloringBox 3x3x3)" : "Striped Box Coloring (bx=by=bz=3) (Precomputed)",
+    "Striped Box coloring (COR stored on GPU) (coloringBox 2x2x2)" : "Striped Box Coloring (bx=by=bz=2) (Precomputed)",
+}
+
+all_possible_versions = [
+    "AMGX",
+    "Striped Multi GPU",
+    "Striped coloring (COR Format already stored on the GPU)",
+    "Striped coloring (pre-computing COR Format)",
+    "Striped Box coloring (coloringBox 3x3x3)",
+    "Striped Box coloring (coloringBox 2x2x2)",
+    "Striped Box coloring (COR stored on GPU) (coloringBox 3x3x3)",
+    "Striped Box coloring (COR stored on GPU) (coloringBox 2x2x2)",
+]
+
+# apply the name map to all possible versions
+for version in all_possible_versions:
+    if version in name_map:
+        new_name = name_map[version]
+        all_possible_versions[all_possible_versions.index(version)] = new_name
+    else:
+        pass
+
+for version in versions_to_plot:
+    if version in name_map:
+        new_name = name_map[version]
+        versions_to_plot[versions_to_plot.index(version)] = new_name
+    else:
+        pass
+
+for version in baseline_implementations:
+    if version in name_map:
+        new_name = name_map[version]
+        baseline_implementations[baseline_implementations.index(version)] = new_name
+    else:
+        pass
+
+
+# Assign unique colors to each implementation
+# cmap = plt.cm.get_cmap(sns.color_palette, len(all_possible_versions))
+
+palette = sns.color_palette(sns.color_palette("deep"), len(all_possible_versions))
+# Assign unique colors to each implementation
+version_colors = {version: palette[i] for i, version in enumerate(all_possible_versions)}
 
 #################################################################################################################
 # Suppress all FutureWarnings
@@ -234,8 +284,6 @@ def get_theoretical_bytes_read(nx, ny, nz, method):
         print(f"Method {method} not found for theoretical bytes", flush=True)
         return 1
 
-
-
 #################################################################################################################
 # read the data
 #################################################################################################################
@@ -255,15 +303,14 @@ def read_data():
     for file in files:
         # print(file, flush=True)
         # the first line contains the metadata, read it in
-        with open(file, "r") as f:
+        with open(file, "r", encoding="utf-8", errors="replace") as f:
             file_content = f.read()
 
         lines = file_content.splitlines()
         meta_data = lines[0].split(",")
 
         version_name = str(meta_data[0])
-        version_name = "CSR-Implementation" if version_name == "cuSparse&cuBLAS" or version_name == "cuSparse-Implementation" else version_name # we change the name because I am too lazy to re-run the benchmark
-        version_name = version_name.replace("Banded", "Striped")
+        version_name = name_map[version_name] if version_name in name_map else version_name
 
         # this portion can help finding the old measurements that we don't need anymore
         # if version_name ==  "Striped coloring (COR Format already stored on the GPU)":
@@ -281,6 +328,31 @@ def read_data():
         additional_info = str(meta_data[8]) if len(meta_data) > 8 else ""
         # grab the norm
 
+
+        # Extract NPX, NPY, NPZ from the first header line
+        np_match = re.search(r"NPX=(\d+)\s+NPY=(\d+)\s+NPZ=(\d+)", additional_info)
+        if np_match:
+            file_npx, file_npy, file_npz = map(int, np_match.groups())
+            nx = file_npx * nx
+            ny = file_npy * ny
+            nz = file_npz * nz
+        else:
+            file_npx = file_npy = file_npz = None
+
+        if(nnz == 0):
+            # Replace nnz = int(meta_data[6]) with the following code:
+            num_interior_points = (nx - 2) * (ny - 2) * (nz - 2)
+            num_face_points = 2 * ((nx - 2) * (ny - 2) + (nx - 2) * (nz - 2) + (ny - 2) * (nz - 2))
+            num_edge_points = 4 * ((nx - 2) + (ny - 2) + (nz - 2))
+            num_corner_points = 8
+
+            nnz_interior = 27 * num_interior_points
+            nnz_face = 18 * num_face_points
+            nnz_edge = 12 * num_edge_points
+            nnz_corner = 8 * num_corner_points
+
+            nnz = nnz_interior + nnz_face + nnz_edge + nnz_corner
+        
         # sanity check the numbers
         assert nnz > 0
         assert nx * ny * nz > 0
@@ -331,6 +403,9 @@ def read_data():
 
         data = pd.read_csv(StringIO("\n".join(lines[num_measurements_to_skip_for_warm_cache:])), header=None, names=['Time (ms)'])
 
+        # filter out measurements where 'Time (ms)' is 0
+        data = data[data['Time (ms)'] != 0]
+
         # Add metadata as columns to the data
         data['Version'] = version_name
         data['Ault Node'] = ault_node
@@ -341,6 +416,13 @@ def read_data():
         data['NNZ'] = nnz
         data['Method'] = method
         data['Density of A'] = sparsity_of_A
+
+        # If NPX/NPY/NPZ were extracted, add them as well
+        if 'file_npx' in locals() and file_npx is not None:
+            data['NPX'] = file_npx
+            data['NPY'] = file_npy
+            data['NPZ'] = file_npz
+
 
         # if (version_name in versions_to_plot and method == "SymGS"):
         #     print(f"Read in data for {version_name}, {ault_node}, {matrix_type}, {nx}x{ny}x{nz}, {method}, {additional_info}, {l2_norm}", flush=True)
@@ -489,8 +571,12 @@ def preprocess_data(full_data):
     # Here we could do preprocessing, such as time per nnz or sorting of the possible values of the columns
 
     # add a column matrix dimensions: nx x ny x nz (a string)
-    full_data['# Rows'] = full_data['nx'] * full_data['ny'] * full_data['nz']
-    full_data['NXxNYxNZ = #Rows'] = full_data['nx'].astype(str) + "x" + full_data['ny'].astype(str) + "x" + full_data['nz'].astype(str) + "="  + full_data['# Rows'].astype(str) # +  ', '+ (full_data['Density of A']* 100).round(2).astype(str) + "%" 
+    full_data['# Rows int'] = full_data['nx'] * full_data['ny'] * full_data['nz']
+    full_data['# Rows'] = full_data.apply(
+        lambda row: f"{row['nx']}³" if row['nx'] == row['ny'] == row['nz'] else f"{row['nx']}x{row['ny']}x{row['nz']}",
+        axis=1
+    )
+    full_data['NXxNYxNZ = #Rows'] = full_data['nx'].astype(str) + "x" + full_data['ny'].astype(str) + "x" + full_data['nz'].astype(str) + "="  + full_data['# Rows int'].astype(str) # +  ', '+ (full_data['Density of A']* 100).round(2).astype(str) + "%" 
     full_data['Matrix Size'] = full_data['nx'].astype(str) + "x" + full_data['ny'].astype(str) + "x" + full_data['nz'].astype(str)
 
     # remove any data, that is not to be plotted
@@ -591,7 +677,7 @@ def get_legend_horizontal_offset(num_cols, hue_order):
 
     return -(num_rows + 1) * 0.06 - 0.18
 
-def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale):
+def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale, color_palette):
 
     # print(len(data), flush=True)
 
@@ -605,12 +691,8 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
     # print("hue column values", data[hue].unique(), flush=True)
     # print("hue order", hue_order, flush=True)
 
-    ax = sns.barplot(x=x, order=x_order, y=y, hue=hue, hue_order=hue_order, data=data, estimator= np.median, ci=98)
+    ax = sns.barplot(x=x, order=x_order, y=y, hue=hue, hue_order=hue_order, palette=color_palette, data=data, estimator= np.median, ci=98)
     fig = ax.get_figure()
-
-    # print(f"**************************", flush=True)
-    # print(f"Title: {title}", flush=True)
-    # print("**************************", flush=True)
     
    # Group the data by the relevant columns
     grouped_data = data.groupby([x, hue])
@@ -619,7 +701,6 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
     bar_ctr = 0
 
     text_size = 30
-
 
     # Iterate over x_order and hue_order to annotate bars
     if y != "Percentage of Memory Bandwidth":
@@ -661,7 +742,7 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
     ax.set_title(title, fontsize=text_size+4)
     ax.set_xlabel(x, fontsize=text_size+2)
     ax.set_ylabel(y, fontsize=text_size+2)
-    ax.tick_params(axis='both', which='major', labelsize=text_size-5)
+    ax.tick_params(axis='both', which='major', labelsize=text_size)
 
     if y_ax_scale == "log":
         ax.set_yscale('log')
@@ -685,9 +766,9 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
 
         handles, labels = ax.get_legend_handles_labels()
         legend_labels = [legend_label_updates.get(label, label) for label in labels]
-        legend = ax.legend(handles, legend_labels, loc='lower center', bbox_to_anchor=(0.5, box_offset -0.2), ncol=nc, prop={'size': text_size})
+        legend = ax.legend(handles, legend_labels, loc='lower center', bbox_to_anchor=(0.5, box_offset -0.3), ncol=nc, prop={'size': text_size})
     else:
-        legend = ax.legend(loc='lower center', bbox_to_anchor=(0.5, box_offset - 0.2), ncol=nc, prop={'size': text_size})
+        legend = ax.legend(loc='lower center', bbox_to_anchor=(0.5, box_offset - 0.3), ncol=nc, prop={'size': text_size})
 
 
     # legend = ax.legend(loc = 'lower center', bbox_to_anchor = (0.5, box_offset- 0.05), ncol = nc, prop={'size': text_size}, labels = legend_labels)
@@ -703,19 +784,24 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale)
     fig.clf()
     plt.close(fig)
 
-def generate_order(current_dim_perc):
+def generate_order(current_dim):
     sorted_sizes = {}
 
-    for string in current_dim_perc:
-        size = string.split("=")[0]
-        # print(size, flush=True)
-        if size in sizes_to_plot:
-            if size not in sorted_sizes:
-                sorted_sizes[size] = []
-            sorted_sizes[size].append(string)
-    
-    # sort the order from smallest size to largest and sort the percentages within the same size
-    # print(sorted_sizes, flush=True)
+    for string in current_dim:
+
+        if "³" in string:
+            nx = int(string.split("³")[0])
+            ny = nx
+            nz = nx
+
+        else:
+            nx, ny, nz = [int(x) for x in string.split("x")]
+
+        size_string = f"{nx}x{ny}x{nz}"
+        if size_string in sizes_to_plot:
+            if size_string not in sorted_sizes:
+                sorted_sizes[size_string] = []
+            sorted_sizes[size_string].append(string)
 
     order = []
 
@@ -736,40 +822,42 @@ def plot_x_options(y_axis, y_axis_scale, save_path, full_data):
     # print(f"Plotting {axis_info}", flush=True)
 
 
-    for version in versions_to_plot:
+    # for version in versions_to_plot:
 
-        # filter data
-        data = full_data[full_data['Version'] == version]
-        # print(len(data), flush=True)
+    #     # filter data
+    #     data = full_data[full_data['Version'] == version]
+    #     # print(len(data), flush=True)
         
-        # we group by sparse and dense operations 
-        sparse_data = data[data['Method'].isin(sparse_ops_to_plot)]
-        dense_data = data[data['Method'].isin(dense_ops_to_plot)]
+    #     # we group by sparse and dense operations 
+    #     sparse_data = data[data['Method'].isin(sparse_ops_to_plot)]
+    #     dense_data = data[data['Method'].isin(dense_ops_to_plot)]
 
 
         
-        # we might want to sort these in accordance with the sorting instructions!
-        current_sparse_methods = [m for m in sparse_ops_to_plot if m in data['Method'].unique()]
-        current_dense_methods = [m for m in dense_ops_to_plot if m in data['Method'].unique()]
-        current_dense_sizes = [s for s in sizes_to_plot if s in dense_data['Matrix Size'].unique()]
-        current_sparse_sizes = generate_order(sparse_data['NXxNYxNZ = #Rows'].unique())
-        current_title = version
-        current_dense_save_path = os.path.join(save_path, axis_info + "_" + version + "_denseOps_grouped_by_sizes.png")
-        current_sparse_save_path = os.path.join(save_path, axis_info + "_" + version + "_sparseOps_grouped_by_sizes.png")
+    #     # we might want to sort these in accordance with the sorting instructions!
+    #     current_sparse_methods = [m for m in sparse_ops_to_plot if m in data['Method'].unique()]
+    #     current_dense_methods = [m for m in dense_ops_to_plot if m in data['Method'].unique()]
+    #     current_dense_sizes = [s for s in sizes_to_plot if s in dense_data['Matrix Size'].unique()]
+    #     current_sparse_sizes = generate_order(sparse_data['NXxNYxNZ = #Rows'].unique())
+    #     current_title = version
+    #     current_dense_save_path = os.path.join(save_path, axis_info + "_" + version + "_denseOps_grouped_by_sizes.png")
+    #     current_sparse_save_path = os.path.join(save_path, axis_info + "_" + version + "_sparseOps_grouped_by_sizes.png")
 
-        if not sparse_data.empty:
-            plot_data(sparse_data, x = 'NXxNYxNZ = #Rows', x_order = current_sparse_sizes, y = y_axis, hue = 'Method', hue_order = current_sparse_methods, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
-        if not dense_data.empty:
-            # print(dense_data.head())
-            plot_data(dense_data, x = 'Matrix Size', x_order = current_dense_sizes, y = y_axis, hue = 'Method', hue_order = current_dense_methods, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale)
+    #     color_palette = {version_colors[version]}
 
-        current_dense_save_path = os.path.join(save_path, axis_info + "_" + version + "_denseOps_grouped_by_methods.png")
-        current_sparse_save_path = os.path.join(save_path, axis_info + "_" + version + "_sparseOps_grouped_by_methods.png")
+    #     if not sparse_data.empty:
+    #         plot_data(sparse_data, x = 'NXxNYxNZ = #Rows', x_order = current_sparse_sizes, y = y_axis, hue = 'Method', hue_order = current_sparse_methods, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale, color_palette = color_palette)
+    #     if not dense_data.empty:
+    #         # print(dense_data.head())
+    #         plot_data(dense_data, x = 'Matrix Size', x_order = current_dense_sizes, y = y_axis, hue = 'Method', hue_order = current_dense_methods, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale, color_palette = color_palette)
 
-        if not sparse_data.empty:
-            plot_data(sparse_data, x = 'Method', x_order = current_sparse_methods, y = y_axis, hue = 'NXxNYxNZ = #Rows', hue_order = current_sparse_sizes, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
-        if not dense_data.empty:
-            plot_data(dense_data, x = 'Method', x_order = current_dense_methods, y = y_axis, hue = 'Matrix Size', hue_order = current_dense_sizes, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale)
+    #     current_dense_save_path = os.path.join(save_path, axis_info + "_" + version + "_denseOps_grouped_by_methods.png")
+    #     current_sparse_save_path = os.path.join(save_path, axis_info + "_" + version + "_sparseOps_grouped_by_methods.png")
+
+    #     if not sparse_data.empty:
+    #         plot_data(sparse_data, x = 'Method', x_order = current_sparse_methods, y = y_axis, hue = 'NXxNYxNZ = #Rows', hue_order = current_sparse_sizes, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale, color_palette = color_palette)
+    #     if not dense_data.empty:
+    #         plot_data(dense_data, x = 'Method', x_order = current_dense_methods, y = y_axis, hue = 'Matrix Size', hue_order = current_dense_sizes, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale, color_palette = color_palette)
 
     for method in methods_to_plot:
 
@@ -779,42 +867,46 @@ def plot_x_options(y_axis, y_axis_scale, save_path, full_data):
         # we might want to sort these in accordance with the sorting instructions!
         current_versions = [v for v in versions_to_plot if v in data['Version'].unique()]
         current_dense_sizes = [s for s in sizes_to_plot if s in data['Matrix Size'].unique()]
-        current_sparse_sizes = generate_order(data['NXxNYxNZ = #Rows'].unique())
+        current_sparse_sizes = generate_order(data['# Rows'].unique())
         current_title = method
         current_save_path = os.path.join(save_path,  axis_info + "_" + method + "_grouped_by_versions.png")
 
+        color_palette = {v: version_colors[v] for v in current_versions}
+
         if method in sparse_ops_to_plot and not data.empty:
-            plot_data(data, x = 'NXxNYxNZ = #Rows', x_order = current_sparse_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale)
+            plot_data(data, x = '# Rows', x_order = current_sparse_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale, color_palette = color_palette)
         if method in dense_ops_to_plot and not data.empty:
-            plot_data(data, x = 'Matrix Size', x_order = current_dense_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale)
+            plot_data(data, x = 'Matrix Size', x_order = current_dense_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale, color_palette = color_palette)
 
         # careful, the following was not updated to distinguish between sparse and dense operations
         # current_save_path = os.path.join(save_path, method + "_grouped_by_sizes.png")
         # plot_data(data, x = 'Matrix Dimensions', x_order = current_sizes, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_save_path, y_ax_scale = y_axis_scale)
     
-    for size in sizes_to_plot:
+    # for size in sizes_to_plot:
 
-        # filter data
-        data = full_data[full_data["Matrix Size"] == size]
+    #     # filter data
+    #     data = full_data[full_data["Matrix Size"] == size]
         
-        sparse_data = data[data['Method'].isin(sparse_ops_to_plot)]
-        dense_data = data[data['Method'].isin(dense_ops_to_plot)]
+    #     sparse_data = data[data['Method'].isin(sparse_ops_to_plot)]
+    #     dense_data = data[data['Method'].isin(dense_ops_to_plot)]
 
-        current_dense_sizes = [s for s in sizes_to_plot if s in dense_data['Matrix Size'].unique()]
-        current_sparse_sizes = generate_order(sparse_data['NXxNYxNZ = #Rows'].unique())
+    #     current_dense_sizes = [s for s in sizes_to_plot if s in dense_data['Matrix Size'].unique()]
+    #     current_sparse_sizes = generate_order(sparse_data['NXxNYxNZ = #Rows'].unique())
 
-        # we might want to sort these in accordance with the sorting instructions!
-        current_versions = [v for v in versions_to_plot if v in data['Version'].unique()]
-        current_dense_methods = [m for m in methods_to_plot if m in dense_data['Method'].unique()]
-        current_sparse_methods = [m for m in methods_to_plot if m in sparse_data['Method'].unique()]
-        current_title = "3D Matrix Size, Density: " + size
-        current_dense_save_path = os.path.join(save_path, axis_info + "_" + size + "_denseOps_grouped_by_versions.png")
-        current_sparse_save_path = os.path.join(save_path, axis_info + "_" + size + "_sparseOps_grouped_by_versions.png")
+    #     # we might want to sort these in accordance with the sorting instructions!
+    #     current_versions = [v for v in versions_to_plot if v in data['Version'].unique()]
+    #     current_dense_methods = [m for m in methods_to_plot if m in dense_data['Method'].unique()]
+    #     current_sparse_methods = [m for m in methods_to_plot if m in sparse_data['Method'].unique()]
+    #     current_title = "3D Matrix Size, Density: " + size
+    #     current_dense_save_path = os.path.join(save_path, axis_info + "_" + size + "_denseOps_grouped_by_versions.png")
+    #     current_sparse_save_path = os.path.join(save_path, axis_info + "_" + size + "_sparseOps_grouped_by_versions.png")
 
-        if not sparse_data.empty:
-            plot_data(dense_data, x = 'Method', x_order = current_dense_methods, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale)
-        if not dense_data.empty:
-            plot_data(sparse_data, x = 'Method', x_order = current_sparse_methods, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale)
+    #     color_palette = {version_colors[v] for v in current_versions}
+
+    #     if not sparse_data.empty:
+    #         plot_data(dense_data, x = 'Method', x_order = current_dense_methods, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_dense_save_path, y_ax_scale = y_axis_scale, color_palette = color_palette)
+    #     if not dense_data.empty:
+    #         plot_data(sparse_data, x = 'Method', x_order = current_sparse_methods, y = y_axis, hue = 'Version', hue_order = current_versions, title = current_title, save_path = current_sparse_save_path, y_ax_scale = y_axis_scale, color_palette = color_palette)
 
 # read in the data
 full_data = read_data()
@@ -842,31 +934,6 @@ print(y_axis_to_plot, flush=True)
 # print(filtered_data, flush=True)
 
 # We for every size we want to print the median of the including convergion of the version without convergion
-
-print("Versions in the data", flush=True)
-print(full_data['Version'].unique(), flush=True)
-
-for s in sizes_to_plot:
-    wo_conversion = "Striped Box coloring"
-    with_conversion = "Striped Box coloring (including conversion to Striped)"
-
-    filter_data_wo = full_data[
-        (full_data['Method'] == "CG") &
-        (full_data['Version'] == wo_conversion) &
-        (full_data['Matrix Size'] == s)
-        ]
-    filter_data_with = full_data[
-        (full_data['Method'] == "CG") &
-        (full_data['Version'] == with_conversion) &
-        (full_data['Matrix Size'] == s)
-        ]
-    
-    median_wo = filter_data_wo['Time (ms)'].median()
-    median_with = filter_data_with['Time (ms)'].median()
-
-    # print(f"Median Time for CG of size {s}, without conversion {median_wo}, with conversion {median_with}, conversion takes {median_with - median_wo} ms that is {(median_with-median_wo)/median_with * 100}% of the execution", flush=True)
-
-        
 
 #######################
 
