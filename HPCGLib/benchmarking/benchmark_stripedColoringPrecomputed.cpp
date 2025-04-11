@@ -26,7 +26,7 @@ void run_striped_coloringPrecomputed_3d27p_benchmarks(int nx, int ny, int nz, st
     }
 
     
-    striped_A.generate_coloring();
+    striped_A.generate_coloring(true);
     
     std::string implementation_name = implementation.version_name;
     std::string additional_params = implementation.additional_parameters;
@@ -77,7 +77,7 @@ void run_striped_coloringPrecomputed_3d27p_SymGS_benchmark(int nx, int ny, int n
     std::vector<DataType> y = generate_y_vector_for_HPCG_problem(nx, ny, nz);
     std::vector<DataType> x (num_rows, 0.0);
 
-    striped_A.generate_coloring();
+    striped_A.generate_coloring(true);
 
     std::string implementation_name = implementation.version_name;
     std::string additional_params = implementation.additional_parameters;

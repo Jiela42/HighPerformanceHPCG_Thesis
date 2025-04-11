@@ -41,9 +41,9 @@ public:
 
 
         // default box size for coloring
-        this->bx = 3;
-        this->by = 3;
-        this->bz = 3;
+        this->bx = 2;
+        this->by = 2;
+        this->bz = 2;
 
         // set the default cooperation number for the SymGS
         this->SymGS_cooperation_number = 4;

@@ -180,7 +180,7 @@ bool test_CG(
                     striped_Matrix<DataType>* A_striped = A.get_Striped();
 
                     // we might need a coloring precomputed for some SymGS implementations
-                    A_striped->generate_coloring();
+                    A_striped->generate_coloring(true);
 
                     implementation.compute_CG(*A_striped, b_d, x_d, n_iters, normr, normr0);
                     std::cout << "CG took " << n_iters << " iterations for size " << nx << "x" << ny << "x" << nz << " without Preconditioning, with a normr/normr0 of " << normr/normr0 << std::endl;
@@ -207,10 +207,12 @@ bool test_CG(
                 if (implementation.implementation_type == Implementation_Type::STRIPED){
                     striped_Matrix<DataType>* A_striped = A.get_Striped();
                     
-                    // we might need a coloring precomputed
-                    A_striped->generate_coloring();
+                    // we might need a coloring precomputed (since this is a de-coupled matrix it's fine)
+                    
+                    A_striped->generate_coloring(true);
 
                     implementation.compute_CG(*A_striped, b_d, x_d, n_iters, normr, normr0);
+
 
                     std::cout << "CG took " << n_iters << " iterations for size " << nx << "x" << ny << "x" << nz << " with Preconditioning, with a normr/normr0 of " << normr/normr0 << std::endl;
                 } else{
@@ -432,8 +434,8 @@ bool test_MG(
 
                     striped_Matrix<DataType>* A_striped = A.get_Striped();
 
-                    // we might need a coloring precomputed
-                    A_striped->generate_coloring();
+                    // we might need a coloring precomputed (and all its subdata)
+                    A_striped->generate_coloring(true);
     
                     // test the MG function
                     implementation.compute_MG(*A_striped, b_computed_d, x_overlap_d);

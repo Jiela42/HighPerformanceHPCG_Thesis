@@ -21,8 +21,9 @@ void striped_coloringPrecomputed_Implementation<T>::striped_coloringPrecomputed_
     T * striped_A_d = A.get_values_d();
 
     // the coloring was already computed, we can grab the pointers from the striped matrix object
-    local_int_t * color_pointer_d = A.get_color_pointer_d();
-    local_int_t * color_sorted_rows_d = A.get_color_sorted_rows_d();
+    // we don't generate if necessary (hence the false)
+    local_int_t * color_pointer_d = A.get_color_pointer_d(false);
+    local_int_t * color_sorted_rows_d = A.get_color_sorted_rows_d(false);
 
     assert(diag_offset >= 0);
     // this assertion is here such that we don't benchmark the coloring computation

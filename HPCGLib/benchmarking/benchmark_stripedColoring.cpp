@@ -48,9 +48,93 @@ void run_striped_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::string f
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(DataType), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
 
-    // run the benchmarks (without the copying back and forth)
-    bench_Implementation(implementation, *timer, striped_A, a_d, b_d, x_d, y_d, result_d, 1.0, 1.0);
+    // because this benchmark also need to bench the coloring, we need to delete and re-generate the matrix between runs
 
+    int num_iterations = implementation.getNumberOfIterations();
+    implementation.setNumberOfIterations(1);
+
+    for(int iterations = 0; iterations < num_iterations; iterations++){
+        // run the benchmarks (without the copying back and forth)
+
+        int num_sanity_elements = 100;
+        std::vector<DataType> a_original(num_sanity_elements);
+        std::vector<DataType> b_original(num_sanity_elements);
+        std::vector<DataType> x_original(num_sanity_elements);
+        std::vector<DataType> y_original(num_sanity_elements);
+    
+        // copy the first 100 elements of the vectors
+        CHECK_CUDA(cudaMemcpy(a_original.data(), a_d, num_sanity_elements * sizeof(DataType), cudaMemcpyDeviceToHost));
+        CHECK_CUDA(cudaMemcpy(b_original.data(), b_d, num_sanity_elements * sizeof(DataType), cudaMemcpyDeviceToHost));
+        CHECK_CUDA(cudaMemcpy(x_original.data(), x_d, num_sanity_elements * sizeof(DataType), cudaMemcpyDeviceToHost));
+        CHECK_CUDA(cudaMemcpy(y_original.data(), y_d, num_sanity_elements * sizeof(DataType), cudaMemcpyDeviceToHost));
+        
+        // make a vector of vectors
+        std::vector<std::vector<DataType>> original_vectors = {a_original, b_original, x_original, y_original};
+        std::vector<DataType*> vectors_d = {a_d, b_d, x_d, y_d};
+        
+        // we do one sanity check prior to the benchmarking (just for my sanity and to make debugging easier)
+        sanity_check_vectors(vectors_d, original_vectors);
+    
+        std::cout << "Bench SymGS" << std::endl;
+        if(implementation.SymGS_implemented){
+            bench_SymGS(implementation, *timer, striped_A, x_d, y_d);
+            sanity_check_vectors(vectors_d, original_vectors);
+            // delete A & re-generate it
+            striped_A.~striped_Matrix();
+            new (&striped_A) striped_Matrix<DataType>();
+            striped_A.Generate_striped_3D27P_Matrix_onGPU(nx, ny, nz);
+    
+            if(nx % 8 == 0 && ny % 8 == 0 && nz % 8 == 0 && nx / 8 > 2 && ny / 8 > 2 && nz / 8 > 2){
+                // initialize the MG data
+                striped_Matrix <DataType>* current_matrix = &striped_A;
+                for(int i = 0; i < 3; i++){
+                    current_matrix->initialize_coarse_Matrix();
+                    current_matrix = current_matrix->get_coarse_Matrix();
+                }
+            }
+        }
+
+
+        std::cout << "Bench CG" << std::endl;
+        if(implementation.CG_implemented){
+            bench_CG(implementation, *timer, striped_A, x_d, y_d);
+            sanity_check_vectors(vectors_d, original_vectors);
+            // delete A & re-generate it
+            striped_A.~striped_Matrix();
+            new (&striped_A) striped_Matrix<DataType>();
+            striped_A.Generate_striped_3D27P_Matrix_onGPU(nx, ny, nz);
+    
+            if(nx % 8 == 0 && ny % 8 == 0 && nz % 8 == 0 && nx / 8 > 2 && ny / 8 > 2 && nz / 8 > 2){
+                // initialize the MG data
+                striped_Matrix <DataType>* current_matrix = &striped_A;
+                for(int i = 0; i < 3; i++){
+                    current_matrix->initialize_coarse_Matrix();
+                    current_matrix = current_matrix->get_coarse_Matrix();
+                }
+            }
+        }
+        std::cout << "Bench MG" << std::endl;
+        if(implementation.MG_implemented){
+            bench_MG(implementation, *timer, striped_A, x_d, y_d);
+            sanity_check_vectors(vectors_d, original_vectors);
+            // delete A & re-generate it
+            striped_A.~striped_Matrix();
+            new (&striped_A) striped_Matrix<DataType>();
+            striped_A.Generate_striped_3D27P_Matrix_onGPU(nx, ny, nz);
+    
+            if(nx % 8 == 0 && ny % 8 == 0 && nz % 8 == 0 && nx / 8 > 2 && ny / 8 > 2 && nz / 8 > 2){
+                // initialize the MG data
+                striped_Matrix <DataType>* current_matrix = &striped_A;
+                for(int i = 0; i < 3; i++){
+                    current_matrix->initialize_coarse_Matrix();
+                    current_matrix = current_matrix->get_coarse_Matrix();
+                }
+            }
+        }
+        
+    }
+    
+    
     // free the memory
     cudaFree(a_d);
     cudaFree(b_d);
@@ -58,6 +142,9 @@ void run_striped_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::string f
     cudaFree(y_d);
     cudaFree(result_d);
 
+    // restore the number of iterations
+    implementation.setNumberOfIterations(num_iterations);
+    
     delete timer;
 }
 
@@ -95,11 +182,27 @@ void run_striped_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std::str
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(DataType), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
 
-    bench_SymGS(implementation, *timer, striped_A, x_d, y_d);
+
+    int num_iterations = implementation.getNumberOfIterations();
+    implementation.setNumberOfIterations(1);
+
+    for(int iteration = 0; iteration < num_iterations; iteration++){
+
+        bench_SymGS(implementation, *timer, striped_A, x_d, y_d);
+
+        // delete A & re-generate it
+        striped_A.~striped_Matrix();
+        new (&striped_A) striped_Matrix<DataType>();
+        striped_A.Generate_striped_3D27P_Matrix_onGPU(nx, ny, nz);
+    }
+
 
     // free the memory
     CHECK_CUDA(cudaFree(x_d));
     CHECK_CUDA(cudaFree(y_d));
+
+    // restore the number of iterations
+    implementation.setNumberOfIterations(num_iterations);
 
     delete timer;
 }
