@@ -9,7 +9,7 @@
 #include "cuda_runtime.h"
 
 // define number of iterations we want to have
-#define num_bench_iter 10
+#define nBenchIter 10
 
 enum class Implementation_Type {
     STRIPED,
@@ -63,6 +63,7 @@ class HPCG_functions {
         int get_maxSymGSIters() const {
             return max_SymGS_iterations;
         }
+    
 
 
     // CG starts with having the data on the CPU
@@ -132,8 +133,11 @@ class HPCG_functions {
         ) = 0;
 
         int getNumberOfIterations() const {
-            return num_bench_iter;
+            return this->numBenchIters;
     }
+        void setNumberOfIterations(int new_numBenchIters) {
+            this->numBenchIters = new_numBenchIters;
+        }
 
     double L2_norm_for_SymGS(
         striped_Matrix<T> & A,
@@ -265,6 +269,7 @@ class HPCG_functions {
         double CG_tolerance = 1e-9;
         int max_SymGS_iterations = 1;
         double SymGS_tolerance = 1e-6;
+        int numBenchIters = nBenchIter;
 };
 
 #endif // HPCGLIB_HPP

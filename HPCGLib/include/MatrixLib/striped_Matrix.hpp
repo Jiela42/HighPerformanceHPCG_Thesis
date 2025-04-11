@@ -21,7 +21,7 @@ class striped_Matrix {
         striped_Matrix();
         ~striped_Matrix();
         
-        void generate_coloring();
+        void generate_coloring(bool recursive);
         void generate_box_coloring(int bx, int by, int bz);
         
         void copy_Matrix_toGPU();
@@ -29,10 +29,11 @@ class striped_Matrix {
 
         void remove_Matrix_from_GPU();
         
-        local_int_t *get_color_pointer_d();
-        local_int_t *get_color_sorted_rows_d();
+        local_int_t *get_color_pointer_d(bool generate_if_necessary);
+        local_int_t *get_color_sorted_rows_d(bool generate_if_necessary);
         std::vector<local_int_t> get_color_pointer_vector();
         std::vector<local_int_t> get_color_sorted_rows_vector();
+        local_int_t get_num_colors() const;
         
         local_int_t get_num_rows() const;
         local_int_t get_num_cols() const;
@@ -94,6 +95,7 @@ class striped_Matrix {
         T *values_d;
         local_int_t* color_pointer_d;
         local_int_t* color_sorted_rows_d;
+        local_int_t num_colors;
 
         sparse_CSR_Matrix<T> *CSR;
 
