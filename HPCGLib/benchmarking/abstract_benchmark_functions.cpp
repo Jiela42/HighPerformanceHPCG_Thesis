@@ -47,6 +47,9 @@ void bench_CG(
     ){
         implementation.doPreconditioning = true;
         for(int i = 0; i < num_iterations; i++){
+            // restore original x
+            CHECK_CUDA(cudaMemcpy(x_d, x_original.data(), A.get_num_rows() * sizeof(DataType), cudaMemcpyHostToDevice));
+            
             timer.startTimer();
             implementation.compute_CG(
                 A,
@@ -55,7 +58,6 @@ void bench_CG(
             );
             timer.stopTimer("compute_CG");
             std::cout << "CG took " << n_iters << " iterations for size " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz()<< " and implementation " << implementation.version_name << std::endl;
-            // restore original x
 
         }
         // add the CG iterations to the timer

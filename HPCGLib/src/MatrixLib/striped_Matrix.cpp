@@ -592,7 +592,7 @@ T* striped_Matrix<T>::get_Axf_d(){
 
 
 template <typename T>
-void striped_Matrix<T>::generate_coloring(){
+void striped_Matrix<T>::generate_coloring(bool recursive){
 
     if(this->matrix_type == MatrixType::Stencil_3D27P){
 
@@ -601,6 +601,7 @@ void striped_Matrix<T>::generate_coloring(){
         local_int_t nz = this->nz;
 
         local_int_t num_colors = (nx -1) + 2 * (ny-1) + 4 * (nz-1) + 1;
+        this->num_colors = num_colors;
     
         // first we allocate the space on the GPU
         CHECK_CUDA(cudaMalloc(&this->color_pointer_d, (num_colors + 1) * sizeof(local_int_t)));
@@ -609,8 +610,8 @@ void striped_Matrix<T>::generate_coloring(){
         get_color_row_mapping(this->nx, this->ny, this->nz, this->color_pointer_d, this->color_sorted_rows_d);
     
         // also generate the coloring for any coarse matrices
-        if(this->coarse_Matrix != nullptr){
-            this->coarse_Matrix->generate_coloring();
+        if(recursive and this->coarse_Matrix != nullptr){
+            this->coarse_Matrix->generate_coloring(recursive);
         }
     } else{
         printf("ERROR: Unsupported matrix type for coloring\n");
@@ -625,6 +626,7 @@ void striped_Matrix<T>::generate_box_coloring(int bx, int by, int bz){
     if(this->matrix_type == MatrixType::Stencil_3D27P){
 
         int num_colors = bx * by * bz;
+        this->num_colors = num_colors;
 
         // first we allocate the space on the GPU
         // to do so we first check if the color ptr are nullptr
@@ -658,13 +660,25 @@ void striped_Matrix<T>::generate_box_coloring(int bx, int by, int bz){
 }
 
 template <typename T>
-local_int_t* striped_Matrix<T>::get_color_pointer_d(){
+local_int_t* striped_Matrix<T>::get_color_pointer_d(bool generate_if_necessary){
+
+    if (generate_if_necessary && this->color_pointer_d == nullptr){
+        this->generate_coloring(false);
+    }
     return this->color_pointer_d;
 }
 
 template <typename T>
-local_int_t* striped_Matrix<T>::get_color_sorted_rows_d(){
+local_int_t* striped_Matrix<T>::get_color_sorted_rows_d(bool generate_if_necessary){
+    if (generate_if_necessary && this->color_sorted_rows_d == nullptr){
+        this->generate_coloring(false);
+    }
     return this->color_sorted_rows_d;
+}
+
+template <typename T>
+local_int_t striped_Matrix<T>::get_num_colors() const{
+    return this->num_colors;
 }
 
 template <typename T>

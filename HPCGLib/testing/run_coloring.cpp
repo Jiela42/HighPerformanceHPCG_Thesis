@@ -18,7 +18,7 @@ void print_COR_Format(int nx, int ny, int nz){
     // A_striped.striped_Matrix_from_sparse_CSR(A_csr);
 
     // make coloring
-    A_striped->generate_coloring();
+    A_striped->generate_coloring(true);
     A_striped->print_COR_Format();
 
 }

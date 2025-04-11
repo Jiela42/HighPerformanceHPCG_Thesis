@@ -149,6 +149,11 @@ int main() {
     // run_striped_box_coloring_3d27p_CG_benchmark(256, 128, 128, folder_path, SBC_implementation);
 
 
+
+    // striped_COR_box_coloring_Implementation<double> COR_SBC_implementation;
+    // run_striped_COR_box_coloring_3d27p_SymGS_benchmark(32, 32, 32, folder_path, COR_SBC_implementation);
+
+
     std::cout << "Finished Benchmark" << std::endl;  
 
 }

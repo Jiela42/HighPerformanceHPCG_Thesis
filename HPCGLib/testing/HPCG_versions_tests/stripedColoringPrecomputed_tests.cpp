@@ -24,7 +24,7 @@ bool run_striped_coloringPrecomputed_tests_on_matrix(sparse_CSR_Matrix<DataType>
 
     striped_Matrix<DataType>* A_striped = A.get_Striped();
 
-    A_striped->generate_coloring();
+    A_striped->generate_coloring(true);
 
     local_int_t num_rows = A.get_num_rows();
     local_int_t num_cols = A.get_num_cols();

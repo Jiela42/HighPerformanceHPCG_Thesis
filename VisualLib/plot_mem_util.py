@@ -281,6 +281,15 @@ for m in full_data["Method"].unique():
     # now we can plot the data
     for metric in ["Memory Bandwidth Utilization (kernel)", "Total Memory Bandwidth Utilization"]:
         y = metric
+
+        # for each size print the total memory bandwidth utilization
+        for size in sizes_to_plot:
+            size_data = data[data["Size"] == size]
+            for version in versions_to_plot:
+                version_data = size_data[size_data["Version"] == version]
+                if not version_data.empty:
+                    # print(version)
+                    print(f"{m} {metric} {size} {version}: {version_data[y].values[0]}")
         # if we have no data we do not want to plot anything
         if data.empty:
             continue

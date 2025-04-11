@@ -453,7 +453,7 @@ bool coloring_test(striped_Matrix<double>& A){
     }
     all_pass = all_pass && color_sorted_rows_stat_vs_dyn_test;
 
-    A.generate_coloring();
+    A.generate_coloring(true);
     // now come the comparisons with the parallel computed COR Format
     std::vector<local_int_t> parallel_color_ptr = A.get_color_pointer_vector();
     std::vector<local_int_t> parallel_color_sorted_rows = A.get_color_sorted_rows_vector();
@@ -524,8 +524,8 @@ bool box_coloring_test(striped_Matrix<double>& A){
     std::vector<local_int_t> color_idx_ptr(num_colors + 1, 0);
     std::vector<local_int_t> color_sorted_rows(A.get_num_rows(), 0);
 
-    CHECK_CUDA(cudaMemcpy(color_idx_ptr.data(), A.get_color_pointer_d(), 28 * sizeof(local_int_t), cudaMemcpyDeviceToHost));
-    CHECK_CUDA(cudaMemcpy(color_sorted_rows.data(), A.get_color_sorted_rows_d(), A.get_num_rows() * sizeof(local_int_t), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(color_idx_ptr.data(), A.get_color_pointer_d(false), 28 * sizeof(local_int_t), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(color_sorted_rows.data(), A.get_color_sorted_rows_d(false), A.get_num_rows() * sizeof(local_int_t), cudaMemcpyDeviceToHost));
 
     for(int i = 1; i <= num_colors; i ++){
         int color = i-1;
