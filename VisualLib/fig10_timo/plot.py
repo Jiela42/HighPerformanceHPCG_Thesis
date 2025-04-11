@@ -14,9 +14,10 @@ sns.lineplot(data=data, x='GPUs', y='Runtime', marker='o', errorbar=('ci', 95)) 
 
 # Axis labels
 plt.xlabel('Number of GPUs')
-plt.ylabel('Normalized Runtime [s]')
+plt.ylabel('Normalized Runtime [ms]')
 
 # Show the plot
 plt.tight_layout()
 #plt.show()
 plt.savefig("fig10.pdf")
+plt.savefig("fig10.png")
