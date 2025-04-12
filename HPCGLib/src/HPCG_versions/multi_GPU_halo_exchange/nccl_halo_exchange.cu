@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "nccl.h"
+//#include "nccl.h"
 
 #define NCCL_TYPE ncclDouble
 

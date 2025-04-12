@@ -67,7 +67,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
     normr0 = normr;
     
     // Start iterations
-    for(int k = 1; k <= this->max_CG_iterations && normr/normr0 > this->CG_tolerance; k++){
+    for(int k = 1; normr/normr0 > this->CG_tolerance; k++){
         
         if(this->doPreconditioning){
             this->compute_MG(A, &r_d, &z_d, problem); // Apply preconditioner

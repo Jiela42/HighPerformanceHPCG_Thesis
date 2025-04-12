@@ -184,6 +184,7 @@ void bench_CG(
     ){
         implementation.doPreconditioning = true;
         for(int i = 0; i < num_iterations; i++){
+            n_iters = 0;
             timer.startTimer();
             implementation.compute_CG(
                 A,
@@ -192,7 +193,7 @@ void bench_CG(
                 problem
             );
             timer.stopTimer("compute_CG");
-            if(problem->rank == 0)std::cout << "CG took " << n_iters << " iterations for size " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz()<< " and implementation " << implementation.version_name << std::endl;
+            if(problem->rank == 0)std::cout << "CG_preconditioned took " << n_iters << " iterations for size " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz()<< " and implementation " << implementation.version_name << std::endl;
             // restore original x
             CHECK_CUDA(cudaMemcpy(x_d->x_d, x_original.data(), size_halo * sizeof(DataType), cudaMemcpyHostToDevice));
         }
@@ -210,6 +211,7 @@ void bench_CG(
             n_iters, normr, normr0, problem
         );
         timer.stopTimer("compute_CG_noPreconditioning");
+        if(problem->rank == 0)std::cout << "CG_no_preconditioning took " << n_iters << " iterations for size " << A.get_nx() << "x" << A.get_ny() << "x" << A.get_nz()<< " and implementation " << implementation.version_name << std::endl;
         // restore original x
         CHECK_CUDA(cudaMemcpy(x_d->x_d, x_original.data(), size_halo * sizeof(DataType), cudaMemcpyHostToDevice));
     }

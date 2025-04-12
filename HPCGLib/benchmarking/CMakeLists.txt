@@ -89,6 +89,6 @@ target_link_libraries(run_bench_multi_GPU
     TestHPCGLib
     stdc++fs
     MPI::MPI_CXX
-    nccl
+    #nccl
 
 )

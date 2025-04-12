@@ -9,15 +9,15 @@
 #include <stdbool.h>
 
 __inline__ __device__ global_int_t local_i_to_halo_i(
-    local_int_t i, 
-    local_int_t nx, local_int_t ny, local_int_t nz,
+    int i, 
+    int nx, int ny, int nz,
     local_int_t dimx, local_int_t dimy
     )
     {
         return dimx*(dimy+1) + 1 + (i % nx) + dimx*((i % (nx*ny)) / nx) + (dimx*dimy)*(i / (nx*ny));
 }
 
-__global__ void inject_data_to_halo_kernel(DataType *x_d, DataType *data, local_int_t nx, local_int_t ny, local_int_t nz, local_int_t dimx, local_int_t dimy){
+__global__ void inject_data_to_halo_kernel(DataType *x_d, DataType *data, int nx, int ny, int nz, int dimx, int dimy){
     local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
     local_int_t n = nx * ny * nz;
     for(local_int_t i = tid; i < n; i += blockDim.x * gridDim.x){
@@ -443,7 +443,7 @@ void InitHaloMemCPU(Halo *halo, Problem *problem){
 void InitHalo(Halo *halo, Problem *problem){
     InitHaloMemGPU(halo, problem);
     InitHaloMemCPU(halo, problem);
-    SetHaloZeroGPU(halo);
+    //SetHaloZeroGPU(halo);
 }
 
 void SetHaloZeroGPU(Halo *halo){
@@ -452,7 +452,7 @@ void SetHaloZeroGPU(Halo *halo){
 
 // correctness verified
 void InjectDataToHalo(Halo *halo, DataType *data){
-    local_int_t n = halo->nx * halo->ny * halo->nz;
+    int n = halo->nx * halo->ny * halo->nz;
     int num_threads = 1024;
     int num_blocks = (n + num_threads - 1) / num_threads;
     inject_data_to_halo_kernel<<<num_blocks, num_threads>>>(halo->x_d, data, halo->nx, halo->ny, halo->nz, halo->dimx, halo->dimy);
@@ -467,14 +467,14 @@ void InjectDataToHalo(Halo *halo, DataType *data){
 */
 void SetHaloGlobalIndexGPU(Halo *halo, Problem *problem){
     DataType *x_h = (DataType*) malloc(halo->dimx * halo->dimy * halo->dimz * sizeof(DataType));
-    for(local_int_t i=0; i<halo->dimx * halo->dimy * halo->dimz; i++){
+    for(int i=0; i<halo->dimx * halo->dimy * halo->dimz; i++){
         x_h[i] = 0;
     }
-    DataType *write_addr = x_h + halo->dimx * halo->dimy + halo->dimx + 1;
-    local_int_t gi = problem->gi0;
-    for(local_int_t i = 0; i<halo->nz; i++){
-        for(local_int_t j = 0; j<halo->ny; j++){
-            for(local_int_t l = 0; l<halo->nx; l++){
+    DataType *write_addr = x_h+ halo->dimx * halo->dimy + halo->dimx + 1;
+    int gi = problem->gi0;
+    for(int i = 0; i<halo->nz; i++){
+        for(int j = 0; j<halo->ny; j++){
+            for(int l = 0; l<halo->nx; l++){
                 *write_addr = gi;
                 gi++;
                 write_addr++;
@@ -493,14 +493,14 @@ void SetHaloGlobalIndexGPU(Halo *halo, Problem *problem){
 */
 void SetHaloQuotientGlobalIndexGPU(Halo *halo, Problem *problem){
     DataType *x_h = (DataType*) malloc(halo->dimx * halo->dimy * halo->dimz * sizeof(DataType));
-    for(local_int_t i=0; i<halo->dimx * halo->dimy * halo->dimz; i++){
+    for(int i=0; i<halo->dimx * halo->dimy * halo->dimz; i++){
         x_h[i] = 0;
     }
     DataType *write_addr = x_h+ halo->dimx * halo->dimy + halo->dimx + 1;
-    global_int_t gi = problem->gi0;
-    for(local_int_t i = 0; i<halo->nz; i++){
-        for(local_int_t j = 0; j<halo->ny; j++){
-            for(local_int_t l = 0; l<halo->nx; l++){
+    int gi = problem->gi0;
+    for(int i = 0; i<halo->nz; i++){
+        for(int j = 0; j<halo->ny; j++){
+            for(int l = 0; l<halo->nx; l++){
                 *write_addr = 1.0/(gi+1.0);
                 gi++;
                 write_addr++;
@@ -520,15 +520,15 @@ void SetHaloQuotientGlobalIndexGPU(Halo *halo, Problem *problem){
 */
 void SetHaloRandomGPU(Halo *halo, Problem *problem, int min, int max, int seed){
     DataType *x_h = (DataType*) malloc(halo->dimx * halo->dimy * halo->dimz * sizeof(DataType));
-    for(local_int_t i=0; i<halo->dimx * halo->dimy * halo->dimz; i++){
+    for(int i=0; i<halo->dimx * halo->dimy * halo->dimz; i++){
         x_h[i] = 0;
     }
     srand(seed + problem->rank);
     DataType *write_addr = x_h+ halo->dimx * halo->dimy + halo->dimx + 1;
-    global_int_t gi = problem->gi0;
-    for(local_int_t i = 0; i<halo->nz; i++){
-        for(local_int_t j = 0; j<halo->ny; j++){
-            for(local_int_t l = 0; l<halo->nx; l++){
+    int gi = problem->gi0;
+    for(int i = 0; i<halo->nz; i++){
+        for(int j = 0; j<halo->ny; j++){
+            for(int l = 0; l<halo->nx; l++){
                 int rand_num = rand();
                 if(min == 0 && max == 1.0) {
                     *write_addr = (DataType) rand_num / RAND_MAX;
@@ -576,50 +576,50 @@ void InitGPU(Problem *problem){
 }
 /* x_d is the pointer to the first element in the slice */
 /* every thread fills an element */
-__global__ void extract_xz_plane_kernel(DataType *x_d, DataType *slice_d, local_int_t length_X, local_int_t length_Z, local_int_t slice_X, local_int_t slice_Z){
-    local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+__global__ void extract_xz_plane_kernel(DataType *x_d, DataType *slice_d, int length_X, int length_Z, int slice_X, int slice_Z){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
     
-    local_int_t z_loc = tid / length_X;
-    local_int_t x_loc = tid % length_X;
+    int z_loc = tid / length_X;
+    int x_loc = tid % length_X;
     if (z_loc<length_Z) slice_d[tid]=x_d[z_loc*slice_Z + x_loc*slice_X];
 }
 
-__global__ void inject_xz_plane_kernel(DataType *x_d, DataType *slice_d, local_int_t length_X, local_int_t length_Z, local_int_t slice_X, local_int_t slice_Z){
-    local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+__global__ void inject_xz_plane_kernel(DataType *x_d, DataType *slice_d, int length_X, int length_Z, int slice_X, int slice_Z){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
     
-    local_int_t z_loc = tid / length_X;
-    local_int_t x_loc = tid % length_X;
+    int z_loc = tid / length_X;
+    int x_loc = tid % length_X;
     if (z_loc<length_Z) x_d[z_loc*slice_Z + x_loc*slice_X]=slice_d[tid];
 }
 
-__global__ void extract_yz_plane_kernel(DataType *x_d, DataType *slice_d, local_int_t length_Y, local_int_t length_Z, local_int_t slice_Y, local_int_t slice_Z){
-    local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+__global__ void extract_yz_plane_kernel(DataType *x_d, DataType *slice_d, int length_Y, int length_Z, int slice_Y, int slice_Z){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
     
-    local_int_t z_loc = tid / length_Y;
-    local_int_t y_loc = tid % length_Y;
+    int z_loc = tid / length_Y;
+    int y_loc = tid % length_Y;
     if (z_loc<length_Z) slice_d[tid]=x_d[z_loc*slice_Z + y_loc*slice_Y];
 }
 
-__global__ void inject_yz_plane_kernel(DataType *x_d, DataType *slice_d, local_int_t length_Y, local_int_t length_Z, local_int_t slice_Y, local_int_t slice_Z){
-    local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+__global__ void inject_yz_plane_kernel(DataType *x_d, DataType *slice_d, int length_Y, int length_Z, int slice_Y, int slice_Z){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
     
-    local_int_t z_loc = tid / length_Y;
-    local_int_t y_loc = tid % length_Y;
+    int z_loc = tid / length_Y;
+    int y_loc = tid % length_Y;
     if (z_loc<length_Z) x_d[z_loc*slice_Z + y_loc*slice_Y]=slice_d[tid];
 }
-__global__ void extract_xy_plane_kernel(DataType *x_d, DataType *slice_d, local_int_t length_X, local_int_t length_Y, local_int_t slice_X, local_int_t slice_Y){
-    local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+__global__ void extract_xy_plane_kernel(DataType *x_d, DataType *slice_d, int length_X, int length_Y, int slice_X, int slice_Y){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
     
-    local_int_t y_loc = tid / length_X;
-    local_int_t x_loc = tid % length_X;
+    int y_loc = tid / length_X;
+    int x_loc = tid % length_X;
     if (y_loc<length_Y) slice_d[tid] = x_d[y_loc*slice_Y + x_loc*slice_X];
 }
 
-__global__ void inject_xy_plane_kernel(DataType *x_d, DataType *slice_d, local_int_t length_X, local_int_t length_Y, local_int_t slice_X, local_int_t slice_Y){
-    local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+__global__ void inject_xy_plane_kernel(DataType *x_d, DataType *slice_d, int length_X, int length_Y, int slice_X, int slice_Y){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
     
-    local_int_t y_loc = tid / length_X;
-    local_int_t x_loc = tid % length_X;
+    int y_loc = tid / length_X;
+    int x_loc = tid % length_X;
     if (y_loc<length_Y) x_d[y_loc*slice_Y + x_loc*slice_X] = slice_d[tid];
 }
 
@@ -630,8 +630,8 @@ void extract_horizontal_plane_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bo
     DataType *buff = halo->send_buff_d[i_buff];
     
     // collect halo on device
-    local_int_t const nthread=256;
-    local_int_t const nblock = (gh->length_X*gh->length_Z + nthread - 1) / nthread;
+    int const nthread=256;
+    int const nblock = (gh->length_X*gh->length_Z + nthread - 1) / nthread;
     extract_xz_plane_kernel<<<nblock,nthread>>>(x_d, buff, gh->length_X, gh->length_Z, 1, gh->dimy*gh->dimx);
     
     // copy from device to host
@@ -721,14 +721,14 @@ void inject_frontal_plane_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool hos
     inject_xy_plane_kernel<<<nblock, nthread>>>(x_d, buff, gh->length_X, gh->length_Y, 1, gh->dimx);
 }
 
-__global__ void extract_edge_kernel(DataType *x_d, DataType *slice_d, local_int_t length_X, local_int_t slice_X){
-    local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+__global__ void extract_edge_kernel(DataType *x_d, DataType *slice_d, int length_X, int slice_X){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
     
     if (tid<length_X) slice_d[tid]=x_d[tid*slice_X];
 }
 
-__global__ void inject_edge_kernel(DataType *x_d, DataType *slice_d, local_int_t length_X, local_int_t slice_X){
-    local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+__global__ void inject_edge_kernel(DataType *x_d, DataType *slice_d, int length_X, int slice_X){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
     
     if (tid<length_X) x_d[tid*slice_X] = slice_d[tid];
 }
@@ -826,19 +826,11 @@ void inject_edge_Z_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
 void extract_corner_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff) {
     local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
+    
+    DataType *buff = halo->send_buff_h[i_buff];
 
-    assert(gh->length_X*gh->length_Y*gh->length_Z == 1);
-
-    if(host_buff){
-        CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], x_d, sizeof(DataType), cudaMemcpyDeviceToHost));
-    }else{
-        CHECK_CUDA(cudaMemcpy(halo->send_buff_d[i_buff], x_d, sizeof(DataType), cudaMemcpyDeviceToHost));
-    }
-    /*
-    DataType *buff = halo->send_buff_d[i_buff];
-
-    for (local_int_t z = 0; z < gh->length_Z; z++) {
-        for (local_int_t y = 0; y < gh->length_Y; y++) {
+    for (int z = 0; z < gh->length_Z; z++) {
+        for (int y = 0; y < gh->length_Y; y++) {
             // Copy a contiguous block of length_X elements (one row of the corner)
             CHECK_CUDA(cudaMemcpy(buff, x_d, gh->length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
             buff += gh->length_X;
@@ -850,26 +842,17 @@ void extract_corner_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_bu
 
     if(!host_buff){
         CHECK_CUDA(cudaMemcpy(halo->send_buff_d[i_buff], buff, gh->length_X*gh->length_Y*gh->length_Z * sizeof(DataType), cudaMemcpyHostToDevice));
-    }*/
+    }
 }
 
 void inject_corner_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff) {
     local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
 
-
-    assert(gh->length_X*gh->length_Y*gh->length_Z == 1);
-
-    if(host_buff){
-        CHECK_CUDA(cudaMemcpy(x_d, halo->recv_buff_h[i_buff], sizeof(DataType), cudaMemcpyHostToDevice));
-    }else{
-        CHECK_CUDA(cudaMemcpy(x_d, halo->recv_buff_d[i_buff], sizeof(DataType), cudaMemcpyDeviceToDevice));
-    }
-    /*
     DataType *buff = halo->recv_buff_h[i_buff];
 
-    for (local_int_t z = 0; z < gh->length_Z; z++) {
-        for (local_int_t y = 0; y < gh->length_Y; y++) {
+    for (int z = 0; z < gh->length_Z; z++) {
+        for (int y = 0; y < gh->length_Y; y++) {
             // Copy a contiguous block of length_X elements (one row of the corner)
             CHECK_CUDA(cudaMemcpy(x_d, buff, gh->length_X * sizeof(DataType), cudaMemcpyHostToDevice));
             buff += gh->length_X;
@@ -879,20 +862,17 @@ void inject_corner_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
         x_d += gh->dimx * (gh->dimy - gh->length_Y);
     }
 
-    printf("about to inject = %f\n", buff[0]);
-
     if(!host_buff){
         CHECK_CUDA(cudaMemcpy(halo->recv_buff_d[i_buff], buff, gh->length_X*gh->length_Y*gh->length_Z * sizeof(DataType), cudaMemcpyHostToDevice));
     }    
-    */
 }
 
 //correctness verified
 void SendResult(int rank_recv, Halo *x_d, Problem *problem){
     DataType *send_addr_d = x_d->interior;
     DataType *send_buf_h = (DataType*) malloc(problem->nx * sizeof(DataType));
-    for(local_int_t i = 0; i < problem->nz; i++){
-        for(local_int_t j = 0; j<problem->ny; j++){
+    for(int i = 0; i < problem->nz; i++){
+        for(int j = 0; j<problem->ny; j++){
             CHECK_CUDA(cudaMemcpy(send_buf_h, send_addr_d, problem->nx * sizeof(DataType), cudaMemcpyDeviceToHost));
             MPI_Send(send_buf_h, problem->nx, MPIDataType, rank_recv, 0, MPI_COMM_WORLD);
             send_addr_d += x_d->dimx;
@@ -905,16 +885,16 @@ void SendResult(int rank_recv, Halo *x_d, Problem *problem){
 //correctness verified
 void GatherResult(Halo *x_d, Problem *problem, DataType *result_h){
     DataType *own_data_d = x_d->interior;
-    for(local_int_t i = 0; i<problem->gnz; i++){ // go through all gnz layers
+    for(int i = 0; i<problem->gnz; i++){ // go through all gnz layers
         int pz_recv = i / problem->nz;
-        for(local_int_t j = 0; j<problem->gny; j++){ // go through all gny rows
+        for(int j = 0; j<problem->gny; j++){ // go through all gny rows
             int py_recv = j / problem->ny;
-            for(local_int_t l = 0; l<problem->npx; l++){ // go thorugh all nx columns
+            for(int l = 0; l<problem->npx; l++){ // go thorugh all nx columns
                 int px_recv = l;
                 int rank_recv = pz_recv * problem->npx * problem->npy + py_recv * problem->npx + px_recv;
                 if(px_recv == problem->px && py_recv == problem->py && pz_recv == problem->pz){ //gathering rank holds the data
                     CHECK_CUDA(cudaMemcpy(result_h, own_data_d, problem->nx * sizeof(DataType), cudaMemcpyDeviceToHost));
-                    for(local_int_t k = 0; k<problem->nx; k++){
+                    for(int k = 0; k<problem->nx; k++){
                     }
                     own_data_d += x_d->dimx;
                 }else{
@@ -932,9 +912,9 @@ void GatherResult(Halo *x_d, Problem *problem, DataType *result_h){
 void PrintHalo(Halo *x_d){
     DataType *x_h = (DataType*) malloc(x_d->dimx * x_d->dimy * x_d->dimz * sizeof(DataType));
     CHECK_CUDA(cudaMemcpy(x_h, x_d->x_d, x_d->dimx * x_d->dimy * x_d->dimz * sizeof(DataType), cudaMemcpyDeviceToHost));
-    for(local_int_t i = 0; i < x_d->dimz; i++){
-        for(local_int_t j = 0; j < x_d->dimy; j++){
-            for(local_int_t k = 0; k < x_d->dimx; k++){
+    for(int i = 0; i < x_d->dimz; i++){
+        for(int j = 0; j < x_d->dimy; j++){
+            for(int k = 0; k < x_d->dimx; k++){
                 if(k == x_d->dimx - 1){
                     printf("\t");
                 }
@@ -954,24 +934,24 @@ void PrintHalo(Halo *x_d){
 }
 
 void GenerateStripedPartialMatrix(Problem *problem, DataType *A){
-    local_int_t nx = problem->nx;
-    local_int_t ny = problem->ny;
-    local_int_t nz = problem->nz;
+    int nx = problem->nx;
+    int ny = problem->ny;
+    int nz = problem->nz;
     global_int_t gnx = problem->gnx; //global number of points in x
     global_int_t gny = problem->gny; //global number of points in y
     global_int_t gnz = problem->gnz; //global number of points in z
     
-    for(local_int_t iz = 0; iz < nz; iz++){
-        for(local_int_t iy = 0; iy < ny; iy++){
-            for(local_int_t ix = 0; ix < nx; ix++){
+    for(int iz = 0; iz < nz; iz++){
+        for(int iy = 0; iy < ny; iy++){
+            for(int ix = 0; ix < nx; ix++){
 
-                global_int_t gx = problem->gx0 + ix; //global x index
-                global_int_t gy = problem->gy0 + iy; //global y index
-                global_int_t gz = problem->gz0 + iz; //global z index
+                int gx = problem->gx0 + ix; //global x index
+                int gy = problem->gy0 + iy; //global y index
+                int gz = problem->gz0 + iz; //global z index
                 
-                for (local_int_t sz = -1; sz < 2; sz++){
-                    for(local_int_t sy = -1; sy < 2; sy++){
-                        for(local_int_t sx = -1; sx < 2; sx++){
+                for (int sz = -1; sz < 2; sz++){
+                    for(int sy = -1; sy < 2; sy++){
+                        for(int sx = -1; sx < 2; sx++){
 
                             if(gx + sx < 0 || gx + sx >= gnx ||
                                 gy + sy < 0 || gy + sy >= gny ||
@@ -996,11 +976,11 @@ void GenerateStripedPartialMatrix(Problem *problem, DataType *A){
 }
 
 bool VerifyPartialMatrix(DataType *striped_A_local_h, DataType *striped_A_global_h, int num_stripes, Problem *problem){
-    for(local_int_t i = 0; i<problem->nz; i++){
-        local_int_t gi0 = problem->gi0 + i * problem->gnx * problem->gny;
-        for(local_int_t j = 0; j<problem->ny; j++){
-            for(local_int_t k = 0; k<problem->nx; k++){
-                for(local_int_t l = 0; l<num_stripes; l++){
+    for(int i = 0; i<problem->nz; i++){
+        int gi0 = problem->gi0 + i * problem->gnx * problem->gny;
+        for(int j = 0; j<problem->ny; j++){
+            for(int k = 0; k<problem->nx; k++){
+                for(int l = 0; l<num_stripes; l++){
                     if(striped_A_local_h[(k + j*problem->nx + i*problem->nx*problem->ny)*num_stripes + l] != striped_A_global_h[(gi0 + j*problem->gnx + k)*num_stripes + l]){
                         return false;
                     }
@@ -1015,16 +995,16 @@ bool IsHaloZero(Halo *x_d){
     DataType *x_h = (DataType*) malloc(x_d->dimx * x_d->dimy * x_d->dimz * sizeof(DataType));
     CHECK_CUDA(cudaMemcpy(x_h, x_d->x_d, x_d->dimx * x_d->dimy * x_d->dimz * sizeof(DataType), cudaMemcpyDeviceToHost));
     //check front and back
-    for(local_int_t i = 0; i < x_d->dimx * x_d->dimy; i++){
+    for(int i = 0; i < x_d->dimx * x_d->dimy; i++){
         if(x_h[i] != 0.0 || x_h[i + x_d->dimx * x_d->dimy * (x_d->dimz - 1)] != 0.0){
             return false;
         }
     }
     //check middle part
     x_h += x_d->dimx * x_d->dimy;
-    for(local_int_t iz = 0; iz < x_d->dimz-2; iz++){
-        for(local_int_t iy = 0; iy < x_d->dimy; iy++){
-            for(local_int_t ix = 0; ix < x_d->dimx; ix++){
+    for(int iz = 0; iz < x_d->dimz-2; iz++){
+        for(int iy = 0; iy < x_d->dimy; iy++){
+            for(int ix = 0; ix < x_d->dimx; ix++){
                 if(ix == 0 || ix == x_d->dimx - 1){
                     if(x_h[ix + iy * x_d->dimx + iz * x_d->dimx * x_d->dimy] != 0.0){
                         printf("ix = %d, iy = %d, iz = %d dimx=%d, dimy=%d, dimz=%d\n", ix, iy, iz, x_d->dimx, x_d->dimy, x_d->dimz);

@@ -223,9 +223,9 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
 
     DataType my_result;
     CHECK_CUDA(cudaMemcpy(&my_result, result_d, sizeof(DataType), cudaMemcpyDeviceToHost));
-    DataType result_h;
-    MPI_Allreduce(&my_result, &result_h, 1, MPIDataType, MPI_SUM, MPI_COMM_WORLD);
-    CHECK_CUDA(cudaMemcpy(result_d, &result_h, sizeof(DataType), cudaMemcpyHostToDevice));
+    // DataType result_h;
+    // MPI_Allreduce(&my_result, &result_h, 1, MPIDataType, MPI_SUM, MPI_COMM_WORLD);
+    // CHECK_CUDA(cudaMemcpy(result_d, &result_h, sizeof(DataType), cudaMemcpyHostToDevice));
 
     // std::cout<< "after the loop"<< std::endl;
     // use a kernel to reduce the intermediate sums

@@ -1,0 +1,2 @@
+/usr/bin/ar qc libUtilLib.a CMakeFiles/UtilLib.dir/hpcg_mpi_utils.cu.o CMakeFiles/UtilLib.dir/utils.cu.o CMakeFiles/UtilLib.dir/utils.cpp.o
+/usr/bin/ranlib libUtilLib.a

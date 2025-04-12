@@ -97,7 +97,7 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
         T * striped_A_d = A.get_values_d();
 
         // since every thread is working on one or more rows we need to base the number of threads on that
-        int num_threads = 1024;
+        int num_threads = 512;
         local_int_t num_blocks = (problem->nx * problem->ny * problem->nz + num_threads - 1) / num_threads;
 
         // call the kernel

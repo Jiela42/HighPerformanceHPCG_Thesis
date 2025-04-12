@@ -7,7 +7,7 @@
 #include <filesystem>
 
 #include "HPCG_versions/non_blocking_mpi_halo_exchange.cuh"
-#include "HPCG_versions/nccl_halo_exchange.cuh"
+//#include "HPCG_versions/nccl_halo_exchange.cuh"
 #include "UtilLib/hpcg_multi_GPU_utils.cuh"
 
 using DataType = double;

@@ -88,7 +88,7 @@ target_link_libraries(run_multi_GPU
     MatrixLib
     UtilLib
     MPI::MPI_CXX
-    nccl
+    #nccl
 )
 
 target_link_libraries(run_multi_GPU_tests
@@ -96,5 +96,5 @@ target_link_libraries(run_multi_GPU_tests
     MatrixLib
     UtilLib
     MPI::MPI_CXX
-    nccl
+    #nccl
 )

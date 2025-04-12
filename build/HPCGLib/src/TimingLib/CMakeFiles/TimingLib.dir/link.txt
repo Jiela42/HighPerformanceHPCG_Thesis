@@ -1,0 +1,2 @@
+/usr/bin/ar qc libTimingLib.a CMakeFiles/TimingLib.dir/timer.cpp.o CMakeFiles/TimingLib.dir/cudaTimer.cpp.o CMakeFiles/TimingLib.dir/MPITimer.cpp.o
+/usr/bin/ranlib libTimingLib.a

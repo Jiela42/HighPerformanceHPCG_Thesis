@@ -1,0 +1,2 @@
+/usr/bin/ar qc libMatrixLib.a CMakeFiles/MatrixLib.dir/sparse_CSR_Matrix.cpp.o CMakeFiles/MatrixLib.dir/striped_partial_Matrix.cpp.o CMakeFiles/MatrixLib.dir/striped_Matrix.cpp.o CMakeFiles/MatrixLib.dir/generations.cpp.o CMakeFiles/MatrixLib.dir/generations.cu.o CMakeFiles/MatrixLib.dir/coloring.cu.o
+/usr/bin/ranlib libMatrixLib.a
