@@ -65,11 +65,11 @@ add_executable(run_profiler
     # benchmark_stripedCORBoxColoring.cpp
 )
 
-add_executable(run_bench_multi_GPU
-    run_bench_multi_GPU.cpp
-    abstract_benchmark_functions.cpp
-    benchmark_multi_GPU.cpp
-)
+# add_executable(run_bench_multi_GPU
+#     run_bench_multi_GPU.cpp
+#     abstract_benchmark_functions.cpp
+#     benchmark_multi_GPU.cpp
+# )
 
 
 target_link_libraries(run_bench_test
@@ -105,12 +105,12 @@ target_link_libraries(run_profiler
     stdc++fs
 )
 
-target_link_libraries(run_bench_multi_GPU
-    HPCGLib
-    TimingLib
-    TestHPCGLib
-    stdc++fs
-    MPI::MPI_CXX
-    nccl
+# target_link_libraries(run_bench_multi_GPU
+#     HPCGLib
+#     TimingLib
+#     TestHPCGLib
+#     stdc++fs
+#     MPI::MPI_CXX
+#     nccl
 
-)
+# )

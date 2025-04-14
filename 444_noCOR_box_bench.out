@@ -1,0 +1,98 @@
+Starting Benchmark
+Starting cuSparse 3d27p Benchmarks
+cuSparse 3d27p Benchmarks took: 0m0s
+Starting naive Striped 3d27p Benchmarks
+Naive Striped 3d27p Benchmarks took: 0m0s
+Starting Striped Shared Memory 3d27p Benchmarks
+Striped Shared Memory 3d27p Benchmarks took: 0m0s
+Starting Striped Warp Reduction 3d27p Benchmarks
+Striped Warp Reduction 3d27p Benchmarks took: 0m0s
+Starting Striped Colored 3d27p Benchmarks
+Striped Colored 3d27p Benchmarks took: 0m0s
+Starting no store striped coloring 3d27p Benchmarks
+No store striped coloring 3d27p Benchmarks took: 0m0s
+Starting striped coloring precomputed 3d27p Benchmarks
+Striped coloring precomputed 3d27p Benchmarks took: 0m0s
+Starting striped box coloring 3d27p Benchmarks
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 317 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 317 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 317 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 317 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 317 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 317 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 317 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 317 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 317 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 317 iterations for size 512x512x512 and implementation Striped Box coloring
+Bench MG
+Striped box coloring 3d27p Benchmarks took: 15m23s
+Starting COR striped box coloring 3d27p Benchmarks
+COR Striped box coloring 3d27p Benchmarks took: 0m0s
+Starting multi GPU Benchmarks
+Multi GPU Benchmarks took: 0m0s
+Total benchmark duration: 15 minutes and 23 seconds.
+Finished Benchmark

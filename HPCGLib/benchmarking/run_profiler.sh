@@ -1,20 +1,20 @@
-#!/bin/bash
+#!/usr/local/bin/bash
 ##Resources
-## SBATCH --job-name=profiling
-## SBATCH --account=a-g200
-## SBATCH --output profiling.out
-## SBATCH --time 01:30:00
-## SBATCH --partition=debug
-## SBATCH --nodes=1
-## SBATCH --ntasks-per-node=1
-## SBATCH --gpus-per-task=1
+#SBATCH --job-name=profiling
+#SBATCH --account=a-g200
+#SBATCH --output profiling444ncu.out
+#SBATCH --time 01:30:00
+#SBATCH --partition=debug
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --gpus-per-task=1
 
-# module purge
+module purge
 
-# module load cuda
-# module load cmake
-# module load gcc
-# module load cray-mpich
+module load cuda
+module load cmake
+module load gcc
+module load cray-mpich
 
 # Navigate to the benchmarking directory
 cd /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib
@@ -29,15 +29,15 @@ cd build
 
 # Build the project
 # cmake ..
-make -j16
+# make -j16
 
 # Run the benchmark
 cd benchmarking
 
 
 OUTPUT_FOLDER="/users/dknecht/HighPerformanceHPCG_Thesis/profiling_results"
-NX_LIST=(32 64 128) # 256 512)
-MACHINE="RTX3090"
+NX_LIST=(32 64 128 256 512)
+MACHINE="GH200"
 
 
 start_time=$(date +%s)
@@ -46,7 +46,7 @@ start_time=$(date +%s)
 # Iterate through the list of NX values
 for NX in "${NX_LIST[@]}"; do
     METHOD="SymGS"
-    IMPLEMENTATION="Striped Box coloring (coloringBox 3x3x3)"
+    IMPLEMENTATION="Striped Box coloring (coloringBox 4x4x4)"
     echo "Starting profiling for ${METHOD} with striped_box_coloring_Implementation for size ${NX}x${NX}x${NX} on ${MACHINE}"
 
     # Profiling for the specified size
@@ -64,10 +64,10 @@ for NX in "${NX_LIST[@]}"; do
     echo "Profiler output for ${MACHINE}_${NX}x${NX}x${NX} generated at $OUTPUT_FOLDER/profiler_output_${MACHINE}_${METHOD}_${NX}x${NX}x${NX}.ncu-rep"
 
     # Export the profiling results to CSV
-    ncu --import "$OUTPUT_FOLDER/profiler_output_${MACHINE}_${NX}x${NX}x${NX}.ncu-rep" --csv > "$OUTPUT_FOLDER/profiler_output_${MACHINE}_${NX}x${NX}x${NX}_${METHOD}_striped_box_coloring_333.csv"
+    ncu --import "$OUTPUT_FOLDER/profiler_output_${MACHINE}_${NX}x${NX}x${NX}.ncu-rep" --csv > "$OUTPUT_FOLDER/profiler_output_${MACHINE}_${NX}x${NX}x${NX}_${METHOD}_striped_box_coloring_444.csv"
 
     METADATA="${IMPLEMENTATION},${MACHINE},${NX}x${NX}x${NX},${METHOD}"
-    sed -i "1i $METADATA" "$OUTPUT_FOLDER/profiler_output_${MACHINE}_${NX}x${NX}x${NX}_${METHOD}_striped_box_coloring_333.csv"
+    sed -i "1i $METADATA" "$OUTPUT_FOLDER/profiler_output_${MACHINE}_${NX}x${NX}x${NX}_${METHOD}_striped_box_coloring_444.csv"
 
     step_end_time=$(date +%s)
     step_execution_time=$((step_end_time - step_start_time))

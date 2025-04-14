@@ -1,0 +1,344 @@
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /user-environment/linux-sles15-neoverse_v2/gcc-12.3.0/gcc-13.3.0-rnbf75vyhchi5reyzoadq2jgz4tmue5t/bin/gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /user-environment/linux-sles15-neoverse_v2/gcc-12.3.0/gcc-13.3.0-rnbf75vyhchi5reyzoadq2jgz4tmue5t/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- The CUDA compiler identification is NVIDIA 12.6.77
+-- Detecting CUDA compiler ABI info
+-- Detecting CUDA compiler ABI info - done
+-- Check for working CUDA compiler: /user-environment/linux-sles15-neoverse_v2/gcc-13.3.0/cuda-12.6.2-csv6jo3czkfdk46ep7pmm6ipo3yjlbjj/bin/nvcc - skipped
+-- Detecting CUDA compile features
+-- Detecting CUDA compile features - done
+-- Found CUDAToolkit: /user-environment/linux-sles15-neoverse_v2/gcc-13.3.0/cuda-12.6.2-csv6jo3czkfdk46ep7pmm6ipo3yjlbjj/targets/sbsa-linux/include (found version "12.6.77")
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Failed
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE
+-- Found MPI_C: /user-environment/linux-sles15-neoverse_v2/gcc-13.3.0/cray-mpich-8.1.30-wb5peugemrg2ebx7psp2iz2abmqy3rgz/lib/libmpi_gnu_123.so (found version "3.1")
+-- Found MPI_CXX: /user-environment/linux-sles15-neoverse_v2/gcc-13.3.0/cray-mpich-8.1.30-wb5peugemrg2ebx7psp2iz2abmqy3rgz/lib/libmpi_gnu_123.so (found version "3.1")
+-- Found MPI: TRUE (found version "3.1")
+-- Configuring done (11.4s)
+-- Generating done (1.1s)
+-- Build files have been written to: /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/build128
+[  3%] Building CUDA object src/UtilLib/CMakeFiles/UtilLib.dir/hpcg_mpi_utils.cu.o
+[  3%] Building CUDA object src/UtilLib/CMakeFiles/UtilLib.dir/utils.cu.o
+[  3%] Building CXX object src/UtilLib/CMakeFiles/UtilLib.dir/utils.cpp.o
+[  4%] Linking CXX static library libUtilLib.a
+[  4%] Built target UtilLib
+[  8%] Building CXX object src/MatrixLib/CMakeFiles/MatrixLib.dir/sparse_CSR_Matrix.cpp.o
+[  8%] Building CXX object src/MatrixLib/CMakeFiles/MatrixLib.dir/striped_partial_Matrix.cpp.o
+[  8%] Building CXX object src/MatrixLib/CMakeFiles/MatrixLib.dir/striped_Matrix.cpp.o
+[ 10%] Building CXX object src/MatrixLib/CMakeFiles/MatrixLib.dir/generations.cpp.o
+[ 10%] Building CUDA object src/MatrixLib/CMakeFiles/MatrixLib.dir/coloring.cu.o
+[ 10%] Building CUDA object src/MatrixLib/CMakeFiles/MatrixLib.dir/generations.cu.o
+[ 11%] Linking CXX static library libMatrixLib.a
+[ 11%] Built target MatrixLib
+[ 14%] Building CXX object src/TimingLib/CMakeFiles/TimingLib.dir/cudaTimer.cpp.o
+[ 14%] Building CXX object src/TimingLib/CMakeFiles/TimingLib.dir/MPITimer.cpp.o
+[ 14%] Building CXX object src/TimingLib/CMakeFiles/TimingLib.dir/timer.cpp.o
+[ 15%] Linking CXX static library libTimingLib.a
+[ 15%] Built target TimingLib
+[ 18%] Building CXX object src/HPCG_versions/CMakeFiles/HPCGLib.dir/cusparse/cusparse_computeSPMV.cpp.o
+[ 21%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_shared_mem/striped_shared_mem_computeSPMV.cu.o
+[ 21%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/cusparse/cusparse_computeSymGS.cu.o
+[ 21%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/naiveStriped/naiveStriped_computeSPMV.cu.o
+[ 21%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/cusparse/cusparse_computeDot.cu.o
+[ 29%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeCG.cu.o
+[ 29%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_warp_reduction/striped_warp_reduction_computeMG.cu.o
+[ 29%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_warp_reduction/striped_warp_reduction_computeDot.cu.o
+[ 29%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_warp_reduction/striped_warp_reduction_computeWAXPBY.cu.o
+[ 29%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU_kernels/striped_box_coloring_multi_GPU_computeSymGS.cu.o
+[ 29%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_warp_reduction/striped_warp_reduction_computeSymGS.cu.o
+[ 29%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_warp_reduction/striped_warp_reduction_computeCG.cu.o
+[ 29%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_warp_reduction/striped_warp_reduction_computeSPMV.cu.o
+[ 31%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeDot.cu.o
+[ 31%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeMG.cu.o
+[ 31%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeSPMV.cu.o
+[ 32%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeWAXPBY.cu.o
+[ 34%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU_halo_exchange/blocking_mpi_halo_exchange.cu.o
+[ 34%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU_halo_exchange/non_blocking_mpi_halo_exchange.cu.o
+[ 35%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/multi_GPU_halo_exchange/nccl_halo_exchange.cu.o
+[ 36%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_preprocessed/striped_preprocessed_computeSymGS.cu.o
+[ 37%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_coloring/striped_coloring_computeSymGS.cu.o
+[ 39%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_coloringPrecomputed/striped_coloringPrecomputed_computeSymGS.cu.o
+[ 39%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/no_store_striped_coloring/no_store_striped_coloring_computeSymGS.cu.o
+[ 40%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_box_coloring/striped_box_coloring_computeSymGS.cu.o
+[ 41%] Building CUDA object src/HPCG_versions/CMakeFiles/HPCGLib.dir/striped_COR_box_coloring/striped_box_coloring_computeSymGS.cu.o
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_coloring.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=DataType]" is only partially overridden in class "striped_coloring_Implementation<DataType>"
+  class striped_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_coloring_Implementation<T> [with T=DataType]" at line 204 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_coloring/striped_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/no_store_striped_coloring.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=DataType]" is only partially overridden in class "no_store_striped_coloring_Implementation<DataType>"
+  class no_store_striped_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "no_store_striped_coloring_Implementation<T> [with T=DataType]" at line 155 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/no_store_striped_coloring/no_store_striped_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_coloringPrecomputed.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=DataType]" is only partially overridden in class "striped_coloringPrecomputed_Implementation<DataType>"
+  class striped_coloringPrecomputed_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_coloringPrecomputed_Implementation<T> [with T=DataType]" at line 101 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_coloringPrecomputed/striped_coloringPrecomputed_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_COR_box_coloring.cuh(19): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=DataType]" is only partially overridden in class "striped_COR_box_coloring_Implementation<DataType>"
+  class striped_COR_box_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_COR_box_coloring_Implementation<T> [with T=DataType]" at line 114 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_COR_box_coloring/striped_box_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_box_coloring.cuh(19): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=DataType]" is only partially overridden in class "striped_box_coloring_Implementation<DataType>"
+  class striped_box_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_box_coloring_Implementation<T> [with T=DataType]" at line 265 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_box_coloring/striped_box_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_coloring.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=DataType]" is only partially overridden in class "striped_coloring_Implementation<DataType>"
+  class striped_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_coloring_Implementation<T> [with T=DataType]" at line 204 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_coloring/striped_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/no_store_striped_coloring.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=DataType]" is only partially overridden in class "no_store_striped_coloring_Implementation<DataType>"
+  class no_store_striped_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "no_store_striped_coloring_Implementation<T> [with T=DataType]" at line 155 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/no_store_striped_coloring/no_store_striped_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_coloringPrecomputed.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=DataType]" is only partially overridden in class "striped_coloringPrecomputed_Implementation<DataType>"
+  class striped_coloringPrecomputed_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_coloringPrecomputed_Implementation<T> [with T=DataType]" at line 101 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_coloringPrecomputed/striped_coloringPrecomputed_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_COR_box_coloring.cuh(19): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=DataType]" is only partially overridden in class "striped_COR_box_coloring_Implementation<DataType>"
+  class striped_COR_box_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_COR_box_coloring_Implementation<T> [with T=DataType]" at line 114 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_COR_box_coloring/striped_box_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_box_coloring.cuh(19): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=DataType]" is only partially overridden in class "striped_box_coloring_Implementation<DataType>"
+  class striped_box_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_box_coloring_Implementation<T> [with T=DataType]" at line 265 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_box_coloring/striped_box_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/no_store_striped_coloring.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=DataType]" is only partially overridden in class "no_store_striped_coloring_Implementation<DataType>"
+  class no_store_striped_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "no_store_striped_coloring_Implementation<T> [with T=DataType]" at line 155 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/no_store_striped_coloring/no_store_striped_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_coloringPrecomputed.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=DataType]" is only partially overridden in class "striped_coloringPrecomputed_Implementation<DataType>"
+  class striped_coloringPrecomputed_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_coloringPrecomputed_Implementation<T> [with T=DataType]" at line 101 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_coloringPrecomputed/striped_coloringPrecomputed_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_coloring.cuh(18): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=DataType]" is only partially overridden in class "striped_coloring_Implementation<DataType>"
+  class striped_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_coloring_Implementation<T> [with T=DataType]" at line 204 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_coloring/striped_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_COR_box_coloring.cuh(19): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=DataType]" is only partially overridden in class "striped_COR_box_coloring_Implementation<DataType>"
+  class striped_COR_box_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_COR_box_coloring_Implementation<T> [with T=DataType]" at line 114 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_COR_box_coloring/striped_box_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/include/HPCG_versions/striped_box_coloring.cuh(19): warning #611-D: overloaded virtual function "HPCG_functions<T>::compute_SymGS [with T=DataType]" is only partially overridden in class "striped_box_coloring_Implementation<DataType>"
+  class striped_box_coloring_Implementation : public striped_warp_reduction_Implementation<T> {
+        ^
+          detected during instantiation of class "striped_box_coloring_Implementation<T> [with T=DataType]" at line 265 of /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_box_coloring/striped_box_coloring_computeSymGS.cu
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+[ 42%] Linking CXX static library libHPCGLib.a
+[ 42%] Built target HPCGLib
+[ 47%] Building CXX object testing/CMakeFiles/run_get_Norm.dir/run_get_Norm.cpp.o
+[ 47%] Building CXX object testing/CMakeFiles/run_coloring.dir/run_coloring.cpp.o
+[ 47%] Building CXX object benchmarking/CMakeFiles/run_bench_test.dir/run_bench_test.cpp.o
+[ 47%] Building CXX object testing/CMakeFiles/run_example.dir/run_example.cpp.o
+[ 55%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/naiveStriped_tests.cpp.o
+[ 55%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedSharedMem_tests.cpp.o
+[ 55%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedBoxColoring_tests.cpp.o
+[ 55%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedColored_tests.cpp.o
+[ 55%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedWarpReduction_tests.cpp.o
+[ 55%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedColoringPrecomputed_tests.cpp.o
+[ 55%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/cuSparse_tests.cpp.o
+[ 55%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedPreprocessed_tests.cpp.o
+[ 58%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedNoStore_tests.cpp.o
+[ 58%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/stripedCORBoxColoring_tests.cpp.o
+[ 58%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/kernel_multi_GPU_tests.cpp.o
+[ 58%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/UtilLib_tests.cpp.o
+[ 59%] Linking CXX executable run_bench_test
+[ 59%] Built target run_bench_test
+[ 60%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/MatrixLib_tests.cpp.o
+[ 62%] Linking CXX executable run_get_Norm
+[ 62%] Linking CXX executable run_example
+[ 63%] Building CXX object testing/CMakeFiles/TestHPCGLib.dir/HPCG_versions_tests/test_calls.cpp.o
+[ 64%] Linking CXX executable run_coloring
+[ 64%] Built target run_example
+[ 64%] Built target run_get_Norm
+[ 64%] Built target run_coloring
+[ 65%] Linking CXX static library libTestHPCGLib.a
+[ 65%] Built target TestHPCGLib
+[ 69%] Building CXX object benchmarking/CMakeFiles/run_maxSizeSingleGPU_finder.dir/run_maxSizeSingleGPU_finder.cpp.o
+[ 69%] Building CXX object benchmarking/CMakeFiles/run_profiler.dir/run_profiling.cpp.o
+[ 69%] Building CXX object testing/CMakeFiles/run_AllTests.dir/run_all_tests.cpp.o
+[ 81%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedSharedMem.cpp.o
+[ 81%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_naiveStriped.cpp.o
+[ 81%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_cuSparse.cpp.o
+[ 81%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_naiveStriped.cpp.o
+[ 81%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/abstract_benchmark_functions.cpp.o
+[ 81%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_cuSparse.cpp.o
+[ 81%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/abstract_benchmark_functions.cpp.o
+[ 81%] Building CXX object benchmarking/CMakeFiles/run_maxSizeSingleGPU_finder.dir/abstract_benchmark_functions.cpp.o
+[ 81%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedSharedMem.cpp.o
+[ 81%] Building CXX object benchmarking/CMakeFiles/run_maxSizeSingleGPU_finder.dir/benchmark_stripedColoring.cpp.o
+[ 81%] Building CXX object benchmarking/CMakeFiles/run_maxSizeSingleGPU_finder.dir/benchmark_stripedBoxColoring.cpp.o
+[ 81%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/run_specific_bench.cpp.o
+[ 81%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/run_full_bench.cpp.o
+[ 85%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedWarpReduction.cpp.o
+[ 85%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedPreprocessed.cpp.o
+[ 85%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedWarpReduction.cpp.o
+[ 86%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedPreprocessed.cpp.o
+[ 87%] Linking CXX executable run_AllTests
+[ 87%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedColoring.cpp.o
+[ 88%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedColoring.cpp.o
+[ 89%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_noStoreStripedColoring.cpp.o
+[ 90%] Linking CXX executable run_profiler
+[ 91%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedColoringPrecomputed.cpp.o
+[ 92%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedBoxColoring.cpp.o
+[ 93%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_noStoreStripedColoring.cpp.o
+[ 93%] Built target run_AllTests
+[ 96%] Linking CXX executable run_maxSizeSingleGPU_finder
+[ 96%] Building CXX object benchmarking/CMakeFiles/run_specific_bench.dir/benchmark_stripedCORBoxColoring.cpp.o
+[ 96%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedColoringPrecomputed.cpp.o
+[ 97%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedBoxColoring.cpp.o
+[ 97%] Built target run_profiler
+[ 98%] Building CXX object benchmarking/CMakeFiles/run_full_bench.dir/benchmark_stripedCORBoxColoring.cpp.o
+[ 98%] Built target run_maxSizeSingleGPU_finder
+[100%] Linking CXX executable run_full_bench
+[100%] Linking CXX executable run_specific_bench
+[100%] Built target run_full_bench
+[100%] Built target run_specific_bench
+Starting Benchmark
+Starting cuSparse 3d27p Benchmarks
+cuSparse 3d27p Benchmarks took: 0m0s
+Starting naive Striped 3d27p Benchmarks
+Naive Striped 3d27p Benchmarks took: 0m0s
+Starting Striped Shared Memory 3d27p Benchmarks
+Striped Shared Memory 3d27p Benchmarks took: 0m0s
+Starting Striped Warp Reduction 3d27p Benchmarks
+Striped Warp Reduction 3d27p Benchmarks took: 0m0s
+Starting Striped Colored 3d27p Benchmarks
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Striped Colored 3d27p Benchmarks took: 1m8s
+Starting no store striped coloring 3d27p Benchmarks
+No store striped coloring 3d27p Benchmarks took: 0m0s
+Starting striped coloring precomputed 3d27p Benchmarks
+Striped coloring precomputed 3d27p Benchmarks took: 0m0s
+Starting striped box coloring 3d27p Benchmarks
+Striped box coloring 3d27p Benchmarks took: 0m0s
+Starting COR striped box coloring 3d27p Benchmarks
+COR Striped box coloring 3d27p Benchmarks took: 0m0s
+Starting multi GPU Benchmarks
+Multi GPU Benchmarks took: 0m0s
+Total benchmark duration: 1 minutes and 8 seconds.
+Finished Benchmark

@@ -1,0 +1,905 @@
+Starting profiling for SymGS with striped_box_coloring_Implementation for size 32x32x32 on GH200
+Starting profiling
+==PROF== Connected to process 253675 (/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/build333/benchmarking/run_profiler)
+SymGS
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 0: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 1: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 2: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 3: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 4: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 5: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 6: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 7: 0%....50%....100% - 39 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 8: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 9: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 10: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 11: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 12: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 13: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 14: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 15: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 16: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 17: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 18: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 19: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 20: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 21: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 22: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 23: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 24: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 25: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 26: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 27: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 28: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 29: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 30: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 31: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 32: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 33: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 34: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 35: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 36: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 37: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 38: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 39: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 40: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 41: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 42: 0%....50%....100% - 39 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 43: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 44: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 45: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 46: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 47: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 48: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 49: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 50: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 51: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 52: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 53: 0%....50%....100% - 38 passes
+==PROF== Disconnected from process 253675
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_GH200_32x32x32.ncu-rep
+Profiler output for GH200_32x32x32 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_GH200_SymGS_32x32x32.ncu-rep
+Execution time for GH200_32x32x32: 2 minutes and 25 seconds
+Starting profiling for SymGS with striped_box_coloring_Implementation for size 64x64x64 on GH200
+Starting profiling
+==PROF== Connected to process 256300 (/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/build333/benchmarking/run_profiler)
+SymGS
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 0: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 1: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 2: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 3: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 4: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 5: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 6: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 7: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 8: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 9: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 10: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 11: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 12: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 13: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 14: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 15: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 16: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 17: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 18: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 19: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 20: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 21: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 22: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 23: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 24: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 25: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 26: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 27: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 28: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 29: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 30: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 31: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 32: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 33: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 34: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 35: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 36: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 37: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 38: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 39: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 40: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 41: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 42: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 43: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 44: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 45: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 46: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 47: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 48: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 49: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 50: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 51: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 52: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 53: 0%....50%....100% - 38 passes
+==PROF== Disconnected from process 256300
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_GH200_64x64x64.ncu-rep
+Profiler output for GH200_64x64x64 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_GH200_SymGS_64x64x64.ncu-rep
+Execution time for GH200_64x64x64: 2 minutes and 23 seconds
+Starting profiling for SymGS with striped_box_coloring_Implementation for size 128x128x128 on GH200
+Starting profiling
+==PROF== Connected to process 259143 (/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/build333/benchmarking/run_profiler)
+SymGS
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 0: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 1: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 2: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 3: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 4: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 5: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 6: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 7: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 8: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 9: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 10: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 11: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 12: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 13: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 14: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 15: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 16: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 17: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 18: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 19: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 20: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 21: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 22: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 23: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 24: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 25: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 26: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 27: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 28: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 29: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 30: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 31: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 32: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 33: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 34: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 35: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 36: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 37: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 38: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 39: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 40: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 41: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 42: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 43: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 44: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 45: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 46: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 47: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 48: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 49: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 50: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 51: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 52: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 53: 0%....50%....100% - 38 passes
+==PROF== Disconnected from process 259143
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_GH200_128x128x128.ncu-rep
+Profiler output for GH200_128x128x128 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_GH200_SymGS_128x128x128.ncu-rep
+Execution time for GH200_128x128x128: 2 minutes and 26 seconds
+Starting profiling for SymGS with striped_box_coloring_Implementation for size 256x256x256 on GH200
+Starting profiling
+==PROF== Connected to process 261743 (/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/build333/benchmarking/run_profiler)
+SymGS
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 0: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 1: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 2: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 3: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 4: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 5: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 6: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 7: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 8: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 9: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 10: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 11: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 12: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 13: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 14: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 15: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 16: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 17: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 18: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 19: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 20: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 21: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 22: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 23: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 24: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 25: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 26: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 27: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 28: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 29: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 30: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 31: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 32: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 33: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 34: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 35: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 36: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 37: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 38: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 39: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 40: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 41: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 42: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 43: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 44: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 45: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 46: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 47: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 48: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 49: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 50: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 51: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 52: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 53: 0%....50%....100% - 38 passes
+==PROF== Disconnected from process 261743
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_GH200_256x256x256.ncu-rep
+Profiler output for GH200_256x256x256 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_GH200_SymGS_256x256x256.ncu-rep
+Execution time for GH200_256x256x256: 2 minutes and 32 seconds
+Starting profiling for SymGS with striped_box_coloring_Implementation for size 512x512x512 on GH200
+Starting profiling
+==PROF== Connected to process 264339 (/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/build333/benchmarking/run_profiler)
+SymGS
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 0: 0%
+==WARNING== Backing up device memory in system memory. Kernel replay might be slow. Consider using "--replay-mode application" to avoid memory save-and-restore.
+....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 1: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 2: 0%....50%....100% - 39 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 3: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 4: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 5: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 6: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 7: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 8: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 9: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 10: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 11: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 12: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 13: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 14: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 15: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 16: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 17: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 18: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 19: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 20: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 21: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 22: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 23: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 24: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 25: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 26: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 27: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 28: 0%....50%....100% - 39 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 29: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 30: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 31: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 32: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 33: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 34: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 35: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 36: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 37: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 38: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 39: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 40: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 41: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 42: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 43: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 44: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 45: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 46: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 47: 0%....50%....100% - 39 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 48: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 49: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 50: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 51: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 52: 0%....50%....100% - 38 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 53: 0%....50%....100% - 38 passes
+==PROF== Disconnected from process 264339
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_GH200_512x512x512.ncu-rep
+Profiler output for GH200_512x512x512 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_GH200_SymGS_512x512x512.ncu-rep
+Execution time for GH200_512x512x512: 7 minutes and 30 seconds
+Starting Benchmark
+Starting cuSparse 3d27p Benchmarks
+cuSparse 3d27p Benchmarks took: 0m0s
+Starting naive Striped 3d27p Benchmarks
+Naive Striped 3d27p Benchmarks took: 0m0s
+Starting Striped Shared Memory 3d27p Benchmarks
+Striped Shared Memory 3d27p Benchmarks took: 0m0s
+Starting Striped Warp Reduction 3d27p Benchmarks
+Striped Warp Reduction 3d27p Benchmarks took: 0m0s
+Starting Striped Colored 3d27p Benchmarks
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.725953 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.725953 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.725953 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.725953 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.725953 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.725953 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.725953 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.725953 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.725953 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.725953 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Striped Colored 3d27p Benchmarks took: 56m36s
+Starting no store striped coloring 3d27p Benchmarks
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (storing nothing)
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (storing nothing)
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (storing nothing)
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (storing nothing)
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (storing nothing)
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (storing nothing)
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (storing nothing)
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (storing nothing)
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (storing nothing)
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (storing nothing)
+Bench MG
+No store striped coloring 3d27p Benchmarks took: 64m17s
+Starting striped coloring precomputed 3d27p Benchmarks
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 295 iterations for size 512x512x512 and implementation Striped coloring (COR Format already stored on the GPU)
+Bench MG
+Striped coloring precomputed 3d27p Benchmarks took: 29m15s
+Starting striped box coloring 3d27p Benchmarks
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring
+Bench MG
+Striped box coloring 3d27p Benchmarks took: 24m32s
+Starting COR striped box coloring 3d27p Benchmarks
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+Bench MG
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring (COR stored on GPU)
+Bench MG
+num iterations for implementation Striped Box coloring (COR stored on GPU): 10
+norm: 0.14711 for implementation Striped Box coloring (COR stored on GPU)
+original max iter: 1
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+num iterations for implementation Striped Box coloring (COR stored on GPU): 10
+norm: 0.131496 for implementation Striped Box coloring (COR stored on GPU)
+original max iter: 1
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+Bench MG
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring (COR stored on GPU)
+Bench MG
+num iterations for implementation Striped Box coloring (COR stored on GPU): 10
+norm: 0.320812 for implementation Striped Box coloring (COR stored on GPU)
+original max iter: 1
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+num iterations for implementation Striped Box coloring (COR stored on GPU): 10
+norm: 0.292314 for implementation Striped Box coloring (COR stored on GPU)
+original max iter: 1
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+Bench MG
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring (COR stored on GPU)
+Bench MG
+num iterations for implementation Striped Box coloring (COR stored on GPU): 10
+norm: 0.51174 for implementation Striped Box coloring (COR stored on GPU)
+original max iter: 1
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+num iterations for implementation Striped Box coloring (COR stored on GPU): 10
+norm: 0.469112 for implementation Striped Box coloring (COR stored on GPU)
+original max iter: 1
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+Bench MG
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring (COR stored on GPU)
+Bench MG
+num iterations for implementation Striped Box coloring (COR stored on GPU): 10
+norm: 0.70437 for implementation Striped Box coloring (COR stored on GPU)
+original max iter: 1
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+num iterations for implementation Striped Box coloring (COR stored on GPU): 10
+norm: 0.647401 for implementation Striped Box coloring (COR stored on GPU)
+original max iter: 1
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+CG took 332 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+Bench MG
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+CG took 315 iterations for size 512x512x512 and implementation Striped Box coloring (COR stored on GPU)
+Bench MG
+num iterations for implementation Striped Box coloring (COR stored on GPU): 10
+norm: 0.875788 for implementation Striped Box coloring (COR stored on GPU)
+original max iter: 1
+WARNING: color_pointer_d not nullptr, freeing it to generate box coloring
+WARNING: color_sorted_rows_d not nullptr, freeing it to generate box coloring
+num iterations for implementation Striped Box coloring (COR stored on GPU): 10
+norm: 0.805915 for implementation Striped Box coloring (COR stored on GPU)
+original max iter: 1
+COR Striped box coloring 3d27p Benchmarks took: 31m2s
+Starting multi GPU Benchmarks
+Multi GPU Benchmarks took: 0m0s
+Total benchmark duration: 205 minutes and 44 seconds.
+Finished Benchmark

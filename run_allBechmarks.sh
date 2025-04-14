@@ -4,7 +4,7 @@
 #SBATCH --job-name=HPCG200_fullBenchmark
 #SBATCH --account=a-g200
 #SBATCH --output Benchmark.out
-#SBATCH --time 12:00:00
+#SBATCH --time 10:00:00
 #SBATCH --partition=normal
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
@@ -25,7 +25,7 @@ cd /users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib
 # fi
 # mkdir build
 
-cd build
+cd build333
 
 # # Build the project
 # cmake ..
