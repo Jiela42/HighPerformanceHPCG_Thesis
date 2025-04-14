@@ -173,9 +173,11 @@ name_map = {
     "Striped coloring (pre-computing COR Format)" : "Striped Propagated Coloring (On-the-fly)",
     "Striped Box coloring (coloringBox 3x3x3)" : "Striped Box Coloring (bx=by=bz=3)",
     "Striped Box coloring (coloringBox 2x2x2)" : "Striped Box Coloring (bx=by=bz=2)",
+    "Striped Box coloring (coloringBox 4x4x4)" : "Striped Box Coloring (bx=by=bz=4)",
 
     "Striped Box coloring (COR stored on GPU) (coloringBox 3x3x3)" : "Striped Box Coloring (bx=by=bz=3) (Precomputed)",
     "Striped Box coloring (COR stored on GPU) (coloringBox 2x2x2)" : "Striped Box Coloring (bx=by=bz=2) (Precomputed)",
+    "Striped Box coloring (COR stored on GPU) (coloringBox 4x4x4)" : "Striped Box Coloring (bx=by=bz=4) (Precomputed)",
 }
 
 all_possible_versions = [
@@ -184,8 +186,10 @@ all_possible_versions = [
     "Striped coloring (COR Format already stored on the GPU)",
     "Striped coloring (pre-computing COR Format)",
     "Striped Box coloring (coloringBox 3x3x3)",
+    "Striped Box coloring (coloringBox 4x4x4",
     "Striped Box coloring (coloringBox 2x2x2)",
     "Striped Box coloring (COR stored on GPU) (coloringBox 3x3x3)",
+    "Striped Box coloring (COR stored on GPU) (coloringBox 4x4x4)",
     "Striped Box coloring (COR stored on GPU) (coloringBox 2x2x2)",
 ]
 

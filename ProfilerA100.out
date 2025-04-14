@@ -1,0 +1,1137 @@
+
+Due to MODULEPATH changes, the following have been reloaded:
+  1) libxml2/2.9.10
+
+Starting profiling for Striped Box coloring (coloringBox 4x4x4) on A100
+Starting profiling for SymGS with striped_box_coloring_Implementation for size 32x32x32 on A100
+Starting profiling
+==PROF== Connected to process 3189651 (/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/buildABenchmark/benchmarking/run_profiler)
+SymGS
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 0: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 1: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 2: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 3: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 4: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 5: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 6: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 7: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 8: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 9: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 10: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 11: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 12: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 13: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 14: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 15: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 16: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 17: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 18: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 19: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 20: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 21: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 22: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 23: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 24: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 25: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 26: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 27: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 28: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 29: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 30: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 31: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 32: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 33: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 34: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 35: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 36: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 37: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 38: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 39: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 40: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 41: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 42: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 43: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 44: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 45: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 46: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 47: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 48: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 49: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 50: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 51: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 52: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 53: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 54: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 55: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 56: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 57: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 58: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 59: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 60: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 61: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 62: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 63: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 64: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 65: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 66: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 67: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 68: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 69: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 70: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 71: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 72: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 73: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 74: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 75: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 76: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 77: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 78: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 79: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 80: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 81: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 82: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 83: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 84: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 85: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 86: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 87: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 88: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 89: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 90: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 91: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 92: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 93: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 94: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 95: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 96: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 97: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 98: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 99: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 100: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 101: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 102: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 103: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 104: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 105: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 106: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 107: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 108: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 109: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 110: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 111: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 112: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 113: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 114: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 115: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 116: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 117: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 118: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 119: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 120: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 121: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 122: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 123: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 124: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 125: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 126: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 127: 0%....50%....100% - 43 passes
+==PROF== Disconnected from process 3189651
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_32x32x32.ncu-rep
+Profiler output for A100_32x32x32 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_SymGS_32x32x32.ncu-rep
+Execution time for A100_32x32x32: 4 minutes and 20 seconds
+Starting profiling for SymGS with striped_box_coloring_Implementation for size 64x64x64 on A100
+Starting profiling
+==PROF== Connected to process 3198288 (/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/buildABenchmark/benchmarking/run_profiler)
+SymGS
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 0: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 1: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 2: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 3: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 4: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 5: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 6: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 7: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 8: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 9: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 10: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 11: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 12: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 13: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 14: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 15: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 16: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 17: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 18: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 19: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 20: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 21: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 22: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 23: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 24: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 25: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 26: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 27: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 28: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 29: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 30: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 31: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 32: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 33: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 34: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 35: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 36: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 37: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 38: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 39: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 40: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 41: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 42: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 43: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 44: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 45: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 46: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 47: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 48: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 49: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 50: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 51: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 52: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 53: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 54: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 55: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 56: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 57: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 58: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 59: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 60: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 61: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 62: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 63: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 64: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 65: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 66: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 67: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 68: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 69: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 70: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 71: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 72: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 73: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 74: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 75: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 76: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 77: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 78: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 79: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 80: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 81: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 82: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 83: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 84: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 85: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 86: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 87: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 88: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 89: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 90: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 91: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 92: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 93: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 94: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 95: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 96: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 97: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 98: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 99: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 100: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 101: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 102: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 103: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 104: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 105: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 106: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 107: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 108: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 109: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 110: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 111: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 112: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 113: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 114: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 115: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 116: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 117: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 118: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 119: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 120: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 121: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 122: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 123: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 124: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 125: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 126: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 127: 0%....50%....100% - 43 passes
+==PROF== Disconnected from process 3198288
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_64x64x64.ncu-rep
+Profiler output for A100_64x64x64 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_SymGS_64x64x64.ncu-rep
+Execution time for A100_64x64x64: 4 minutes and 22 seconds
+Starting profiling for SymGS with striped_box_coloring_Implementation for size 128x128x128 on A100
+Starting profiling
+==PROF== Connected to process 3203928 (/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/buildABenchmark/benchmarking/run_profiler)
+SymGS
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 0: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 1: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 2: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 3: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 4: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 5: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 6: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 7: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 8: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 9: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 10: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 11: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 12: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 13: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 14: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 15: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 16: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 17: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 18: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 19: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 20: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 21: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 22: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 23: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 24: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 25: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 26: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 27: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 28: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 29: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 30: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 31: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 32: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 33: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 34: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 35: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 36: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 37: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 38: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 39: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 40: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 41: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 42: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 43: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 44: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 45: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 46: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 47: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 48: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 49: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 50: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 51: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 52: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 53: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 54: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 55: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 56: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 57: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 58: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 59: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 60: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 61: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 62: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 63: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 64: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 65: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 66: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 67: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 68: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 69: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 70: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 71: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 72: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 73: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 74: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 75: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 76: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 77: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 78: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 79: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 80: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 81: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 82: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 83: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 84: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 85: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 86: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 87: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 88: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 89: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 90: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 91: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 92: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 93: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 94: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 95: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 96: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 97: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 98: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 99: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 100: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 101: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 102: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 103: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 104: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 105: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 106: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 107: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 108: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 109: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 110: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 111: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 112: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 113: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 114: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 115: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 116: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 117: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 118: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 119: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 120: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 121: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 122: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 123: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 124: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 125: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 126: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 127: 0%....50%....100% - 43 passes
+==PROF== Disconnected from process 3203928
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_128x128x128.ncu-rep
+Profiler output for A100_128x128x128 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_SymGS_128x128x128.ncu-rep
+Execution time for A100_128x128x128: 4 minutes and 27 seconds
+Starting profiling for SymGS with striped_box_coloring_Implementation for size 256x256x256 on A100
+Starting profiling
+==PROF== Connected to process 3209537 (/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/buildABenchmark/benchmarking/run_profiler)
+SymGS
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 0: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 1: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 2: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 3: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 4: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 5: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 6: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 7: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 8: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 9: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 10: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 11: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 12: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 13: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 14: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 15: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 16: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 17: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 18: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 19: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 20: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 21: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 22: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 23: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 24: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 25: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 26: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 27: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 28: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 29: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 30: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 31: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 32: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 33: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 34: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 35: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 36: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 37: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 38: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 39: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 40: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 41: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 42: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 43: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 44: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 45: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 46: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 47: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 48: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 49: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 50: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 51: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 52: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 53: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 54: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 55: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 56: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 57: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 58: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 59: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 60: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 61: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 62: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 63: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 64: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 65: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 66: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 67: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 68: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 69: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 70: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 71: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 72: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 73: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 74: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 75: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 76: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 77: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 78: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 79: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 80: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 81: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 82: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 83: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 84: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 85: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 86: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 87: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 88: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 89: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 90: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 91: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 92: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 93: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 94: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 95: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 96: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 97: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 98: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 99: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 100: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 101: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 102: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 103: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 104: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 105: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 106: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 107: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 108: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 109: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 110: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 111: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 112: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 113: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 114: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 115: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 116: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 117: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 118: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 119: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 120: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 121: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 122: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 123: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 124: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 125: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 126: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 127: 0%....50%....100% - 43 passes
+==PROF== Disconnected from process 3209537
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_256x256x256.ncu-rep
+Profiler output for A100_256x256x256 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_SymGS_256x256x256.ncu-rep
+Execution time for A100_256x256x256: 4 minutes and 40 seconds
+Total execution time: 17 minutes and 49 seconds
+Starting profiling for Striped Box coloring (coloringBox 3x3x3) on A100
+Starting profiling for SymGS with striped_box_coloring_Implementation for size 32x32x32 on A100
+Starting profiling
+==PROF== Connected to process 3215185 (/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/buildA333/benchmarking/run_profiler)
+SymGS
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 0: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 1: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 2: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 3: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 4: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 5: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 6: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 7: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 8: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 9: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 10: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 11: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 12: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 13: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 14: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 15: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 16: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 17: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 18: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 19: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 20: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 21: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 22: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 23: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 24: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 25: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 26: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 27: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 28: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 29: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 30: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 31: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 32: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 33: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 34: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 35: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 36: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 37: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 38: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 39: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 40: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 41: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 42: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 43: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 44: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 45: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 46: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 47: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 48: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 49: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 50: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 51: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 52: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 53: 0%....50%....100% - 43 passes
+==PROF== Disconnected from process 3215185
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_32x32x32.ncu-rep
+Profiler output for A100_32x32x32 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_SymGS_32x32x32.ncu-rep
+Execution time for A100_32x32x32: 1 minutes and 51 seconds
+Starting profiling for SymGS with striped_box_coloring_Implementation for size 64x64x64 on A100
+Starting profiling
+==PROF== Connected to process 3217647 (/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/buildA333/benchmarking/run_profiler)
+SymGS
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 0: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 1: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 2: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 3: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 4: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 5: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 6: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 7: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 8: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 9: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 10: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 11: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 12: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 13: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 14: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 15: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 16: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 17: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 18: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 19: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 20: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 21: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 22: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 23: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 24: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 25: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 26: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 27: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 28: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 29: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 30: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 31: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 32: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 33: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 34: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 35: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 36: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 37: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 38: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 39: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 40: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 41: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 42: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 43: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 44: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 45: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 46: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 47: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 48: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 49: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 50: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 51: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 52: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 53: 0%....50%....100% - 43 passes
+==PROF== Disconnected from process 3217647
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_64x64x64.ncu-rep
+Profiler output for A100_64x64x64 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_SymGS_64x64x64.ncu-rep
+Execution time for A100_64x64x64: 1 minutes and 52 seconds
+Starting profiling for SymGS with striped_box_coloring_Implementation for size 128x128x128 on A100
+Starting profiling
+==PROF== Connected to process 3220075 (/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/buildA333/benchmarking/run_profiler)
+SymGS
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 0: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 1: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 2: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 3: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 4: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 5: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 6: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 7: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 8: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 9: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 10: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 11: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 12: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 13: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 14: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 15: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 16: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 17: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 18: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 19: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 20: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 21: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 22: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 23: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 24: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 25: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 26: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 27: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 28: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 29: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 30: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 31: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 32: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 33: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 34: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 35: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 36: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 37: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 38: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 39: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 40: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 41: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 42: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 43: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 44: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 45: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 46: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 47: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 48: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 49: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 50: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 51: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 52: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 53: 0%....50%....100% - 43 passes
+==PROF== Disconnected from process 3220075
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_128x128x128.ncu-rep
+Profiler output for A100_128x128x128 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_SymGS_128x128x128.ncu-rep
+Execution time for A100_128x128x128: 1 minutes and 54 seconds
+Starting profiling for SymGS with striped_box_coloring_Implementation for size 256x256x256 on A100
+Starting profiling
+==PROF== Connected to process 3222497 (/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/buildA333/benchmarking/run_profiler)
+SymGS
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 0: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 1: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 2: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 3: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 4: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 5: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 6: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 7: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 8: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 9: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 10: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 11: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 12: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 13: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 14: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 15: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 16: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 17: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 18: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 19: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 20: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 21: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 22: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 23: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 24: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 25: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 26: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 27: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 28: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 29: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 30: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 31: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 32: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 33: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 34: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 35: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 36: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 37: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 38: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 39: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 40: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 41: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 42: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 43: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 44: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 45: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 46: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 47: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 48: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 49: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 50: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 51: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 52: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 53: 0%....50%....100% - 43 passes
+==PROF== Disconnected from process 3222497
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_256x256x256.ncu-rep
+Profiler output for A100_256x256x256 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_SymGS_256x256x256.ncu-rep
+Execution time for A100_256x256x256: 2 minutes and 3 seconds
+Total execution time: 7 minutes and 40 seconds
+Starting profiling for Striped Box coloring (coloringBox 2x2x2) on A100
+Starting profiling for SymGS with striped_box_coloring_Implementation for size 32x32x32 on A100
+Starting profiling
+==PROF== Connected to process 3224965 (/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/buildA222/benchmarking/run_profiler)
+SymGS
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 0: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 1: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 2: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 3: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 4: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 5: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 6: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 7: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 8: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 9: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 10: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 11: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 12: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 13: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 14: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 15: 0%....50%....100% - 43 passes
+==PROF== Disconnected from process 3224965
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_32x32x32.ncu-rep
+Profiler output for A100_32x32x32 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_SymGS_32x32x32.ncu-rep
+Execution time for A100_32x32x32: 0 minutes and 35 seconds
+Starting profiling for SymGS with striped_box_coloring_Implementation for size 64x64x64 on A100
+Starting profiling
+==PROF== Connected to process 3225752 (/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/buildA222/benchmarking/run_profiler)
+SymGS
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 0: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 1: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 2: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 3: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 4: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 5: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 6: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 7: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 8: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 9: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 10: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 11: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 12: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 13: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 14: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 15: 0%....50%....100% - 43 passes
+==PROF== Disconnected from process 3225752
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_64x64x64.ncu-rep
+Profiler output for A100_64x64x64 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_SymGS_64x64x64.ncu-rep
+Execution time for A100_64x64x64: 0 minutes and 34 seconds
+Starting profiling for SymGS with striped_box_coloring_Implementation for size 128x128x128 on A100
+Starting profiling
+==PROF== Connected to process 3226539 (/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/buildA222/benchmarking/run_profiler)
+SymGS
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 0: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 1: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 2: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 3: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 4: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 5: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 6: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 7: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 8: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 9: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 10: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 11: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 12: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 13: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 14: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 15: 0%....50%....100% - 43 passes
+==PROF== Disconnected from process 3226539
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_128x128x128.ncu-rep
+Profiler output for A100_128x128x128 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_SymGS_128x128x128.ncu-rep
+Execution time for A100_128x128x128: 0 minutes and 36 seconds
+Starting profiling for SymGS with striped_box_coloring_Implementation for size 256x256x256 on A100
+Starting profiling
+==PROF== Connected to process 3227326 (/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/buildA222/benchmarking/run_profiler)
+SymGS
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 0: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 1: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 2: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 3: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 4: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 5: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 6: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 7: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 8: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 9: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 10: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 11: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 12: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 13: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 14: 0%....50%....100% - 43 passes
+==PROF== Profiling "striped_box_coloring_half_Sym..." - 15: 0%....50%....100% - 43 passes
+==PROF== Disconnected from process 3227326
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_256x256x256.ncu-rep
+Profiler output for A100_256x256x256 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/profiler_output_A100_SymGS_256x256x256.ncu-rep
+Execution time for A100_256x256x256: 0 minutes and 42 seconds
+Total execution time: 2 minutes and 27 seconds
+Starting AMGX profiling on A100
+Starting AMGX profiling for SymGS for size 32x32x32 on A100
+HPCG_bench main
+Running profiler
+Profiling symGS
+File already exists: /scratch/dknecht/amgx_problems/problem_32x32x32.mtx
+==PROF== Connected to process 3228115 (/users/dknecht/AMGX/buildAProfiling/examples/hpcg_bench)
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 0: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 1: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 2: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 3: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 4: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 5: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 6: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 7: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 8: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 9: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 10: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 11: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 12: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 13: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 14: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 15: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 16: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 17: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 18: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 19: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 20: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 21: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 22: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 23: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 24: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 25: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 26: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 27: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 28: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 29: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 30: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 31: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 32: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 33: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 34: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 35: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 36: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 37: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 38: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 39: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 40: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 41: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 42: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 43: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 44: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 45: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 46: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 47: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 48: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 49: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 50: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 51: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 52: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 53: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 54: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 55: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 56: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 57: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 58: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 59: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 60: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 61: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 62: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 63: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 64: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 65: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 66: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 67: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 68: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 69: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 70: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 71: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 72: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 73: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 74: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 75: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 76: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 77: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 78: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 79: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 80: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 81: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 82: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 83: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 84: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 85: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 86: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 87: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 88: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 89: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 90: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 91: 0%....50%....100% - 43 passes
+==PROF== Disconnected from process 3228115
+AMGX version 2.5.0
+Built on Apr 14 2025, 15:43:47
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+SymGS Solver status: 3
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/AMGX/profiler_output_A100_32x32x32.ncu-rep
+Profiler output for A100_32x32x32 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/AMGX/profiler_output_A100_SymGS_32x32x32.ncu-rep
+Execution time for A100_32x32x32: 3 minutes and 15 seconds
+Starting AMGX profiling for SymGS for size 64x64x64 on A100
+HPCG_bench main
+Running profiler
+Profiling symGS
+File already exists: /scratch/dknecht/amgx_problems/problem_64x64x64.mtx
+==PROF== Connected to process 3232212 (/users/dknecht/AMGX/buildAProfiling/examples/hpcg_bench)
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 0: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 1: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 2: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 3: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 4: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 5: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 6: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 7: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 8: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 9: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 10: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 11: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 12: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 13: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 14: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 15: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 16: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 17: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 18: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 19: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 20: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 21: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 22: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 23: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 24: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 25: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 26: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 27: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 28: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 29: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 30: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 31: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 32: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 33: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 34: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 35: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 36: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 37: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 38: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 39: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 40: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 41: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 42: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 43: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 44: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 45: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 46: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 47: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 48: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 49: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 50: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 51: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 52: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 53: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 54: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 55: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 56: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 57: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 58: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 59: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 60: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 61: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 62: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 63: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 64: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 65: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 66: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 67: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 68: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 69: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 70: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 71: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 72: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 73: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 74: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 75: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 76: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 77: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 78: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 79: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 80: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 81: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 82: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 83: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 84: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 85: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 86: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 87: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 88: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 89: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 90: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 91: 0%....50%....100% - 43 passes
+==PROF== Disconnected from process 3232212
+AMGX version 2.5.0
+Built on Apr 14 2025, 15:43:47
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+SymGS Solver status: 3
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/AMGX/profiler_output_A100_64x64x64.ncu-rep
+Profiler output for A100_64x64x64 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/AMGX/profiler_output_A100_SymGS_64x64x64.ncu-rep
+Execution time for A100_64x64x64: 3 minutes and 19 seconds
+Starting AMGX profiling for SymGS for size 128x128x128 on A100
+HPCG_bench main
+Running profiler
+Profiling symGS
+File already exists: /scratch/dknecht/amgx_problems/problem_128x128x128.mtx
+==PROF== Connected to process 3236308 (/users/dknecht/AMGX/buildAProfiling/examples/hpcg_bench)
+AMGX ERROR: file /users/dknecht/AMGX/src/amgx_c.cu line   4998
+AMGX ERROR: I/O error.
+==PROF== Disconnected from process 3236308
+AMGX version 2.5.0
+Built on Apr 14 2025, 15:43:47
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Error while reading matrix: Matrix Market format requires 1-based indexing. Use 'base0' AMGX format option to override.
+==ERROR== The application returned an error code (1).
+==WARNING== No kernels were profiled.
+==WARNING== Profiling kernels launched by child processes requires the --target-processes all option.
+srun: error: ault25: task 0: Exited with exit code 1
+Error: Profiling failed for 128x128x128 on A100
+Total execution time: 7 minutes and 6 seconds

@@ -1,0 +1,403 @@
+
+Due to MODULEPATH changes, the following have been reloaded:
+  1) libxml2/2.9.10
+
+HPCG_bench main
+Starting Benchmark
+File already exists: /scratch/dknecht/amgx_problems/problem_32x32x32.mtx
+Problem written to file: /scratch/dknecht/amgx_problems/problem_32x32x32.mtx
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+File already exists: /scratch/dknecht/amgx_problems/problem_64x64x64.mtx
+Problem written to file: /scratch/dknecht/amgx_problems/problem_64x64x64.mtx
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+File already exists: /scratch/dknecht/amgx_problems/problem_128x128x128.mtx
+Problem written to file: /scratch/dknecht/amgx_problems/problem_128x128x128.mtx
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+AMGX version 2.5.0
+Built on Apr 14 2025, 18:22:59
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+CG Solver status: 0
+Benchmark Finished

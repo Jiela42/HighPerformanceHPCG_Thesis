@@ -25,7 +25,7 @@ void run_striped_box_coloring_3d27p_SymGS_benchmark(int nx, int ny, int nz, std:
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(DataType), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
 
-    for(int i = 4; i <= 4; i ++){
+    for(int i = 2; i <= 4; i ++){
         
         implementation.bx = i;
         implementation.by = i;
@@ -115,7 +115,7 @@ void run_striped_box_coloring_3d27p_CG_benchmark(int nx, int ny, int nz, std::st
         implementation_name += " (including conversion to Striped)";
     }
 
-    for(int i = 4; i <= 4; i++){
+    for(int i = 2; i <= 4; i++){
         implementation.bx = i;
         implementation.by = i;
         implementation.bz = i;
@@ -217,7 +217,7 @@ void run_striped_box_coloring_3d27p_benchmarks(int nx, int ny, int nz, std::stri
     CHECK_CUDA(cudaMemcpy(x_d, x.data(), num_cols * sizeof(DataType), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMemcpy(y_d, y.data(), num_rows * sizeof(DataType), cudaMemcpyHostToDevice));
 
-    for(int i = 4; i <=4; i++){
+    for(int i = 2; i <=4; i++){
         
         implementation.bx = i;
         implementation.by = i;

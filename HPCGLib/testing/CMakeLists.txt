@@ -45,13 +45,13 @@ add_executable(run_example
     run_example.cpp
 )
 
-add_executable(run_multi_GPU_tests
-    run_multi_GPU_tests.cpp
-)
+# add_executable(run_multi_GPU_tests
+#     run_multi_GPU_tests.cpp
+# )
 
-add_executable(run_multi_GPU
-    run_multi_GPU.cpp
-)
+# add_executable(run_multi_GPU
+#     run_multi_GPU.cpp
+# )
 
 target_link_libraries(TestHPCGLib
     HPCGLib
@@ -83,18 +83,18 @@ target_link_libraries(run_example
     MatrixLib
 )
 
-target_link_libraries(run_multi_GPU
-    HPCGLib
-    MatrixLib
-    UtilLib
-    MPI::MPI_CXX
-    nccl
-)
+# target_link_libraries(run_multi_GPU
+#     HPCGLib
+#     MatrixLib
+#     UtilLib
+#     MPI::MPI_CXX
+#     nccl
+# )
 
-target_link_libraries(run_multi_GPU_tests
-    HPCGLib
-    MatrixLib
-    UtilLib
-    MPI::MPI_CXX
-    nccl
-)
+# target_link_libraries(run_multi_GPU_tests
+#     HPCGLib
+#     MatrixLib
+#     UtilLib
+#     MPI::MPI_CXX
+#     nccl
+# )

@@ -1,0 +1,766 @@
+
+Due to MODULEPATH changes, the following have been reloaded:
+  1) libxml2/2.9.10
+
+Starting Benchmark
+Starting cuSparse 3d27p Benchmarks
+cuSparse 3d27p Benchmarks took: 0m0s
+Starting naive Striped 3d27p Benchmarks
+Naive Striped 3d27p Benchmarks took: 0m0s
+Starting Striped Shared Memory 3d27p Benchmarks
+Striped Shared Memory 3d27p Benchmarks took: 0m0s
+Starting Striped Warp Reduction 3d27p Benchmarks
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+Bench MG
+Striped Warp Reduction 3d27p Benchmarks took: 0m4s
+Starting Striped Colored 3d27p Benchmarks
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.107826 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.254994 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.295982 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 54 iterations for size 128x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.295982 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 54 iterations for size 128x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.295982 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 54 iterations for size 128x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.295982 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 54 iterations for size 128x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.295982 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 54 iterations for size 128x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.295982 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 54 iterations for size 128x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.295982 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 54 iterations for size 128x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.295982 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 54 iterations for size 128x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.295982 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 54 iterations for size 128x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.295982 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 54 iterations for size 128x64x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.348167 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 65 iterations for size 128x128x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.348167 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 65 iterations for size 128x128x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.348167 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 65 iterations for size 128x128x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.348167 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 65 iterations for size 128x128x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.348167 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 65 iterations for size 128x128x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.348167 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 65 iterations for size 128x128x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.348167 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 65 iterations for size 128x128x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.348167 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 65 iterations for size 128x128x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.348167 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 65 iterations for size 128x128x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.348167 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 65 iterations for size 128x128x64 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.417477 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Bench SymGS
+num iterations for implementation Striped coloring (pre-computing COR Format): 10
+norm: 0.58093 for implementation Striped coloring (pre-computing COR Format)
+original max iter: 1
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (pre-computing COR Format)
+Bench MG
+Striped Colored 3d27p Benchmarks took: 14m23s
+Starting no store striped coloring 3d27p Benchmarks
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (storing nothing)
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (storing nothing)
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (storing nothing)
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (storing nothing)
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (storing nothing)
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (storing nothing)
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (storing nothing)
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (storing nothing)
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (storing nothing)
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (storing nothing)
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (storing nothing)
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (storing nothing)
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (storing nothing)
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (storing nothing)
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (storing nothing)
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (storing nothing)
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (storing nothing)
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (storing nothing)
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (storing nothing)
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (storing nothing)
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (storing nothing)
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (storing nothing)
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (storing nothing)
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (storing nothing)
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (storing nothing)
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (storing nothing)
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (storing nothing)
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (storing nothing)
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (storing nothing)
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (storing nothing)
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (storing nothing)
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (storing nothing)
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (storing nothing)
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (storing nothing)
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (storing nothing)
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (storing nothing)
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (storing nothing)
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (storing nothing)
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (storing nothing)
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (storing nothing)
+Bench MG
+No store striped coloring 3d27p Benchmarks took: 11m49s
+Starting striped coloring precomputed 3d27p Benchmarks
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 24 iterations for size 32x32x32 and implementation Striped coloring (COR Format already stored on the GPU)
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 41 iterations for size 64x64x64 and implementation Striped coloring (COR Format already stored on the GPU)
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 78 iterations for size 128x128x128 and implementation Striped coloring (COR Format already stored on the GPU)
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (COR Format already stored on the GPU)
+CG took 152 iterations for size 256x256x256 and implementation Striped coloring (COR Format already stored on the GPU)
+Bench MG
+Striped coloring precomputed 3d27p Benchmarks took: 7m49s
+Starting striped box coloring 3d27p Benchmarks
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 26 iterations for size 32x32x32 and implementation Striped Box coloring
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 24 iterations for size 32x32x32 and implementation Striped Box coloring
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+CG took 25 iterations for size 32x32x32 and implementation Striped Box coloring
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 48 iterations for size 64x64x64 and implementation Striped Box coloring
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 44 iterations for size 64x64x64 and implementation Striped Box coloring
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+CG took 45 iterations for size 64x64x64 and implementation Striped Box coloring
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 91 iterations for size 128x128x128 and implementation Striped Box coloring
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 83 iterations for size 128x128x128 and implementation Striped Box coloring
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+CG took 88 iterations for size 128x128x128 and implementation Striped Box coloring
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 177 iterations for size 256x256x256 and implementation Striped Box coloring
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 159 iterations for size 256x256x256 and implementation Striped Box coloring
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+CG took 174 iterations for size 256x256x256 and implementation Striped Box coloring
+Bench MG
+Bench SPMV
+Bench Dot
+Bench WAXPBY
+Bench CG
+CUDA error in file '/users/dknecht/HighPerformanceHPCG_Thesis/HPCGLib/src/HPCG_versions/striped_warp_reduction/striped_warp_reduction_computeCG.cu' in line 36: out of memory.
+srun: error: ault25: task 0: Exited with exit code 1

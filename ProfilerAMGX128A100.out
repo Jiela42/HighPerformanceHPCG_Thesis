@@ -1,0 +1,125 @@
+
+Due to MODULEPATH changes, the following have been reloaded:
+  1) libxml2/2.9.10
+
+Starting AMGX profiling on A100
+Starting AMGX profiling for SymGS for size 128x128x128 on 
+HPCG_bench main
+Running profiler
+Profiling symGS
+Problem written to file: /scratch/dknecht/amgx_problems/problem_128x128x128.mtx
+==PROF== Connected to process 3238717 (/users/dknecht/AMGX/buildAProfiling/examples/hpcg_bench)
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 0: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 1: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 2: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 3: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 4: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 5: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 6: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 7: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 8: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 9: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 10: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 11: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 12: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 13: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 14: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 15: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 16: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 17: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 18: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 19: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 20: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 21: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 22: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 23: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 24: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 25: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 26: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 27: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 28: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 29: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 30: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 31: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 32: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 33: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 34: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 35: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 36: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 37: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 38: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 39: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 40: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 41: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 42: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 43: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 44: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 45: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 46: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 47: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 48: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 49: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 50: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 51: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 52: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 53: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 54: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 55: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 56: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 57: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 58: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 59: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 60: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 61: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 62: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 63: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 64: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 65: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 66: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 67: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 68: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 69: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 70: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 71: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 72: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 73: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 74: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 75: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 76: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 77: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 78: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 79: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 80: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 81: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 82: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 83: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 84: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 85: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 86: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 87: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 88: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 89: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 90: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 91: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 92: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 93: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 94: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 95: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 96: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 97: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 98: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 99: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 100: 0%....50%....100% - 43 passes
+==PROF== Profiling "multicolorGSSmoothCsrKernel_n..." - 101: 0%....50%....100% - 43 passes
+==PROF== Disconnected from process 3238717
+AMGX version 2.5.0
+Built on Apr 14 2025, 15:43:47
+Compiled with CUDA Runtime 12.1, using CUDA driver 12.8
+Reading data...
+Solution vector was not found. Setting initial solution to x=[0,…,0]^T
+Finished reading
+SymGS Solver status: 3
+==PROF== Report: /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/AMGX/profiler_output__128x128x128.ncu-rep
+Profiler output for _128x128x128 generated at /users/dknecht/HighPerformanceHPCG_Thesis/profiling_results/AMGX/profiler_output__SymGS_128x128x128.ncu-rep
+Execution time for _128x128x128: 5 minutes and 32 seconds
+Total execution time: 5 minutes and 32 seconds

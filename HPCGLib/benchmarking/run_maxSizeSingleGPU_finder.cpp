@@ -36,11 +36,13 @@ int main(){
 
     // run_striped_coloring_3d27p_benchmarks(128, 128, 128, folder_path, implementation);
 
+    implementation.setNumberOfIterations(1);
+    implementation.set_maxCGIters(1);
 
-    for(int i = 80; i < 100; i++){
-        int nx = i * 8;
-        int ny = i * 8;
-        int nz = i * 8;
+    for(int i = 7; i < 10; i++){
+        int nx = 1 << i;
+        int ny = 1 << i;
+        int nz = 1 << i;
 
         std::cout << "Running striped coloring benchmarks for " << nx << " " << ny << " " << nz << std::endl;
         run_striped_coloring_3d27p_benchmarks(nx, ny, nz, folder_path, implementation);

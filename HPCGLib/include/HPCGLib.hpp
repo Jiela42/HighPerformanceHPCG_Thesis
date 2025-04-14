@@ -22,7 +22,7 @@ class HPCG_functions {
     public:
         bool test_before_bench = false;
         std::string version_name = "unknown";
-        const std::string ault_nodes = "GH200";
+        const std::string ault_nodes = "A100";
         // this string is used when small changes are benchmarked to see their effect
         std::string additional_parameters = "vanilla_version";
 
