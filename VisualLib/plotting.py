@@ -11,7 +11,7 @@ methods_to_plot = [
     # "CG_noPreconditioning",
     # "MG",
     # "SymGS",
-    "SPMV",
+    # "SPMV",
     # "Restriction",
     # "Prolongation",
     # "Dot",
@@ -36,6 +36,18 @@ sizes_to_plot =[
     (str(256*8) + "x" + str(256*8) + "x" + str(256*8)),
     (str(512*8) + "x" + str(512*8) + "x" + str(512*8)),
 ]
+
+machines_to_plot = [
+    "RTX3090",
+    "GH200",
+    "A100",
+    "V100",
+]
+
+if len(machines_to_plot) > 1:
+    print("Please select only one machine to plot, we plot the first machine in the list.")
+machine_to_plot = machines_to_plot[0]
+
 
 versions_to_plot = [
 
@@ -93,6 +105,7 @@ update_legend_labels = False
 #################################################################################################################
 
 import matplotlib.pyplot as plt
+import matplotlib
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -103,6 +116,12 @@ import datetime
 import warnings
 import re
 
+# Print library versions
+print("Library Versions:")
+print(f"Matplotlib: {matplotlib.__version__}")
+print(f"Pandas: {pd.__version__}")
+print(f"NumPy: {np.__version__}")
+print(f"Seaborn: {sns.__version__}")
 
 #################################################################################################################
 # Standard L2 Norms for perfectly dependent SymGS
@@ -358,7 +377,7 @@ def read_data():
         assert nx * ny * nz > 0
 
         # print("Warning for now we ignore any ault_node that is not 41-44", flush=True)
-        if ault_node not in ["GH200"]:
+        if ault_node not in machines_to_plot:
             continue
 
         if version_name not in version_names:
@@ -691,7 +710,7 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, y_ax_scale,
     # print("hue column values", data[hue].unique(), flush=True)
     # print("hue order", hue_order, flush=True)
 
-    ax = sns.barplot(x=x, order=x_order, y=y, hue=hue, hue_order=hue_order, palette=color_palette, data=data, estimator= np.median, ci=98)
+    ax = sns.barplot(x=x, order=x_order, y=y, hue=hue, hue_order=hue_order, palette=color_palette, data=data, estimator= np.median, errorbar=("ci", 0.98), err_kws={"alpha": 0.9, "linewidth": 5, "color": "#363535", "linestyle": "-"}, capsize=0.01 )
     fig = ax.get_figure()
     
    # Group the data by the relevant columns

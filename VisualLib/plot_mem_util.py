@@ -11,6 +11,17 @@ sizes_to_plot =[
     ("512x512x512"),
 ]
 
+machines_to_plot = [
+    "RTX3090",
+    "GH200",
+    "A100",
+    "V100",
+]
+
+if len(machines_to_plot) > 1:
+    print("Please select only one machine to plot, we plot the first machine in the list.")
+machine_to_plot = machines_to_plot[0]
+
 versions_to_plot = [
     "AMGX",
     "Striped Box coloring (coloringBox 2x2x2)",
@@ -35,6 +46,51 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 import os
+
+
+name_map = {
+    "Striped coloring (COR Format already stored on the GPU)" : "Striped Propagated Coloring (Precomputed)",
+    "Striped coloring (pre-computing COR Format)" : "Striped Propagated Coloring (On-the-fly)",
+    "Striped Box coloring (coloringBox 3x3x3)" : "Striped Box Coloring (bx=by=bz=3)",
+    "Striped Box coloring (coloringBox 2x2x2)" : "Striped Box Coloring (bx=by=bz=2)",
+
+    "Striped Box coloring (COR stored on GPU) (coloringBox 3x3x3)" : "Striped Box Coloring (bx=by=bz=3) (Precomputed)",
+    "Striped Box coloring (COR stored on GPU) (coloringBox 2x2x2)" : "Striped Box Coloring (bx=by=bz=2) (Precomputed)",
+}
+
+all_possible_versions = [
+    "AMGX",
+    "Striped Multi GPU",
+    "Striped coloring (COR Format already stored on the GPU)",
+    "Striped coloring (pre-computing COR Format)",
+    "Striped Box coloring (coloringBox 3x3x3)",
+    "Striped Box coloring (coloringBox 2x2x2)",
+    "Striped Box coloring (COR stored on GPU) (coloringBox 3x3x3)",
+    "Striped Box coloring (COR stored on GPU) (coloringBox 2x2x2)",
+]
+
+# apply the name map to all possible versions
+for version in all_possible_versions:
+    if version in name_map:
+        new_name = name_map[version]
+        all_possible_versions[all_possible_versions.index(version)] = new_name
+    else:
+        pass
+
+for version in versions_to_plot:
+    if version in name_map:
+        new_name = name_map[version]
+        versions_to_plot[versions_to_plot.index(version)] = new_name
+    else:
+        pass
+
+# Assign unique colors to each implementation
+# cmap = plt.cm.get_cmap(sns.color_palette, len(all_possible_versions))
+
+palette = sns.color_palette(sns.color_palette("deep"), len(all_possible_versions))
+# Assign unique colors to each implementation
+version_colors = {version: palette[i] for i, version in enumerate(all_possible_versions)}
+
 
 def adjust_throughput_metric(df):
     """
@@ -109,6 +165,9 @@ def read_data():
         machine = metadata[1]
         size = metadata[2]
         method = metadata[3]
+
+        if machine != machine_to_plot:
+            continue
 
         size_split = size.split("x")
         nx = int(size_split[0])
@@ -187,12 +246,19 @@ def read_data():
 
         full_data.append(df)
 
+
     full_data = pd.concat(full_data, ignore_index=True)
+    # preprocess the data
     full_data['NXxNYxNZ = #Rows'] = (
         full_data['nx'].astype(str) + "x" +
         full_data['ny'].astype(str) + "x" +
         full_data['nz'].astype(str) + "="  +
         (full_data["nx"]*full_data["ny"]*full_data["nz"]).astype(str))
+    
+    full_data['# Rows'] = full_data.apply(
+        lambda row: f"{row['nx']}³" if row['nx'] == row['ny'] == row['nz'] else f"{row['nx']}x{row['ny']}x{row['nz']}",
+        axis=1
+    )
 
     return full_data
 
@@ -205,7 +271,7 @@ def get_legend_horizontal_offset(num_cols, hue_order):
     return -(num_rows + 1) * 0.06 - 0.18
 
 
-def plot_data(data, x, x_order, y, hue, hue_order, title, save_path):
+def plot_data(data, x, x_order, y, hue, hue_order, title, save_path, color_palette):
 
     # if we have no data we do not want to plot anything
     if data.empty:
@@ -214,7 +280,7 @@ def plot_data(data, x, x_order, y, hue, hue_order, title, save_path):
     sns.set(style="whitegrid")
     plt.figure(figsize=(30, 8))
 
-    ax = sns.barplot(x=x, order=x_order, y=y, hue=hue, hue_order=hue_order, data=data, estimator= np.median, ci=98)
+    ax = sns.barplot(x=x, order=x_order, y=y, hue=hue, hue_order=hue_order, data=data, color_palette=color_palette, estimator= np.median,  errorbar=("ci", 0.98), err_kws={"alpha": 0.9, "linewidth": 5, "color": "#363535", "linestyle": "-"}, capsize=0.01)
     fig = ax.get_figure()
 
    # Group the data by the relevant columns
@@ -273,10 +339,13 @@ for m in full_data["Method"].unique():
     data.sort_values(by=["nx", "ny", "nz"], inplace=True)
 
     # get the x order
-    x_order = data["NXxNYxNZ = #Rows"].unique()
+    x_order = data["# Rows"].unique()
 
     # get the hue order
     hue_order = data["Version"].unique()
+
+    # get the color palette
+    color_palette = [version_colors[version] for version in hue_order]
 
     # now we can plot the data
     for metric in ["Memory Bandwidth Utilization (kernel)", "Total Memory Bandwidth Utilization"]:
@@ -295,4 +364,4 @@ for m in full_data["Method"].unique():
             continue
 
         image_safepath = os.path.join(save_path, f"{m}_{metric}.png")
-        plot_data(data, x="NXxNYxNZ = #Rows", x_order=x_order, y=y, hue="Version", hue_order=hue_order, title=f"{m} {metric}", save_path=image_safepath)
+        plot_data(data, x="# Rows", x_order=x_order, y=y, hue="Version", hue_order=hue_order, title=f"{m} {metric}", save_path=image_safepath, color_palette=color_palette)
