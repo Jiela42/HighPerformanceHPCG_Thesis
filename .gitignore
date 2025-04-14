@@ -2,7 +2,7 @@
 example_matrices/
 Python_HPCGLib/MatrixLib/example_stencil_matrices
 src/__pycache__/
-HPCGLib/build/
+HPCGLib/build*/
 HPCGLib/example_matrices/
 Python_HPCGLib/__pycache__/
 Python_HPCGLib/BenchmarkingLib/__pycache__/
