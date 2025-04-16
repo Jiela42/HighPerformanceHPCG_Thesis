@@ -273,7 +273,64 @@ def generate_memory_footprint_analysis():
     plt.savefig(plot_path + '/paper_figures/memory_footprint_general.png')
     plt.savefig(plot_path + '/paper_figures/memory_footprint_general.eps')
 
+def nnz(nx):
+    # Calculate nnz for a 3D 27-point stencil
+    num_interior_points = (nx - 2) * (nx - 2) * (nx - 2)
+    num_face_points = 2 * ((nx - 2) * (nx - 2) + (nx - 2) * (nx - 2) + (nx - 2) * (nx - 2))
+    num_edge_points = 4 * ((nx - 2) + (nx - 2) + (nx - 2))
+    num_corner_points = 8
+
+    nnz_interior = 27 * num_interior_points
+    nnz_face = 18 * num_face_points
+    nnz_edge = 12 * num_edge_points
+    nnz_corner = 8 * num_corner_points
+
+    nnz = nnz_interior + nnz_face + nnz_edge + nnz_corner
+
+    return nnz
+
+def plot_sparsity_curve():
+    
+    # Generate nx values
+    nx = np.linspace(2, 1024, 1024)  # Generate 400 points between 2 and 1028
+    matrix_size = (nx * nx * nx)**2
+    nnzs = nnz(nx)
+
+    density = nnzs / matrix_size * 100
+
+    # print the last 10 values of density
+    print(f"density: {density[-10:]}")
+
+    # Create the plot
+    textsize = 20
+    # Set global font size
+    plt.rcParams.update({'font.size': textsize})  # Adjust this value as needed
+
+    plt.figure(figsize=(12,8))
+    plt.plot(nx, density, linewidth=3)
+
+    plt.xlabel('nx')
+    plt.ylabel('Matrix Density in %')
+
+    plt.yscale('log')
+    plt.xscale('log')
+    plt.xlim(0, 600)
+    # Set x-axis ticks to powers of two
+    powers_of_two = 2**np.arange(1, 10)
+    print(f"powers_of_two: {powers_of_two}")
+    plt.xticks(powers_of_two, labels=[f"{x}" for x in powers_of_two])
+    # plt.title('Memory Footprint Ratio')
+
+    plt.legend(fontsize=textsize)
+    plt.grid(True)
+
+    plt.tight_layout()
+
+    # Save the plot
+    plt.savefig(plot_path + '/paper_figures/sparsity_curve.png')
+    plt.savefig(plot_path + '/paper_figures/sparsity_curve.eps')
 
 if __name__ == "__main__":
     # generate_striped_matrix_visualization()
-    generate_memory_footprint_analysis()
+    # generate_memory_footprint_analysis()
+    plot_sparsity_curve()
