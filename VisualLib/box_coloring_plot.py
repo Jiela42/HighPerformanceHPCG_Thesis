@@ -52,6 +52,52 @@ def generate_2D_propagated_coloring(nx, ny):
 
     return x, y, colors
 
+def generate_3D_propagated_coloring(nx, ny, nz):
+    x = []
+    y = []
+    z = []
+    colors = []
+
+    print(f"Generating propagated coloring for {nx}x{ny}x{nz}")
+
+    for inx in range(nx):
+        for iny in range(ny):
+            for inz in range(nz):
+                color = inx + 2*iny + 4*inz
+                x.append(inx)
+                y.append(iny)
+                z.append(inz)
+                colors.append(color)
+
+    return x, y, z, colors
+
+def generate_3D_box_coloring(nx, ny, nz, bx, by, bz):
+    assert bx >= 2 and by >= 2 and bz >= 2, "Box size must be greater than 2, otherwise dependencies are violated"
+
+    x = []
+    y = []
+    z = []
+    colors = []
+
+    print(f"Generating box coloring for {nx}x{ny}x{nz} with box size {bx}x{by}x{bz}")
+
+    for inx in range(nx):
+        for iny in range(ny):
+            for inz in range(nz):
+                mod_inx = inx % bx
+                mod_iny = iny % by
+                mod_inz = inz % bz
+
+                x.append(inx)
+                y.append(iny)
+                z.append(inz)
+
+                color = mod_inx + mod_iny * bx + mod_inz * bx * by
+
+                colors.append(color)
+
+    return x, y, z, colors
+
 def plot_2D_box_coloring(nx, ny, bx, by):
 
     x, y, colors = generate_2D_box_coloring(nx, ny, bx, by)
@@ -310,6 +356,84 @@ def plot_2D_propagated_coloring_COR_format(nx, ny):
     plt.savefig(save_path_figure.replace('.png', '.eps'), dpi=300, bbox_inches='tight')
     plt.close()
 
+def plot_3D_propagated_coloring(nx, ny, nz):
+    # Generate propagated coloring for 3D
+    x, y, z, colors = generate_3D_propagated_coloring(nx, ny, nz)
+
+    # Create a 3D plot
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111, projection='3d')
+
+    node_size = 800 if nx < 8 else 400
+
+    # Create the scatter plot
+    scatter = ax.scatter(x, y, z, c=colors, cmap=color_scale, s=node_size, edgecolor='black', alpha=1.0)
+
+    # Add color values as text on the dots
+    if(nx < 8):
+        for i in range(len(x)):
+            ax.text(x[i], y[i], z[i], str(colors[i]), color='white', fontsize=10, ha='center', va='center')
+
+    # Add labels and title
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+
+    # Set axis limits
+    ax.set_xlim(-0.5, nx - 0.5)
+    ax.set_ylim(-0.5, ny - 0.5)
+    ax.set_zlim(-0.5, nz - 0.5)
+
+    # Set ticks
+    ax.set_xticks(np.arange(0, nx, 1))
+    ax.set_yticks(np.arange(0, ny, 1))
+    ax.set_zticks(np.arange(0, nz, 1))
+
+    # Save the plot
+    save_path_figure = save_path + f"3D_propagated_coloring_{nx}x{ny}x{nz}.png"
+    plt.savefig(save_path_figure, dpi=300, bbox_inches='tight')
+    plt.savefig(save_path_figure.replace('.png', '.eps'), dpi=300, bbox_inches='tight')
+
+    plt.close()
+
+def plot_3D_box_coloring(nx, ny, nz, bx, by, bz):
+
+    # Generate propagated coloring for 3D
+    x, y, z, colors = generate_3D_box_coloring(nx, ny, nz, bx, by, bz)
+
+    # Create a 3D plot
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Create the scatter plot with opaque nodes
+    scatter = ax.scatter(x, y, z, c=colors, cmap=color_scale, s=500, edgecolor='black', alpha=1.0)
+
+    # Add color values as text on the dots
+    for i in range(len(x)):
+        ax.text(x[i], y[i], z[i], str(colors[i]), color='white', fontsize=10, ha='center', va='center')
+
+    # Add labels and title
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+
+    # Set axis limits
+    ax.set_xlim(-0.5, nx - 0.5)
+    ax.set_ylim(-0.5, ny - 0.5)
+    ax.set_zlim(-0.5, nz - 0.5)
+
+    # Set ticks
+    ax.set_xticks(np.arange(0, nx, 1))
+    ax.set_yticks(np.arange(0, ny, 1))
+    ax.set_zticks(np.arange(0, nz, 1))
+
+    # Save the plot
+    save_path_figure = save_path + f"3D_box_coloring_{nx}x{ny}x{nz}_{bx}x{by}x{bz}.png"
+    plt.savefig(save_path_figure, dpi=300, bbox_inches='tight')
+    plt.savefig(save_path_figure.replace('.png', '.eps'), dpi=300, bbox_inches='tight')
+
+    plt.close()
+
 def plot_min_max_coloring():
 
     nx = 4
@@ -364,4 +488,15 @@ def plot_min_max_coloring():
 
 # plot_2D_propagated_coloring(4, 4)
 # plot_2D_propagated_coloring_COR_format(4, 4)
-plot_min_max_coloring()
+# plot_min_max_coloring()
+
+# plot_3D_propagated_coloring(4, 4, 4)
+# plot_3D_propagated_coloring(8, 8, 8)
+
+# these are very "unübersichtlich. so we don't need them in the thesis"
+# plot_3D_box_coloring(4, 4, 4, 2, 2, 2)
+# plot_3D_box_coloring(4, 4, 4, 3, 3, 3)
+# plot_3D_box_coloring(8, 8, 8, 2, 2, 2)
+# plot_3D_box_coloring(8, 8, 8, 3, 3, 3)
+
+# plot_3D_propagated_coloring(64, 64, 64)

@@ -1,42 +1,64 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.table import Table
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
+import matplotlib.patches as patches
 
+import sys
+sys.path.append('/users/dknecht/HighPerformanceHPCG_Thesis')
+from Python_HPCGLib.MatrixLib.arbitrary_stencil import generate_stencil_matrix, generate_offsets, Shape
 plot_path = "plots/"
 
 def generate_striped_matrix_visualization():
 
-    n = 8
+    # we generate a 4x4 2d9pt stencil matrix
+    n = 16
+    nx = 4
+    ny = 4
 
-    matrix = np.zeros((n, n))
-    offsets = np.array([-5,-4,-1,0,1,4,5])
-    stripe_colors = ['lightcoral', 'lightblue', 'lightgreen', 'lightyellow', 'plum', 'lightsalmon', 'lightgray']
+    matrix = generate_stencil_matrix(2, Shape.SQUARE, 1, [4, 4])
 
-    # generate a toy matrix
+    # from this matrix, generate the striped matrix
+    num_stripes = 0
+    j_min_i =[]
+
+    # discover the offsets
     for i in range(n):
-        for j in offsets:
-            if i+j >= 0 and i+j < n:
-                matrix[i, (i+j)] = -1
-                if i+j == i:
-                    matrix[i, (i+j)] = 4
-    
-    matrix[3, 4] = 0
-    matrix[4, 3] = 0
-    print(matrix)
+        for j in range(n):
+            if matrix[i,j] != 0:
+                curr_offset = j-i
+                if curr_offset not in j_min_i:
+                    j_min_i.append(curr_offset)
+                    num_stripes += 1
 
-    num_stripes = 7
+    # the offsets are the sorted stripes
+    print(f"j_min_i: {j_min_i}")
+    offsets = np.sort(j_min_i)
+
+    
+    # offsets_2d = generate_offsets(2, 1, Shape.SQUARE)
+
+
+    print(f"Offsets: {offsets}")
+    num_stripes = len(offsets)
+    # create the striped matrix
     striped_matrix = np.zeros((n, num_stripes))
 
     for i in range(n):
-        for n_stripe in range(num_stripes):
-            j = i + offsets[n_stripe]
-            if j >= 0 and j < n:
-                striped_matrix[i, n_stripe] = matrix[i, j]
+        for j in range(n):
+            if matrix[i,j] != 0:
+                curr_offset = j-i
+                stripe_idx = np.where(offsets == curr_offset)[0][0]
+                striped_matrix[i, stripe_idx] = matrix[i,j]
 
-    print(striped_matrix)
+    cmap = cm.get_cmap('Pastel1', num_stripes) 
+    stripe_colors = [mcolors.rgb2hex(cmap(i)) for i in range(num_stripes)]
+    stripe_colors[-1] = '#cccccc'
+
 
     # Plot the standard matrix
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig, ax = plt.subplots(figsize=(n, n))
     ax.axis('off')
     # ax.set_title('Dense Representation of a Striped Matrix A', fontsize=25, pad=20)
 
@@ -75,26 +97,27 @@ def generate_striped_matrix_visualization():
     plt.tight_layout()
 
     # Save the figure and display it
-    plt.savefig('plots/paper_figures/standard_matrix.png')
-    plt.savefig('plots/paper_figures/standard_matrix.eps')
+    plt.savefig('plots/paper_figures/standard_2d9pt_matrix.png')
+    plt.savefig('plots/paper_figures/standard_2d9pt_matrix.eps')
     
 
     ##########################################
 
-    # Plot the striped matrix
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 11), gridspec_kw={'height_ratios':[1,n]})  # Adjust to stack subfigures vertically
-    # fig.suptitle('Striped Representation of a Striped Matrix A', fontsize=25, y=0.95)  # Adjust the vertical position of the title
-    
-    cell_size = 1 / max(num_stripes, n)
+  # Plot the striped matrix
+    fig, (ax1, ax2) = plt.subplots(
+        2, 1, figsize=(num_stripes, n + 1), gridspec_kw={'height_ratios': [1, n]}  # Adjust figsize and height ratios
+    )
 
-    # Plot the offsets
+    # Calculate cell size to ensure square cells
+    cell_size = 1 / max(n, num_stripes)
+
+    # Plot the offsets (Table 1)
     ax1.axis('off')
-    cell_size = 1 / n  # Ensure cell_size is based on the number of rows in the data table
-    table1 = Table(ax1, bbox=[0, 0, 1, cell_size * num_stripes])  # Adjust the height of the offsets to be 1 row
+    table1 = Table(ax1, bbox=[0, 0, n * cell_size, n*cell_size])  # Adjust bbox for offsets
 
-    # Add the offset cells (same size as data cells)
+    # Add the offset cells
     for i in range(num_stripes):
-        cell = table1.add_cell(0, i, cell_size, cell_size * num_stripes, text=str(offsets[i]), loc='center', facecolor=stripe_colors[i])
+        cell = table1.add_cell(0, i, cell_size, cell_size, text=str(offsets[i]), loc='center', facecolor=stripe_colors[i])
         cell.get_text().set_fontsize(20)
 
     # Add borders to the offset table
@@ -102,14 +125,14 @@ def generate_striped_matrix_visualization():
         cell.set_edgecolor('lightgrey')
     ax1.add_table(table1)
 
-    for cell in table1.get_celld().values():
-        cell.get_text().set_fontsize(20)
-
+    # Annotate the offsets
     ax1.annotate('Offsets', xy=(-0.08, 0.5), xycoords='axes fraction', fontsize=20, ha='center', va='center')
 
-    # Plot the data
+    # Plot the data (Table 2)
     ax2.axis('off')
-    table2 = Table(ax2, bbox=[0, 0, n * cell_size, num_stripes * cell_size])  # Adjust the height to match the number of rows
+    table2 = Table(ax2, bbox=[0, 0, n * cell_size, n * cell_size])  # Adjust bbox for the matrix
+
+    # Add the matrix cells
     for (i, j), val in np.ndenumerate(striped_matrix):
         background_color = stripe_colors[j]
         cell = table2.add_cell(i, j, cell_size, cell_size, text=str(int(val)), loc='center', facecolor=background_color)
@@ -120,19 +143,230 @@ def generate_striped_matrix_visualization():
         cell.set_edgecolor('lightgrey')
     ax2.add_table(table2)
 
-    for cell in table2.get_celld().values():
-        cell.get_text().set_fontsize(20)
-
+    # Annotate the data
     ax2.annotate('Data', xy=(-0.08, 0.5), xycoords='axes fraction', fontsize=20, ha='center', va='center')
-    # Save the figure and display it
-    # plt.tight_layout()
-    fig.subplots_adjust(hspace=0)  # Adjust the vertical spacing between subfigures
+
+    # Adjust layout and save the figure
+    fig.subplots_adjust(hspace=0.1)  # Reduce vertical spacing between subplots
     plt.tight_layout()
 
-
-    plt.savefig('plots/paper_figures/striped_matrix.png')
-    plt.savefig('plots/paper_figures/striped_matrix.eps')
+    plt.savefig('plots/paper_figures/striped_2d9pt_matrix.png')
+    plt.savefig('plots/paper_figures/striped_2d9pt_matrix.eps')
     plt.show()
+
+def plot_space2matrix_visualization():
+
+    n = 16
+    nx = 4
+    ny = 4
+
+    matrix = generate_stencil_matrix(2, Shape.SQUARE, 1, [4, 4])
+
+    # plot the matrix
+
+    fig, ax = plt.subplots(figsize=(n, n))
+    ax.axis('off')
+
+    # Create a table with the matrix values
+    table = Table(ax, bbox=[0, 0, 1, 1])
+
+    highlight_color = '#A2CFFE'  # Light red color for highlighting
+
+    # Add cells
+    for (i, j), val in np.ndenumerate(matrix):
+
+        background_color = highlight_color if (i==5) else 'white'
+       
+        if val != 0:
+            cell = table.add_cell(i, j, 1/n, 1/n, text=str(int(val)), loc='center', facecolor=background_color)
+            cell.get_text().set_fontsize(20)
+        else:
+            # add dummy text to keep the cell white
+            if i == 3 and j == 4:
+                # add a zero to the cell
+                table.add_cell(i, j, 1/n, 1/n, text='0', loc='center', facecolor=background_color)
+            elif i == 4 and j == 3:
+                # add a zero to the cell
+                table.add_cell(i, j, 1/n, 1/n, text='0', loc='center', facecolor=background_color)
+            else:
+                table.add_cell(i, j, 1/n, 1/n, text='', loc='center', facecolor=background_color)
+   
+   # Set the inner dividers to a faint grey color
+    for (i, j), cell in table.get_celld().items():
+        cell.set_edgecolor('lightgrey')  # Keep inner borders grey
+    
+    # Display the table
+    ax.add_table(table)
+
+    for cell in table.get_celld().values():
+        cell.get_text().set_fontsize(20)
+
+    plt.tight_layout()
+
+    # Save the figure and display it
+    plt.savefig('plots/paper_figures/standard_2d9pt_matrix_withDependencyHighlight.png')
+    plt.savefig('plots/paper_figures/standard_2d9pt_matrix_withDependencyHighlight.eps')
+
+    plt.close()
+    ##########################################
+    ##########################################
+
+    # plot the corresponding 2d space
+    # Create a 2D grid
+    x = np.arange(nx)
+    y = np.arange(ny)
+
+        # Add pale grey gridlines
+    plt.grid(color='lightgrey', linestyle='--', linewidth=1.0, zorder=0.0)
+
+    # Create a meshgrid
+    X, Y = np.meshgrid(x, y)
+
+    # adapt the colors
+    colors = np.full((nx, ny), 'white', dtype='<U10')
+
+    for i in range(nx):
+        for j in range(ny):
+                if i < 3 and j < 3:
+                    colors[i,j] = highlight_color
+
+    colors[1,1] = '#1e00ff'
+
+    # print(f"colors: {colors}")
+    # Create a scatter plot
+    plt.scatter(X, Y, s=800, c=colors.flatten(),edgecolors='black', zorder=5.0)
+    
+    # Add numbers (x + y * nx) to each point
+    for i in range(nx):
+        for j in range(ny):
+            value = i + j * nx  # Calculate x + y * nx
+            plt.text(i, j, str(value), color='black', fontsize=15, ha='center', va='center', zorder=10)
+
+
+    # add boxes around each bx*by region
+    box_buffer = 0.3
+    ax = plt.gca()
+    rect = patches.FancyBboxPatch(
+                 (0 - box_buffer, 0 - box_buffer),
+                 3-1 + 2 * box_buffer, 3-1 + 2 * box_buffer,
+                 boxstyle="round,pad=0.1, rounding_size=0.3",
+                 linewidth=1, edgecolor= highlight_color, facecolor=highlight_color, zorder=-5.0)
+    ax.add_patch(rect)
+
+            
+            
+
+
+    # Set x and y limits
+    plt.xlim(-0.5, nx-0.5)
+    plt.ylim(-0.5, ny-0.5)
+
+    # Set ticks
+    plt.xticks(np.arange(0, nx, 1))
+    plt.yticks(np.arange(0, ny, 1))
+
+    # Remove the enclosing box
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
+    # plt.gca().spines['left'].set_visible(False)
+    # plt.gca().spines['bottom'].set_visible(False)
+
+
+    # Add labels and title
+    plt.xlabel('X')
+    plt.ylabel('Y', rotation=0)
+    # plt.title(f'Box Coloring (ColoringBox {bx}x{by})')
+
+    # Set aspect ratio
+    plt.gca().set_aspect('equal', adjustable='box')
+
+    save_path_figure = "plots/paper_figures/2D9pt_space_withDependencyHighlight.png"
+    plt.savefig(save_path_figure, dpi=300, bbox_inches='tight')
+    plt.savefig(save_path_figure.replace('.png', '.eps'), dpi=300, bbox_inches='tight')
+
+    plt.close()
+
+def plot_SymGS_forward_visualization():
+
+    nx = 4
+    ny = 4
+
+    # Create a 2D grid
+    x = np.arange(nx)
+    y = np.arange(ny)
+
+    # Create a meshgrid
+    X, Y = np.meshgrid(x, y)
+
+    # adapt the colors
+    colors = np.full((nx, ny), 'white', dtype='<U10')
+
+
+    # colors[1,1] = '#1e00ff'
+
+    # print(f"colors: {colors}")
+    # Create a scatter plot
+    plt.scatter(X, Y, s=800, c=colors.flatten(),edgecolors='black', zorder=5.0)
+    
+    # Add numbers (x + y * nx) to each point
+    for i in range(nx):
+        for j in range(ny):
+            value = i + j * nx  # Calculate x + y * nx
+            plt.text(i, j, str(value), color='black', fontsize=15, ha='center', va='center', zorder=10)          
+
+    arrow_color = "#b82727"
+
+    # Add red arrows from every node to its smaller neighbors
+    arrow_pad = 0.3  # Padding factor to shorten the arrows
+    diagonal_arrow_pad = 0.2
+    for i in range(nx):
+        for j in range(ny):
+            # Check neighbors in the grid
+            if i > 0:  # Left neighbor
+                plt.arrow(i - arrow_pad, j, -1 + 2 * arrow_pad, 0, 
+                        head_width=0.1, head_length=0.1, fc=arrow_color, ec=arrow_color, 
+                        length_includes_head=True, zorder=5)
+            if j > 0:  # Bottom neighbor
+                plt.arrow(i, j - arrow_pad, 0, -1 + 2 * arrow_pad, 
+                        head_width=0.1, head_length=0.1, fc=arrow_color, ec=arrow_color, 
+                        length_includes_head=True, zorder=5)
+            if i > 0 and j > 0:  # Bottom-left neighbor
+                plt.arrow(i - diagonal_arrow_pad, j - diagonal_arrow_pad, -1 + 2 * diagonal_arrow_pad, -1 + 2 * diagonal_arrow_pad, 
+                        head_width=0.1, head_length=0.1, fc=arrow_color, ec=arrow_color, 
+                        length_includes_head=True, zorder=5)
+            
+
+
+    # Set x and y limits
+    plt.xlim(-0.5, nx-0.5)
+    plt.ylim(-0.5, ny-0.5)
+
+    # Set ticks
+    plt.xticks(np.arange(0, nx, 1))
+    plt.yticks(np.arange(0, ny, 1))
+
+    # Remove the enclosing box
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
+    # plt.gca().spines['left'].set_visible(False)
+    # plt.gca().spines['bottom'].set_visible(False)
+
+
+    # Add labels and title
+    plt.xlabel('X')
+    plt.ylabel('Y', rotation=0)
+    # plt.title(f'Box Coloring (ColoringBox {bx}x{by})')
+
+    # Set aspect ratio
+    plt.gca().set_aspect('equal', adjustable='box')
+
+    save_path_figure = "plots/paper_figures/2D9pt_space_withDependencies.png"
+    plt.savefig(save_path_figure, dpi=300, bbox_inches='tight')
+    plt.savefig(save_path_figure.replace('.png', '.eps'), dpi=300, bbox_inches='tight')
+
+    plt.close()
+
+    
 
 # Define the function
 def memory_footprint_3d27pt(nx, index_size, value_size):
@@ -165,8 +399,6 @@ def memory_footprint(nnz, num_rows, additional_zeros, num_stripes, index_size, v
 
     return Striped_footprint / CSR_footprint
     
-
-
 def generate_memory_footprint_analysis():
     # Generate nx values
     nx = np.linspace(2, 128, 400)  # Generate 400 points between 2 and 1028
@@ -332,5 +564,7 @@ def plot_sparsity_curve():
 
 if __name__ == "__main__":
     # generate_striped_matrix_visualization()
+    # plot_space2matrix_visualization()
+    plot_SymGS_forward_visualization()
     # generate_memory_footprint_analysis()
-    plot_sparsity_curve()
+    # plot_sparsity_curve()
