@@ -1,4 +1,4 @@
-# Install script for directory: /users/nrottste/HighPerformanceHPCG_Thesis/HPCGLib/src
+# Install script for directory: /users/nrottstegge/github/HighPerformanceHPCG_Thesis/HPCGLib/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -37,28 +37,28 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "FALSE")
 endif()
 
-# Set default install directory permissions.
+# Set path to fallback-tool for dependency-resolution.
 if(NOT DEFINED CMAKE_OBJDUMP)
   set(CMAKE_OBJDUMP "/usr/bin/objdump")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/users/nrottste/HighPerformanceHPCG_Thesis/build/HPCGLib/src/HPCG_versions/cmake_install.cmake")
+  include("/users/nrottstegge/github/HighPerformanceHPCG_Thesis/build/HPCGLib/src/HPCG_versions/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/users/nrottste/HighPerformanceHPCG_Thesis/build/HPCGLib/src/TimingLib/cmake_install.cmake")
+  include("/users/nrottstegge/github/HighPerformanceHPCG_Thesis/build/HPCGLib/src/TimingLib/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/users/nrottste/HighPerformanceHPCG_Thesis/build/HPCGLib/src/MatrixLib/cmake_install.cmake")
+  include("/users/nrottstegge/github/HighPerformanceHPCG_Thesis/build/HPCGLib/src/MatrixLib/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/users/nrottste/HighPerformanceHPCG_Thesis/build/HPCGLib/src/UtilLib/cmake_install.cmake")
+  include("/users/nrottstegge/github/HighPerformanceHPCG_Thesis/build/HPCGLib/src/UtilLib/cmake_install.cmake")
 endif()
 
