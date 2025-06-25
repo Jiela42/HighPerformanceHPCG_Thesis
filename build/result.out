@@ -1,269 +1,71 @@
-Started: 23:32:33
+Started: 15:52:34
 Testing BLOCKING MPI implementation
 Testing started.
 Comm Type: blocking_mpi
-CPU wall-clock time for multi-GPU compute_SymGS: 0.676652 ms
-CPU wall-clock time for multi-GPU compute_SymGS: 0.238393 ms
-CPU wall-clock time for multi-GPU compute_SymGS: 0.239321 ms
-CPU wall-clock time for multi-GPU compute_SymGS: 0.231385 ms
-CPU wall-clock time for multi-GPU compute_SymGS: 0.237689 ms
-CPU wall-clock time for multi-GPU compute_SymGS: 0.234457 ms
-CPU wall-clock time for multi-GPU compute_SymGS: 0.232794 ms
-CPU wall-clock time for multi-GPU compute_SymGS: 0.232473 ms
-CPU wall-clock time for multi-GPU compute_SymGS: 0.234521 ms
-CPU wall-clock time for multi-GPU compute_SymGS: 0.242073 ms
-CPU wall-clock time for single-GPU compute_SymGS: 0.420372 ms
-CPU wall-clock time for single-GPU compute_SymGS: 0.175867 ms
-CPU wall-clock time for single-GPU compute_SymGS: 0.176058 ms
-CPU wall-clock time for single-GPU compute_SymGS: 0.175867 ms
-CPU wall-clock time for single-GPU compute_SymGS: 0.177691 ms
-CPU wall-clock time for single-GPU compute_SymGS: 0.175291 ms
-CPU wall-clock time for single-GPU compute_SymGS: 0.176091 ms
-CPU wall-clock time for single-GPU compute_SymGS: 0.174394 ms
-CPU wall-clock time for single-GPU compute_SymGS: 0.177403 ms
-CPU wall-clock time for single-GPU compute_SymGS: 0.177659 ms
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458526,	 result_single_GPU_h[i]=317352.461538,	 result_multi_GPU_h[i]317352.461538
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458529,	 result_single_GPU_h[i]=317354.538462,	 result_multi_GPU_h[i]317354.538462
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458565,	 result_single_GPU_h[i]=317379.461538,	 result_multi_GPU_h[i]317379.461538
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458568,	 result_single_GPU_h[i]=317381.538462,	 result_multi_GPU_h[i]317381.538462
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458604,	 result_single_GPU_h[i]=317406.461538,	 result_multi_GPU_h[i]317406.461538
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458607,	 result_single_GPU_h[i]=317408.538462,	 result_multi_GPU_h[i]317408.538462
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458643,	 result_single_GPU_h[i]=317433.461538,	 result_multi_GPU_h[i]317433.461538
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458646,	 result_single_GPU_h[i]=317435.538462,	 result_multi_GPU_h[i]317435.538462
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458682,	 result_single_GPU_h[i]=317460.461538,	 result_multi_GPU_h[i]317460.461538
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458685,	 result_single_GPU_h[i]=317462.538462,	 result_multi_GPU_h[i]317462.538462
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458721,	 result_single_GPU_h[i]=317487.461538,	 result_multi_GPU_h[i]317487.461538
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458724,	 result_single_GPU_h[i]=317489.538462,	 result_multi_GPU_h[i]317489.538462
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1771263,	 result_single_GPU_h[i]=1226258.653846,	 result_multi_GPU_h[i]1226258.653846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1772031,	 result_single_GPU_h[i]=1226790.346154,	 result_multi_GPU_h[i]1226790.346154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1781247,	 result_single_GPU_h[i]=1233170.653846,	 result_multi_GPU_h[i]1233170.653846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1782015,	 result_single_GPU_h[i]=1233702.346154,	 result_multi_GPU_h[i]1233702.346154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1791231,	 result_single_GPU_h[i]=1240082.653846,	 result_multi_GPU_h[i]1240082.653846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1791999,	 result_single_GPU_h[i]=1240614.346154,	 result_multi_GPU_h[i]1240614.346154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1801215,	 result_single_GPU_h[i]=1246994.653846,	 result_multi_GPU_h[i]1246994.653846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1801983,	 result_single_GPU_h[i]=1247526.346154,	 result_multi_GPU_h[i]1247526.346154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1811199,	 result_single_GPU_h[i]=1253906.653846,	 result_multi_GPU_h[i]1253906.653846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1811967,	 result_single_GPU_h[i]=1254438.346154,	 result_multi_GPU_h[i]1254438.346154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834773,	 result_single_GPU_h[i]=1270138.846154,	 result_multi_GPU_h[i]1270138.846154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834785,	 result_single_GPU_h[i]=1270147.153846,	 result_multi_GPU_h[i]1270147.153846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834812,	 result_single_GPU_h[i]=1270165.846154,	 result_multi_GPU_h[i]1270165.846154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834824,	 result_single_GPU_h[i]=1270174.153846,	 result_multi_GPU_h[i]1270174.153846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834851,	 result_single_GPU_h[i]=1270192.846154,	 result_multi_GPU_h[i]1270192.846154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834863,	 result_single_GPU_h[i]=1270201.153846,	 result_multi_GPU_h[i]1270201.153846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834890,	 result_single_GPU_h[i]=1270219.846154,	 result_multi_GPU_h[i]1270219.846154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834902,	 result_single_GPU_h[i]=1270228.153846,	 result_multi_GPU_h[i]1270228.153846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834929,	 result_single_GPU_h[i]=1270246.846154,	 result_multi_GPU_h[i]1270246.846154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834941,	 result_single_GPU_h[i]=1270255.153846,	 result_multi_GPU_h[i]1270255.153846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834968,	 result_single_GPU_h[i]=1270273.846154,	 result_multi_GPU_h[i]1270273.846154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834980,	 result_single_GPU_h[i]=1270282.153846,	 result_multi_GPU_h[i]1270282.153846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3543039,	 result_single_GPU_h[i]=2452872.807692,	 result_multi_GPU_h[i]2452872.807692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3544575,	 result_single_GPU_h[i]=2453936.192308,	 result_multi_GPU_h[i]2453936.192308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3553023,	 result_single_GPU_h[i]=2459784.807692,	 result_multi_GPU_h[i]2459784.807692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3554559,	 result_single_GPU_h[i]=2460848.192308,	 result_multi_GPU_h[i]2460848.192308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3563007,	 result_single_GPU_h[i]=2466696.807692,	 result_multi_GPU_h[i]2466696.807692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3564543,	 result_single_GPU_h[i]=2467760.192308,	 result_multi_GPU_h[i]2467760.192308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3572991,	 result_single_GPU_h[i]=2473608.807692,	 result_multi_GPU_h[i]2473608.807692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3574527,	 result_single_GPU_h[i]=2474672.192308,	 result_multi_GPU_h[i]2474672.192308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3582975,	 result_single_GPU_h[i]=2480520.807692,	 result_multi_GPU_h[i]2480520.807692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3584511,	 result_single_GPU_h[i]=2481584.192308,	 result_multi_GPU_h[i]2481584.192308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3592959,	 result_single_GPU_h[i]=2487432.807692,	 result_multi_GPU_h[i]2487432.807692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3594495,	 result_single_GPU_h[i]=2488496.192308,	 result_multi_GPU_h[i]2488496.192308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3602943,	 result_single_GPU_h[i]=2494344.807692,	 result_multi_GPU_h[i]2494344.807692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604236,	 result_single_GPU_h[i]=2495151.692308,	 result_multi_GPU_h[i]2495151.692308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604260,	 result_single_GPU_h[i]=2495168.307692,	 result_multi_GPU_h[i]2495168.307692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604275,	 result_single_GPU_h[i]=2495178.692308,	 result_multi_GPU_h[i]2495178.692308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604299,	 result_single_GPU_h[i]=2495195.307692,	 result_multi_GPU_h[i]2495195.307692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604314,	 result_single_GPU_h[i]=2495205.692308,	 result_multi_GPU_h[i]2495205.692308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604338,	 result_single_GPU_h[i]=2495222.307692,	 result_multi_GPU_h[i]2495222.307692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604353,	 result_single_GPU_h[i]=2495232.692308,	 result_multi_GPU_h[i]2495232.692308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604377,	 result_single_GPU_h[i]=2495249.307692,	 result_multi_GPU_h[i]2495249.307692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604392,	 result_single_GPU_h[i]=2495259.692308,	 result_multi_GPU_h[i]2495259.692308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604416,	 result_single_GPU_h[i]=2495276.307692,	 result_multi_GPU_h[i]2495276.307692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604431,	 result_single_GPU_h[i]=2495286.692308,	 result_multi_GPU_h[i]2495286.692308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604455,	 result_single_GPU_h[i]=2495303.307692,	 result_multi_GPU_h[i]2495303.307692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604470,	 result_single_GPU_h[i]=2495313.692308,	 result_multi_GPU_h[i]2495313.692308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7079679,	 result_single_GPU_h[i]=4901315.884615,	 result_multi_GPU_h[i]4901315.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7086591,	 result_single_GPU_h[i]=4906101.115385,	 result_multi_GPU_h[i]4906101.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7089663,	 result_single_GPU_h[i]=4908227.884615,	 result_multi_GPU_h[i]4908227.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7096575,	 result_single_GPU_h[i]=4913013.115385,	 result_multi_GPU_h[i]4913013.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7099647,	 result_single_GPU_h[i]=4915139.884615,	 result_multi_GPU_h[i]4915139.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7106559,	 result_single_GPU_h[i]=4919925.115385,	 result_multi_GPU_h[i]4919925.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7109631,	 result_single_GPU_h[i]=4922051.884615,	 result_multi_GPU_h[i]4922051.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7116543,	 result_single_GPU_h[i]=4926837.115385,	 result_multi_GPU_h[i]4926837.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7119615,	 result_single_GPU_h[i]=4928963.884615,	 result_multi_GPU_h[i]4928963.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7126527,	 result_single_GPU_h[i]=4933749.115385,	 result_multi_GPU_h[i]4933749.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7129599,	 result_single_GPU_h[i]=4935875.884615,	 result_multi_GPU_h[i]4935875.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7136511,	 result_single_GPU_h[i]=4940661.115385,	 result_multi_GPU_h[i]4940661.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7139583,	 result_single_GPU_h[i]=4942787.884615,	 result_multi_GPU_h[i]4942787.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143171,	 result_single_GPU_h[i]=4945183.615385,	 result_multi_GPU_h[i]4945183.615385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143201,	 result_single_GPU_h[i]=4945204.384615,	 result_multi_GPU_h[i]4945204.384615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143210,	 result_single_GPU_h[i]=4945210.615385,	 result_multi_GPU_h[i]4945210.615385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143240,	 result_single_GPU_h[i]=4945231.384615,	 result_multi_GPU_h[i]4945231.384615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143249,	 result_single_GPU_h[i]=4945237.615385,	 result_multi_GPU_h[i]4945237.615385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143279,	 result_single_GPU_h[i]=4945258.384615,	 result_multi_GPU_h[i]4945258.384615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143288,	 result_single_GPU_h[i]=4945264.615385,	 result_multi_GPU_h[i]4945264.615385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143318,	 result_single_GPU_h[i]=4945285.384615,	 result_multi_GPU_h[i]4945285.384615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143327,	 result_single_GPU_h[i]=4945291.615385,	 result_multi_GPU_h[i]4945291.615385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143357,	 result_single_GPU_h[i]=4945312.384615,	 result_multi_GPU_h[i]4945312.384615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143366,	 result_single_GPU_h[i]=4945318.615385,	 result_multi_GPU_h[i]4945318.615385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143396,	 result_single_GPU_h[i]=4945339.384615,	 result_multi_GPU_h[i]4945339.384615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143405,	 result_single_GPU_h[i]=4945345.615385,	 result_multi_GPU_h[i]4945345.615385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7276287,	 result_single_GPU_h[i]=5037429.115385,	 result_multi_GPU_h[i]5037429.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7279359,	 result_single_GPU_h[i]=5039555.884615,	 result_multi_GPU_h[i]5039555.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7286271,	 result_single_GPU_h[i]=5044341.115385,	 result_multi_GPU_h[i]5044341.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7289343,	 result_single_GPU_h[i]=5046467.884615,	 result_multi_GPU_h[i]5046467.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7296255,	 result_single_GPU_h[i]=5051253.115385,	 result_multi_GPU_h[i]5051253.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7299327,	 result_single_GPU_h[i]=5053379.884615,	 result_multi_GPU_h[i]5053379.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7306239,	 result_single_GPU_h[i]=5058165.115385,	 result_multi_GPU_h[i]5058165.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7309311,	 result_single_GPU_h[i]=5060291.884615,	 result_multi_GPU_h[i]5060291.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7316223,	 result_single_GPU_h[i]=5065077.115385,	 result_multi_GPU_h[i]5065077.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7319295,	 result_single_GPU_h[i]=5067203.884615,	 result_multi_GPU_h[i]5067203.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7326207,	 result_single_GPU_h[i]=5071989.115385,	 result_multi_GPU_h[i]5071989.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7329279,	 result_single_GPU_h[i]=5074115.884615,	 result_multi_GPU_h[i]5074115.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7336191,	 result_single_GPU_h[i]=5078901.115385,	 result_multi_GPU_h[i]5078901.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7339263,	 result_single_GPU_h[i]=5081027.884615,	 result_multi_GPU_h[i]5081027.884615
-!!!!!SymGS Result is NOT correct!!!!!
-SymGS: 217.000000 of 16777216.000000 wrong values which is 0.001293 percent
+CPU wall-clock time for multi-GPU test_SPMV: 2.424110 ms
+CPU wall-clock time for multi-GPU test_SPMV: 2.045883 ms
+CPU wall-clock time for multi-GPU test_SPMV: 2.041467 ms
+CPU wall-clock time for multi-GPU test_SPMV: 2.032923 ms
+CPU wall-clock time for multi-GPU test_SPMV: 2.014204 ms
+CPU wall-clock time for multi-GPU test_SPMV: 2.010461 ms
+CPU wall-clock time for multi-GPU test_SPMV: 2.004284 ms
+CPU wall-clock time for multi-GPU test_SPMV: 1.998876 ms
+CPU wall-clock time for multi-GPU test_SPMV: 1.994941 ms
+CPU wall-clock time for multi-GPU test_SPMV: 1.984061 ms
+CPU wall-clock time for single-GPU test_SPMV: 1.732805 ms
+CPU wall-clock time for single-GPU test_SPMV: 1.500749 ms
+CPU wall-clock time for single-GPU test_SPMV: 1.479119 ms
+CPU wall-clock time for single-GPU test_SPMV: 1.479279 ms
+CPU wall-clock time for single-GPU test_SPMV: 1.476622 ms
+CPU wall-clock time for single-GPU test_SPMV: 1.479374 ms
+CPU wall-clock time for single-GPU test_SPMV: 1.469550 ms
+CPU wall-clock time for single-GPU test_SPMV: 1.467662 ms
+CPU wall-clock time for single-GPU test_SPMV: 1.475022 ms
+CPU wall-clock time for single-GPU test_SPMV: 1.455343 ms
+++++++
+SPMV is correct for multi GPU
+++++++
 Testing done.
-==PROF== Connected to process 287727 (/users/nrottstegge/github/HighPerformanceHPCG_Thesis/build/HPCGLib/testing/run_multi_GPU_tests)
-==PROF== Profiling "no_warp_striped_box_coloring_half_SymGS_kernel": 0%
+==PROF== Connected to process 273630 (/users/nrottstegge/github/HighPerformanceHPCG_Thesis/build/HPCGLib/testing/run_multi_GPU_tests)
+==PROF== Profiling "pipelined_columnMajor_multi_GPU_SPMV_kernel": 0%
 ==WARNING== Backing up device memory in system memory. Kernel replay might be slow. Consider using "--replay-mode application" to avoid memory save-and-restore.
-....50%....100% - 10 passes
-==PROF== Profiling "no_warp_striped_box_coloring_half_SymGS_kernel": 0%....50%....100% - 10 passes
-==PROF== Profiling "no_warp_striped_box_coloring_half_SymGS_kernel": 0%....50%....100% - 10 passes
-==PROF== Profiling "no_warp_striped_box_coloring_half_SymGS_kernel": 0%....50%....100% - 10 passes
-==PROF== Profiling "no_warp_striped_box_coloring_half_SymGS_kernel": 0%....50%....100% - 10 passes
-==PROF== Profiling "no_warp_striped_box_coloring_half_SymGS_kernel": 0%....50%....100% - 10 passes
-==PROF== Profiling "no_warp_striped_box_coloring_half_SymGS_kernel": 0%....50%....100% - 10 passes
-==PROF== Profiling "no_warp_striped_box_coloring_half_SymGS_kernel": 0%....50%....100% - 10 passes
-==PROF== Profiling "no_warp_striped_box_coloring_half_SymGS_kernel": 0%....50%....100% - 10 passes
-==PROF== Profiling "no_warp_striped_box_coloring_half_SymGS_kernel": 0%....50%....100% - 10 passes
+....50%....100% - 39 passes
+==PROF== Profiling "pipelined_columnMajor_multi_GPU_SPMV_kernel": 0%....50%....100% - 39 passes
+==PROF== Profiling "pipelined_columnMajor_multi_GPU_SPMV_kernel": 0%....50%....100% - 39 passes
+==PROF== Profiling "pipelined_columnMajor_multi_GPU_SPMV_kernel": 0%....50%....100% - 39 passes
+==PROF== Profiling "pipelined_columnMajor_multi_GPU_SPMV_kernel": 0%....50%....100% - 39 passes
+==PROF== Profiling "pipelined_columnMajor_multi_GPU_SPMV_kernel": 0%....50%....100% - 39 passes
+==PROF== Profiling "pipelined_columnMajor_multi_GPU_SPMV_kernel": 0%....50%....100% - 39 passes
+==PROF== Profiling "pipelined_columnMajor_multi_GPU_SPMV_kernel": 0%....50%....100% - 39 passes
+==PROF== Profiling "pipelined_columnMajor_multi_GPU_SPMV_kernel": 0%....50%....100% - 39 passes
+==PROF== Profiling "pipelined_columnMajor_multi_GPU_SPMV_kernel": 0%....50%....100% - 38 passes
 Testing started.
 Comm Type: blocking_mpi
-CPU wall-clock time for multi-GPU compute_SymGS: 2401.365284 ms
-CPU wall-clock time for multi-GPU compute_SymGS: 1465.240401 ms
-CPU wall-clock time for multi-GPU compute_SymGS: 1618.160880 ms
-CPU wall-clock time for multi-GPU compute_SymGS: 1469.789131 ms
-CPU wall-clock time for multi-GPU compute_SymGS: 1515.087283 ms
-CPU wall-clock time for multi-GPU compute_SymGS: 1428.837859 ms
-CPU wall-clock time for multi-GPU compute_SymGS: 1428.540909 ms
-CPU wall-clock time for multi-GPU compute_SymGS: 1418.726223 ms
-CPU wall-clock time for multi-GPU compute_SymGS: 1432.873357 ms
-CPU wall-clock time for multi-GPU compute_SymGS: 1428.334707 ms
-CPU wall-clock time for single-GPU compute_SymGS: 1.142815 ms
-CPU wall-clock time for single-GPU compute_SymGS: 0.199546 ms
-CPU wall-clock time for single-GPU compute_SymGS: 0.203418 ms
-CPU wall-clock time for single-GPU compute_SymGS: 0.200858 ms
-CPU wall-clock time for single-GPU compute_SymGS: 0.203290 ms
-CPU wall-clock time for single-GPU compute_SymGS: 0.204026 ms
-CPU wall-clock time for single-GPU compute_SymGS: 0.204538 ms
-CPU wall-clock time for single-GPU compute_SymGS: 0.202586 ms
-CPU wall-clock time for single-GPU compute_SymGS: 0.203802 ms
-CPU wall-clock time for single-GPU compute_SymGS: 0.204090 ms
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458526,	 result_single_GPU_h[i]=317352.461538,	 result_multi_GPU_h[i]317352.461538
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458529,	 result_single_GPU_h[i]=317354.538462,	 result_multi_GPU_h[i]317354.538462
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458565,	 result_single_GPU_h[i]=317379.461538,	 result_multi_GPU_h[i]317379.461538
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458568,	 result_single_GPU_h[i]=317381.538462,	 result_multi_GPU_h[i]317381.538462
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458604,	 result_single_GPU_h[i]=317406.461538,	 result_multi_GPU_h[i]317406.461538
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458607,	 result_single_GPU_h[i]=317408.538462,	 result_multi_GPU_h[i]317408.538462
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458643,	 result_single_GPU_h[i]=317433.461538,	 result_multi_GPU_h[i]317433.461538
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458646,	 result_single_GPU_h[i]=317435.538462,	 result_multi_GPU_h[i]317435.538462
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458682,	 result_single_GPU_h[i]=317460.461538,	 result_multi_GPU_h[i]317460.461538
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458685,	 result_single_GPU_h[i]=317462.538462,	 result_multi_GPU_h[i]317462.538462
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458721,	 result_single_GPU_h[i]=317487.461538,	 result_multi_GPU_h[i]317487.461538
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=458724,	 result_single_GPU_h[i]=317489.538462,	 result_multi_GPU_h[i]317489.538462
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1771263,	 result_single_GPU_h[i]=1226258.653846,	 result_multi_GPU_h[i]1226258.653846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1772031,	 result_single_GPU_h[i]=1226790.346154,	 result_multi_GPU_h[i]1226790.346154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1781247,	 result_single_GPU_h[i]=1233170.653846,	 result_multi_GPU_h[i]1233170.653846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1782015,	 result_single_GPU_h[i]=1233702.346154,	 result_multi_GPU_h[i]1233702.346154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1791231,	 result_single_GPU_h[i]=1240082.653846,	 result_multi_GPU_h[i]1240082.653846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1791999,	 result_single_GPU_h[i]=1240614.346154,	 result_multi_GPU_h[i]1240614.346154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1801215,	 result_single_GPU_h[i]=1246994.653846,	 result_multi_GPU_h[i]1246994.653846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1801983,	 result_single_GPU_h[i]=1247526.346154,	 result_multi_GPU_h[i]1247526.346154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1811199,	 result_single_GPU_h[i]=1253906.653846,	 result_multi_GPU_h[i]1253906.653846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1811967,	 result_single_GPU_h[i]=1254438.346154,	 result_multi_GPU_h[i]1254438.346154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834773,	 result_single_GPU_h[i]=1270138.846154,	 result_multi_GPU_h[i]1270138.846154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834785,	 result_single_GPU_h[i]=1270147.153846,	 result_multi_GPU_h[i]1270147.153846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834812,	 result_single_GPU_h[i]=1270165.846154,	 result_multi_GPU_h[i]1270165.846154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834824,	 result_single_GPU_h[i]=1270174.153846,	 result_multi_GPU_h[i]1270174.153846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834851,	 result_single_GPU_h[i]=1270192.846154,	 result_multi_GPU_h[i]1270192.846154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834863,	 result_single_GPU_h[i]=1270201.153846,	 result_multi_GPU_h[i]1270201.153846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834890,	 result_single_GPU_h[i]=1270219.846154,	 result_multi_GPU_h[i]1270219.846154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834902,	 result_single_GPU_h[i]=1270228.153846,	 result_multi_GPU_h[i]1270228.153846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834929,	 result_single_GPU_h[i]=1270246.846154,	 result_multi_GPU_h[i]1270246.846154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834941,	 result_single_GPU_h[i]=1270255.153846,	 result_multi_GPU_h[i]1270255.153846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834968,	 result_single_GPU_h[i]=1270273.846154,	 result_multi_GPU_h[i]1270273.846154
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=1834980,	 result_single_GPU_h[i]=1270282.153846,	 result_multi_GPU_h[i]1270282.153846
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3543039,	 result_single_GPU_h[i]=2452872.807692,	 result_multi_GPU_h[i]2452872.807692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3544575,	 result_single_GPU_h[i]=2453936.192308,	 result_multi_GPU_h[i]2453936.192308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3553023,	 result_single_GPU_h[i]=2459784.807692,	 result_multi_GPU_h[i]2459784.807692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3554559,	 result_single_GPU_h[i]=2460848.192308,	 result_multi_GPU_h[i]2460848.192308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3563007,	 result_single_GPU_h[i]=2466696.807692,	 result_multi_GPU_h[i]2466696.807692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3564543,	 result_single_GPU_h[i]=2467760.192308,	 result_multi_GPU_h[i]2467760.192308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3572991,	 result_single_GPU_h[i]=2473608.807692,	 result_multi_GPU_h[i]2473608.807692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3574527,	 result_single_GPU_h[i]=2474672.192308,	 result_multi_GPU_h[i]2474672.192308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3582975,	 result_single_GPU_h[i]=2480520.807692,	 result_multi_GPU_h[i]2480520.807692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3584511,	 result_single_GPU_h[i]=2481584.192308,	 result_multi_GPU_h[i]2481584.192308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3592959,	 result_single_GPU_h[i]=2487432.807692,	 result_multi_GPU_h[i]2487432.807692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3594495,	 result_single_GPU_h[i]=2488496.192308,	 result_multi_GPU_h[i]2488496.192308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3602943,	 result_single_GPU_h[i]=2494344.807692,	 result_multi_GPU_h[i]2494344.807692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604236,	 result_single_GPU_h[i]=2495151.692308,	 result_multi_GPU_h[i]2495151.692308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604260,	 result_single_GPU_h[i]=2495168.307692,	 result_multi_GPU_h[i]2495168.307692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604275,	 result_single_GPU_h[i]=2495178.692308,	 result_multi_GPU_h[i]2495178.692308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604299,	 result_single_GPU_h[i]=2495195.307692,	 result_multi_GPU_h[i]2495195.307692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604314,	 result_single_GPU_h[i]=2495205.692308,	 result_multi_GPU_h[i]2495205.692308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604338,	 result_single_GPU_h[i]=2495222.307692,	 result_multi_GPU_h[i]2495222.307692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604353,	 result_single_GPU_h[i]=2495232.692308,	 result_multi_GPU_h[i]2495232.692308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604377,	 result_single_GPU_h[i]=2495249.307692,	 result_multi_GPU_h[i]2495249.307692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604392,	 result_single_GPU_h[i]=2495259.692308,	 result_multi_GPU_h[i]2495259.692308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604416,	 result_single_GPU_h[i]=2495276.307692,	 result_multi_GPU_h[i]2495276.307692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604431,	 result_single_GPU_h[i]=2495286.692308,	 result_multi_GPU_h[i]2495286.692308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604455,	 result_single_GPU_h[i]=2495303.307692,	 result_multi_GPU_h[i]2495303.307692
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=3604470,	 result_single_GPU_h[i]=2495313.692308,	 result_multi_GPU_h[i]2495313.692308
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7079679,	 result_single_GPU_h[i]=4901315.884615,	 result_multi_GPU_h[i]4901315.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7086591,	 result_single_GPU_h[i]=4906101.115385,	 result_multi_GPU_h[i]4906101.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7089663,	 result_single_GPU_h[i]=4908227.884615,	 result_multi_GPU_h[i]4908227.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7096575,	 result_single_GPU_h[i]=4913013.115385,	 result_multi_GPU_h[i]4913013.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7099647,	 result_single_GPU_h[i]=4915139.884615,	 result_multi_GPU_h[i]4915139.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7106559,	 result_single_GPU_h[i]=4919925.115385,	 result_multi_GPU_h[i]4919925.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7109631,	 result_single_GPU_h[i]=4922051.884615,	 result_multi_GPU_h[i]4922051.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7116543,	 result_single_GPU_h[i]=4926837.115385,	 result_multi_GPU_h[i]4926837.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7119615,	 result_single_GPU_h[i]=4928963.884615,	 result_multi_GPU_h[i]4928963.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7126527,	 result_single_GPU_h[i]=4933749.115385,	 result_multi_GPU_h[i]4933749.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7129599,	 result_single_GPU_h[i]=4935875.884615,	 result_multi_GPU_h[i]4935875.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7136511,	 result_single_GPU_h[i]=4940661.115385,	 result_multi_GPU_h[i]4940661.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7139583,	 result_single_GPU_h[i]=4942787.884615,	 result_multi_GPU_h[i]4942787.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143171,	 result_single_GPU_h[i]=4945183.615385,	 result_multi_GPU_h[i]4945183.615385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143201,	 result_single_GPU_h[i]=4945204.384615,	 result_multi_GPU_h[i]4945204.384615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143210,	 result_single_GPU_h[i]=4945210.615385,	 result_multi_GPU_h[i]4945210.615385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143240,	 result_single_GPU_h[i]=4945231.384615,	 result_multi_GPU_h[i]4945231.384615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143249,	 result_single_GPU_h[i]=4945237.615385,	 result_multi_GPU_h[i]4945237.615385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143279,	 result_single_GPU_h[i]=4945258.384615,	 result_multi_GPU_h[i]4945258.384615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143288,	 result_single_GPU_h[i]=4945264.615385,	 result_multi_GPU_h[i]4945264.615385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143318,	 result_single_GPU_h[i]=4945285.384615,	 result_multi_GPU_h[i]4945285.384615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143327,	 result_single_GPU_h[i]=4945291.615385,	 result_multi_GPU_h[i]4945291.615385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143357,	 result_single_GPU_h[i]=4945312.384615,	 result_multi_GPU_h[i]4945312.384615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143366,	 result_single_GPU_h[i]=4945318.615385,	 result_multi_GPU_h[i]4945318.615385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143396,	 result_single_GPU_h[i]=4945339.384615,	 result_multi_GPU_h[i]4945339.384615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7143405,	 result_single_GPU_h[i]=4945345.615385,	 result_multi_GPU_h[i]4945345.615385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7276287,	 result_single_GPU_h[i]=5037429.115385,	 result_multi_GPU_h[i]5037429.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7279359,	 result_single_GPU_h[i]=5039555.884615,	 result_multi_GPU_h[i]5039555.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7286271,	 result_single_GPU_h[i]=5044341.115385,	 result_multi_GPU_h[i]5044341.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7289343,	 result_single_GPU_h[i]=5046467.884615,	 result_multi_GPU_h[i]5046467.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7296255,	 result_single_GPU_h[i]=5051253.115385,	 result_multi_GPU_h[i]5051253.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7299327,	 result_single_GPU_h[i]=5053379.884615,	 result_multi_GPU_h[i]5053379.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7306239,	 result_single_GPU_h[i]=5058165.115385,	 result_multi_GPU_h[i]5058165.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7309311,	 result_single_GPU_h[i]=5060291.884615,	 result_multi_GPU_h[i]5060291.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7316223,	 result_single_GPU_h[i]=5065077.115385,	 result_multi_GPU_h[i]5065077.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7319295,	 result_single_GPU_h[i]=5067203.884615,	 result_multi_GPU_h[i]5067203.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7326207,	 result_single_GPU_h[i]=5071989.115385,	 result_multi_GPU_h[i]5071989.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7329279,	 result_single_GPU_h[i]=5074115.884615,	 result_multi_GPU_h[i]5074115.884615
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7336191,	 result_single_GPU_h[i]=5078901.115385,	 result_multi_GPU_h[i]5078901.115385
-Error: SymGS result_multi_GPU_h != result_single_GPU_h.	 index=7339263,	 result_single_GPU_h[i]=5081027.884615,	 result_multi_GPU_h[i]5081027.884615
-!!!!!SymGS Result is NOT correct!!!!!
-SymGS: 217.000000 of 16777216.000000 wrong values which is 0.001293 percent
+CPU wall-clock time for multi-GPU test_SPMV: 6269.890564 ms
+CPU wall-clock time for multi-GPU test_SPMV: 4232.749974 ms
+CPU wall-clock time for multi-GPU test_SPMV: 4619.361048 ms
+CPU wall-clock time for multi-GPU test_SPMV: 4230.777305 ms
+CPU wall-clock time for multi-GPU test_SPMV: 4243.341681 ms
+CPU wall-clock time for multi-GPU test_SPMV: 4232.487839 ms
+CPU wall-clock time for multi-GPU test_SPMV: 4220.239773 ms
+CPU wall-clock time for multi-GPU test_SPMV: 4234.223684 ms
+CPU wall-clock time for multi-GPU test_SPMV: 4223.088540 ms
+CPU wall-clock time for multi-GPU test_SPMV: 3906.680024 ms
+CPU wall-clock time for single-GPU test_SPMV: 2.301875 ms
+CPU wall-clock time for single-GPU test_SPMV: 1.485966 ms
+CPU wall-clock time for single-GPU test_SPMV: 1.481198 ms
+CPU wall-clock time for single-GPU test_SPMV: 1.487118 ms
+CPU wall-clock time for single-GPU test_SPMV: 1.490894 ms
+CPU wall-clock time for single-GPU test_SPMV: 1.487886 ms
+CPU wall-clock time for single-GPU test_SPMV: 1.484621 ms
+CPU wall-clock time for single-GPU test_SPMV: 1.480078 ms
+CPU wall-clock time for single-GPU test_SPMV: 1.481486 ms
+CPU wall-clock time for single-GPU test_SPMV: 1.480750 ms
+++++++
+SPMV is correct for multi GPU
+++++++
 Testing done.
-==PROF== Disconnected from process 287727
+==PROF== Disconnected from process 273630
 ==PROF== Report: /users/nrottstegge/github/HighPerformanceHPCG_Thesis/build/my_report.ncu-rep
-Finished: 23:33:39
+Finished: 15:54:13
 DONE.
