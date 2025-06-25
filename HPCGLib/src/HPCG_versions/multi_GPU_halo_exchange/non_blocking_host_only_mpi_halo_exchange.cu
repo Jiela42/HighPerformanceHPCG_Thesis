@@ -1,4 +1,6 @@
-#include "HPCG_versions/non_blocking_mpi_halo_exchange.cuh"
+// Implements non-blocking host-only MPI halo exchange using host buffers and asynchronous MPI calls.
+
+#include "HPCG_versions/non_blocking_host_only_mpi_halo_exchange.cuh"
 #include "UtilLib/utils.cuh"
 
 #include <cuda_runtime.h>
@@ -6,8 +8,11 @@
 #include <stdio.h>
 
 template <typename T>
-Problem* non_blocking_mpi_Implementation<T>::init_comm_non_blocking_MPI(int argc, char *argv[], int npx, int npy, int npz, local_int_t nx, local_int_t ny, local_int_t nz){
-    //MPI_Init( &argc , &argv );
+Problem* non_blocking_host_only_mpi_Implementation<T>::init_comm_non_blocking_host_only_MPI(int argc, char *argv[], int npx, int npy, int npz, local_int_t nx, local_int_t ny, local_int_t nz, bool initMPI) {
+    // Initialize MPI environment and select GPU device for this rank
+    if(initMPI){
+        CHECK_MPI(MPI_Init(&argc, &argv));
+    }
     int size, rank;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -20,12 +25,12 @@ Problem* non_blocking_mpi_Implementation<T>::init_comm_non_blocking_MPI(int argc
     return problem;
 }
 
-// Copies to host and back to device, no device-to-device copy
 // TODO: Introduce cudaStreams
 template <typename T>
-void non_blocking_mpi_Implementation<T>::ExchangeHaloNonBlockingMPI(Halo *halo, Problem *problem) {
+void non_blocking_host_only_mpi_Implementation<T>::ExchangeHaloNonBlockingHostOnlyMPI(Halo *halo, Problem *problem) {
+    // Perform halo data exchange using non-blocking MPI with host buffers
 
-    //extract the data into send buffers on the GPU
+    // Extract the data into send buffers on the GPU
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
         if(problem->neighbors_mask[i]){
             (*problem->extraction_functions[i])(halo, i, &problem->extraction_ghost_cells[i], 1);
@@ -36,7 +41,7 @@ void non_blocking_mpi_Implementation<T>::ExchangeHaloNonBlockingMPI(Halo *halo, 
     MPI_Request requests[52];
     int msg_count = 0;
     
-    //post receive calls
+    // Post receive calls for incoming halo data
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
         if(problem->neighbors_mask[i]){
             CHECK_MPI(MPI_Irecv(halo->recv_buff_h[i], problem->count_exchange[i], MPIDataType, problem->neighbors[i], 0, MPI_COMM_WORLD, &requests[msg_count]));
@@ -44,10 +49,10 @@ void non_blocking_mpi_Implementation<T>::ExchangeHaloNonBlockingMPI(Halo *halo, 
         }
     }
 
-    //wait for extraction to finish
+    // Wait for extraction to finish before sending
     CHECK_CUDA(cudaDeviceSynchronize());
 
-    //post send calls
+    // Post send calls for outgoing halo data
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
         if(problem->neighbors_mask[i]){
             CHECK_MPI(MPI_Isend(halo->send_buff_h[i], problem->count_exchange[i], MPIDataType, problem->neighbors[i], 0, MPI_COMM_WORLD, &requests[msg_count]));
@@ -58,22 +63,23 @@ void non_blocking_mpi_Implementation<T>::ExchangeHaloNonBlockingMPI(Halo *halo, 
     // Wait until all exchanges are done
     CHECK_MPI(MPI_Waitall(msg_count, requests, MPI_STATUSES_IGNORE));
 
-    // Now that we received all data, we can inject it back to the halo
+    // Inject the received data back into the halo region on the device
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
         if(problem->neighbors_mask[i]){
             (*problem->injection_functions[i])(halo, i, &problem->injection_ghost_cells[i], 1);
         }
     }
 
-    //wait for injection to be done
+    // Wait for injection to be done
     CHECK_CUDA(cudaDeviceSynchronize());
 
 }
 
 template <typename T>
-void non_blocking_mpi_Implementation<T>::finalize_comm_non_blocking_MPI(Problem *problem){
+void non_blocking_host_only_mpi_Implementation<T>::finalize_comm_non_blocking_host_only_MPI(Problem *problem){
+    // Finalize the MPI environment
     MPI_Finalize();
 }
 
 // Explicit template instantiation
-template class non_blocking_mpi_Implementation<DataType>;
+template class non_blocking_host_only_mpi_Implementation<DataType>;

@@ -1,3 +1,5 @@
+// Implements NCCL-based halo exchange using device buffers and GPU-aware collectives.
+
 #include "HPCG_versions/nccl_halo_exchange.cuh"
 #include "UtilLib/utils.cuh"
 
@@ -6,7 +8,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-//#include "nccl.h"
+#include "nccl.h"
 
 #define NCCL_TYPE ncclDouble
 
@@ -63,15 +65,17 @@ static void getHostName(char* hostname, int maxlen) {
 }
 
 template <typename T>
-Problem* NCCL_Implementation<T>::init_comm_NCCL(int argc, char *argv[], int npx, int npy, int npz, local_int_t nx, local_int_t ny, local_int_t nz) {
+Problem* NCCL_Implementation<T>::init_comm_NCCL(int argc, char *argv[], int npx, int npy, int npz, local_int_t nx, local_int_t ny, local_int_t nz, bool initMPI) {
     
-    //initializing MPI
-    CHECK_MPI(MPI_Init( &argc , &argv ));
+    // Initialize MPI and determine rank and size
+    if(initMPI){
+        CHECK_MPI(MPI_Init(&argc, &argv));
+    }
     int size, rank, localRank = 0;
     CHECK_MPI(MPI_Comm_size(MPI_COMM_WORLD, &size));
     CHECK_MPI(MPI_Comm_rank(MPI_COMM_WORLD, &rank));
 
-    //calculating localRank which is used in selecting a GPU
+    // Calculate localRank for GPU device selection based on host hash
     uint64_t hostHashs[size];
     char hostname[1024];
     getHostName(hostname, 1024);
@@ -85,49 +89,50 @@ Problem* NCCL_Implementation<T>::init_comm_NCCL(int argc, char *argv[], int npx,
     int deviceCount = 0;
     CHECK_CUDA(cudaGetDeviceCount(&deviceCount));
 
-    //picking a GPU based on localRank
+    // Select GPU device based on localRank if multiple devices are available
     if(deviceCount > 1){
         CHECK_CUDA(cudaSetDevice(localRank));
     }
 
     CHECK_CUDA(cudaStreamCreate(&this->cuda_stream));
 
-    //get NCCL unique ID at rank 0 and broadcast it to all others
+    // Get NCCL unique ID at rank 0 and broadcast it to all ranks
     ncclUniqueId id;
     if (rank == 0) ncclGetUniqueId(&id);
     CHECK_MPI(MPI_Bcast((void *)&id, sizeof(id), MPI_BYTE, 0, MPI_COMM_WORLD));
 
-    //initializing NCCL
+    // Initialize NCCL communicator
     CHECK_NCCL(ncclCommInitRank(&this->nccl_comm, size, id, rank));
 
-    //initializing the problem
+    // Initialize the problem data structure
     Problem *problem = (Problem *)malloc(sizeof(Problem));
     GenerateProblem(npx, npy, npz, nx, ny, nz, size, rank, problem);
 
     return problem;
 }
 
-// Copies to host and back to device, no device-to-device copy
 // TODO: Use seperate cudaStreams
 template <typename T>
 void NCCL_Implementation<T>::ExchangeHaloNCCL(Halo *halo, Problem *problem) {
+    // Perform halo exchange using NCCL with device buffers
 
-    //ensure computation is done
+    // Ensure all previous computations are complete
     CHECK_CUDA(cudaDeviceSynchronize());
 
-    //Fill the send buffers
+    // Extract data to send buffers from halo regions
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
         if(problem->neighbors_mask[i]){
             (*problem->extraction_functions[i])(halo, i, &problem->extraction_ghost_cells[i], 0);
         }
     }
     
-    // Wait until send buffers are ready
+    // Synchronize to ensure send buffers are ready
     CHECK_CUDA(cudaDeviceSynchronize());
 
-    // Now we can start the NCCL communication
+    // Start NCCL communication group
     ncclGroupStart();
     
+    // Post receives and sends for all neighbors
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
         if(problem->neighbors_mask[i]){
             CHECK_NCCL(ncclRecv(halo->recv_buff_d[i], problem->count_exchange[i], NCCL_TYPE,
@@ -137,32 +142,34 @@ void NCCL_Implementation<T>::ExchangeHaloNCCL(Halo *halo, Problem *problem) {
         }
     }
 
+    // End NCCL communication group
     ncclGroupEnd();
 
-    // synchronizing on CUDA stream to complete NCCL communication
+    // Synchronize CUDA stream to ensure NCCL communication completes
     CHECK_CUDA(cudaStreamSynchronize(this->cuda_stream));
 
-    // Now that we received all data, we can inject it back to the halo
+    // Inject received data back into halo regions
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
         if(problem->neighbors_mask[i]){
             (*problem->injection_functions[i])(halo, i, &problem->injection_ghost_cells[i], 0);
         }
     }
 
-    // Wait until received data is injected
+    // Synchronize to ensure injection is complete
     CHECK_CUDA(cudaDeviceSynchronize());
 }
 
 template <typename T>
 void NCCL_Implementation<T>::finalize_comm_NCCL(Problem *problem){
+    // Finalize NCCL communication and MPI environment
 
-    //wait for all NCCL operations to finish
+    // Wait for all NCCL operations to complete
     CHECK_CUDA(cudaStreamSynchronize(this->cuda_stream));
 
-    //finalizing NCCL
+    // Destroy NCCL communicator
     ncclCommDestroy(this->nccl_comm);
 
-    //finalizing MPI
+    // Finalize MPI
     MPI_Finalize();
 }
 

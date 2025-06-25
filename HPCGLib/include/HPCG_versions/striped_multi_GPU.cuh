@@ -18,6 +18,8 @@ public:
     int bx, by, bz; // the box size in x, y and z direction
     int SymGS_cooperation_number; // the cooperation number for the SymGS
 
+    std::string comm_type; // the communication type
+
     striped_multi_GPU_Implementation(){
         // overwritting the inherited variables
 
@@ -36,9 +38,9 @@ public:
         this->norm_based = false;
 
         // default box size for coloring
-        this->bx = 2;
-        this->by = 2;
-        this->bz = 2;
+        this->bx = 3;
+        this->by = 3;
+        this->bz = 3;
 
         // set the default cooperation number for the SymGS
         this->SymGS_cooperation_number = 4;
@@ -48,7 +50,8 @@ public:
     virtual Problem* init_comm(
         int argc, char *argv[],
         int npx, int npy, int npz,
-        local_int_t nx, local_int_t ny, local_int_t nz
+        local_int_t nx, local_int_t ny, local_int_t nz,
+        bool initMPI
         ) = 0;
 
     virtual void ExchangeHalo(

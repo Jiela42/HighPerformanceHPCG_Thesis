@@ -3,59 +3,69 @@
 #include "HPCG_versions/striped_multi_GPU.cuh"
 #include "HPCG_versions/blocking_mpi_halo_exchange.cuh"
 #include "HPCG_versions/nccl_halo_exchange.cuh"
-#include "HPCG_versions/non_blocking_mpi_halo_exchange.cuh"
-// #include "HPCG_versions_tests/kernel_multi_GPU_tests.cpp"
+#include "HPCG_versions/non_blocking_host_only_mpi_halo_exchange.cuh"
 
 #include <mpi.h>
 #include <cuda_runtime.h>
 #include <time.h>
 
+#include <cutlass/cutlass.h>
+#include <cute/layout.hpp>
+
+using namespace cute;
+
 using DataType = double;
 
 #define MPIDataType MPI_DOUBLE
 //number of processes in x, y, z
-#define NPX 2
-#define NPY 2
-#define NPZ 2
+#define NPX 1
+#define NPY 1
+#define NPZ 1
 //each process gets assigned problem size of NX x NY x NZ
-#define NX 3
-#define NY 3
-#define NZ 3
+#define NX 4
+#define NY 4
+#define NZ 4
 
 int main(int argc, char *argv[]){
 
     int nx = NX;
     int ny = NY;
     int nz = NZ;
-
-    // create an instance of the version to run the functions on
-    non_blocking_mpi_Implementation<DataType> implementation_multi_GPU_nccl;
-
-    Problem *problem = implementation_multi_GPU_nccl.init_comm(argc, argv, NPX, NPY, NPZ, NX, NY, NZ);
-
-    //initialize matrix partial matrix A_local
-    striped_partial_Matrix<DataType> A(problem);
     
-    //initialize p and Ap
-    Halo p;
-    InitHalo(&p, problem);
-    SetHaloGlobalIndexGPU(&p, problem);
+    blocking_mpi_Implementation<DataType> implementation_multi_GPU;
 
+    Problem problem = *implementation_multi_GPU.init_comm(argc, argv, NPX, NPY, NPZ, NX, NY, NZ, true);
 
-    //run SPMV on multi GPU
-    clock_t start_multi_GPU, end_multi_GPU;
-    start_multi_GPU = clock();
-    implementation_multi_GPU_nccl.ExchangeHalo(&p, problem); //1st * 2nd = 3rd argument
-    end_multi_GPU = clock();
-    double time_multi_GPU = ((double) (end_multi_GPU - start_multi_GPU)) / CLOCKS_PER_SEC;
-
-    if(problem->rank == 0){
-        PrintHalo(&p);
-        printf("Rank=%d:\t SPMV Result for multiGPU computed.\n", problem->rank);
-        printf("Time for SPMV on multi GPU: %f\n", time_multi_GPU);
+    MPI_Barrier(MPI_COMM_WORLD);
+    if(problem.rank == 0){
+        printf("Testing started.\n");
+        printf("Comm Type: %s\n", implementation_multi_GPU.comm_type.c_str());
     }
+    MPI_Barrier(MPI_COMM_WORLD);
 
-    implementation_multi_GPU_nccl.finalize_comm(problem);
+    int x = 6;
+    int y = 6;
+    int z = 6;
+    int bx = 3;
+    int by = 3;
+    int bz = 3;
+
+    int num_colors = bx * by * bz;
+    int max_num_per_color = ((x + bx - 1) / bx) * ((y + by - 1) / by) * ((z + bz - 1) / bz);
+    int stencil_size = 27;
+    Layout layout_3d_color_wise = make_layout(
+        make_shape(num_colors, make_shape(stencil_size, max_num_per_color)), //num_colors blocks, each containing max_num_per_color * stencil_size coefficients
+        make_stride(max_num_per_color * stencil_size, make_stride(max_num_per_color, 1)) //to skip a full color you skip max_num_per_color * stencil_size coefficient
+    );
+
+    //print layout_3d_color_wise
+    printf("3D Color-wise Layout: ");
+    print(layout_3d_color_wise);
+    printf("\n");
+    print_layout(layout_3d_color_wise);
+    printf("\n");
+
+    implementation_multi_GPU.finalize_comm(&problem);
 
     return 0;
 }

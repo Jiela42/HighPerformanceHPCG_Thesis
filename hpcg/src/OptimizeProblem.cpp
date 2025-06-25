@@ -35,7 +35,7 @@
   @see GenerateProblem
 */
 
-#include "HPCG_versions/non_blocking_mpi_halo_exchange.cuh"
+#include "HPCG_versions/non_blocking_cuda_aware_mpi_halo_exchange.cuh"
 #include "UtilLib/hpcg_multi_GPU_utils.cuh"
 #include "HPCG_versions/striped_multi_GPU.cuh"
 
@@ -51,10 +51,10 @@ int OptimizeProblem(SparseMatrix & A, CGData & data, Vector & b, Vector & x, Vec
   local_int_t npz = geom->npz;
 
   //setup the implementation
-  non_blocking_mpi_Implementation<DataType> *MGPU_Implementation = new non_blocking_mpi_Implementation<DataType>();
+  non_blocking_cuda_aware_mpi_Implementation<DataType> *MGPU_Implementation = new non_blocking_cuda_aware_mpi_Implementation<DataType>();
   int argc; //only dummy, never accessed
   char *argv[1]; //only dummy, never accessed
-  Problem *problem = MGPU_Implementation->init_comm(argc, argv, npx, npy, npz, nx, ny, nz);
+  Problem *problem = MGPU_Implementation->init_comm(argc, argv, npx, npy, npz, nx, ny, nz, false);
 
   //print nx, ny, nz stroed in problem
 

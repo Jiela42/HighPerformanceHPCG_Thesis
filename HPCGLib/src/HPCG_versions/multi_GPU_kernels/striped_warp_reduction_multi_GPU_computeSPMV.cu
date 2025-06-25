@@ -1,6 +1,36 @@
+// This file implements sparse matrix-vector multiplication (SPMV) using striped matrix storage
+// and warp-level reductions on multiple GPUs with halo-based data access.
+
 #include "HPCG_versions/striped_multi_GPU.cuh"
 #include "UtilLib/utils.cuh"
 #include <cuda_runtime.h>
+#include <cuda/pipeline>
+#include <cooperative_groups.h>
+#include <cooperative_groups/memcpy_async.h>
+
+#define CEIL_DIV(x, y) (((x) + (y) - 1) / (y))
+#define PIPELINE_DEPTH 2
+#define NUM_THREADS_PER_BLOCK 256
+
+namespace cg = cooperative_groups;
+
+/**
+ * @brief Converts a local coordinate index to the corresponding index within a halo data region.
+ * @param i Local linear index.
+ * @param nx, ny, nz Local grid dimensions.
+ * @param dimx, dimy Dimensions of the data region including halos.
+ * @return Index into the halo data region.
+ */
+__inline__ __device__ global_int_t local_i_to_halo_i(
+    int i,
+    int nx, int ny, int nz,
+    local_int_t dimx, local_int_t dimy
+)
+{
+    return dimx*(dimy+1) + 1 + (i % nx) + dimx*((i % (nx*ny)) / nx) + (dimx*dimy)*(i / (nx*ny));
+}
+
+__constant__ local_int_t j_min_i_d[27];
 
 __inline__ __device__ global_int_t local_i_to_global_i(
     local_int_t i, 
@@ -25,20 +55,12 @@ __inline__ __device__ local_int_t global_i_to_halo_i(
     int px, int py, int pz
     )
     {
-        /*
-        local_int_t global_j_x = i % gnx;
-        local_int_t global_j_y = (i % (gnx * gny)) / gnx;
-        local_int_t global_j_z = i / (gnx * gny);
-        int halo_j_x = global_j_x - px * nx + 1;
-        int halo_j_y = global_j_y - py * ny + 1;
-        int halo_j_z = global_j_z - pz * nz + 1;
-        return halo_j_x + halo_j_y * (nx+2) + halo_j_z * ((nx+2) * (ny+2));*/
         return ((i % gnx) - px * nx + 1) +
             ((((i / gnx) % gny) - py * ny + 1) * (nx + 2)) +
             (((i / (gnx * gny)) - pz * nz + 1) * ((nx + 2) * (ny + 2))); //should be equivalent to the above
 }
 
-__global__ void striped_warp_reduction_multi_GPU_SPMV_kernel(
+__global__ void striped_warp_reduction_multi_GPU_SPMV_kernel_old(
         DataType* striped_A,
         local_int_t num_rows, int num_stripes, local_int_t * j_min_i,
         double* x, double* y, local_int_t nx, local_int_t ny, local_int_t nz, 
@@ -82,6 +104,256 @@ __global__ void striped_warp_reduction_multi_GPU_SPMV_kernel(
     }
 }
 
+/**
+ * @brief Kernel for sparse matrix-vector multiplication using striped storage format.
+ *
+ * Each thread cooperatively computes a matrix row using warp-level reduction, accessing halo-aware vectors.
+ *
+ * @param striped_A   Striped matrix values.
+ * @param num_rows    Number of rows in the matrix.
+ * @param num_stripes Number of stripes per row.
+ * @param j_min_i     Stripe offsets for each row.
+ * @param x, y        Input and output vectors (with halo).
+ * @param nx, ny, nz  Local grid dimensions.
+ * @param gnx, gny, gnz Global grid dimensions.
+ * @param gi0         Global index offset.
+ * @param px, py, pz  Process grid coordinates.
+ */
+__global__ void striped_warp_reduction_multi_GPU_SPMV_kernel(
+        DataType* striped_A,
+        local_int_t num_rows, int num_stripes,
+        double* x, double* y, local_int_t nx, local_int_t ny, local_int_t nz, 
+        local_int_t dimx, local_int_t dimy, local_int_t dimz
+    )
+{
+    local_int_t cooperation_number = 4;
+    local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+    local_int_t lane = threadIdx.x % cooperation_number;
+
+    // every thread computes one or more rows of the matrix
+    for (local_int_t i = tid / cooperation_number; i < num_rows; i += (blockDim.x * gridDim.x) / cooperation_number) {
+        // compute the matrix-vector product for the ith row
+        // convert i to global index
+        local_int_t hi = local_i_to_halo_i(i, nx, ny, nz, dimx, dimy);
+        double sum_i = 0;
+        for (local_int_t stripe = lane; stripe < num_stripes; stripe += cooperation_number) {
+            local_int_t hj = hi + j_min_i_d[stripe];
+            local_int_t current_row = i * num_stripes;
+            sum_i += striped_A[current_row + stripe] * x[hj];
+        }
+        // now let's reduce the sum_i to a single value using warp-level reduction
+        for (int offset = cooperation_number / 2; offset > 0; offset /= 2) {
+            sum_i += __shfl_down_sync(0xFFFFFFFF, sum_i, offset);
+        }
+
+        __syncthreads();
+
+        if (lane == 0) {
+            // convert gi to halo coordinate hi which is the memory location of gi in the halo struct
+            if (hi >= 0 && hi < (dimx) * (dimy) * (dimz)) y[hi] = sum_i;
+        }
+    }
+}
+
+//clumn-major
+__global__ void columnMajor_multi_GPU_SPMV_kernel(
+    DataType* A_d,
+    local_int_t num_rows, int num_stripes,
+    double* x_d, double* y, 
+    local_int_t nx, local_int_t ny, local_int_t nz, 
+    local_int_t dimx, local_int_t dimy, local_int_t dimz
+)
+{
+    //get IDs
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;  // global thread ID
+
+    //gate
+    if(tid >= num_rows) return;
+    
+    local_int_t hi = local_i_to_halo_i(tid, nx, ny, nz, dimx, dimy);
+
+    DataType sum_i = 0;
+    for(int stripe = 0; stripe < num_stripes; stripe++){
+        local_int_t coeff_i = tid + stripe * num_rows;
+        DataType coeff = A_d[coeff_i];
+        int v_i = hi + j_min_i_d[stripe];
+        sum_i += coeff * x_d[v_i];
+    }
+
+    y[hi] = sum_i;
+}
+
+__global__ void blocked_multi_GPU_SPMV_kernel(
+    DataType* A_d,
+    local_int_t num_rows, int num_stripes,
+    double* x_d, double* y, 
+    local_int_t nx, local_int_t ny, local_int_t nz, 
+    local_int_t dimx, local_int_t dimy, local_int_t dimz
+)
+{
+    //get IDs
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;  // global thread ID
+    int global_warp_id = tid / warpSize; // global warp ID
+    int lane_id;
+    asm volatile ("mov.u32 %0, %%laneid;" : "=r"(lane_id));
+    
+    //gate
+    if(tid >= num_rows) return;
+    
+    local_int_t hi = local_i_to_halo_i(tid, nx, ny, nz, dimx, dimy);
+
+    DataType sum_i = 0;
+    A_d += warpSize * num_stripes * global_warp_id; // move to the start of the current warp's rows
+    for(int stripe = 0; stripe < num_stripes; stripe++){
+        DataType coeff = A_d[lane_id];
+        int v_i = hi + j_min_i_d[stripe];
+        sum_i += coeff * x_d[v_i];
+        A_d += warpSize; // move to the next row
+    }
+
+    y[hi] = sum_i;
+}
+
+__global__ void two_elems_multi_GPU_SPMV_kernel(
+    DataType* __restrict__ A_d,
+    local_int_t num_rows, int num_stripes,
+    double* __restrict__ x_d, double* __restrict__ y, 
+    local_int_t nx, local_int_t ny, local_int_t nz, 
+    local_int_t dimx, local_int_t dimy, local_int_t dimz
+)
+{
+    //get IDs
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;  // global thread ID
+    int global_warp_id = tid / warpSize; // global warp ID
+    int lane_id;
+    asm volatile ("mov.u32 %0, %%laneid;" : "=r"(lane_id));
+    int my_val = tid * 2; // each thread computes two elements
+
+    //gate
+    if(my_val >= num_rows) return;
+    
+    local_int_t hi = local_i_to_halo_i(my_val, nx, ny, nz, dimx, dimy);
+
+    DataType sum1 = 0;
+    DataType sum2 = 0;
+    A_d += warpSize * 2 * num_stripes * global_warp_id; // move to the start of the current warp's rows
+    for(int stripe = 0; stripe < num_stripes; stripe++){
+        double2* data = reinterpret_cast<double2*>(A_d); // reinterpret A_d to double2 for two elements
+        double2 coeffs = data[lane_id]; // load two coefficients at once
+        double coeff1 = coeffs.x;
+        double coeff2 = coeffs.y;
+        int v1 = hi + j_min_i_d[stripe];
+        int v2 = hi + 1 + j_min_i_d[stripe];
+        sum1 += coeff1 * x_d[v1];
+        sum2 += coeff2 * x_d[v2];
+        A_d += warpSize * 2; // move to the next row
+    }
+
+    // write both results to the output vector
+    y[my_val] = sum1;
+    y[my_val + 1] = sum2;
+}
+
+__global__ void pipelined_columnMajor_multi_GPU_SPMV_kernel(
+    DataType* A_d,
+    local_int_t num_rows, int num_stripes,
+    DataType* x_d, DataType* y_d, 
+    local_int_t nx, local_int_t ny, local_int_t nz, 
+    local_int_t dimx, local_int_t dimy, local_int_t dimz
+)
+{
+    // Shared memory for DataType buffering
+    __shared__ alignas(16) DataType sA_buffer[PIPELINE_DEPTH][NUM_THREADS_PER_BLOCK]; // Shared memory for matrix values
+    __shared__ alignas(16) DataType sx_buffer[PIPELINE_DEPTH][NUM_THREADS_PER_BLOCK]; // Shared memory for vector values
+
+    // Create thread block group for cooperative operations
+    auto block = cg::this_thread_block();
+
+    // Pipeline object for managing async operations
+    __shared__ cuda::pipeline_shared_state<cuda::thread_scope::thread_scope_block, PIPELINE_DEPTH> pipe_state;
+    auto pipeline = cuda::make_pipeline(block, &pipe_state);
+
+    const local_int_t block_start_A = blockIdx.x * NUM_THREADS_PER_BLOCK; // Start index for this block in the matrix
+    const local_int_t block_start_x = local_i_to_halo_i(block_start_A, nx, ny, nz, dimx, dimy); // Start index for this block in the 3d padded halo vector
+    const local_int_t elements_this_block = min(static_cast<local_int_t>(NUM_THREADS_PER_BLOCK), num_rows - block_start_A);
+    const local_int_t copy_size = elements_this_block * sizeof(DataType);
+    const local_int_t my_val = block_start_x + threadIdx.x; // index which this thread will compute
+
+    // Only process if we have valid elements
+    if (block_start_A + threadIdx.x >= num_rows) return;
+
+    int producer_idx = 0;
+    int consumer_idx = 0;
+
+    //prefill the buffer
+    for(int tile_idx = 0; tile_idx < PIPELINE_DEPTH - 1; tile_idx++){
+        local_int_t tile_start_A = block_start_A + tile_idx * num_rows;
+        local_int_t tile_start_x = block_start_x + j_min_i_d[tile_idx];
+
+        pipeline.producer_acquire();
+
+        cuda::memcpy_async(block,
+            sA_buffer[producer_idx], // Shared memory buffer
+            A_d + tile_start_A, // Global memory source
+            copy_size, // Size of the copy
+            pipeline // Pipeline for async operation
+        );
+        cuda::memcpy_async(block, 
+            sx_buffer[producer_idx], // Shared memory buffer
+            x_d + tile_start_x, // Global memory source
+            copy_size, // Size of the copy
+            pipeline // Pipeline for async operation
+        );
+
+        producer_idx = (producer_idx + 1) % PIPELINE_DEPTH;
+        pipeline.producer_commit();
+    }
+
+    // Process tiles with overlap
+    DataType my_sum = 0;
+    for(int tile_idx = 0; tile_idx < num_stripes; tile_idx++){
+
+        const local_int_t next_load_tile = tile_idx + (PIPELINE_DEPTH - 1);
+        if(next_load_tile < num_stripes){
+            local_int_t next_tile_start_A = block_start_A + next_load_tile * num_rows;
+            local_int_t next_tile_start_x = block_start_x + j_min_i_d[next_load_tile];
+            // Issue async copy for the next tile
+            pipeline.producer_acquire();
+            cuda::memcpy_async(block, 
+                sA_buffer[producer_idx], // Shared memory buffer
+                A_d + next_tile_start_A, // Global memory source
+                copy_size, // Size of the copy
+                pipeline // Pipeline for async operation
+            );
+            cuda::memcpy_async(block, 
+                sx_buffer[producer_idx], // Shared memory buffer
+                x_d + next_tile_start_x, // Global memory source
+                copy_size, // Size of the copy
+                pipeline // Pipeline for async operation
+            );
+            producer_idx = (producer_idx + 1) % PIPELINE_DEPTH;
+            pipeline.producer_commit();
+        }
+
+        // Wait for current tile and compute
+        pipeline.consumer_wait();
+        my_sum += sA_buffer[consumer_idx][threadIdx.x] * sx_buffer[consumer_idx][threadIdx.x];
+        consumer_idx = (consumer_idx + 1) % PIPELINE_DEPTH;
+        pipeline.consumer_release();
+
+    }
+    y_d[my_val] = my_sum;
+}
+
+
+/**
+ * @brief Launches the striped SPMV kernel on multiple GPUs with halo-aware inputs.
+ *
+ * @param A        Matrix with striped format.
+ * @param x_d      Input vector (device, halo-aware).
+ * @param y_d      Output vector (device, halo-aware).
+ * @param problem  Geometry and decomposition metadata.
+ */
 template <typename T>
 void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_computeSPMV(
         striped_partial_Matrix<T>& A,
@@ -89,29 +361,44 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
         Problem *problem
     ) {
 
-        //std::cout << "Rank="<< problem->rank <<"\t striped_warp_reduction_computeSPMV" << std::endl;
-
-        local_int_t num_rows = A.get_num_rows();
+        local_int_t num_rows = A.get_num_rows(); // exclude halo rows
         int num_stripes = A.get_num_stripes();
-        //int * j_min_i = A.get_j_min_i_d();
         T * striped_A_d = A.get_values_d();
 
         // since every thread is working on one or more rows we need to base the number of threads on that
-        int num_threads = 512;
-        local_int_t num_blocks = (problem->nx * problem->ny * problem->nz + num_threads - 1) / num_threads;
+        int num_threads = NUM_THREADS_PER_BLOCK;
+        uint num_blocks = (problem->nx * problem->ny * problem->nz + num_threads - 1) / num_threads;
 
-        // call the kernel
-        
-        striped_warp_reduction_multi_GPU_SPMV_kernel<<<num_blocks, num_threads>>>(
-            striped_A_d, num_rows, num_stripes, A.get_j_min_i_d(), x_d->x_d, y_d->x_d, problem->nx, problem->ny, problem->nz,
-            problem->gnx, problem->gny, problem->gnz, problem->gi0, problem->px, problem->py, problem->pz
+        //move j_min_i to constant memory
+        std::vector<local_int_t> j_min_i_h(27);
+        CHECK_CUDA(cudaMemcpy(j_min_i_h.data(), A.get_j_min_i_halo_d(), 27 * sizeof(local_int_t), cudaMemcpyDeviceToHost));
+        CHECK_CUDA(cudaMemcpyToSymbol(j_min_i_d, j_min_i_h.data(), 27 * sizeof(local_int_t)));
+
+        // striped_warp_reduction_multi_GPU_SPMV_kernel_old<<<num_blocks, num_threads>>>(
+        //     striped_A_d, num_rows, num_stripes, A.get_j_min_i_d(), x_d->x_d, y_d->x_d, problem->nx, problem->ny, problem->nz,
+        //     problem->gnx, problem->gny, problem->gnz, problem->gi0, problem->px, problem->py, problem->pz
+        // );
+
+
+        pipelined_columnMajor_multi_GPU_SPMV_kernel<<<num_blocks, num_threads>>>(
+            striped_A_d, 
+            num_rows, num_stripes, 
+            x_d->x_d, y_d->x_d,
+            problem->nx, problem->ny, problem->nz,
+            x_d->dimx, x_d->dimy, x_d->dimz
         );
+
+        // // call the kernel
+        // blocked_multi_GPU_SPMV_kernel<<<num_blocks, num_threads>>>(
+        //     striped_A_d, 
+        //     num_rows, num_stripes, 
+        //     x_d->x_d, y_d->x_d,
+        //     problem->nx, problem->ny, problem->nz,
+        //     x_d->dimx, x_d->dimy, x_d->dimz
+        // );
 
         // synchronize the device
         CHECK_CUDA(cudaDeviceSynchronize());
-
-        // std::cerr << "Assertion failed in function: " << __PRETTY_FUNCTION__ << std::endl;
-        // assert(false);
     }
 
 // explicit template instantiation

@@ -8,6 +8,9 @@
 #include <thrust/device_vector.h>
 #include <thrust/reduce.h>
 
+#define MY_WARP_SIZE 32
+#define NUM_STRIPES 27
+
 __global__ void generateHPCGProblem_kernel(
     int nx, int ny, int nz,
     local_int_t * row_ptr, local_int_t * col_idx, DataType * values,
@@ -435,6 +438,82 @@ __global__ void GenerateStripedPartialMatrix_kernel(int nx, int ny, int nz, glob
     }
 }
 
+__global__ void GenerateStripedPartialMatrix_columnMajor_kernel(int nx, int ny, int nz, global_int_t gnx, global_int_t gny, global_int_t gnz, global_int_t offset_x, global_int_t offset_y, global_int_t offset_z, DataType *A){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    local_int_t num_rows = nx * ny * nz;
+    
+    for (local_int_t i=tid; i<num_rows; i += blockDim.x * gridDim.x) {
+        global_int_t gx = i % nx + offset_x;
+        global_int_t gy = (i / nx) % ny + offset_y;
+        global_int_t gz = i / (nx * ny) + offset_z;
+
+        local_int_t id;
+        int stripe = 0;
+        for (int sz = -1; sz < 2; sz++){
+            for(int sy = -1; sy < 2; sy++){
+                for(int sx = -1; sx < 2; sx++){
+                    id = stripe * num_rows + tid;
+                    if(gx + sx < 0 || gx + sx >= gnx ||
+                        gy + sy < 0 || gy + sy >= gny ||
+                        gz + sz < 0 || gz + sz >= gnz) {
+                            A[id] = 0.0;
+                    } 
+                    else {
+                        if(sx == 0 && sy == 0 && sz == 0){
+                            A[id] = 26.0;
+                        } 
+                        else {
+                            A[id] = -1.0;
+                        }
+                    }
+                    stripe++;
+                }
+            }
+        }
+
+    }
+}
+
+__global__ void GenerateStripedPartialMatrix_columnMajor_blocked_kernel(int nx, int ny, int nz, global_int_t gnx, global_int_t gny, global_int_t gnz, global_int_t offset_x, global_int_t offset_y, global_int_t offset_z, DataType *A){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    local_int_t num_rows = nx * ny * nz;
+    
+    for (local_int_t i=tid; i<num_rows; i += blockDim.x * gridDim.x) {
+        global_int_t gx = i % nx + offset_x;
+        global_int_t gy = (i / nx) % ny + offset_y;
+        global_int_t gz = i / (nx * ny) + offset_z;
+        
+        local_int_t warp_id = i / MY_WARP_SIZE;
+
+        local_int_t id;
+        int stripe = 0;
+        for (int sz = -1; sz < 2; sz++){
+            for(int sy = -1; sy < 2; sy++){
+                for(int sx = -1; sx < 2; sx++){
+                    id = warp_id * NUM_STRIPES * MY_WARP_SIZE + stripe * MY_WARP_SIZE + (i % MY_WARP_SIZE);
+                    if(gx + sx < 0 || gx + sx >= gnx ||
+                        gy + sy < 0 || gy + sy >= gny ||
+                        gz + sz < 0 || gz + sz >= gnz) {
+                            A[id] = 0.0;
+                    } 
+                    else {
+                        if(sx == 0 && sy == 0 && sz == 0){
+                            A[id] = 26.0;
+                        } 
+                        else {
+                            A[id] = -1.0;
+                        }
+                    }
+                    stripe++;
+                }
+            }
+        }
+
+    }
+}
+
 
 __global__ void generate_partialf2c_operator_kernel(
     int nxf, int nyf, int nzf,
@@ -466,7 +545,8 @@ __global__ void generate_partialf2c_operator_kernel(
 }
 
 
-void GenerateStripedPartialMatrix_GPU(Problem *problem, DataType *A_d) {
+void GenerateStripedPartialMatrix_GPU(Problem *problem, DataType *A_d, bool column_major, bool blocked){
+    assert((blocked && column_major) || !blocked);
     int nx = problem->nx;
     int ny = problem->ny;
     int nz = problem->nz;
@@ -474,8 +554,13 @@ void GenerateStripedPartialMatrix_GPU(Problem *problem, DataType *A_d) {
 
     int block_size = 256;
     int num_blocks = (num_rows + block_size - 1) / block_size;
-
-    GenerateStripedPartialMatrix_kernel<<<num_blocks, block_size>>>(problem->nx, problem->ny, problem->nz, problem->gnx, problem->gny, problem->gnz, problem->gx0, problem->gy0, problem->gz0, A_d);
+    if(column_major && blocked){
+        GenerateStripedPartialMatrix_columnMajor_blocked_kernel<<<num_blocks, block_size>>>(nx, ny, nz, problem->gnx, problem->gny, problem->gnz, problem->gx0, problem->gy0, problem->gz0, A_d);
+    } else if(column_major){
+        GenerateStripedPartialMatrix_columnMajor_kernel<<<num_blocks, block_size>>>(nx, ny, nz, problem->gnx, problem->gny, problem->gnz, problem->gx0, problem->gy0, problem->gz0, A_d);
+    } else {
+        GenerateStripedPartialMatrix_kernel<<<num_blocks, block_size>>>(nx, ny, nz, problem->gnx, problem->gny, problem->gnz, problem->gx0, problem->gy0, problem->gz0, A_d);
+    }
 }
 
 void generate_partialf2c_operator(

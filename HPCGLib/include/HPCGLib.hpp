@@ -37,6 +37,8 @@ class HPCG_functions {
         bool WAXPBY_implemented = false;
         bool Dot_implemented = false;
 
+        int max_CG_iterations = 1000000;
+
         bool CG_file_based_tests_passed = false;
         bool MG_file_based_tests_passed = false;
 
@@ -261,7 +263,6 @@ class HPCG_functions {
             }
         }
     protected:
-        int max_CG_iterations = 800;
         double CG_tolerance = 1e-9;
         int max_SymGS_iterations = 1;
         double SymGS_tolerance = 1e-6;

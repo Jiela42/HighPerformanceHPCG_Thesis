@@ -14,7 +14,7 @@
 template <typename T>
 class striped_partial_Matrix {
     public:
-        striped_partial_Matrix(Problem *problem);
+        striped_partial_Matrix(Problem *problem, bool column_major = false, bool blocked = false);
         ~striped_partial_Matrix();
         
         // void generate_coloring();
@@ -56,12 +56,17 @@ class striped_partial_Matrix {
         //std::vector <int>& get_j_min_i();
         //std::vector <T>& get_values();
         local_int_t * get_j_min_i_d();
+        local_int_t * get_j_min_i_halo_d();
+        local_int_t * get_j_min_i_shared_d();
         T * get_values_d();
         //void set_num_rows(int num_rows);
         //void print_COR_Format();
         //void print() const;
         // void compare_to(striped_Matrix<T>& other) const;
         // void write_to_file() const;
+
+        bool column_major;
+        bool blocked;
 
         void initialize_coarse_matrix();
         void generateMatrix_onGPU();     
@@ -80,6 +85,8 @@ class striped_partial_Matrix {
         local_int_t num_cols;
         int num_stripes;
         std::vector<local_int_t> j_min_i;
+        std::vector<local_int_t> j_min_i_halo;
+        std::vector<local_int_t> j_min_i_shared;
         // std::vector<T> values;
         MatrixType matrix_type;
         // friend void sparse_CSR_Matrix<T>::sparse_CSR_Matrix_from_striped(striped_Matrix<T> & A);
@@ -87,9 +94,12 @@ class striped_partial_Matrix {
         // void striped_3D27P_Matrix_from_CSR_onCPU(sparse_CSR_Matrix<T> & A);
         // void striped_3D27P_Matrix_from_CSR_onGPU(sparse_CSR_Matrix<T> & A);
         local_int_t *j_min_i_d;
+        local_int_t *j_min_i_halo_d;
+        local_int_t *j_min_i_shared_d;
         T *values_d;
         // int* color_pointer_d;
         // int* color_sorted_rows_d;
+
 
         // sparse_CSR_Matrix<T> *CSR;
 

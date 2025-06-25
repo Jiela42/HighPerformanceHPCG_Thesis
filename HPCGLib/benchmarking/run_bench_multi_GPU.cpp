@@ -6,7 +6,7 @@
 #include <sstream>
 #include <filesystem>
 
-#include "HPCG_versions/non_blocking_mpi_halo_exchange.cuh"
+#include "HPCG_versions/non_blocking_host_only_mpi_halo_exchange.cuh"
 //#include "HPCG_versions/nccl_halo_exchange.cuh"
 #include "UtilLib/hpcg_multi_GPU_utils.cuh"
 
@@ -76,8 +76,8 @@ int main(int argc, char *argv[]) {
     //start timer
     auto total_start = std::chrono::high_resolution_clock::now();
     
-    non_blocking_mpi_Implementation<DataType> MGPU_Implementation;
-    Problem *problem = MGPU_Implementation.init_comm(argc, argv, NPX, NPY, NPZ, NX, NY, NZ);
+    non_blocking_host_only_mpi_Implementation<DataType> MGPU_Implementation;
+    Problem *problem = MGPU_Implementation.init_comm(argc, argv, NPX, NPY, NPZ, NX, NY, NZ, true);
     std::string folder_path = createTimestampedFolder(base_path, problem);
     folder_path += "/";
     if(problem->rank == 0) std::cout << "Starting Benchmark" << std::endl;
@@ -85,8 +85,6 @@ int main(int argc, char *argv[]) {
     //start timer
     if(problem->rank == 0) std::cout << "Starting multi GPU Benchmarks" << std::endl;
     auto start = std::chrono::high_resolution_clock::now();
-
-    non_blocking_mpi_Implementation<double> MGPU_implementation;
 
     //run
     run_multi_GPU_benchmarks(NPX, NPY, NPZ, NX, NY, NZ, folder_path, MGPU_Implementation, problem, benchFilter);

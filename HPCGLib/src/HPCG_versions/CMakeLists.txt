@@ -10,7 +10,7 @@ find_package(MPI REQUIRED)
 # Include CUDA directories
 include_directories(${CUDAToolkit_INCLUDE_DIRS})
 include_directories(${MPI_CXX_INCLUDE_DIRS})
-include_directories(/user-environment/linux-sles15-neoverse_v2/gcc-13.2.0/nccl-2.20.3-1-l2d55ru4lupkbzxnqm2b5nrvlgnt3v3s/include)
+include_directories(/user-environment/linux-sles15-neoverse_v2/gcc-13.3.0/nccl-2.22.3-1-4j6h3ffzysukqpqbvriorrzk2lm762dd/include)
 
 
 # specify cuda standard
@@ -49,8 +49,9 @@ target_sources(HPCGLib PRIVATE
     multi_GPU_kernels/striped_warp_reduction_multi_GPU_computeWAXPBY.cu
 
     multi_GPU_halo_exchange/blocking_mpi_halo_exchange.cu
-    multi_GPU_halo_exchange/non_blocking_mpi_halo_exchange.cu
-    #multi_GPU_halo_exchange/nccl_halo_exchange.cu
+    multi_GPU_halo_exchange/non_blocking_host_only_mpi_halo_exchange.cu
+    multi_GPU_halo_exchange/non_blocking_cuda_aware_mpi_halo_exchange.cu
+    multi_GPU_halo_exchange/nccl_halo_exchange.cu
 
     striped_preprocessed/striped_preprocessed_computeSymGS.cu
 
@@ -75,4 +76,5 @@ target_link_libraries(
     CUDA::cublas
     CUDA::cudart
     MPI::MPI_CXX
+    nccl
 )

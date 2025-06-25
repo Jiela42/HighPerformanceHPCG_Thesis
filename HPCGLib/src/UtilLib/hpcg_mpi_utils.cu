@@ -1,3 +1,7 @@
+// This file provides utility functions and GPU kernels for managing halo regions and data exchange
+// in a multi-GPU setting using CUDA and MPI. It includes routines for initializing, zeroing,
+// injecting, extracting, and verifying halo data.
+
 #include "UtilLib/hpcg_multi_GPU_utils.cuh"
 #include "UtilLib/cuda_utils.hpp"
 #include <testing.hpp>
@@ -8,25 +12,45 @@
 #include <cassert>
 #include <stdbool.h>
 
+/**
+ * @brief Converts a local coordinate index to the corresponding index within a halo data region.
+ * @param i Local linear index.
+ * @param nx, ny, nz Local grid dimensions.
+ * @param dimx, dimy Dimensions of the data region including halos.
+ * @return Index into the halo data region.
+ */
 __inline__ __device__ global_int_t local_i_to_halo_i(
-    int i, 
+    int i,
     int nx, int ny, int nz,
     local_int_t dimx, local_int_t dimy
-    )
-    {
-        return dimx*(dimy+1) + 1 + (i % nx) + dimx*((i % (nx*ny)) / nx) + (dimx*dimy)*(i / (nx*ny));
+)
+{
+    return dimx*(dimy+1) + 1 + (i % nx) + dimx*((i % (nx*ny)) / nx) + (dimx*dimy)*(i / (nx*ny));
 }
 
-__global__ void inject_data_to_halo_kernel(DataType *x_d, DataType *data, int nx, int ny, int nz, int dimx, int dimy){
+/**
+ * @brief Kernel to inject contiguous data into a halo data region.
+ * @param x_d Destination halo data array (device).
+ * @param data Source contiguous data array (device).
+ * @param nx, ny, nz Local grid dimensions.
+ * @param dimx, dimy Dimensions of the data region including halos.
+ */
+__global__ void inject_data_to_halo_kernel(DataType *x_d, DataType *data, int nx, int ny, int nz, int dimx, int dimy)
+{
     local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
     local_int_t n = nx * ny * nz;
     for(local_int_t i = tid; i < n; i += blockDim.x * gridDim.x){
-            local_int_t hi = local_i_to_halo_i(i, nx, ny, nz, dimx, dimy);
-            x_d[hi] = data[i];
+        local_int_t hi = local_i_to_halo_i(i, nx, ny, nz, dimx, dimy);
+        x_d[hi] = data[i];
     }
 }
 
-void GenerateProblem(int npx, int npy, int npz, local_int_t nx, local_int_t ny, local_int_t nz, int size, int rank, Problem *problem){
+/**
+ * @brief Stores and initializes all necessary metadata for the multi-GPU setting.
+ *        Stores everything into a Problem struct.
+ */
+void GenerateProblem(int npx, int npy, int npz, local_int_t nx, local_int_t ny, local_int_t nz, int size, int rank, Problem *problem)
+{
     problem->npx = npx; //number of processes in x
     problem->npy = npy; //number of processes in y
     problem->npz = npz; //number of processes in z
@@ -380,7 +404,12 @@ void GenerateProblem(int npx, int npy, int npz, local_int_t nx, local_int_t ny, 
 
 }
 
-void InitHaloMemGPU(Halo *halo, Problem *problem){
+/**
+ * @brief Initializes the variables of a halo struct and allocates all GPU memory necessary for halo exchange and computation.
+ *        GPU memory is initialized with zeros.
+ */
+void InitHaloMemGPU(Halo *halo, Problem *problem)
+{
     local_int_t nx = problem->nx;
     local_int_t ny = problem->ny;
     local_int_t nz = problem->nz;
@@ -414,7 +443,11 @@ void InitHaloMemGPU(Halo *halo, Problem *problem){
     
 }
 
-void InitHaloMemCPU(Halo *halo, Problem *problem){
+/**
+ * @brief Initializes all halo struct variables and the necessary data regions on the CPU for communication and computation.
+ */
+void InitHaloMemCPU(Halo *halo, Problem *problem)
+{
     local_int_t nx = problem->nx;
     local_int_t ny = problem->ny;
     local_int_t nz = problem->nz;
@@ -437,35 +470,43 @@ void InitHaloMemCPU(Halo *halo, Problem *problem){
     }
 }
 
-/*
-* Initializes the memory for halo on both CPU and GPU and initializes all data memory with zeros.
-*/
-void InitHalo(Halo *halo, Problem *problem){
+/**
+ * @brief Initializes the memory for halo on both CPU and GPU and initializes all data memory with zeros.
+ */
+void InitHalo(Halo *halo, Problem *problem)
+{
     InitHaloMemGPU(halo, problem);
     InitHaloMemCPU(halo, problem);
-    //SetHaloZeroGPU(halo);
 }
 
-void SetHaloZeroGPU(Halo *halo){
+/**
+ * @brief Sets the entire halo data region to zero on the GPU.
+ */
+void SetHaloZeroGPU(Halo *halo)
+{
     CHECK_CUDA(cudaMemset(halo->x_d, 0, halo->dimx * halo->dimy * halo->dimz * sizeof(DataType)));
 }
 
-// correctness verified
-void InjectDataToHalo(Halo *halo, DataType *data){
+/**
+ * @brief Injects a data array of length nx*ny*nz into the data field of a halo struct.
+ */
+void InjectDataToHalo(Halo *halo, DataType *data)
+{
     int n = halo->nx * halo->ny * halo->nz;
-    int num_threads = 1024;
-    int num_blocks = (n + num_threads - 1) / num_threads;
-    inject_data_to_halo_kernel<<<num_blocks, num_threads>>>(halo->x_d, data, halo->nx, halo->ny, halo->nz, halo->dimx, halo->dimy);
+    int const nthread = 1024; // number of threads per block
+    int const nblock = (n + nthread - 1) / nthread; // total blocks needed
+    inject_data_to_halo_kernel<<<nblock, nthread>>>(halo->x_d, data, halo->nx, halo->ny, halo->nz, halo->dimx, halo->dimy);
     cudaError_t err = cudaGetLastError();
     if(err != cudaSuccess) {
         printf("Kernel launch error: %s\n", cudaGetErrorString(err));
     }
 }
 
-/*
-* Initialize the halo with global index
-*/
-void SetHaloGlobalIndexGPU(Halo *halo, Problem *problem){
+/**
+ * @brief Initialize the data region of a halo struct with global index.
+ */
+void SetHaloGlobalIndexGPU(Halo *halo, Problem *problem)
+{
     DataType *x_h = (DataType*) malloc(halo->dimx * halo->dimy * halo->dimz * sizeof(DataType));
     for(int i=0; i<halo->dimx * halo->dimy * halo->dimz; i++){
         x_h[i] = 0;
@@ -488,10 +529,11 @@ void SetHaloGlobalIndexGPU(Halo *halo, Problem *problem){
     CHECK_CUDA(cudaMemcpy(halo->x_d, x_h, halo->dimx * halo->dimy * halo->dimz * sizeof(DataType), cudaMemcpyHostToDevice));
 }
 
-/*
-* Initialize the halo with 1.0/(global index + 1.0)
-*/
-void SetHaloQuotientGlobalIndexGPU(Halo *halo, Problem *problem){
+/**
+ * @brief Initialize the data region of a halo with 1.0/(global index + 1.0).
+ */
+void SetHaloQuotientGlobalIndexGPU(Halo *halo, Problem *problem)
+{
     DataType *x_h = (DataType*) malloc(halo->dimx * halo->dimy * halo->dimz * sizeof(DataType));
     for(int i=0; i<halo->dimx * halo->dimy * halo->dimz; i++){
         x_h[i] = 0;
@@ -514,11 +556,12 @@ void SetHaloQuotientGlobalIndexGPU(Halo *halo, Problem *problem){
     CHECK_CUDA(cudaMemcpy(halo->x_d, x_h, halo->dimx * halo->dimy * halo->dimz * sizeof(DataType), cudaMemcpyHostToDevice));
 }
 
-/*
-* Initialize the halo with random numbers between min and max
-* Seed = input seed + rank for each process
-*/
-void SetHaloRandomGPU(Halo *halo, Problem *problem, int min, int max, int seed){
+/**
+ * @brief Initialize the halo with random numbers between min and max.
+ *        Seed = input seed + rank for each process.
+ */
+void SetHaloRandomGPU(Halo *halo, Problem *problem, int min, int max, int seed)
+{
     DataType *x_h = (DataType*) malloc(halo->dimx * halo->dimy * halo->dimz * sizeof(DataType));
     for(int i=0; i<halo->dimx * halo->dimy * halo->dimz; i++){
         x_h[i] = 0;
@@ -547,7 +590,11 @@ void SetHaloRandomGPU(Halo *halo, Problem *problem, int min, int max, int seed){
     CHECK_CUDA(cudaMemcpy(halo->x_d, x_h, halo->dimx * halo->dimy * halo->dimz * sizeof(DataType), cudaMemcpyHostToDevice));
 }
 
-void FreeHaloGPU(Halo *halo){
+/**
+ * @brief Frees all initialized GPU memory for the halo struct.
+ */
+void FreeHaloGPU(Halo *halo)
+{
     CHECK_CUDA(cudaFree(halo->x_d));
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
             CHECK_CUDA(cudaFree(halo->send_buff_d[i]));
@@ -555,320 +602,371 @@ void FreeHaloGPU(Halo *halo){
     }
 }
 
-void FreeHaloCPU(Halo *halo){
+/**
+ * @brief Frees all initialized CPU memory for the halo struct.
+ */
+void FreeHaloCPU(Halo *halo)
+{
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
             free(halo->send_buff_h[i]);
             free(halo->recv_buff_h[i]);
     }
 }
 
-void FreeHalo(Halo *halo){
+/**
+ * @brief Frees both CPU and GPU memory for the halo struct.
+ */
+void FreeHalo(Halo *halo)
+{
     FreeHaloGPU(halo);
     FreeHaloCPU(halo);
 }
 
-void InitGPU(Problem *problem){
+/**
+ * @brief In case there are more than one GPUs visible to the process, picks the one (rank % visibleDevices).
+ */
+void InitGPU(Problem *problem)
+{
     int deviceCount;
     CHECK_CUDA(cudaGetDeviceCount(&deviceCount));
     assert(deviceCount > 0);
     CHECK_CUDA(cudaSetDevice(problem->rank % deviceCount));
     // printf("Rank=%d:\t\t Set my device to device=%d, available=%d.\n", problem->rank, problem->rank % deviceCount, deviceCount);
 }
-/* x_d is the pointer to the first element in the slice */
-/* every thread fills an element */
-__global__ void extract_xz_plane_kernel(DataType *x_d, DataType *slice_d, int length_X, int length_Z, int slice_X, int slice_Z){
+
+// ---------------------------------------------------------------------------
+// GPU Kernels for extracting/injecting halo planes
+// ---------------------------------------------------------------------------
+
+/**
+ * @brief Extracts an XZ plane from x_d into slice_d.
+ */
+__global__ void extract_xz_plane_kernel(DataType *x_d, DataType *slice_d, int length_X, int length_Z, int slice_X, int slice_Z)
+{
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    
     int z_loc = tid / length_X;
     int x_loc = tid % length_X;
-    if (z_loc<length_Z) slice_d[tid]=x_d[z_loc*slice_Z + x_loc*slice_X];
+    if (z_loc < length_Z) slice_d[tid] = x_d[z_loc*slice_Z + x_loc*slice_X];
 }
 
-__global__ void inject_xz_plane_kernel(DataType *x_d, DataType *slice_d, int length_X, int length_Z, int slice_X, int slice_Z){
+/**
+ * @brief Injects an XZ plane from slice_d into x_d.
+ */
+__global__ void inject_xz_plane_kernel(DataType *x_d, DataType *slice_d, int length_X, int length_Z, int slice_X, int slice_Z)
+{
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    
     int z_loc = tid / length_X;
     int x_loc = tid % length_X;
-    if (z_loc<length_Z) x_d[z_loc*slice_Z + x_loc*slice_X]=slice_d[tid];
+    if (z_loc < length_Z) x_d[z_loc*slice_Z + x_loc*slice_X] = slice_d[tid];
 }
 
-__global__ void extract_yz_plane_kernel(DataType *x_d, DataType *slice_d, int length_Y, int length_Z, int slice_Y, int slice_Z){
+/**
+ * @brief Extracts a YZ plane from x_d into slice_d.
+ */
+__global__ void extract_yz_plane_kernel(DataType *x_d, DataType *slice_d, int length_Y, int length_Z, int slice_Y, int slice_Z)
+{
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    
     int z_loc = tid / length_Y;
     int y_loc = tid % length_Y;
-    if (z_loc<length_Z) slice_d[tid]=x_d[z_loc*slice_Z + y_loc*slice_Y];
+    if (z_loc < length_Z) slice_d[tid] = x_d[z_loc*slice_Z + y_loc*slice_Y];
 }
 
-__global__ void inject_yz_plane_kernel(DataType *x_d, DataType *slice_d, int length_Y, int length_Z, int slice_Y, int slice_Z){
+/**
+ * @brief Injects a YZ plane from slice_d into x_d.
+ */
+__global__ void inject_yz_plane_kernel(DataType *x_d, DataType *slice_d, int length_Y, int length_Z, int slice_Y, int slice_Z)
+{
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    
     int z_loc = tid / length_Y;
     int y_loc = tid % length_Y;
-    if (z_loc<length_Z) x_d[z_loc*slice_Z + y_loc*slice_Y]=slice_d[tid];
-}
-__global__ void extract_xy_plane_kernel(DataType *x_d, DataType *slice_d, int length_X, int length_Y, int slice_X, int slice_Y){
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    
-    int y_loc = tid / length_X;
-    int x_loc = tid % length_X;
-    if (y_loc<length_Y) slice_d[tid] = x_d[y_loc*slice_Y + x_loc*slice_X];
+    if (z_loc < length_Z) x_d[z_loc*slice_Z + y_loc*slice_Y] = slice_d[tid];
 }
 
-__global__ void inject_xy_plane_kernel(DataType *x_d, DataType *slice_d, int length_X, int length_Y, int slice_X, int slice_Y){
+/**
+ * @brief Extracts an XY plane from x_d into slice_d.
+ */
+__global__ void extract_xy_plane_kernel(DataType *x_d, DataType *slice_d, int length_X, int length_Y, int slice_X, int slice_Y)
+{
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    
     int y_loc = tid / length_X;
     int x_loc = tid % length_X;
-    if (y_loc<length_Y) x_d[y_loc*slice_Y + x_loc*slice_X] = slice_d[tid];
+    if (y_loc < length_Y) slice_d[tid] = x_d[y_loc*slice_Y + x_loc*slice_X];
 }
 
-void extract_horizontal_plane_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff){
+/**
+ * @brief Injects an XY plane from slice_d into x_d.
+ */
+__global__ void inject_xy_plane_kernel(DataType *x_d, DataType *slice_d, int length_X, int length_Y, int slice_X, int slice_Y)
+{
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    int y_loc = tid / length_X;
+    int x_loc = tid % length_X;
+    if (y_loc < length_Y) x_d[y_loc*slice_Y + x_loc*slice_X] = slice_d[tid];
+}
+
+/**
+ * @brief Extracts a horizontal (XZ) plane from the GPU halo region into a buffer.
+ */
+void extract_horizontal_plane_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
+{
     local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
 
     DataType *buff = halo->send_buff_d[i_buff];
-    
-    // collect halo on device
-    int const nthread=256;
-    int const nblock = (gh->length_X*gh->length_Z + nthread - 1) / nthread;
-    extract_xz_plane_kernel<<<nblock,nthread>>>(x_d, buff, gh->length_X, gh->length_Z, 1, gh->dimy*gh->dimx);
-    
-    // copy from device to host
-    if(host_buff) {
-        CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_X*gh->length_Z*sizeof(DataType), cudaMemcpyDeviceToHost));
+    // Kernel launch config for extracting XZ plane:
+    int const nthread = 256; // number of threads per block
+    int const nblock = (gh->length_X * gh->length_Z + nthread - 1) / nthread; // total blocks needed
+    extract_xz_plane_kernel<<<nblock, nthread>>>(x_d, buff, gh->length_X, gh->length_Z, 1, gh->dimy * gh->dimx);
+
+    // copy from device to host if needed
+    if (host_buff) {
+        CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_X * gh->length_Z * sizeof(DataType), cudaMemcpyDeviceToHost));
     }
 }
 
-void inject_horizontal_plane_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff){
+/**
+ * @brief Injects a horizontal (XZ) plane from a buffer into the GPU halo region.
+ */
+void inject_horizontal_plane_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
+{
     local_int_t k = gh->x +  gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType* x_d = halo->x_d + k;
-  
     DataType *buff = halo->recv_buff_d[i_buff];
-
-    if (host_buff){
-        CHECK_CUDA(cudaMemcpy(buff, halo->recv_buff_h[i_buff], gh->length_X*gh->length_Z*sizeof(DataType), cudaMemcpyHostToDevice));
+    if (host_buff) {
+        CHECK_CUDA(cudaMemcpy(buff, halo->recv_buff_h[i_buff], gh->length_X * gh->length_Z * sizeof(DataType), cudaMemcpyHostToDevice));
     }
-    
-    // fill x_d with buffer
-    int const nthread=256;
-    int const nblock = (gh->length_X*gh->length_Z + nthread - 1) / nthread;
-    inject_xz_plane_kernel<<<nblock,nthread>>>(x_d, buff, gh->length_X, gh->length_Z, 1, gh->dimy*gh->dimx);
-
+    // Kernel launch config for injecting XZ plane:
+    int const nthread = 256; // number of threads per block
+    int const nblock = (gh->length_X * gh->length_Z + nthread - 1) / nthread; // total blocks needed
+    inject_xz_plane_kernel<<<nblock, nthread>>>(x_d, buff, gh->length_X, gh->length_Z, 1, gh->dimy * gh->dimx);
 }
 
-
-void extract_vertical_plane_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff){
+/**
+ * @brief Extracts a vertical (YZ) plane from the GPU halo region into a buffer.
+ */
+void extract_vertical_plane_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
+{
     local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
 
     DataType *buff = halo->send_buff_d[i_buff];
-
-    // collect halo on device
-    int nthread=256;
-    int nblock = (gh->length_Y*gh->length_Z + nthread - 1) / nthread;
-    extract_yz_plane_kernel<<<nblock,nthread>>>(x_d, buff, gh->length_Y, gh->length_Z, gh->dimx, gh->dimy*gh->dimx);
-    
-    // copy from device to host
-    if (host_buff){
-        CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_Y*gh->length_Z*sizeof(DataType), cudaMemcpyDeviceToHost));
+    // Kernel launch config for extracting YZ plane:
+    int const nthread = 256; // number of threads per block
+    int const nblock = (gh->length_Y * gh->length_Z + nthread - 1) / nthread; // total blocks needed
+    extract_yz_plane_kernel<<<nblock, nthread>>>(x_d, buff, gh->length_Y, gh->length_Z, gh->dimx, gh->dimy * gh->dimx);
+    // copy from device to host if needed
+    if (host_buff) {
+        CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_Y * gh->length_Z * sizeof(DataType), cudaMemcpyDeviceToHost));
     }
 }
 
-void inject_vertical_plane_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff){
+/**
+ * @brief Injects a vertical (YZ) plane from a buffer into the GPU halo region.
+ */
+void inject_vertical_plane_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
+{
     local_int_t k = gh->x +  gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
 
     DataType *buff = halo->recv_buff_d[i_buff];
-    if(host_buff){
-        CHECK_CUDA(cudaMemcpy(buff, halo->recv_buff_h[i_buff], gh->length_Y*gh->length_Z*sizeof(DataType), cudaMemcpyHostToDevice));
+    if (host_buff) {
+        CHECK_CUDA(cudaMemcpy(buff, halo->recv_buff_h[i_buff], gh->length_Y * gh->length_Z * sizeof(DataType), cudaMemcpyHostToDevice));
     }
-    
-    // fill x_d with slice_d
-    int const nthread=256;
-    int const nblock = (gh->length_Y*gh->length_Z + nthread - 1) / nthread;
-    inject_yz_plane_kernel<<<nblock,nthread>>>(x_d, buff, gh->length_Y, gh->length_Z, gh->dimx, gh->dimy*gh->dimx);   
+    // Kernel launch config for injecting YZ plane:
+    int const nthread = 256; // number of threads per block
+    int const nblock = (gh->length_Y * gh->length_Z + nthread - 1) / nthread; // total blocks needed
+    inject_yz_plane_kernel<<<nblock, nthread>>>(x_d, buff, gh->length_Y, gh->length_Z, gh->dimx, gh->dimy * gh->dimx);
 }
 
-void extract_frontal_plane_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff){
+/**
+ * @brief Extracts a frontal (XY) plane from the GPU halo region into a buffer.
+ */
+void extract_frontal_plane_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
+{
     local_int_t k = gh->x +  gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
 
     DataType *buff = halo->send_buff_d[i_buff];
-
-    // collect halo on device
-    int nthread=256;
-    int nblock = (gh->length_X*gh->length_Y + nthread - 1) / nthread;
-    extract_xy_plane_kernel<<<nblock,nthread>>>(x_d, buff, gh->length_X, gh->length_Y, 1, gh->dimx);
-    
+    // Kernel launch config for extracting XY plane:
+    int const nthread = 256; // number of threads per block
+    int const nblock = (gh->length_X * gh->length_Y + nthread - 1) / nthread; // total blocks needed
+    extract_xy_plane_kernel<<<nblock, nthread>>>(x_d, buff, gh->length_X, gh->length_Y, 1, gh->dimx);
     // copy from device to host
-    CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_X*gh->length_Y*sizeof(DataType), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_X * gh->length_Y * sizeof(DataType), cudaMemcpyDeviceToHost));
 }
 
-
-void inject_frontal_plane_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff){
+/**
+ * @brief Injects a frontal (XY) plane from a buffer into the GPU halo region.
+ */
+void inject_frontal_plane_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
+{
     local_int_t k = gh->x +  gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
 
     DataType *buff = halo->recv_buff_d[i_buff];
-    if(host_buff){
-        CHECK_CUDA(cudaMemcpy(buff, halo->recv_buff_h[i_buff], gh->length_Y*gh->length_X*sizeof(DataType), cudaMemcpyHostToDevice));
+    if (host_buff) {
+        CHECK_CUDA(cudaMemcpy(buff, halo->recv_buff_h[i_buff], gh->length_Y * gh->length_X * sizeof(DataType), cudaMemcpyHostToDevice));
     }
-
-    // fill x_d with slice_d
-    int const nthread=256;
-    int const nblock = (gh->length_X*gh->length_Y + nthread - 1) / nthread;
+    // Kernel launch config for injecting XY plane:
+    int const nthread = 256; // number of threads per block
+    int const nblock = (gh->length_X * gh->length_Y + nthread - 1) / nthread; // total blocks needed
     inject_xy_plane_kernel<<<nblock, nthread>>>(x_d, buff, gh->length_X, gh->length_Y, 1, gh->dimx);
 }
 
-__global__ void extract_edge_kernel(DataType *x_d, DataType *slice_d, int length_X, int slice_X){
+/**
+ * @brief Kernel to extract a 1D edge from x_d into slice_d.
+ */
+__global__ void extract_edge_kernel(DataType *x_d, DataType *slice_d, int length_X, int slice_X)
+{
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    
-    if (tid<length_X) slice_d[tid]=x_d[tid*slice_X];
+    if (tid < length_X) slice_d[tid] = x_d[tid * slice_X];
 }
 
-__global__ void inject_edge_kernel(DataType *x_d, DataType *slice_d, int length_X, int slice_X){
+/**
+ * @brief Kernel to inject a 1D edge from slice_d into x_d.
+ */
+__global__ void inject_edge_kernel(DataType *x_d, DataType *slice_d, int length_X, int slice_X)
+{
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    
-    if (tid<length_X) x_d[tid*slice_X] = slice_d[tid];
+    if (tid < length_X) x_d[tid * slice_X] = slice_d[tid];
 }
 
-
-void extract_edge_X_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff) {
+/**
+ * @brief Extracts an edge along X from the GPU halo region into a buffer.
+ */
+void extract_edge_X_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
+{
     local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
 
     DataType *buff = halo->send_buff_d[i_buff];
-
-    int const nthreads = 128;
-    int const nblocks = (gh->length_X + nthreads - 1)/nthreads;
+    int const nthreads = 128; // number of threads per block
+    int const nblocks = (gh->length_X + nthreads - 1) / nthreads; // total blocks needed
     extract_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_X, 1);
-
-    if(host_buff){
+    if (host_buff) {
         CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
     }
 }
 
-void inject_edge_X_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff) {
+/**
+ * @brief Injects an edge along X from a buffer into the GPU halo region.
+ */
+void inject_edge_X_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
+{
     local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
 
     DataType *buff = halo->recv_buff_d[i_buff];
-    if(host_buff){
+    if (host_buff) {
         CHECK_CUDA(cudaMemcpy(buff, halo->recv_buff_h[i_buff], gh->length_X * sizeof(DataType), cudaMemcpyHostToDevice));
     }
-
-    int const nthreads = 128;
-    int const nblocks = (gh->length_X + nthreads - 1)/nthreads;
+    int const nthreads = 128; // number of threads per block
+    int const nblocks = (gh->length_X + nthreads - 1) / nthreads; // total blocks needed
     inject_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_X, 1);
 }
 
-void extract_edge_Y_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff){
+/**
+ * @brief Extracts an edge along Y from the GPU halo region into a buffer.
+ */
+void extract_edge_Y_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
+{
     local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
-    DataType*x_d = halo->x_d + k;
-
+    DataType *x_d = halo->x_d + k;
     DataType *buff = halo->send_buff_d[i_buff];
-
-    int const nthreads = 128;
-    int const nblocks = (gh->length_Y + nthreads - 1)/nthreads;
+    int const nthreads = 128; // number of threads per block
+    int const nblocks = (gh->length_Y + nthreads - 1) / nthreads; // total blocks needed
     extract_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_Y, gh->dimx);
-
-    if(host_buff){
+    if (host_buff) {
         CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_Y * sizeof(DataType), cudaMemcpyDeviceToHost));
     }
 }
 
-void inject_edge_Y_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff) {
+/**
+ * @brief Injects an edge along Y from a buffer into the GPU halo region.
+ */
+void inject_edge_Y_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
+{
     local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
 
     DataType *buff = halo->recv_buff_d[i_buff];
-    if(host_buff){
+    if (host_buff) {
         CHECK_CUDA(cudaMemcpy(buff, halo->recv_buff_h[i_buff], gh->length_Y * sizeof(DataType), cudaMemcpyHostToDevice));
     }
-
-    int const nthreads = 128;
-    int const nblocks = (gh->length_Y + nthreads - 1)/nthreads;
+    int const nthreads = 128; // number of threads per block
+    int const nblocks = (gh->length_Y + nthreads - 1) / nthreads; // total blocks needed
     inject_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_Y, gh->dimx);
 }
 
-void extract_edge_Z_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff){
+/**
+ * @brief Extracts an edge along Z from the GPU halo region into a buffer.
+ */
+void extract_edge_Z_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
+{
     local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
-    
     DataType *buff = halo->send_buff_d[i_buff];
-    
-    int const nthreads = 128;
-    int const nblocks = (gh->length_Z + nthreads - 1)/nthreads;
-    extract_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_Z, gh->dimx*gh->dimy);
-
-    if(host_buff){
+    int const nthreads = 128; // number of threads per block
+    int const nblocks = (gh->length_Z + nthreads - 1) / nthreads; // total blocks needed
+    extract_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_Z, gh->dimx * gh->dimy);
+    if (host_buff) {
         CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_Z * sizeof(DataType), cudaMemcpyDeviceToHost));
     }
 }
 
-
-void inject_edge_Z_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff) {
+/**
+ * @brief Injects an edge along Z from a buffer into the GPU halo region.
+ */
+void inject_edge_Z_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
+{
     local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
 
     DataType *buff = halo->recv_buff_d[i_buff];
-    if (host_buff){
+    if (host_buff) {
         CHECK_CUDA(cudaMemcpy(buff, halo->recv_buff_h[i_buff], gh->length_Z * sizeof(DataType), cudaMemcpyHostToDevice));
     }
-
-    int const nthreads = 128;
-    int const nblocks = (gh->length_Z + nthreads - 1)/nthreads;
-    inject_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_Z, gh->dimx*gh->dimy);
-
+    int const nthreads = 128; // number of threads per block
+    int const nblocks = (gh->length_Z + nthreads - 1) / nthreads; // total blocks needed
+    inject_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_Z, gh->dimx * gh->dimy);
 }
 
-void extract_corner_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff) {
+/**
+ * @brief Extracts a corner value from the GPU halo region into a buffer.
+ * @note Only works for corner being a single element.
+ */
+void extract_corner_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
+{
     local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
-    
-    DataType *buff = halo->send_buff_h[i_buff];
-
-    for (int z = 0; z < gh->length_Z; z++) {
-        for (int y = 0; y < gh->length_Y; y++) {
-            // Copy a contiguous block of length_X elements (one row of the corner)
-            CHECK_CUDA(cudaMemcpy(buff, x_d, gh->length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
-            buff += gh->length_X;
-            x_d += gh->dimx;  // move to the next row in the halo
-        }
-        // Jump to the start of the next z-plane:
-        x_d += gh->dimx * (gh->dimy - gh->length_Y);
-    }
-
-    if(!host_buff){
-        CHECK_CUDA(cudaMemcpy(halo->send_buff_d[i_buff], buff, gh->length_X*gh->length_Y*gh->length_Z * sizeof(DataType), cudaMemcpyHostToDevice));
+    if (host_buff) {
+        CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], x_d, sizeof(DataType), cudaMemcpyDeviceToHost));
+    } else {
+        CHECK_CUDA(cudaMemcpy(halo->send_buff_d[i_buff], x_d, sizeof(DataType), cudaMemcpyDeviceToDevice));
     }
 }
 
-void inject_corner_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff) {
+/**
+ * @brief Injects a corner value from a buffer into the GPU halo region.
+ * @note Only works for corner being a single element.
+ */
+void inject_corner_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
+{
     local_int_t k = gh->x + gh->y * gh->dimx + gh->z * gh->dimx * gh->dimy;
     DataType *x_d = halo->x_d + k;
-
-    DataType *buff = halo->recv_buff_h[i_buff];
-
-    for (int z = 0; z < gh->length_Z; z++) {
-        for (int y = 0; y < gh->length_Y; y++) {
-            // Copy a contiguous block of length_X elements (one row of the corner)
-            CHECK_CUDA(cudaMemcpy(x_d, buff, gh->length_X * sizeof(DataType), cudaMemcpyHostToDevice));
-            buff += gh->length_X;
-            x_d += gh->dimx;  // move to the next row in the halo
-        }
-        // Jump to the start of the next z-plane:
-        x_d += gh->dimx * (gh->dimy - gh->length_Y);
+    if (host_buff) {
+        CHECK_CUDA(cudaMemcpy(x_d, halo->recv_buff_h[i_buff], sizeof(DataType), cudaMemcpyHostToDevice));
+    } else {
+        CHECK_CUDA(cudaMemcpy(x_d, halo->recv_buff_d[i_buff], sizeof(DataType), cudaMemcpyDeviceToDevice));
     }
-
-    if(!host_buff){
-        CHECK_CUDA(cudaMemcpy(halo->recv_buff_d[i_buff], buff, gh->length_X*gh->length_Y*gh->length_Z * sizeof(DataType), cudaMemcpyHostToDevice));
-    }    
 }
 
-//correctness verified
-void SendResult(int rank_recv, Halo *x_d, Problem *problem){
+/**
+ * @brief Sends the data region of halo to the specified rank.
+ *        Can be used to gather the result at one process.
+ */
+void SendResult(int rank_recv, Halo *x_d, Problem *problem)
+{
     DataType *send_addr_d = x_d->interior;
     DataType *send_buf_h = (DataType*) malloc(problem->nx * sizeof(DataType));
     for(int i = 0; i < problem->nz; i++){
@@ -882,8 +980,12 @@ void SendResult(int rank_recv, Halo *x_d, Problem *problem){
     free(send_buf_h);
 }
 
-//correctness verified
-void GatherResult(Halo *x_d, Problem *problem, DataType *result_h){
+/**
+ * @brief Collects the data region of a halo from all processes in the correct order and stores it into result_h.
+ *        Includes the own computation.
+ */
+void GatherResult(Halo *x_d, Problem *problem, DataType *result_h)
+{
     DataType *own_data_d = x_d->interior;
     for(int i = 0; i<problem->gnz; i++){ // go through all gnz layers
         int pz_recv = i / problem->nz;
@@ -909,7 +1011,11 @@ void GatherResult(Halo *x_d, Problem *problem, DataType *result_h){
     }
 }
 
-void PrintHalo(Halo *x_d){
+/**
+ * @brief Prints the data region of a halo.
+ */
+void PrintHalo(Halo *x_d)
+{
     DataType *x_h = (DataType*) malloc(x_d->dimx * x_d->dimy * x_d->dimz * sizeof(DataType));
     CHECK_CUDA(cudaMemcpy(x_h, x_d->x_d, x_d->dimx * x_d->dimy * x_d->dimz * sizeof(DataType), cudaMemcpyDeviceToHost));
     for(int i = 0; i < x_d->dimz; i++){
@@ -933,7 +1039,11 @@ void PrintHalo(Halo *x_d){
     free(x_h);
 }
 
-void GenerateStripedPartialMatrix(Problem *problem, DataType *A){
+/**
+ * @brief Generates a striped partial matrix on CPU.
+ */
+void GenerateStripedPartialMatrix(Problem *problem, DataType *A)
+{
     int nx = problem->nx;
     int ny = problem->ny;
     int nz = problem->nz;
@@ -975,7 +1085,11 @@ void GenerateStripedPartialMatrix(Problem *problem, DataType *A){
     }
 }
 
-bool VerifyPartialMatrix(DataType *striped_A_local_h, DataType *striped_A_global_h, int num_stripes, Problem *problem){
+/**
+ * @brief Verifies correctness of a striped partial matrix.
+ */
+bool VerifyPartialMatrix(DataType *striped_A_local_h, DataType *striped_A_global_h, int num_stripes, Problem *problem)
+{
     for(int i = 0; i<problem->nz; i++){
         int gi0 = problem->gi0 + i * problem->gnx * problem->gny;
         for(int j = 0; j<problem->ny; j++){
@@ -991,7 +1105,11 @@ bool VerifyPartialMatrix(DataType *striped_A_local_h, DataType *striped_A_global
     return true;
 }
 
-bool IsHaloZero(Halo *x_d){
+/**
+ * @brief Checks if the data region of a halo is zero.
+ */
+bool IsHaloZero(Halo *x_d)
+{
     DataType *x_h = (DataType*) malloc(x_d->dimx * x_d->dimy * x_d->dimz * sizeof(DataType));
     CHECK_CUDA(cudaMemcpy(x_h, x_d->x_d, x_d->dimx * x_d->dimy * x_d->dimz * sizeof(DataType), cudaMemcpyDeviceToHost));
     //check front and back

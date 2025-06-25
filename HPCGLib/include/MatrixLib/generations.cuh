@@ -35,7 +35,9 @@ void generate_f2c_operator(
 
 void GenerateStripedPartialMatrix_GPU(
     Problem *problem, 
-    DataType *A_d
+    DataType *A_d,
+    bool column_major = false,
+    bool blocked = false
 );
 
 void generate_partialf2c_operator(

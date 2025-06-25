@@ -4,16 +4,47 @@
 #SBATCH --job-name=bench_solver
 #SBATCH --account=a-g200
 #SBATCH --output result.out
-#SBATCH --time 00:15:00
+#SBATCH --time 00:05:00
 #SBATCH --partition=debug
-#SBATCH --nodes=2
-#SBATCH --ntasks=8
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
 #SBATCH --gpus-per-task=1
 
-## Set NCCL debug mode
-export NCCL_DEBUG=WARN
+##setup
+export MPICH_GPU_SUPPORT_ENABLED=1
 
 ## Run 
 echo "Started: $(date '+%H:%M:%S')"
-srun /users/nrottstegge/github/HighPerformanceHPCG_Thesis/HPCGLib/build/testing/run_multi_GPU_tests
+echo "Testing BLOCKING MPI implementation"
+srun /users/nrottstegge/github/HighPerformanceHPCG_Thesis/build/HPCGLib/testing/run_multi_GPU_tests BLOCKING_MPI
+srun ncu --kernel-name pipelined_columnMajor_multi_GPU_SPMV_kernel --set full -f --export my_report.ncu-rep /users/nrottstegge/github/HighPerformanceHPCG_Thesis/build/HPCGLib/testing/run_multi_GPU_tests BLOCKING_MPI
 echo "Finished: $(date '+%H:%M:%S')"
+
+#echo ""
+#echo ""
+
+#echo "Started: $(date '+%H:%M:%S')"
+#echo "Testing NON_BLOCKING HOST_ONLY MPI implementation"
+#srun /users/nrottstegge/github/HighPerformanceHPCG_Thesis/build/HPCGLib/testing/run_multi_GPU_tests NON_BLOCKING_HOST_MPI
+#echo "Finished: $(date '+%H:%M:%S')"
+
+#echo ""
+#echo ""
+
+#echo "Started: $(date '+%H:%M:%S')"
+#echo "Testing NON_BLOCKING CUDA_AWARE MPI implementation"
+#srun /users/nrottstegge/github/HighPerformanceHPCG_Thesis/build/HPCGLib/testing/run_multi_GPU_tests NON_BLOCKING_CUDA_MPI
+#echo "Finished: $(date '+%H:%M:%S')"
+
+#echo ""
+#echo ""
+
+#echo "Started: $(date '+%H:%M:%S')"
+#echo "Testing NCCL implementation"
+#srun /users/nrottstegge/github/HighPerformanceHPCG_Thesis/build/HPCGLib/testing/run_multi_GPU_tests NCCL
+#echo "Finished: $(date '+%H:%M:%S')"
+
+#echo ""
+#echo ""
+
+echo "DONE."

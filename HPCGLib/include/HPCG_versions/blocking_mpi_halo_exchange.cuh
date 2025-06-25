@@ -7,12 +7,17 @@ template <typename T>
 class blocking_mpi_Implementation : public striped_multi_GPU_Implementation<T> {
 public:
 
+    blocking_mpi_Implementation(){
+        this->comm_type = "blocking_mpi";
+    }
+
     Problem* init_comm(
         int argc, char *argv[],
         int npx, int npy, int npz,
-        local_int_t nx, local_int_t ny, local_int_t nz
+        local_int_t nx, local_int_t ny, local_int_t nz,
+        bool initMPI
     ) override {
-        return init_comm_blocking_MPI(argc, argv, npx, npy, npz, nx, ny, nz);
+        return init_comm_blocking_MPI(argc, argv, npx, npy, npz, nx, ny, nz, initMPI);
     }
 
     void ExchangeHalo(Halo * halo, Problem * problem
@@ -29,7 +34,8 @@ private:
     Problem* init_comm_blocking_MPI(
         int argc, char *argv[],
         int npx, int npy, int npz,
-        local_int_t nx, local_int_t ny, local_int_t nz
+        local_int_t nx, local_int_t ny, local_int_t nz,
+        bool initMPI
     );
 
     void ExchangeHaloBlockingMPI(

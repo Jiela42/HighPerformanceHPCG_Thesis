@@ -11,9 +11,11 @@
 
 #include <memory>
 
+#define BLOCK_SIZE 32
+
 // #include <stdio.h>
 template <typename T>
-striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
+striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p, bool column_major, bool blocked) {
     // this->nx = 0;
     // this->ny = 0;
     // this->nz = 0;
@@ -47,6 +49,8 @@ striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
     //this->j_min_i.clear();
     //this->values.clear();
     this->j_min_i = std::vector<local_int_t>(this->num_stripes, 0);
+    this->j_min_i_halo = std::vector<local_int_t>(this->num_stripes, 0);
+    this->j_min_i_shared = std::vector<local_int_t>(this->num_stripes, 0);
     //this->j_min_i_d = nullptr;
     //this->values_d = nullptr;
 
@@ -62,8 +66,11 @@ striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
     this->Axf_d = new Halo;
     //this->f2c_op.clear();
 
+    this->column_major = column_major;
+    this->blocked = blocked;
+
     CHECK_CUDA(cudaMalloc(&this->values_d, sizeof(T) * num_rows* 27));
-    GenerateStripedPartialMatrix_GPU(this->problem, this->values_d);
+    GenerateStripedPartialMatrix_GPU(this->problem, this->values_d, column_major, blocked);
 
     // fill j_min_i_d
     local_int_t neighbour_offsets [num_stripes][3] = {
@@ -87,10 +94,24 @@ striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p) {
         if (this->j_min_i[i] == 0) {
             this->diag_index = i;
         }
+
+        this->j_min_i_halo[i] = off_x + off_y * (p->nx + 2) + off_z * (p->nx + 2) * (p->ny + 2);
+        if (this->j_min_i_halo[i] == 0) {
+            this->diag_index = i;
+        }
+        this->j_min_i_shared[i] = off_x + off_y * (BLOCK_SIZE + 2) + off_z * (BLOCK_SIZE + 2) * (1 + 2);
+        if (this->j_min_i_shared[i] == 0) {
+            this->diag_index = i;
+        }
     }
 
     CHECK_CUDA(cudaMalloc(&this->j_min_i_d, this->num_stripes * sizeof(local_int_t)));
     CHECK_CUDA(cudaMemcpy(this->j_min_i_d, this->j_min_i.data(), this->num_stripes * sizeof(local_int_t), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMalloc(&this->j_min_i_halo_d, this->num_stripes * sizeof(local_int_t)));
+    CHECK_CUDA(cudaMemcpy(this->j_min_i_halo_d, this->j_min_i_halo.data(), this->num_stripes * sizeof(local_int_t), cudaMemcpyHostToDevice));
+    CHECK_CUDA(cudaMalloc(&this->j_min_i_shared_d, this->num_stripes * sizeof(local_int_t)));
+    CHECK_CUDA(cudaMemcpy(this->j_min_i_shared_d, this->j_min_i_shared.data(), this->num_stripes * sizeof(local_int_t), cudaMemcpyHostToDevice));
+    
 }
 
 template<typename T>
@@ -220,6 +241,16 @@ local_int_t * striped_partial_Matrix<T>::get_j_min_i_d(){
 }
 
 template <typename T>
+local_int_t * striped_partial_Matrix<T>::get_j_min_i_halo_d(){
+    return this->j_min_i_halo_d;
+}
+
+template <typename T>
+local_int_t * striped_partial_Matrix<T>::get_j_min_i_shared_d(){
+    return this->j_min_i_shared_d;
+}
+
+template <typename T>
 T * striped_partial_Matrix<T>::get_values_d(){
     return this->values_d;
 }
@@ -266,7 +297,7 @@ void striped_partial_Matrix<T>::initialize_coarse_matrix(){
     // allocate coarse matrix
     Problem *p_c = new Problem;
     GenerateProblem(this->problem->npx, this->problem->npy, this->problem->npz, nx_c, ny_c, nz_c, this->problem->size, this->problem->rank, p_c);
-    this->coarse_Matrix= new striped_partial_Matrix<T>(p_c);
+    this->coarse_Matrix= new striped_partial_Matrix<T>(p_c, this->column_major, this->blocked);
     this->coarse_Matrix->generate_f2c_operator_onGPU();
 
     // allocate halos rc, xc, Axf and set to zero

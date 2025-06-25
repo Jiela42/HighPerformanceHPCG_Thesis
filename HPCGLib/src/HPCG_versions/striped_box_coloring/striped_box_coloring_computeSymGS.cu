@@ -193,8 +193,8 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
                 x_d, y_d
                 );
                 CHECK_CUDA(cudaDeviceSynchronize());
-            }
-        // total_iterations ++;
+        }
+        //total_iterations ++;
         if(max_iterations > 1){
 
             // double L2_norm = this->L2_norm_for_SymGS(A, x_d, y_d);

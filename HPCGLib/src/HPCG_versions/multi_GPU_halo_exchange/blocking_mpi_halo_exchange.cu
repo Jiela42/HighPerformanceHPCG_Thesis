@@ -1,3 +1,5 @@
+// Implements blocking MPI-based halo exchange using host buffers and synchronous communication.
+
 #include "HPCG_versions/blocking_mpi_halo_exchange.cuh"
 #include "UtilLib/utils.cuh"
 
@@ -6,8 +8,11 @@
 #include <stdio.h>
 
 template <typename T>
-Problem* blocking_mpi_Implementation<T>::init_comm_blocking_MPI(int argc, char *argv[], int npx, int npy, int npz, local_int_t nx, local_int_t ny, local_int_t nz){
-    MPI_Init(&argc, &argv);
+Problem* blocking_mpi_Implementation<T>::init_comm_blocking_MPI(int argc, char *argv[], int npx, int npy, int npz, local_int_t nx, local_int_t ny, local_int_t nz, bool initMPI){
+    // Initialize MPI environment and set up GPU device for the problem
+    if(initMPI){
+        MPI_Init(&argc, &argv);
+    }
     int size, rank;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -20,23 +25,21 @@ Problem* blocking_mpi_Implementation<T>::init_comm_blocking_MPI(int argc, char *
     return problem;
 }
 
-// Copies to host and back to device, no device-to-device copy
-// TODO: Replace malloc per exchange with malloc once at beginning
 template <typename T>
 void blocking_mpi_Implementation<T>::ExchangeHaloBlockingMPI(Halo *halo, Problem *problem) {
+    // Perform blocking halo exchange using MPI with host buffers
 
-    //extract the data into send buffers on the GPU
+    // Extract the data into send buffers on the GPU
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
         if(problem->neighbors_mask[i]){
             (*problem->extraction_functions[i])(halo, i, &(problem->extraction_ghost_cells[i]), 1);
         }
     }
     
-    
-    //wait for extraction to finish
+    // Wait for extraction to finish
     CHECK_CUDA(cudaDeviceSynchronize());
 
-    //do blocking SendRecv
+    // Do blocking SendRecv communication
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
         if(problem->neighbors_mask[i]){
             CHECK_MPI(MPI_Sendrecv(halo->send_buff_h[i], problem->count_exchange[i], MPI_DOUBLE,
@@ -47,19 +50,20 @@ void blocking_mpi_Implementation<T>::ExchangeHaloBlockingMPI(Halo *halo, Problem
         }
     }
 
-    // Now that we received all data, we can inject it back to the halo
+    // Now that we received all data, inject it back to the halo
     for(int i = 0; i<NUMBER_NEIGHBORS; i++){
         if(problem->neighbors_mask[i]){
             (*problem->injection_functions[i])(halo, i, &(problem->injection_ghost_cells[i]), 1);
         }
     }
 
-    //wait for injection to be done
+    // Wait for injection to be done
     CHECK_CUDA(cudaDeviceSynchronize());
 }
 
 template <typename T>
 void blocking_mpi_Implementation<T>::finalize_comm_blocking_MPI(Problem *problem){
+    // Finalize the MPI environment
     MPI_Finalize();
 }
 
