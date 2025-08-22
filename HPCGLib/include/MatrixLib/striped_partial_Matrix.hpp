@@ -3,6 +3,7 @@
 
 #include "MatrixLib/matrix_basics.hpp"
 #include "MatrixLib/generations.cuh"
+#include "MatrixLib/generations.hpp"
 #include "UtilLib/hpcg_multi_GPU_utils.cuh"
 #include "UtilLib/utils.hpp"
 
@@ -14,7 +15,7 @@
 template <typename T>
 class striped_partial_Matrix {
     public:
-        striped_partial_Matrix(Problem *problem, bool column_major = false, bool blocked = false);
+        striped_partial_Matrix(Problem *problem, bool column_major = false, bool blocked = false, bool color_wise = false, bool color_wise_padding = false, int bx = 1, int by = 1, int bz = 1, double density_COO = 0);
         ~striped_partial_Matrix();
         
         // void generate_coloring();
@@ -65,13 +66,42 @@ class striped_partial_Matrix {
         // void compare_to(striped_Matrix<T>& other) const;
         // void write_to_file() const;
 
+        local_int_t *get_border_idx_d();
+        int *get_idx_send_buff_d();
+        int *get_idx_in_send_buff_d();
+        local_int_t get_num_border_values();
+        local_int_t get_num_inner_values();
+
         bool column_major;
         bool blocked;
+        bool color_wise;
+        bool color_wise_padding;
+        int bx;
+        int by;
+        int bz;
+        int num_colors;
+        local_int_t block_size;
 
         void initialize_coarse_matrix();
         void generateMatrix_onGPU();     
         void generate_f2c_operator_onGPU();   
         Problem *get_problem() {return problem;};
+
+        global_int_t *row_COO;
+        global_int_t *col_COO;
+        T *data_COO;
+        global_int_t nnz_COO;
+        double density_COO;
+        int *col_to_rank_COO; // maps each column index to the rank that owns it, used for COO communication
+        int *req_per_rank_COO; // number of values per rank to request, used for COO communication
+        int *send_per_rank_COO; // number of values per rank to send, used for COO communication
+        global_int_t **ptr_idx_to_send_COO_h; // pointers to the indices to send per rank, used for COO communication
+        global_int_t **ptr_idx_to_recv_COO_h; // pointers to the indices to receive per rank, used for COO communication
+        DataType **ptr_send_buff_COO_h; // pointers to the values to send per rank, used for COO communication
+        DataType **ptr_recv_buff_COO_h; // pointers to the values to receive per rank, used for COO communication
+        bool initialized_COO_comm = false; // flag to check if COO communication has been initialized
+        global_int_t total_to_send_COO = 0; // total number of values to send in COO communication
+        global_int_t total_to_recv_COO = 0; // total number of values to receive in COO communication
         
         private:
         //friend class sparse_CSR_Matrix<T>;
@@ -100,7 +130,6 @@ class striped_partial_Matrix {
         // int* color_pointer_d;
         // int* color_sorted_rows_d;
 
-
         // sparse_CSR_Matrix<T> *CSR;
 
         int num_MG_pre_smooth_steps;
@@ -113,6 +142,13 @@ class striped_partial_Matrix {
         Halo* rc_d;
         Halo* xc_d;
         Halo* Axf_d;
+
+        local_int_t num_border_values; // number of border values, used for the border index mapping
+        local_int_t num_inner_values; // number of inner values, used for the inner index mapping
+        
+        local_int_t *border_idx_d; //thread to index mapping for border computation
+        int *idx_send_buff_d; //maps each thread to the neighbor it sends to
+        int *idx_in_send_buff_d; //maps each thread to the index in the send buffer it has to write to
 
 };
 

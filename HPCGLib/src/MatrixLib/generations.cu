@@ -3,6 +3,8 @@
 #include "MatrixLib/generations.cuh"
 #include "UtilLib/hpcg_multi_GPU_utils.cuh"
 
+#include "HPCG_versions/striped_multi_GPU.cuh"
+
 #include <cmath>
 #include <cuda_runtime.h>
 #include <thrust/device_vector.h>
@@ -10,6 +12,7 @@
 
 #define MY_WARP_SIZE 32
 #define NUM_STRIPES 27
+#define CEIL_DIV(n, d)  (((n) + (d) - 1) / (d))
 
 __global__ void generateHPCGProblem_kernel(
     int nx, int ny, int nz,
@@ -514,6 +517,80 @@ __global__ void GenerateStripedPartialMatrix_columnMajor_blocked_kernel(int nx, 
     }
 }
 
+__global__ void GenerateStripedPartialMatrix_color_wise_blocked_kernel(int nx, int ny, int nz, global_int_t gnx, global_int_t gny, global_int_t gnz, global_int_t offset_x, global_int_t offset_y, global_int_t offset_z, DataType *A, int bx, int by, int bz, int px, int py, int pz, local_int_t block_size){
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    int num_colors = bx * by * bz;
+
+    for(int color = 0; color < num_colors; color ++){
+        //calculate the index of the color
+        local_int_t num_color_cols = nx / bx;
+        local_int_t num_color_rows = ny / by;
+        local_int_t num_color_faces = nz / bz;
+
+        // How is the vector colored
+        local_int_t color_offs_x_global = color % bx; //gives x-xcoordinate of first appearance of color
+        local_int_t color_offs_y_global = (color - color_offs_x_global) % (bx * by) / bx; //gives y-coordinate of first appearance of color
+        local_int_t color_offs_z_global = (color - color_offs_x_global - bx * color_offs_y_global) / (bx * by); //gives z-coordinate of first appearance of color
+
+        local_int_t color_offs_x_local = (color_offs_x_global + (bx - ((px * nx) % bx)) % bx) % bx;
+        local_int_t color_offs_y_local = (color_offs_y_global + (by - ((py * ny) % by)) % by) % by;
+        local_int_t color_offs_z_local = (color_offs_z_global + (bz - ((pz * nz) % bz)) % bz) % bz;
+
+        num_color_cols = (color_offs_x_local < nx % bx) ? (num_color_cols + 1) : num_color_cols;
+        num_color_rows = (color_offs_y_local < ny % by) ? (num_color_rows + 1) : num_color_rows;
+        num_color_faces = (color_offs_z_local < nz % bz) ? (num_color_faces + 1) : num_color_faces;
+
+        int num_nodes_with_color = num_color_cols * num_color_rows * num_color_faces;
+
+        //gate
+        if(tid >= num_nodes_with_color){
+            continue;
+        }
+        // Find the (ix,iy,iz) position of the node for this color.
+        local_int_t ix = tid % num_color_cols;
+        local_int_t iy = ((tid % (num_color_cols * num_color_rows))) / num_color_cols;
+        local_int_t iz = tid / (num_color_cols * num_color_rows);
+
+        // Map to full local grid coordinates.
+        ix = ix * bx + color_offs_x_local;
+        iy = iy * by + color_offs_y_local;
+        iz = iz * bz + color_offs_z_local;
+
+        // Compute the index for which this thread computes the coefficients
+        local_int_t i = ix + iy * nx + iz * nx * ny;
+
+        global_int_t gx = i % nx + offset_x;
+        global_int_t gy = (i / nx) % ny + offset_y;
+        global_int_t gz = i / (nx * ny) + offset_z;
+        
+
+        local_int_t id;
+        int stripe = 0;
+        for (int sz = -1; sz < 2; sz++){
+            for(int sy = -1; sy < 2; sy++){
+                for(int sx = -1; sx < 2; sx++){
+                    id = color * NUM_STRIPES * block_size + stripe * block_size + tid;
+                    if(gx + sx < 0 || gx + sx >= gnx ||
+                        gy + sy < 0 || gy + sy >= gny ||
+                        gz + sz < 0 || gz + sz >= gnz) {
+                            A[id] = 0.0;
+                    } 
+                    else {
+                        if(sx == 0 && sy == 0 && sz == 0){
+                            A[id] = 26.0;
+                        } 
+                        else {
+                            A[id] = -1.0;
+                        }
+                    }
+                    stripe++;
+                }
+            }
+        }
+
+    }
+}
+
 
 __global__ void generate_partialf2c_operator_kernel(
     int nxf, int nyf, int nzf,
@@ -545,21 +622,33 @@ __global__ void generate_partialf2c_operator_kernel(
 }
 
 
-void GenerateStripedPartialMatrix_GPU(Problem *problem, DataType *A_d, bool column_major, bool blocked){
+void GenerateStripedPartialMatrix_GPU(Problem *problem, DataType *A_d, bool column_major, bool blocked, bool color_wise, bool color_wise_padding, local_int_t block_size, int bx, int by, int bz){
     assert((blocked && column_major) || !blocked);
     int nx = problem->nx;
     int ny = problem->ny;
     int nz = problem->nz;
     local_int_t num_rows = nx * ny * nz;
 
-    int block_size = 256;
-    int num_blocks = (num_rows + block_size - 1) / block_size;
+    int threads_per_block = 256;
+    int num_blocks = (num_rows + threads_per_block - 1) / threads_per_block;
     if(column_major && blocked){
-        GenerateStripedPartialMatrix_columnMajor_blocked_kernel<<<num_blocks, block_size>>>(nx, ny, nz, problem->gnx, problem->gny, problem->gnz, problem->gx0, problem->gy0, problem->gz0, A_d);
+        GenerateStripedPartialMatrix_columnMajor_blocked_kernel<<<num_blocks, threads_per_block>>>(nx, ny, nz, problem->gnx, problem->gny, problem->gnz, problem->gx0, problem->gy0, problem->gz0, A_d);
+    } else if(color_wise){
+        // Compute number of colors and max number of nodes per color
+        int num_colors = bx * by * bz;
+        int max_color = num_colors - 1;
+        int max_num_rows_per_color = CEIL_DIV(nx, bx) * CEIL_DIV(ny, by) * CEIL_DIV(nz, bz);
+        if(!color_wise_padding){
+            block_size = max_num_rows_per_color;
+        }
+        // Use 512 threads per block
+        const int threads_per_block = 512;
+        local_int_t num_blocks = (max_num_rows_per_color + threads_per_block - 1) / threads_per_block;
+        GenerateStripedPartialMatrix_color_wise_blocked_kernel<<<num_blocks, threads_per_block>>>(nx, ny, nz, problem->gnx, problem->gny, problem->gnz, problem->gx0, problem->gy0, problem->gz0, A_d, bx, by, bz, problem->px, problem->py, problem->pz, block_size);
     } else if(column_major){
-        GenerateStripedPartialMatrix_columnMajor_kernel<<<num_blocks, block_size>>>(nx, ny, nz, problem->gnx, problem->gny, problem->gnz, problem->gx0, problem->gy0, problem->gz0, A_d);
+        GenerateStripedPartialMatrix_columnMajor_kernel<<<num_blocks, threads_per_block>>>(nx, ny, nz, problem->gnx, problem->gny, problem->gnz, problem->gx0, problem->gy0, problem->gz0, A_d);
     } else {
-        GenerateStripedPartialMatrix_kernel<<<num_blocks, block_size>>>(nx, ny, nz, problem->gnx, problem->gny, problem->gnz, problem->gx0, problem->gy0, problem->gz0, A_d);
+        GenerateStripedPartialMatrix_kernel<<<num_blocks, threads_per_block>>>(nx, ny, nz, problem->gnx, problem->gny, problem->gnz, problem->gx0, problem->gy0, problem->gz0, A_d);
     }
 }
 

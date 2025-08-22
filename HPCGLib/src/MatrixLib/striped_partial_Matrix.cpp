@@ -4,6 +4,7 @@
 #include "UtilLib/utils.hpp"
 #include "MatrixLib/coloring.cuh"
 #include "UtilLib/hpcg_multi_GPU_utils.cuh"
+#include "HPCG_versions/striped_multi_GPU.cuh"
 
 #include <vector>
 #include <iostream>
@@ -12,10 +13,12 @@
 #include <memory>
 
 #define BLOCK_SIZE 32
+#define CEIL_DIV(n, d)  (((n) + (d) - 1) / (d))
+#define MEMORY_ALIGNMENT 128
 
 // #include <stdio.h>
 template <typename T>
-striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p, bool column_major, bool blocked) {
+striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p, bool column_major, bool blocked, bool color_wise, bool color_wise_padding, int bx, int by, int bz, double density_COO) {
     // this->nx = 0;
     // this->ny = 0;
     // this->nz = 0;
@@ -68,9 +71,68 @@ striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p, bool column_major,
 
     this->column_major = column_major;
     this->blocked = blocked;
+    this->color_wise = color_wise;
+    this->color_wise_padding = color_wise_padding;
 
-    CHECK_CUDA(cudaMalloc(&this->values_d, sizeof(T) * num_rows* 27));
-    GenerateStripedPartialMatrix_GPU(this->problem, this->values_d, column_major, blocked);
+    // Compute number of colors and max number of nodes per color
+    int num_colors = bx * by * bz;
+    int max_color = num_colors - 1;
+    local_int_t max_num_rows_per_color = CEIL_DIV(p->nx, bx) * CEIL_DIV(p->ny, by) * CEIL_DIV(p->nz, bz);
+    this->bx = bx;
+    this->by = by;
+    this->bz = bz;
+    this->num_colors = num_colors;
+    if(color_wise_padding){ //make sure the start of a color_block is 128byte aligned
+        this->block_size = (((max_num_rows_per_color * sizeof(T) + MEMORY_ALIGNMENT - 1) / MEMORY_ALIGNMENT) * MEMORY_ALIGNMENT) / sizeof(T);
+    }else{
+        this->block_size = max_num_rows_per_color;
+    }
+
+    if(color_wise){
+        CHECK_CUDA(cudaMalloc(&this->values_d, sizeof(T) * this->block_size * num_stripes * num_colors));
+    }else{
+        CHECK_CUDA(cudaMalloc(&this->values_d, sizeof(T) * num_rows* num_stripes));
+    }
+    GenerateStripedPartialMatrix_GPU(this->problem, this->values_d, column_major, blocked, color_wise, color_wise_padding, this->block_size, bx, by, bz);
+
+    //COO part
+    this->density_COO = density_COO;
+    global_int_t size_dense_partial_matrix = p->nx * p->ny * p->nz * p->ny * p->nz * p->nx;
+    global_int_t nnz_partial_matrix_DIA = p->nx * p->ny * p->nz * this->num_stripes;
+    global_int_t nnz_partial_matrix_COO = 5;//density_COO * (size_dense_partial_matrix - nnz_partial_matrix_DIA); //density times (size of dense matrix minus 27 coeffs per vector value)
+    this->nnz_COO = nnz_partial_matrix_COO;
+    this->row_COO = (global_int_t *) malloc(nnz_partial_matrix_COO * sizeof(global_int_t));
+    this->col_COO = (global_int_t *) malloc(nnz_partial_matrix_COO * sizeof(global_int_t));
+    this->data_COO = (DataType *) malloc(nnz_partial_matrix_COO * sizeof(DataType));
+    GenerateRandomCOOPartialMatrix_CPU(this->row_COO, this->col_COO, this->data_COO, p, nnz_partial_matrix_COO);
+    //figure out which process owns which COO entry
+    this->col_to_rank_COO = (int *) malloc(nnz_partial_matrix_COO * sizeof(int));
+    this->req_per_rank_COO = (int *) calloc(p->size, sizeof(int));
+    for(global_int_t i = 0; i < nnz_partial_matrix_COO; i++){
+        global_int_t col_x = this->col_COO[i] % p->gnx;
+        global_int_t col_y = (this->col_COO[i] / p->gnx) % p->gny; //row index in local matrix
+        global_int_t col_z = this->col_COO[i] / (p->gnx * p->gny); //depth index
+        int rank_x = col_x / p->nx;
+        int rank_y = col_y / p->ny;
+        int rank_z = col_z / p->nz;
+        int rank = rank_x + rank_y * p->npx + rank_z * p->npx * p->npy;
+        this->col_to_rank_COO[i] = rank;
+        this->req_per_rank_COO[rank]++;
+    }
+    this->send_per_rank_COO = (int *) malloc(p->size * sizeof(int));
+    this->ptr_idx_to_send_COO_h = (global_int_t **) malloc(p->size * sizeof(global_int_t *)); // pointers to the indices to send per rank
+    this->ptr_idx_to_recv_COO_h = (global_int_t **) malloc(p->size * sizeof(global_int_t *)); // pointers to the indices to receive per rank
+    this->ptr_send_buff_COO_h = (DataType **) malloc(p->size * sizeof(DataType *)); // pointers to the values to send per rank
+    this->ptr_recv_buff_COO_h = (DataType **) malloc(p->size * sizeof(DataType *)); // pointers to the values to receive per rank
+
+    if(p->rank == 0){
+        printf("Density per partial matrix COO: %f\n", density_COO);
+        printf("nnz_partial_matrix_COO: %lld\n", nnz_partial_matrix_COO);
+        printf("nnz_partial_matrix_DIA: %lld\n", nnz_partial_matrix_DIA);
+        printf("Size of dense partial matrix: %lld\n", size_dense_partial_matrix);
+        //total density
+        printf("Total density of partial matrix: %f\n", ((double)nnz_partial_matrix_COO + (double)nnz_partial_matrix_DIA) / (double)size_dense_partial_matrix);
+    }
 
     // fill j_min_i_d
     local_int_t neighbour_offsets [num_stripes][3] = {
@@ -111,6 +173,27 @@ striped_partial_Matrix<T>::striped_partial_Matrix(Problem *p, bool column_major,
     CHECK_CUDA(cudaMemcpy(this->j_min_i_halo_d, this->j_min_i_halo.data(), this->num_stripes * sizeof(local_int_t), cudaMemcpyHostToDevice));
     CHECK_CUDA(cudaMalloc(&this->j_min_i_shared_d, this->num_stripes * sizeof(local_int_t)));
     CHECK_CUDA(cudaMemcpy(this->j_min_i_shared_d, this->j_min_i_shared.data(), this->num_stripes * sizeof(local_int_t), cudaMemcpyHostToDevice));
+
+    //initialize border index mapping
+    local_int_t num_inner_values = (p->nx - 2) * (p->ny - 2) * (p->nz - 2);
+    local_int_t num_border_values = p->nx * p->ny * p->nz - num_inner_values;
+    this->num_border_values = num_border_values;
+    this->num_inner_values = num_inner_values;
+    CHECK_CUDA(cudaMalloc(&this->border_idx_d, num_border_values * sizeof(local_int_t)));
+    local_int_t *border_idx_h = new local_int_t[num_border_values];
+    local_int_t pos = 0;
+    for(int z = 0; z < p->nz; z++){
+        for(int y = 0; y < p->ny; y++){
+            for(int x = 0; x < p->nx; x++){
+                if(x == 0 || x == p->nx - 1 || y == 0 || y == p->ny - 1 || z == 0 || z == p->nz - 1){
+                    border_idx_h[pos] = x + y * p->nx + z * p->nx * p->ny;
+                    pos++;
+                }
+            }
+        }
+    }
+    CHECK_CUDA(cudaMemcpy(this->border_idx_d, border_idx_h, num_border_values * sizeof(local_int_t), cudaMemcpyHostToDevice));
+    delete[] border_idx_h;
     
 }
 
@@ -258,6 +341,31 @@ T * striped_partial_Matrix<T>::get_values_d(){
 template <typename T>
 local_int_t * striped_partial_Matrix<T>::get_f2c_op_d(){
     return this->f2c_op_d;
+}
+
+template <typename T>
+local_int_t *striped_partial_Matrix<T>::get_border_idx_d() {
+    return this->border_idx_d;
+}
+
+template <typename T>
+int *striped_partial_Matrix<T>::get_idx_send_buff_d() {
+    return this->idx_send_buff_d;
+}
+
+template <typename T>
+int *striped_partial_Matrix<T>::get_idx_in_send_buff_d() {
+    return this->idx_in_send_buff_d;
+}
+
+template <typename T>
+local_int_t striped_partial_Matrix<T>::get_num_border_values() {
+    return this->num_border_values;
+}
+
+template <typename T>
+local_int_t striped_partial_Matrix<T>::get_num_inner_values() {
+    return this->num_inner_values;
 }
 
 template <typename T>

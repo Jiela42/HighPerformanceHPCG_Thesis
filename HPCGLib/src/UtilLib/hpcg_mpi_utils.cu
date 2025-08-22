@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <cassert>
 #include <stdbool.h>
+#include <thread>
 
 /**
  * @brief Converts a local coordinate index to the corresponding index within a halo data region.
@@ -431,12 +432,21 @@ void InitHaloMemGPU(Halo *halo, Problem *problem)
     halo->interior = interior;
 
     //allocate communcation buffers on device
+    local_int_t count_exchange = 0;
     for(int i = 0; i < NUMBER_NEIGHBORS; i++){
-        CHECK_CUDA(cudaMalloc(&(halo->send_buff_d[i]), problem->count_exchange[i] * sizeof(DataType)));
-        CHECK_CUDA(cudaMemset(halo->send_buff_d[i], 0, problem->count_exchange[i] * sizeof(DataType)));
-        CHECK_CUDA(cudaMalloc(&(halo->recv_buff_d[i]), problem->count_exchange[i] * sizeof(DataType)));
-        CHECK_CUDA(cudaMemset(halo->recv_buff_d[i], 0, problem->count_exchange[i] * sizeof(DataType)));
-        
+        count_exchange += problem->count_exchange[i];
+    }
+    DataType *send_buff_d;
+    DataType *recv_buff_d;
+    CHECK_CUDA(cudaMalloc(&(send_buff_d), count_exchange * sizeof(DataType)));
+    CHECK_CUDA(cudaMemset(send_buff_d, 0, count_exchange * sizeof(DataType)));
+    CHECK_CUDA(cudaMalloc(&(recv_buff_d),count_exchange * sizeof(DataType)));
+    CHECK_CUDA(cudaMemset(recv_buff_d, 0, count_exchange * sizeof(DataType)));
+    for(int i = 0; i < NUMBER_NEIGHBORS; i++){
+        halo->send_buff_d[i] = send_buff_d;
+        send_buff_d += problem->count_exchange[i];
+        halo->recv_buff_d[i] = recv_buff_d;
+        recv_buff_d += problem->count_exchange[i];
     }
     // Ensure all device memory setting is complete
     CHECK_CUDA(cudaDeviceSynchronize());
@@ -462,12 +472,31 @@ void InitHaloMemCPU(Halo *halo, Problem *problem)
     halo->dimz = dimz;
 
     // allocate memory for send and receive buffers on CPU
+    local_int_t count_exchange = 0;
     for(int i = 0; i < NUMBER_NEIGHBORS; i++){
-        halo->send_buff_h[i] = (DataType *) malloc(problem->count_exchange[i] * sizeof(DataType));
-        memset(halo->send_buff_h[i], 0, problem->count_exchange[i] * sizeof(DataType));
-        halo->recv_buff_h[i] = (DataType *) malloc(problem->count_exchange[i] * sizeof(DataType));
-        memset(halo->recv_buff_h[i], 0, problem->count_exchange[i] * sizeof(DataType));
+        count_exchange += problem->count_exchange[i];
     }
+    DataType *send_buff_h = (DataType *) calloc(count_exchange, sizeof(DataType));
+    DataType *recv_buff_h = (DataType *) calloc(count_exchange, sizeof(DataType));
+    for(int i = 0; i < NUMBER_NEIGHBORS; i++){
+        halo->send_buff_h[i] = send_buff_h;
+        send_buff_h += problem->count_exchange[i];
+        halo->recv_buff_h[i] = recv_buff_h;
+        recv_buff_h += problem->count_exchange[i];
+    }
+
+    // create cuda streams
+    int least_priority, greatest_priority;
+    CHECK_CUDA(cudaDeviceGetStreamPriorityRange(&least_priority, &greatest_priority));
+    halo->least_priority = least_priority;
+    halo->greatest_priority = greatest_priority;
+    for(int i = 0; i < 27; i++){
+        halo->streams[i] = (cudaStream_t*) malloc(sizeof(cudaStream_t));
+        CHECK_CUDA(cudaStreamCreateWithPriority(halo->streams[i], cudaStreamNonBlocking, greatest_priority));
+    }
+    halo->streams[27] = (cudaStream_t*) malloc(sizeof(cudaStream_t));
+    CHECK_CUDA(cudaStreamCreateWithPriority(halo->streams[27], cudaStreamNonBlocking, least_priority)); //give less priority to stream for inner computation
+
 }
 
 /**
@@ -596,10 +625,8 @@ void SetHaloRandomGPU(Halo *halo, Problem *problem, int min, int max, int seed)
 void FreeHaloGPU(Halo *halo)
 {
     CHECK_CUDA(cudaFree(halo->x_d));
-    for(int i = 0; i<NUMBER_NEIGHBORS; i++){
-            CHECK_CUDA(cudaFree(halo->send_buff_d[i]));
-            CHECK_CUDA(cudaFree(halo->recv_buff_d[i]));
-    }
+    CHECK_CUDA(cudaFree(halo->send_buff_d[0]));
+    CHECK_CUDA(cudaFree(halo->recv_buff_d[0]));
 }
 
 /**
@@ -607,10 +634,8 @@ void FreeHaloGPU(Halo *halo)
  */
 void FreeHaloCPU(Halo *halo)
 {
-    for(int i = 0; i<NUMBER_NEIGHBORS; i++){
-            free(halo->send_buff_h[i]);
-            free(halo->recv_buff_h[i]);
-    }
+    free(halo->send_buff_h[0]);
+    free(halo->recv_buff_h[0]);
 }
 
 /**
@@ -716,7 +741,7 @@ void extract_horizontal_plane_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bo
     // Kernel launch config for extracting XZ plane:
     int const nthread = 256; // number of threads per block
     int const nblock = (gh->length_X * gh->length_Z + nthread - 1) / nthread; // total blocks needed
-    extract_xz_plane_kernel<<<nblock, nthread>>>(x_d, buff, gh->length_X, gh->length_Z, 1, gh->dimy * gh->dimx);
+    extract_xz_plane_kernel<<<nblock, nthread, 0, *(halo->streams[i_buff])>>>(x_d, buff, gh->length_X, gh->length_Z, 1, gh->dimy * gh->dimx);
 
     // copy from device to host if needed
     if (host_buff) {
@@ -738,7 +763,7 @@ void inject_horizontal_plane_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool 
     // Kernel launch config for injecting XZ plane:
     int const nthread = 256; // number of threads per block
     int const nblock = (gh->length_X * gh->length_Z + nthread - 1) / nthread; // total blocks needed
-    inject_xz_plane_kernel<<<nblock, nthread>>>(x_d, buff, gh->length_X, gh->length_Z, 1, gh->dimy * gh->dimx);
+    inject_xz_plane_kernel<<<nblock, nthread, 0, *(halo->streams[i_buff])>>>(x_d, buff, gh->length_X, gh->length_Z, 1, gh->dimy * gh->dimx);
 }
 
 /**
@@ -753,7 +778,7 @@ void extract_vertical_plane_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool
     // Kernel launch config for extracting YZ plane:
     int const nthread = 256; // number of threads per block
     int const nblock = (gh->length_Y * gh->length_Z + nthread - 1) / nthread; // total blocks needed
-    extract_yz_plane_kernel<<<nblock, nthread>>>(x_d, buff, gh->length_Y, gh->length_Z, gh->dimx, gh->dimy * gh->dimx);
+    extract_yz_plane_kernel<<<nblock, nthread, 0, *(halo->streams[i_buff])>>>(x_d, buff, gh->length_Y, gh->length_Z, gh->dimx, gh->dimy * gh->dimx);
     // copy from device to host if needed
     if (host_buff) {
         CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_Y * gh->length_Z * sizeof(DataType), cudaMemcpyDeviceToHost));
@@ -775,7 +800,7 @@ void inject_vertical_plane_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool ho
     // Kernel launch config for injecting YZ plane:
     int const nthread = 256; // number of threads per block
     int const nblock = (gh->length_Y * gh->length_Z + nthread - 1) / nthread; // total blocks needed
-    inject_yz_plane_kernel<<<nblock, nthread>>>(x_d, buff, gh->length_Y, gh->length_Z, gh->dimx, gh->dimy * gh->dimx);
+    inject_yz_plane_kernel<<<nblock, nthread, 0, *(halo->streams[i_buff])>>>(x_d, buff, gh->length_Y, gh->length_Z, gh->dimx, gh->dimy * gh->dimx);
 }
 
 /**
@@ -790,9 +815,12 @@ void extract_frontal_plane_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool 
     // Kernel launch config for extracting XY plane:
     int const nthread = 256; // number of threads per block
     int const nblock = (gh->length_X * gh->length_Y + nthread - 1) / nthread; // total blocks needed
-    extract_xy_plane_kernel<<<nblock, nthread>>>(x_d, buff, gh->length_X, gh->length_Y, 1, gh->dimx);
+    extract_xy_plane_kernel<<<nblock, nthread, 0, *(halo->streams[i_buff])>>>(x_d, buff, gh->length_X, gh->length_Y, 1, gh->dimx);
     // copy from device to host
-    CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_X * gh->length_Y * sizeof(DataType), cudaMemcpyDeviceToHost));
+    if(host_buff) {
+        // Ensure the data is copied back to host memory
+        CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_X * gh->length_Y * sizeof(DataType), cudaMemcpyDeviceToHost));
+    }
 }
 
 /**
@@ -810,7 +838,7 @@ void inject_frontal_plane_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool hos
     // Kernel launch config for injecting XY plane:
     int const nthread = 256; // number of threads per block
     int const nblock = (gh->length_X * gh->length_Y + nthread - 1) / nthread; // total blocks needed
-    inject_xy_plane_kernel<<<nblock, nthread>>>(x_d, buff, gh->length_X, gh->length_Y, 1, gh->dimx);
+    inject_xy_plane_kernel<<<nblock, nthread, 0, *(halo->streams[i_buff])>>>(x_d, buff, gh->length_X, gh->length_Y, 1, gh->dimx);
 }
 
 /**
@@ -842,7 +870,7 @@ void extract_edge_X_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_bu
     DataType *buff = halo->send_buff_d[i_buff];
     int const nthreads = 128; // number of threads per block
     int const nblocks = (gh->length_X + nthreads - 1) / nthreads; // total blocks needed
-    extract_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_X, 1);
+    extract_edge_kernel<<<nblocks, nthreads, 0, *(halo->streams[i_buff])>>>(x_d, buff, gh->length_X, 1);
     if (host_buff) {
         CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_X * sizeof(DataType), cudaMemcpyDeviceToHost));
     }
@@ -862,7 +890,7 @@ void inject_edge_X_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
     }
     int const nthreads = 128; // number of threads per block
     int const nblocks = (gh->length_X + nthreads - 1) / nthreads; // total blocks needed
-    inject_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_X, 1);
+    inject_edge_kernel<<<nblocks, nthreads, 0, *(halo->streams[i_buff])>>>(x_d, buff, gh->length_X, 1);
 }
 
 /**
@@ -875,7 +903,7 @@ void extract_edge_Y_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_bu
     DataType *buff = halo->send_buff_d[i_buff];
     int const nthreads = 128; // number of threads per block
     int const nblocks = (gh->length_Y + nthreads - 1) / nthreads; // total blocks needed
-    extract_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_Y, gh->dimx);
+    extract_edge_kernel<<<nblocks, nthreads, 0, *(halo->streams[i_buff])>>>(x_d, buff, gh->length_Y, gh->dimx);
     if (host_buff) {
         CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_Y * sizeof(DataType), cudaMemcpyDeviceToHost));
     }
@@ -895,7 +923,7 @@ void inject_edge_Y_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
     }
     int const nthreads = 128; // number of threads per block
     int const nblocks = (gh->length_Y + nthreads - 1) / nthreads; // total blocks needed
-    inject_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_Y, gh->dimx);
+    inject_edge_kernel<<<nblocks, nthreads, 0, *(halo->streams[i_buff])>>>(x_d, buff, gh->length_Y, gh->dimx);
 }
 
 /**
@@ -908,7 +936,7 @@ void extract_edge_Z_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_bu
     DataType *buff = halo->send_buff_d[i_buff];
     int const nthreads = 128; // number of threads per block
     int const nblocks = (gh->length_Z + nthreads - 1) / nthreads; // total blocks needed
-    extract_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_Z, gh->dimx * gh->dimy);
+    extract_edge_kernel<<<nblocks, nthreads, 0, *(halo->streams[i_buff])>>>(x_d, buff, gh->length_Z, gh->dimx * gh->dimy);
     if (host_buff) {
         CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], buff, gh->length_Z * sizeof(DataType), cudaMemcpyDeviceToHost));
     }
@@ -928,7 +956,7 @@ void inject_edge_Z_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
     }
     int const nthreads = 128; // number of threads per block
     int const nblocks = (gh->length_Z + nthreads - 1) / nthreads; // total blocks needed
-    inject_edge_kernel<<<nblocks, nthreads>>>(x_d, buff, gh->length_Z, gh->dimx * gh->dimy);
+    inject_edge_kernel<<<nblocks, nthreads, 0, *(halo->streams[i_buff])>>>(x_d, buff, gh->length_Z, gh->dimx * gh->dimy);
 }
 
 /**
@@ -942,7 +970,13 @@ void extract_corner_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_bu
     if (host_buff) {
         CHECK_CUDA(cudaMemcpy(halo->send_buff_h[i_buff], x_d, sizeof(DataType), cudaMemcpyDeviceToHost));
     } else {
-        CHECK_CUDA(cudaMemcpy(halo->send_buff_d[i_buff], x_d, sizeof(DataType), cudaMemcpyDeviceToDevice));
+        CHECK_CUDA(cudaMemcpyAsync(
+            halo->send_buff_d[i_buff],
+            x_d,
+            sizeof(DataType),
+            cudaMemcpyDeviceToDevice,
+            *(halo->streams[i_buff])
+        ));
     }
 }
 
@@ -957,7 +991,13 @@ void inject_corner_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
     if (host_buff) {
         CHECK_CUDA(cudaMemcpy(x_d, halo->recv_buff_h[i_buff], sizeof(DataType), cudaMemcpyHostToDevice));
     } else {
-        CHECK_CUDA(cudaMemcpy(x_d, halo->recv_buff_d[i_buff], sizeof(DataType), cudaMemcpyDeviceToDevice));
+        CHECK_CUDA(cudaMemcpyAsync(
+            x_d,
+            halo->recv_buff_d[i_buff],
+            sizeof(DataType),
+            cudaMemcpyDeviceToDevice,
+            *(halo->streams[i_buff])
+        ));
     }
 }
 
@@ -1139,4 +1179,44 @@ bool IsHaloZero(Halo *x_d)
         }
     }
     return true;
+}
+
+__inline__ __device__ local_int_t global_i_to_halo_i(
+    global_int_t i,
+    local_int_t nx, local_int_t ny, local_int_t nz,
+    global_int_t gnx, global_int_t gny, global_int_t gnz,
+    global_int_t gi0,
+    int px, int py, int pz
+    )
+    {
+        return ((i % gnx) - px * nx + 1) +
+            ((((i / gnx) % gny) - py * ny + 1) * (nx + 2)) +
+            (((i / (gnx * gny)) - pz * nz + 1) * ((nx + 2) * (ny + 2))); //should be equivalent to the above
+}
+
+
+__global__ void extract_COO_data_kernel(DataType *x_d, global_int_t total_to_send, global_int_t *idx_to_extract, DataType *buff, local_int_t nx, local_int_t ny, local_int_t nz, local_int_t dimx, local_int_t dimy,
+    global_int_t gnx, global_int_t gny, global_int_t gnz,
+    global_int_t gi0, int px, int py, int pz)
+{
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid >= total_to_send) return;
+    global_int_t i = idx_to_extract[tid];
+    // Convert global index to local index
+    local_int_t local_i = global_i_to_halo_i(i, nx, ny, nz, gnx, gny, gnz, gi0, px, py, pz);
+    // Convert halo local to halo index
+    global_int_t halo_i = local_i_to_halo_i(local_i, nx, ny, nz, dimx, dimy);
+    // Extract the value from the halo
+    DataType value = x_d[halo_i];
+    // Store the value in the buffer
+    buff[tid] = value;
+}
+
+void extract_COO_data(Halo *halo, Problem *p, striped_partial_Matrix<DataType> &A_local){
+    global_int_t total_to_send = A_local.total_to_send_COO;
+    int num_threads = 512; // number of threads per block
+    int num_blocks = (total_to_send + num_threads - 1) / num_threads;
+    // Launch the kernel to extract COO data from the halo
+    extract_COO_data_kernel<<<num_blocks, num_threads, 0, *(halo->streams[28])>>>(halo->x_d, total_to_send, A_local.ptr_idx_to_send_COO_h[0], A_local.ptr_send_buff_COO_h[0], p->nx, p->ny, p->nz, halo->dimx, halo->dimy, p->gnx, p->gny, p->gnz, p->gi0, p->px, p->py, p->pz);
+    CHECK_CUDA(cudaMemcpyAsync(A_local.ptr_recv_buff_COO_h[p->rank], A_local.ptr_send_buff_COO_h[p->rank], A_local.req_per_rank_COO[p->rank] * sizeof(DataType), cudaMemcpyDeviceToDevice, *(halo->streams[28]))); //we also extracted the data needed locally. now, we place it in the recv buffer
 }

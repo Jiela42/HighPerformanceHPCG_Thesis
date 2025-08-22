@@ -15,4 +15,7 @@ std::vector<DataType> generate_random_vector(global_int_t size, DataType min_val
 
 std::vector<DataType> generate_y_vector_for_HPCG_problem(int nx, int ny, int nz);
 
+global_int_t pick_random(global_int_t num_values);
+void GenerateRandomCOOPartialMatrix_CPU(global_int_t *row, global_int_t *col, DataType *data, Problem *p, global_int_t nnz);
+
 #endif // GENERATIONS_HPP

@@ -3,38 +3,20 @@
 
 // Utility definitions and function declarations for multi-GPU communication and data handling in HPCG
 
+#include <thread>
+
 #include "cuda_runtime.h"
 #include "cuda_utils.hpp"
+#include "types.hpp"
 
-typedef long local_int_t;
-typedef long global_int_t;
-
-using DataType = double;
-
-#define MPIDataType MPI_DOUBLE
-#define NUMBER_NEIGHBORS 26
-
-#define CHECK_MPI(cmd) do {                          \
-    int e = cmd;                                      \
-    if( e != MPI_SUCCESS ) {                          \
-      printf("Failed: MPI error %s:%d '%d'\n",        \
-          __FILE__,__LINE__, e);   \
-      exit(EXIT_FAILURE);                             \
-    }                                                 \
-  } while(0)
-
-#define CHECK_NCCL(cmd) do {                         \
-ncclResult_t r = cmd;                             \
-if (r!= ncclSuccess) {                            \
-    printf("Failed, NCCL error %s:%d '%s'\n",             \
-        __FILE__,__LINE__,ncclGetErrorString(r));   \
-    exit(EXIT_FAILURE);                             \
-}                                                 \
-} while(0)
 
 // Forward declaration to allow use of Halo* in Problem_STRUCT
 struct Halo_STRUCT;
 typedef struct Halo_STRUCT Halo;
+
+// Forward declaration for striped_partial_Matrix template class
+template <typename T>
+class striped_partial_Matrix;
 
 // Represents a subregion (ghost cell) of the halo used for communication between neighboring subdomains.
 struct GhostCell_STRUCT{
@@ -61,6 +43,7 @@ struct Problem_STRUCT{
     GhostCell injection_ghost_cells[NUMBER_NEIGHBORS];  // Geometry for injecting received data
     void(*extraction_functions[NUMBER_NEIGHBORS])(Halo *halo, int i_buff, GhostCell *gh, bool host_buff); // Extraction function pointers
     void(*injection_functions[NUMBER_NEIGHBORS])(Halo *halo, int i_buff, GhostCell *gh, bool host_buff);  // Injection function pointers
+    local_int_t *border_idx; // tid to index mapping for indices to be computed in border-only kernel
 };
 typedef struct Problem_STRUCT Problem;
 
@@ -82,29 +65,11 @@ struct Halo_STRUCT{
     DataType *send_buff_d[NUMBER_NEIGHBORS]; // Device send buffers for each neighbor
     DataType *recv_buff_d[NUMBER_NEIGHBORS]; // Device receive buffers for each neighbor
 
+    cudaStream_t *streams[STREAMS_PER_HALO];
+    int least_priority;
+    int greatest_priority;
 };
 typedef struct Halo_STRUCT Halo;
-
-// Stores halo data used for communication between GPUs and associated metadata.
-struct Halo_padded_STRUCT{
-    local_int_t nx;                 // Local subdomain size in x
-    local_int_t ny;                 // Local subdomain size in y
-    local_int_t nz;                 // Local subdomain size in z
-    local_int_t dimx;               // Halo dimension in x including ghost layers
-    local_int_t dimy;               // Halo dimension in y including ghost layers
-    local_int_t dimz;               // Halo dimension in z including ghost layers
-    DataType *interior;             // Pointer to interior data array
-    DataType *x_d;                 // Device pointer to halo data
-    Problem *problem;               // Associated problem metadata
-
-    DataType *send_buff_h[NUMBER_NEIGHBORS]; // Host send buffers for each neighbor
-    DataType *recv_buff_h[NUMBER_NEIGHBORS]; // Host receive buffers for each neighbor
-
-    DataType *send_buff_d[NUMBER_NEIGHBORS]; // Device send buffers for each neighbor
-    DataType *recv_buff_d[NUMBER_NEIGHBORS]; // Device receive buffers for each neighbor
-
-};
-typedef struct Halo_STRUCT Halo_padded;
 
 enum Comm_Tags {
     NORTH = 0,
@@ -186,5 +151,7 @@ void inject_edge_Z_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff)
 
 void extract_corner_from_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff);
 void inject_corner_to_GPU(Halo *halo, int i_buff, GhostCell *gh, bool host_buff);
+
+void extract_COO_data(Halo *halo, Problem *p, striped_partial_Matrix<DataType> &A_local);
 
 #endif

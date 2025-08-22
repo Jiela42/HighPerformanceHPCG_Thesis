@@ -29,6 +29,10 @@ public:
         finalize_comm_non_blocking_cuda_aware_MPI(problem);
     }
 
+    void initialize_COO_comm(
+        Problem *problem, 
+        striped_partial_Matrix<DataType> &A_local);
+
 private:
 
     Problem* init_comm_non_blocking_cuda_aware_MPI(

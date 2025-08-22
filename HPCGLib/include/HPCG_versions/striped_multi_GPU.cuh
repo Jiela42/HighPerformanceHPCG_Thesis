@@ -133,9 +133,11 @@ public:
     void compute_SPMV(
         striped_partial_Matrix<T>& A,
         Halo * x_d, Halo * b_d, // the vectors x and y are already on the device
-        Problem *problem
+        Problem *problem,
+        bool exchangeHalo = false,
+        bool exchangeHaloOverlap = false
         ) {
-        striped_warp_reduction_multi_GPU_computeSPMV(A, x_d, b_d, problem);
+        striped_warp_reduction_multi_GPU_computeSPMV(A, x_d, b_d, problem, exchangeHalo, exchangeHaloOverlap);
     }
 
     void compute_WAXPBY(
@@ -207,7 +209,9 @@ private:
     void striped_warp_reduction_multi_GPU_computeSPMV(
         striped_partial_Matrix<T>& A,
         Halo *x_d, Halo *y_d, // the vectors x and y are already on the device
-        Problem *problem
+        Problem *problem,
+        bool exchangeHalo = false,
+        bool exchangeHaloOverlap = false
     );
 
     void striped_warp_reduction_multi_GPU_computeDot(

@@ -162,17 +162,17 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
 
     
     // to do the L2 norm asynchroneously we do the first iteration outside of the loop
-        for(int color = 0; color < num_colors; color++){
+        for(int color = 0; color <= 0; color++){
                 // we need to do a forward pass
                 striped_box_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
-                cooperation_number,
-                color, bx, by, bz,
-                nx, ny, nz,
-                num_rows, num_cols,
-                num_stripes, diag_offset,
-                j_min_i,
-                striped_A_d,
-                x_d, y_d
+                    cooperation_number,
+                    color, bx, by, bz,
+                    nx, ny, nz,
+                    num_rows, num_cols,
+                    num_stripes, diag_offset,
+                    j_min_i,
+                    striped_A_d,
+                    x_d, y_d
                 );
                 CHECK_CUDA(cudaDeviceSynchronize());
             }
@@ -180,7 +180,7 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
         // we need to do a backward pass,
         // the colors for this are the same just in reverse order
         
-        for(int color = max_color; color  >= 0; color--){
+        for(int color = max_color; color  >= 100; color--){
 
                 striped_box_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
                 cooperation_number,

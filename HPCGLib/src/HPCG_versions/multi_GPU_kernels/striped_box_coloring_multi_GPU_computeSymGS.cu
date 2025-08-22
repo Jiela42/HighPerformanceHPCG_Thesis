@@ -211,9 +211,9 @@ __global__ void striped_box_coloring_half_SymGS_kernel_opt(
     local_int_t color_offs_y_global = (color - color_offs_x_global) % (bx * by) / bx; //gives y-coordinate of first appearance of color
     local_int_t color_offs_z_global = (color - color_offs_x_global - bx * color_offs_y_global) / (bx * by); //gives z-coordinate of first appearance of color
 
-    local_int_t color_offs_x_local = (color_offs_x_global + (bx - (bx - px % bx))) % bx;
-    local_int_t color_offs_y_local =  (color_offs_y_global + (by - (by - py % by))) % by;
-    local_int_t color_offs_z_local =  (color_offs_z_global + (bz - (bz - pz % bz))) % bz;
+    local_int_t color_offs_x_local = (color_offs_x_global + (bx - ((px * nx) % bx)) % bx) % bx;
+    local_int_t color_offs_y_local = (color_offs_y_global + (by - ((py * ny) % by)) % by) % by;
+    local_int_t color_offs_z_local = (color_offs_z_global + (bz - ((pz * nz) % bz)) % bz) % bz;
 
     num_color_cols = (color_offs_x_local < nx % bx) ? (num_color_cols + 1) : num_color_cols;
     num_color_rows = (color_offs_y_local < ny % by) ? (num_color_rows + 1) : num_color_rows;
@@ -286,9 +286,9 @@ __global__ void column_major_striped_box_coloring_half_SymGS_kernel(
     local_int_t color_offs_y_global = (color - color_offs_x_global) % (bx * by) / bx; //gives y-coordinate of first appearance of color
     local_int_t color_offs_z_global = (color - color_offs_x_global - bx * color_offs_y_global) / (bx * by); //gives z-coordinate of first appearance of color
 
-    local_int_t color_offs_x_local = (color_offs_x_global + (bx - (bx - px % bx))) % bx;
-    local_int_t color_offs_y_local =  (color_offs_y_global + (by - (by - py % by))) % by;
-    local_int_t color_offs_z_local =  (color_offs_z_global + (bz - (bz - pz % bz))) % bz;
+    local_int_t color_offs_x_local = (color_offs_x_global + (bx - ((px * nx) % bx)) % bx) % bx;
+    local_int_t color_offs_y_local = (color_offs_y_global + (by - ((py * ny) % by)) % by) % by;
+    local_int_t color_offs_z_local = (color_offs_z_global + (bz - ((pz * nz) % bz)) % bz) % bz;
 
     num_color_cols = (color_offs_x_local < nx % bx) ? (num_color_cols + 1) : num_color_cols;
     num_color_rows = (color_offs_y_local < ny % by) ? (num_color_rows + 1) : num_color_rows;
@@ -336,6 +336,85 @@ __global__ void column_major_striped_box_coloring_half_SymGS_kernel(
     }
 }
 
+__global__ void column_major_striped_box_coloring_half_SymGS_kernel_opt(
+    int cooperation_number,
+    int color, int bx, int by, int bz,
+    local_int_t nx, local_int_t ny, local_int_t nz,
+    int num_stripes, int diag_offset,
+    DataType * A_d,
+    DataType * x, DataType * y,
+    int px, int py, int pz,
+    int dimx, int dimy
+){
+    local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
+    local_int_t num_rows = nx * ny * nz;
+    if(tid >= num_rows) return;
+
+    // Box coloring: cols = x, rows = y, stripes = z
+
+    local_int_t num_color_cols = nx / bx;
+    local_int_t num_color_rows = ny / by;
+    local_int_t num_color_faces = nz / bz;
+
+    // How is the vector colored
+    local_int_t color_offs_x_global = color % bx; //gives x-xcoordinate of first appearance of color
+    local_int_t color_offs_y_global = (color - color_offs_x_global) % (bx * by) / bx; //gives y-coordinate of first appearance of color
+    local_int_t color_offs_z_global = (color - color_offs_x_global - bx * color_offs_y_global) / (bx * by); //gives z-coordinate of first appearance of color
+
+    local_int_t color_offs_x_local = (color_offs_x_global + (bx - ((px * nx) % bx)) % bx) % bx;
+    local_int_t color_offs_y_local = (color_offs_y_global + (by - ((py * ny) % by)) % by) % by;
+    local_int_t color_offs_z_local = (color_offs_z_global + (bz - ((pz * nz) % bz)) % bz) % bz;
+
+    num_color_cols = (color_offs_x_local < nx % bx) ? (num_color_cols + 1) : num_color_cols;
+    num_color_rows = (color_offs_y_local < ny % by) ? (num_color_rows + 1) : num_color_rows;
+    num_color_faces = (color_offs_z_local < nz % bz) ? (num_color_faces + 1) : num_color_faces;
+
+    int num_nodes_with_color = num_color_cols * num_color_rows * num_color_faces;
+
+    //gate
+    if(tid >= num_nodes_with_color){
+        return;
+    }
+    // Iterate over all grid nodes of the current color assigned to this thread group.
+    // Find the (ix,iy,iz) position of the node for this color.
+    local_int_t ix = tid % num_color_cols;
+    local_int_t iy = ((tid % (num_color_cols * num_color_rows))) / num_color_cols;
+    local_int_t iz = tid / (num_color_cols * num_color_rows);
+
+    // Map to full local grid coordinates.
+    ix = ix * bx + color_offs_x_local;
+    iy = iy * by + color_offs_y_local;
+    iz = iz * bz + color_offs_z_local;
+
+    // Compute local and halo indices.
+    local_int_t li = ix + iy * nx + iz * nx * ny;
+    local_int_t hi = local_i_to_halo_i(li, nx, ny, nz, dimx, dimy);
+
+    DataType my_sum = 0.0;
+
+    // Loop over matrix stripes assigned to this lane.
+    local_int_t hj;
+    for(int stripe = 0; stripe < diag_offset; stripe ++){
+        hj = j_min_i_d[stripe] + hi;
+        DataType coeff = A_d[stripe * num_rows + li];
+        my_sum -= coeff * x[hj];
+    }
+
+    DataType diag = A_d[diag_offset * num_rows + li];
+    hj = j_min_i_d[diag_offset] + hi;
+    my_sum -= diag * x[hj];
+    
+    for(int stripe = diag_offset+1; stripe < num_stripes; stripe++){
+        hj = j_min_i_d[stripe] + hi;
+        DataType coeff = A_d[stripe * num_rows + li];
+        my_sum -= coeff * x[hj];
+    }
+    
+    DataType sum = diag * x[hi] + y[hi] + my_sum;
+    x[hi] = sum / diag;
+
+}
+
 __global__ void blocked_striped_box_coloring_half_SymGS_kernel(
     int cooperation_number,
     int color, int bx, int by, int bz,
@@ -362,9 +441,9 @@ __global__ void blocked_striped_box_coloring_half_SymGS_kernel(
     local_int_t color_offs_y_global = (color - color_offs_x_global) % (bx * by) / bx; //gives y-coordinate of first appearance of color
     local_int_t color_offs_z_global = (color - color_offs_x_global - bx * color_offs_y_global) / (bx * by); //gives z-coordinate of first appearance of color
 
-    local_int_t color_offs_x_local = (color_offs_x_global + (bx - (bx - px % bx))) % bx;
-    local_int_t color_offs_y_local =  (color_offs_y_global + (by - (by - py % by))) % by;
-    local_int_t color_offs_z_local =  (color_offs_z_global + (bz - (bz - pz % bz))) % bz;
+    local_int_t color_offs_x_local = (color_offs_x_global + (bx - ((px * nx) % bx)) % bx) % bx;
+    local_int_t color_offs_y_local = (color_offs_y_global + (by - ((py * ny) % by)) % by) % by;
+    local_int_t color_offs_z_local = (color_offs_z_global + (bz - ((pz * nz) % bz)) % bz) % bz;
 
     num_color_cols = (color_offs_x_local < nx % bx) ? (num_color_cols + 1) : num_color_cols;
     num_color_rows = (color_offs_y_local < ny % by) ? (num_color_rows + 1) : num_color_rows;
@@ -420,7 +499,8 @@ __global__ void color_wise_striped_box_coloring_half_SymGS_kernel(
     DataType * A_d,
     DataType * x, DataType * y,
     int px, int py, int pz,
-    int dimx, int dimy
+    int dimx, int dimy,
+    int block_size
 ){
     local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -435,16 +515,15 @@ __global__ void color_wise_striped_box_coloring_half_SymGS_kernel(
     local_int_t color_offs_y_global = (color - color_offs_x_global) % (bx * by) / bx; //gives y-coordinate of first appearance of color
     local_int_t color_offs_z_global = (color - color_offs_x_global - bx * color_offs_y_global) / (bx * by); //gives z-coordinate of first appearance of color
 
-    local_int_t color_offs_x_local = (color_offs_x_global + (bx - (bx - px % bx))) % bx;
-    local_int_t color_offs_y_local =  (color_offs_y_global + (by - (by - py % by))) % by;
-    local_int_t color_offs_z_local =  (color_offs_z_global + (bz - (bz - pz % bz))) % bz;
+    local_int_t color_offs_x_local = (color_offs_x_global + (bx - ((px * nx) % bx)) % bx) % bx;
+    local_int_t color_offs_y_local = (color_offs_y_global + (by - ((py * ny) % by)) % by) % by;
+    local_int_t color_offs_z_local = (color_offs_z_global + (bz - ((pz * nz) % bz)) % bz) % bz;
 
     num_color_cols = (color_offs_x_local < nx % bx) ? (num_color_cols + 1) : num_color_cols;
     num_color_rows = (color_offs_y_local < ny % by) ? (num_color_rows + 1) : num_color_rows;
     num_color_faces = (color_offs_z_local < nz % bz) ? (num_color_faces + 1) : num_color_faces;
 
     int num_nodes_with_color = num_color_cols * num_color_rows * num_color_faces;
-    int rounded_num_nodes = ((num_nodes_with_color + 31) / 32) * 32;
 
     //gate
     if(tid >= num_nodes_with_color){
@@ -468,22 +547,21 @@ __global__ void color_wise_striped_box_coloring_half_SymGS_kernel(
     DataType my_sum = 0.0;
 
     // Loop over matrix stripes assigned to this lane.
-    A_d += rounded_num_nodes * num_stripes * color;
+    local_int_t base = block_size * num_stripes * color;
     local_int_t hj;
     for(int stripe = 0; stripe < diag_offset; stripe ++){
         hj = j_min_i_d[stripe] + hi;
-        my_sum -= A_d[tid] * x[hj];
-        A_d += rounded_num_nodes;
+        my_sum -= A_d[base + stripe * block_size + tid] * x[hj];
     }
-    DataType diag = A_d[tid];
+
+    DataType diag = A_d[base + diag_offset * block_size + tid];
     hj = j_min_i_d[diag_offset] + hi;
     my_sum -= diag * x[hj];
-    A_d += rounded_num_nodes;
+    if (blockIdx.x == 0 && threadIdx.x < 32) printf("tid %d, hi=%d, hj=%d\n", tid, hi, hj);
     
     for(int stripe = diag_offset+1; stripe < num_stripes; stripe++){
         hj = j_min_i_d[stripe] + hi;
-        my_sum -= A_d[tid] * x[hj];
-        A_d += rounded_num_nodes;
+        my_sum -= A_d[base + stripe * block_size + tid] * x[hj];
     }
     
     DataType sum = diag * x[hi] + y[hi] + my_sum;
@@ -560,8 +638,8 @@ void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_compute
 
 
     // Forward SymGS sweep: process colors 0..max_color
-    for(int color = 0; color < num_colors; color++){
-        blocked_striped_box_coloring_half_SymGS_kernel<<<num_blocks, threads_per_block>>>(
+    for(int color = 0; color <= 0; color++){
+        column_major_striped_box_coloring_half_SymGS_kernel_opt<<<num_blocks, threads_per_block>>>(
             cooperation_number,
             color, bx, by, bz,
             nx, ny, nz,
@@ -577,8 +655,8 @@ void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_compute
     }
 
     //Backward SymGS sweep: process colors max_color..0
-    for(int color = max_color; color  >= 0; color--){
-        blocked_striped_box_coloring_half_SymGS_kernel<<<num_blocks, threads_per_block>>>(
+    for(int color = max_color; color  >= 100; color--){
+        column_major_striped_box_coloring_half_SymGS_kernel<<<num_blocks, threads_per_block>>>(
             cooperation_number,
             color, bx, by, bz,
             nx, ny, nz,

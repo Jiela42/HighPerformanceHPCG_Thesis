@@ -4,7 +4,13 @@
 #include <iostream>
 #include <cassert>
 #include <random>
-#include <utility> // for std::pair
+#include <set>
+#include <tuple>
+#include <utility>
+
+using namespace std;
+
+#define SEED 42
 
 std::pair<sparse_CSR_Matrix<DataType>, std::vector<DataType>> generate_HPCG_Problem(int nx, int ny, int nz){
 
@@ -169,6 +175,37 @@ std::vector<DataType> generate_y_vector_for_HPCG_problem(int nx, int ny, int nz)
         }
     }
     return y;
+}
+
+void GenerateRandomCOOPartialMatrix_CPU(global_int_t *row, global_int_t *col, DataType *data, Problem *p, global_int_t nnz) {
+    global_int_t num_values_local = p->nx * p->ny * p->nz;
+    global_int_t num_values_global = p->gnx * p->gny * p->gnz;
+
+    if (nnz > num_values_local * num_values_global) {
+        cerr << "nnz is greater than total number of unique (r, c) pairs." << endl;
+        return;
+    }
+
+    int seed = p->rank + SEED; // Use rank as part of the seed for reproducibility across processes
+    mt19937_64 generator(seed);
+    uniform_int_distribution<global_int_t> dist_r(0, num_values_local - 1);
+    uniform_int_distribution<global_int_t> dist_c(0, num_values_global - 1);
+
+    set<pair<global_int_t, global_int_t>> seen;
+    global_int_t count = 0;
+
+    while (seen.size() < static_cast<size_t>(nnz)) {
+        global_int_t r = dist_r(generator);
+        global_int_t c = dist_c(generator);
+
+        auto rc = make_pair(r, c);
+        if (seen.insert(rc).second) { //only insert if new
+            row[count] = r;
+            col[count] = c;
+            data[count] = 1;
+            count++;
+        }
+    }
 }
 
 // template std::vector<double> generate_random_vector<int>(int, int);

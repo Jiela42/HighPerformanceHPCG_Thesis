@@ -53,6 +53,14 @@ add_executable(run_multi_GPU
     run_multi_GPU.cpp
 )
 
+add_executable(vadd
+    vadd_async.cu
+)
+
+add_executable(run_HBDIA_test
+    run_HBDIA_test.cpp
+)
+
 target_link_libraries(TestHPCGLib
     HPCGLib
     MatrixLib
@@ -101,4 +109,16 @@ target_link_libraries(run_multi_GPU_tests
     UtilLib
     MPI::MPI_CXX
     nccl
+)
+
+target_link_libraries(vadd
+    HPCGLib
+    MatrixLib
+    UtilLib
+    MPI::MPI_CXX
+    nccl
+)
+
+target_link_libraries(run_HBDIA_test
+    MatrixLib
 )

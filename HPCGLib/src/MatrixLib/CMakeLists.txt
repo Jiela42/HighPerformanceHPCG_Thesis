@@ -24,6 +24,7 @@ target_sources(MatrixLib PRIVATE
     generations.cpp
     generations.cu
     coloring.cu
+    HBDIA.cpp
 )
 
 target_link_libraries(MatrixLib

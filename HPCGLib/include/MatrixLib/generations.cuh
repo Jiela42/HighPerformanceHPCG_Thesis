@@ -37,7 +37,11 @@ void GenerateStripedPartialMatrix_GPU(
     Problem *problem, 
     DataType *A_d,
     bool column_major = false,
-    bool blocked = false
+    bool blocked = false,
+    bool color_wise = false,
+    bool color_wise_padding = false, 
+    local_int_t block_size = 0,
+    int bx = 1, int by = 1, int bz = 1
 );
 
 void generate_partialf2c_operator(
