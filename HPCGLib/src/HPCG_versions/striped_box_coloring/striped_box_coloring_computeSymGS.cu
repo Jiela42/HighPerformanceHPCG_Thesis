@@ -154,7 +154,7 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
     // std::cout << "normi/norm0 = " << normi/norm0 << std::endl;
     // std::cout << this->SymGS_tolerance << std::endl;
 
-    // int total_iterations = 0;
+    int total_iterations = 0;
 
     
 
@@ -162,7 +162,7 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
 
     
     // to do the L2 norm asynchroneously we do the first iteration outside of the loop
-        for(int color = 0; color <= 0; color++){
+        for(int color = 0; color <= max_color; color++){
                 // we need to do a forward pass
                 striped_box_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
                     cooperation_number,
@@ -180,7 +180,7 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
         // we need to do a backward pass,
         // the colors for this are the same just in reverse order
         
-        for(int color = max_color; color  >= 100; color--){
+        for(int color = max_color; color  >= 0; color--){
 
                 striped_box_coloring_half_SymGS_kernel<<<num_blocks, 1024>>>(
                 cooperation_number,
@@ -194,16 +194,16 @@ void striped_box_coloring_Implementation<T>::striped_box_coloring_computeSymGS(
                 );
                 CHECK_CUDA(cudaDeviceSynchronize());
         }
-        //total_iterations ++;
+        total_iterations ++;
         if(max_iterations > 1){
 
-            // double L2_norm = this->L2_norm_for_SymGS(A, x_d, y_d);
-            // CHECK_CUDA(cudaStreamSynchronize(y_Norm_stream));
+            double L2_norm = this->L2_norm_for_SymGS(A, x_d, y_d);
+            CHECK_CUDA(cudaStreamSynchronize(y_Norm_stream));
             
-            // rr_norm = L2_norm / L2_norm_y;
+            rr_norm = L2_norm / L2_norm_y;
             normi = this->L2_norm_for_SymGS(A, x_d, y_d);
         }
-        // CHECK_CUDA(cudaStreamDestroy(y_Norm_stream));
+        CHECK_CUDA(cudaStreamDestroy(y_Norm_stream));
 
     }
     // std::cout << "SymGS for size " << nx << "x" << ny << "x" << nz << " took " << total_iterations << " iterations." << std::endl;

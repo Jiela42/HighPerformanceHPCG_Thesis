@@ -425,6 +425,7 @@ __global__ void blocked_striped_box_coloring_half_SymGS_kernel(
     int px, int py, int pz,
     int dimx, int dimy
 ){
+    
     local_int_t tid = blockIdx.x * blockDim.x + threadIdx.x;
     local_int_t coop_group_id = tid / cooperation_number;
     local_int_t lane = tid % cooperation_number;
@@ -557,7 +558,6 @@ __global__ void color_wise_striped_box_coloring_half_SymGS_kernel(
     DataType diag = A_d[base + diag_offset * block_size + tid];
     hj = j_min_i_d[diag_offset] + hi;
     my_sum -= diag * x[hj];
-    if (blockIdx.x == 0 && threadIdx.x < 32) printf("tid %d, hi=%d, hj=%d\n", tid, hi, hj);
     
     for(int stripe = diag_offset+1; stripe < num_stripes; stripe++){
         hj = j_min_i_d[stripe] + hi;
@@ -638,8 +638,54 @@ void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_compute
 
 
     // Forward SymGS sweep: process colors 0..max_color
-    for(int color = 0; color <= 0; color++){
-        column_major_striped_box_coloring_half_SymGS_kernel_opt<<<num_blocks, threads_per_block>>>(
+    for(int color = 0; color <= max_color; color++){
+        // striped_box_coloring_half_SymGS_kernel_old<<<num_blocks, threads_per_block>>>(
+        //     cooperation_number,
+        //     color, bx, by, bz,
+        //     nx, ny, nz,
+        //     num_rows, num_cols,
+        //     num_stripes, diag_offset,
+        //     striped_A_d,
+        //     x_d->x_d, b_d->x_d,
+        //     gnx, gny, gnz,
+        //     gi0,
+        //     px, py, pz
+        // );
+        
+        // striped_box_coloring_half_SymGS_kernel_opt<<<num_blocks, threads_per_block>>>(
+        //     cooperation_number,
+        //     color, bx, by, bz,
+        //     nx, ny, nz,
+        //     num_stripes, diag_offset,
+        //     striped_A_d,
+        //     x_d->x_d, b_d->x_d,
+        //     px, py, pz,
+        //     x_d->dimx, x_d->dimy
+        // );
+
+        // column_major_striped_box_coloring_half_SymGS_kernel_opt<<<num_blocks, threads_per_block>>>(
+        //     cooperation_number,
+        //     color, bx, by, bz,
+        //     nx, ny, nz,
+        //     num_stripes, diag_offset,
+        //     striped_A_d,
+        //     x_d->x_d, b_d->x_d,
+        //     px, py, pz,
+        //     x_d->dimx, x_d->dimy
+        // );
+
+        // blocked_striped_box_coloring_half_SymGS_kernel<<<num_blocks, threads_per_block>>>(
+        //     cooperation_number,
+        //     color, bx, by, bz,
+        //     nx, ny, nz,
+        //     num_stripes, diag_offset,
+        //     striped_A_d,
+        //     x_d->x_d, b_d->x_d,
+        //     px, py, pz,
+        //     x_d->dimx, x_d->dimy
+        // );
+
+        color_wise_striped_box_coloring_half_SymGS_kernel<<<num_blocks, threads_per_block>>>(
             cooperation_number,
             color, bx, by, bz,
             nx, ny, nz,
@@ -647,15 +693,27 @@ void striped_multi_GPU_Implementation<T>::striped_box_coloring_multi_GPU_compute
             striped_A_d,
             x_d->x_d, b_d->x_d,
             px, py, pz,
-            x_d->dimx, x_d->dimy
+            x_d->dimx, x_d->dimy,
+            max_num_rows_per_color
         );
+
+        // column_major_striped_box_coloring_half_SymGS_kernel_opt<<<num_blocks, threads_per_block>>>(
+        //     cooperation_number,
+        //     color, bx, by, bz,
+        //     nx, ny, nz,
+        //     num_stripes, diag_offset,
+        //     striped_A_d,
+        //     x_d->x_d, b_d->x_d,
+        //     px, py, pz,
+        //     x_d->dimx, x_d->dimy
+        // );
         CHECK_CUDA(cudaDeviceSynchronize());
         this->ExchangeHalo(x_d, problem);
         CHECK_CUDA(cudaDeviceSynchronize());
     }
 
     //Backward SymGS sweep: process colors max_color..0
-    for(int color = max_color; color  >= 100; color--){
+    for(int color = max_color; color  >= 0; color--){
         column_major_striped_box_coloring_half_SymGS_kernel<<<num_blocks, threads_per_block>>>(
             cooperation_number,
             color, bx, by, bz,

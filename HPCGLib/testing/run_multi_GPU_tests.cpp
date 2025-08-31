@@ -29,6 +29,13 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    printf("TEST TEST TEST TEST\n");
+    printf("TEST TEST TEST TEST\n");
+    printf("TEST TEST TEST TEST\n");
+    printf("TEST TEST TEST TEST\n");
+    printf("TEST TEST TEST TEST\n");
+    printf("TEST TEST TEST TEST\n");
+
     std::string impl_type = argv[1];
     if (impl_type == "BLOCKING_MPI") {
         blocking_mpi_Implementation<DataType> impl;

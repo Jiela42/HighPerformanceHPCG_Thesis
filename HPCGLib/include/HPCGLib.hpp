@@ -264,7 +264,7 @@ class HPCG_functions {
         }
     protected:
         double CG_tolerance = 1e-9;
-        int max_SymGS_iterations = 1;
+        int max_SymGS_iterations = 100;
         double SymGS_tolerance = 1e-6;
 };
 

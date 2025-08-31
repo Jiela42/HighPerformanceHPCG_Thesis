@@ -34,13 +34,13 @@
 void initialize_COO_comm(Problem *problem, striped_partial_Matrix<DataType> &A_local);
 
 // MPI process grid and local problem size configuration
-#define NPX 2
-#define NPY 2
+#define NPX 1
+#define NPY 1
 #define NPZ 1
 //each process gets assigned problem size of NX x NY x NZ
-#define NX 32
-#define NY 32
-#define NZ 32
+#define NX 256
+#define NY 256
+#define NZ 256
 
 
 /**
@@ -82,16 +82,18 @@ void test_SPMV(striped_multi_GPU_Implementation<DataType>& implementation_multi_
     //         printf("CPU wall-clock time for multi-GPU test_SPMV NO OVERLAP: %f ms\n", (t_end - t_start) * 1000.0);
     //     }
     // }
-    for(int i = 0; i < (print_timing ? 10 : 1); i++){
+    printf("Multi GPU Timinings\n");
+    for(int i = 0; i < (print_timing ? 30 : 1); i++){
         SetHaloGlobalIndexGPU(halo_p_d, problem);
         SetHaloGlobalIndexGPU(halo_Ap_d, problem);
         implementation_multi_GPU.ExchangeHalo(halo_p_d, problem);
         CHECK_CUDA(cudaDeviceSynchronize());
-        float t_start = MPI_Wtime();
+        auto t_start = std::chrono::high_resolution_clock::now();
         implementation_multi_GPU.compute_SPMV(*A_local_striped, halo_p_d, halo_Ap_d, problem, true, true); //1st * 2nd = 3rd argument
-        float t_end = MPI_Wtime();
+        auto t_end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> elapsed = t_end - t_start;
         if(print_timing && problem->rank == 0){
-            printf("CPU wall-clock time for multi-GPU test_SPMV WITH OVERLAP: %f ms\n", (t_end - t_start) * 1000.0);
+            printf("%f\n", elapsed.count());
         }
     }
 
@@ -130,7 +132,8 @@ void test_SPMV(striped_multi_GPU_Implementation<DataType>& implementation_multi_
 
         // Run SPMV on single-GPU baseline
         striped_warp_reduction_Implementation<DataType> implementation_single_GPU;
-        for(int i = 0; i < (print_timing ? 10 : 1); i++){
+        printf("Single GPU Timinings\n");
+        for(int i = 0; i < (print_timing ? 30 : 1); i++){
             CHECK_CUDA(cudaMemcpy(p_global_d, p_global_h, NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType), cudaMemcpyHostToDevice));
             CHECK_CUDA(cudaMemcpy(Ap_global_d, Ap_global_h, NPX*NX*NPY*NY*NPZ*NZ*sizeof(DataType), cudaMemcpyHostToDevice));
             CHECK_CUDA(cudaDeviceSynchronize());
@@ -139,7 +142,7 @@ void test_SPMV(striped_multi_GPU_Implementation<DataType>& implementation_multi_
             auto stop = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double, std::milli> elapsed = stop - start;
             if(print_timing){
-                printf("CPU wall-clock time for single-GPU test_SPMV: %f ms\n", elapsed.count());
+                printf("%f\n", elapsed.count());
             }
         }
 
@@ -191,13 +194,14 @@ void test_SymGS(striped_multi_GPU_Implementation<DataType>& implementation_multi
 
     // Run SymGS on multi-GPU setup
 
-    for(int i = 0; i < (print_timing ? 10 : 1); i++){
+    printf("Multi GPU Timinings\n");
+    for(int i = 0; i < (print_timing ? 30 : 1); i++){
         auto start = std::chrono::high_resolution_clock::now();
         implementation_multi_GPU.compute_SymGS(*A_local_striped, halo_p_d, halo_Ap_d, problem); //1st * 2nd = 3rd argument
         auto stop = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> elapsed = stop - start;
         if(print_timing){
-            printf("CPU wall-clock time for multi-GPU compute_SymGS: %f ms\n", elapsed.count());
+            printf("%f\n", elapsed.count());
         }
     }
 
@@ -237,13 +241,14 @@ void test_SymGS(striped_multi_GPU_Implementation<DataType>& implementation_multi
         
         // Run SymGS on single-GPU baseline
         striped_box_coloring_Implementation<DataType> implementation_single_GPU;
-        for(int i = 0; i < (print_timing ? 10 : 1); i++){
+        printf("Single GPU Timinings\n");
+        for(int i = 0; i < (print_timing ? 30 : 1); i++){
             auto start = std::chrono::high_resolution_clock::now();
             implementation_single_GPU.compute_SymGS(*A_global_striped, p_global_d, Ap_global_d);
             auto stop = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double, std::milli> elapsed = stop - start;
             if(print_timing){
-                printf("CPU wall-clock time for single-GPU compute_SymGS: %f ms\n", elapsed.count());
+                printf("%f\n", elapsed.count());
             }
         }
         
@@ -554,7 +559,7 @@ void test_CG(striped_multi_GPU_Implementation<DataType>& implementation_multi_GP
     int n_iters_local;
     DataType normr_local;
     DataType normr0_local;
-    implementation_multi_GPU.max_CG_iterations = 1;
+    implementation_multi_GPU.max_CG_iterations = 1000000;
     implementation_multi_GPU.doPreconditioning = false; //no preconditioning for this test
 
     for(int i = 0; i < (print_timing ? 10 : 1); i++){
@@ -609,7 +614,7 @@ void test_CG(striped_multi_GPU_Implementation<DataType>& implementation_multi_GP
         // Run CG on single-GPU baseline
         striped_box_coloring_Implementation<DataType> implementation_single_GPU;
         implementation_single_GPU.doPreconditioning = false; //no preconditioning for this test
-        implementation_single_GPU.max_CG_iterations = 1;
+        implementation_single_GPU.max_CG_iterations = 1000000;
         for(int i = 0; i < (print_timing ? 10 : 1); i++){
             auto start = std::chrono::high_resolution_clock::now();
             implementation_single_GPU.compute_CG(*A_global_striped, b_global_d, x_global_d, n_iters_global, normr_global, normr0_global);
@@ -803,14 +808,14 @@ void run_multi_GPU_tests(int argc, char *argv[], striped_multi_GPU_Implementatio
 
     // initialize matrix partial matrix A_local
     bool column_major = true;
-    bool blocked = true;
-    bool color_wise = false;
+    bool blocked = false;
+    bool color_wise = true;
     bool color_wise_padding = false;
     double density_COO = 0.00000001;
     striped_partial_Matrix<DataType> A_local(&problem, column_major, blocked, color_wise, color_wise_padding, implementation_multi_GPU.bx, implementation_multi_GPU.by, implementation_multi_GPU.bz, density_COO);
 
     striped_partial_Matrix<DataType> *A_local_current = &A_local;
-    for(int i = 0; i < 0; i++){
+    for(int i = 0; i < 3; i++){
         A_local_current->initialize_coarse_matrix();
         A_local_current = A_local_current->get_coarse_Matrix();
     }
@@ -827,7 +832,7 @@ void run_multi_GPU_tests(int argc, char *argv[], striped_multi_GPU_Implementatio
 
     // create the coarse matrices for the MG routines
     sparse_CSR_Matrix <DataType>* current_matrix = &A_global;
-    for(int i = 0; i < 0; i++){
+    for(int i = 0; i < 3; i++){
         current_matrix->initialize_coarse_Matrix();
         current_matrix = current_matrix->get_coarse_Matrix();
     }
@@ -869,10 +874,10 @@ void run_multi_GPU_tests(int argc, char *argv[], striped_multi_GPU_Implementatio
     //test_matrix_distribution(A_local.get_num_stripes(), A_global_striped->get_num_stripes(), A_local.get_num_rows(), A_global_striped->get_num_rows(), A_local_h, A_global_h, &problem);
 
     // test SPMV
-    test_SPMV(implementation_multi_GPU, &A_local, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, false);
+    //test_SPMV(implementation_multi_GPU, &A_local, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, true);
 
     // test SymGS
-    //test_SymGS(implementation_multi_GPU, &A_local, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, true);
+    test_SymGS(implementation_multi_GPU, &A_local, A_global_striped, &halo_p_d, &halo_Ap_d, &problem, true);
 
     // test WAXPBY
     //test_WAXPBY(implementation_multi_GPU, A_global_striped, &halo_w_d, &halo_x_d, &halo_y_d, &problem, false);

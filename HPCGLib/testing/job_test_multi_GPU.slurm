@@ -4,10 +4,10 @@
 #SBATCH --job-name=bench_solver
 #SBATCH --account=a-g200
 #SBATCH --output result.out
-#SBATCH --time 00:05:00
+#SBATCH --time 00:30:00
 #SBATCH --partition=debug
 #SBATCH --nodes=1
-#SBATCH --ntasks=4
+#SBATCH --ntasks=1
 #SBATCH --gpus-per-task=1
 
 ##setup
@@ -18,7 +18,7 @@ echo "Started: $(date '+%H:%M:%S')"
 echo "Testing BLOCKING MPI implementation"
 #srun /users/nrottstegge/github/HighPerformanceHPCG_Thesis/build/HPCGLib/testing/vadd
 #srun ncu --set full --import-source=yes -f --export my_report.ncu-rep /users/nrottstegge/github/HighPerformanceHPCG_Thesis/build/HPCGLib/testing/vadd
-srun /users/nrottstegge/github/HighPerformanceHPCG_Thesis/build/HPCGLib/testing/run_multi_GPU_tests NON_BLOCKING_CUDA_MPI
+srun ncu --set full --call-stack --import-source=yes -f --export striped_warp_reduction_SPMV_kernel.ncu-rep --kernel-name striped_warp_reduction_SPMV_kernel /users/nrottstegge/github/HighPerformanceHPCG_Thesis/build/HPCGLib/testing/run_multi_GPU_tests NON_BLOCKING_HOST_MPI
 #srun ncu --set full --call-stack --import-source=yes -f --export my_report.ncu-rep /users/nrottstegge/github/HighPerformanceHPCG_Thesis/build/HPCGLib/testing/run_multi_GPU_tests NON_BLOCKING_CUDA_MPI
 #srun nsys profile --force-overwrite true -o nsys_report /users/nrottstegge/github/HighPerformanceHPCG_Thesis/build/HPCGLib/testing/run_multi_GPU_tests NON_BLOCKING_CUDA_MPI
 echo "Finished: $(date '+%H:%M:%S')"

@@ -9,8 +9,8 @@
 #include <cooperative_groups/memcpy_async.h>
 
 #define CEIL_DIV(x, y) (((x) + (y) - 1) / (y))
-#define PIPELINE_DEPTH 3
-#define NUM_THREADS_PER_BLOCK 1024
+#define PIPELINE_DEPTH 8
+#define NUM_THREADS_PER_BLOCK 256
 
 namespace cg = cooperative_groups;
 
@@ -394,12 +394,11 @@ __global__ void pipelined_columnMajor_multi_GPU_SPMV_kernel(
     __shared__ alignas(16) DataType sA_buffer[PIPELINE_DEPTH][NUM_THREADS_PER_BLOCK]; // Shared memory for matrix values
     __shared__ alignas(16) DataType sx_buffer[PIPELINE_DEPTH][NUM_THREADS_PER_BLOCK]; // Shared memory for vector values
 
-    // Create thread block group for cooperative operations
+    //Create thread block group for cooperative operations
     auto block = cg::this_thread_block();
 
-    // Pipeline object for managing async operations
-    __shared__ cuda::pipeline_shared_state<cuda::thread_scope::thread_scope_block, PIPELINE_DEPTH> pipe_state;
-    auto pipeline = cuda::make_pipeline(block, &pipe_state);
+    // Pipeline object for managing async operations - CHANGED TO THREAD SCOPE
+    auto pipeline = cuda::make_pipeline();
 
     int totalThreads = gridDim.x * gridDim.y * gridDim.z * blockDim.x * blockDim.y * blockDim.z;
 
@@ -409,20 +408,20 @@ __global__ void pipelined_columnMajor_multi_GPU_SPMV_kernel(
         const local_int_t elements_this_block = min(static_cast<local_int_t>(NUM_THREADS_PER_BLOCK), num_rows - block_start_A);
         const local_int_t copy_size = elements_this_block * sizeof(DataType);
         const local_int_t my_val = block_start_x + threadIdx.x; // index which this thread will compute
-    
+
         // Only process if we have valid elements
         if (block_start_A + threadIdx.x >= num_rows) return;
-    
+
         int producer_idx = 0;
         int consumer_idx = 0;
-    
+
         //prefill the buffer
         for(int tile_idx = 0; tile_idx < PIPELINE_DEPTH - 1; tile_idx++){
             local_int_t tile_start_A = block_start_A + tile_idx * num_rows;
             local_int_t tile_start_x = block_start_x + j_min_i_d[tile_idx];
-    
+
             pipeline.producer_acquire();
-    
+
             cuda::memcpy_async(block,
                 sA_buffer[producer_idx], // Shared memory buffer
                 A_d + tile_start_A, // Global memory source
@@ -435,15 +434,15 @@ __global__ void pipelined_columnMajor_multi_GPU_SPMV_kernel(
                 copy_size, // Size of the copy
                 pipeline // Pipeline for async operation
             );
-    
+
             producer_idx = (producer_idx + 1) % PIPELINE_DEPTH;
             pipeline.producer_commit();
         }
-    
+
         // Process tiles with overlap
         DataType my_sum = 0;
         for(int tile_idx = 0; tile_idx < num_stripes; tile_idx++){
-    
+
             const local_int_t next_load_tile = tile_idx + (PIPELINE_DEPTH - 1);
             if(next_load_tile < num_stripes){
                 local_int_t next_tile_start_A = block_start_A + next_load_tile * num_rows;
@@ -465,13 +464,15 @@ __global__ void pipelined_columnMajor_multi_GPU_SPMV_kernel(
                 producer_idx = (producer_idx + 1) % PIPELINE_DEPTH;
                 pipeline.producer_commit();
             }
-    
+
             // Wait for current tile and compute
             pipeline.consumer_wait();
+            // __syncthreads() since using thread-scope pipeline with shared memory
+            __syncthreads();
             my_sum += sA_buffer[consumer_idx][threadIdx.x] * sx_buffer[consumer_idx][threadIdx.x];
             consumer_idx = (consumer_idx + 1) % PIPELINE_DEPTH;
             pipeline.consumer_release();
-    
+
         }
         y_d[my_val] = my_sum;
     }
@@ -657,85 +658,102 @@ void striped_multi_GPU_Implementation<T>::striped_warp_reduction_multi_GPU_compu
         CHECK_CUDA(cudaMemcpy(j_min_i_h.data(), A.get_j_min_i_halo_d(), 27 * sizeof(local_int_t), cudaMemcpyDeviceToHost));
         CHECK_CUDA(cudaMemcpyToSymbol(j_min_i_d, j_min_i_h.data(), 27 * sizeof(local_int_t)));
 
-        // striped_warp_reduction_multi_GPU_SPMV_kernel_old<<<num_blocks, num_threads>>>(
-        //     striped_A_d, num_rows, num_stripes, A.get_j_min_i_d(), x_d->x_d, y_d->x_d, problem->nx, problem->ny, problem->nz,
-        //     problem->gnx, problem->gny, problem->gnz, problem->gi0, problem->px, problem->py, problem->pz
-        // );
+        striped_warp_reduction_multi_GPU_SPMV_kernel_old<<<num_blocks, num_threads>>>(
+            striped_A_d, num_rows, num_stripes, A.get_j_min_i_d(), x_d->x_d, y_d->x_d, problem->nx, problem->ny, problem->nz,
+            problem->gnx, problem->gny, problem->gnz, problem->gi0, problem->px, problem->py, problem->pz
+        );
 
+        striped_warp_reduction_multi_GPU_SPMV_kernel<<<num_blocks, num_threads>>>(
+            striped_A_d, 
+            num_rows, num_stripes, 
+            x_d->x_d, y_d->x_d,
+            problem->nx, problem->ny, problem->nz,
+            x_d->dimx, x_d->dimy, x_d->dimz
+        );
 
-        // pipelined_columnMajor_multi_GPU_SPMV_kernel<<<num_blocks, num_threads>>>(
-        //     striped_A_d, 
-        //     num_rows, num_stripes, 
-        //     x_d->x_d, y_d->x_d,
-        //     problem->nx, problem->ny, problem->nz,
-        //     x_d->dimx, x_d->dimy, x_d->dimz,
-        //     elems_per_thread
-        // );
+        columnMajor_multi_GPU_SPMV_kernel<<<num_blocks, num_threads>>>(
+            striped_A_d, 
+            num_rows, num_stripes, 
+            x_d->x_d, y_d->x_d,
+            problem->nx, problem->ny, problem->nz,
+            x_d->dimx, x_d->dimy, x_d->dimz
+        );
 
-        // call the kernel
-        // color_wise_multi_GPU_SPMV_kernel_opt<<<num_blocks, num_threads>>>(
-        //     striped_A_d, 
-        //     num_rows, num_stripes, 
-        //     x_d->x_d, y_d->x_d,
-        //     problem->nx, problem->ny, problem->nz,
-        //     x_d->dimx, x_d->dimy, x_d->dimz,
-        //     A.bx, A.by, A.bz,
-        //     problem->px, problem->py, problem->pz,
-        //     A.block_size
-        // );
+        blocked_multi_GPU_SPMV_kernel<<<num_blocks, num_threads>>>(
+            striped_A_d, 
+            num_rows, num_stripes, 
+            x_d->x_d, y_d->x_d,
+            problem->nx, problem->ny, problem->nz,
+            x_d->dimx, x_d->dimy, x_d->dimz
+        );
 
-        if(!exchangeHalo){ //do not exchange halo
-            blocked_multi_GPU_SPMV_kernel<<<num_blocks, num_threads>>>(
-                striped_A_d, 
-                num_rows, num_stripes, 
-                x_d->x_d, y_d->x_d,
-                problem->nx, problem->ny, problem->nz,
-                x_d->dimx, x_d->dimy, x_d->dimz
-            );
-        } else if (!exchangeHaloOverlap){ //exchange halo but not overlap
-            CHECK_CUDA(cudaDeviceSynchronize()); //wait for previous computation to finish
-            blocked_multi_GPU_SPMV_kernel<<<num_blocks, num_threads>>>(
-                striped_A_d, 
-                num_rows, num_stripes, 
-                x_d->x_d, y_d->x_d,
-                problem->nx, problem->ny, problem->nz,
-                x_d->dimx, x_d->dimy, x_d->dimz
-            );
-            CHECK_CUDA(cudaDeviceSynchronize());
-            this->ExchangeHalo(y_d, problem);
-        }else{ // exchange halo with computation-communication overlap
-            int num_blocks_border = (A.get_num_border_values() + num_threads - 1) / num_threads; // number of blocks for border computation
-            cudaStreamSynchronize(*(y_d->streams[26])); // Wait for previous inner computation to finish
-            cudaStreamSynchronize(*(y_d->streams[27])); // Wait for previous border computation to finish
-            border_blocked_multi_GPU_SPMV_kernel<<<num_blocks_border, num_threads, 0, *(y_d->streams[26])>>>( // launch on stream 26 the border computation
-                striped_A_d, 
-                num_rows, num_stripes, 
-                x_d->x_d, y_d->x_d,
-                problem->nx, problem->ny, problem->nz,
-                x_d->dimx, x_d->dimy, x_d->dimz,
-                1, 1, 1,
-                A.get_border_idx_d(), // thread to index mapping for border computation
-                A.get_num_border_values() // number of border values to compute
-            );
-            int num_blocks_inner = (A.get_num_inner_values() + num_threads - 1) / num_threads; // number of blocks for inner computation
-            inner_blocked_multi_GPU_SPMV_kernel<<<num_blocks_inner, num_threads, 0, *(y_d->streams[27])>>>( // launch on stream 27 the inner computation
-                striped_A_d, 
-                num_rows, num_stripes, 
-                x_d->x_d, y_d->x_d,
-                problem->nx, problem->ny, problem->nz,
-                x_d->dimx, x_d->dimy, x_d->dimz,
-                1, 1, 1,
-                A.get_num_inner_values() // number of border values to compute
-            );
-            this->ExchangeHalo(y_d, problem);
-        }
+        pipelined_columnMajor_multi_GPU_SPMV_kernel<<<num_blocks, num_threads>>>(
+            striped_A_d, 
+            num_rows, num_stripes, 
+            (DataType*)x_d->x_d, (DataType*)y_d->x_d,
+            problem->nx, problem->ny, problem->nz,
+            x_d->dimx, x_d->dimy, x_d->dimz,
+            (num_rows + num_threads - 1) / num_threads
+        );
 
+        color_wise_multi_GPU_SPMV_kernel<<<num_blocks, num_threads>>>(
+            striped_A_d, 
+            num_rows, num_stripes, 
+            x_d->x_d, y_d->x_d,
+            problem->nx, problem->ny, problem->nz,
+            x_d->dimx, x_d->dimy, x_d->dimz,
+            A.bx, A.by, A.bz,
+            problem->px, problem->py, problem->pz,
+            A.block_size
+        );
 
-        cudaError_t err = cudaGetLastError();
-        if (err != cudaSuccess) {
-            printf("CUDA error at %s:%d: %s\n", __FILE__, __LINE__, cudaGetErrorString(err));
-            exit(1);
-        }
+        //version for inner/outer computation overlap with halo exchange
+        
+        // if(!exchangeHalo){ //do not exchange halo
+        //     blocked_multi_GPU_SPMV_kernel<<<num_blocks, num_threads>>>(
+        //         striped_A_d, 
+        //         num_rows, num_stripes, 
+        //         x_d->x_d, y_d->x_d,
+        //         problem->nx, problem->ny, problem->nz,
+        //         x_d->dimx, x_d->dimy, x_d->dimz
+        //     );
+        // } else if (!exchangeHaloOverlap){ //exchange halo but not overlap
+        //     CHECK_CUDA(cudaDeviceSynchronize()); //wait for previous computation to finish
+        //     blocked_multi_GPU_SPMV_kernel<<<num_blocks, num_threads>>>(
+        //         striped_A_d, 
+        //         num_rows, num_stripes, 
+        //         x_d->x_d, y_d->x_d,
+        //         problem->nx, problem->ny, problem->nz,
+        //         x_d->dimx, x_d->dimy, x_d->dimz
+        //     );
+        //     CHECK_CUDA(cudaDeviceSynchronize());
+        //     this->ExchangeHalo(y_d, problem);
+        // }else{ // exchange halo with computation-communication overlap
+        //     int num_blocks_border = (A.get_num_border_values() + num_threads - 1) / num_threads; // number of blocks for border computation
+        //     cudaStreamSynchronize(*(y_d->streams[26])); // Wait for previous inner computation to finish
+        //     cudaStreamSynchronize(*(y_d->streams[27])); // Wait for previous border computation to finish
+        //     border_blocked_multi_GPU_SPMV_kernel<<<num_blocks_border, num_threads, 0, *(y_d->streams[26])>>>( // launch on stream 26 the border computation
+        //         striped_A_d, 
+        //         num_rows, num_stripes, 
+        //         x_d->x_d, y_d->x_d,
+        //         problem->nx, problem->ny, problem->nz,
+        //         x_d->dimx, x_d->dimy, x_d->dimz,
+        //         1, 1, 1,
+        //         A.get_border_idx_d(), // thread to index mapping for border computation
+        //         A.get_num_border_values() // number of border values to compute
+        //     );
+        //     int num_blocks_inner = (A.get_num_inner_values() + num_threads - 1) / num_threads; // number of blocks for inner computation
+        //     inner_blocked_multi_GPU_SPMV_kernel<<<num_blocks_inner, num_threads, 0, *(y_d->streams[27])>>>( // launch on stream 27 the inner computation
+        //         striped_A_d, 
+        //         num_rows, num_stripes, 
+        //         x_d->x_d, y_d->x_d,
+        //         problem->nx, problem->ny, problem->nz,
+        //         x_d->dimx, x_d->dimy, x_d->dimz,
+        //         1, 1, 1,
+        //         A.get_num_inner_values() // number of border values to compute
+        //     );
+        //     this->ExchangeHalo(y_d, problem);
+        // }
 
         // synchronize the device
         CHECK_CUDA(cudaDeviceSynchronize());
